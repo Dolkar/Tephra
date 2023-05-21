@@ -1,0 +1,1841 @@
+/** @page user-guide User Guide
+@brief A high-level overview of the concepts and functionality in Tephra.
+
+@tableofcontents
+
+This user guide aims to introduce the concepts in Tephra in a succinct and practical way. After reading it, you should
+be knowledgeable about how the API should be used and how to design effective, high-performance engines
+and applications around it. Most concepts will have example code to help illustrate common usage, with symbols linking
+to their respective documentation.
+
+@m_class{m-note m-dim}
+
+@parblock
+Paragraphs marked like this will offer insights into the relevant implementation details of the library and
+justifications for its design. It is not needed to read these when first learning the API, but being aware of the inner
+workings of any tool is necessary to master it.
+@endparblock
+
+<b>Prior knowledge of computer graphics is assumed</b>, but experience with low-level graphics APIs, such as Vulkan and
+Dx12, should not be required to understand this documentation.
+
+However, <b>this guide is still incomplete</b> and may not touch on all the subjects sufficiently enough. Please reach
+out or submit an issue if you have a suggestion for how it should be improved.
+
+<br><hr>
+@section ug-introduction Introduction
+
+Tephra is a C++ library that provides a higher level abstraction layer around the Vulkan graphics API. It aims to bring
+some of the convenience, safety and low barrier of entry from older APIs without sacrificing much of the performance and
+control that Vulkan brings, all under a modern C++17 design. It is **not** a renderer, but a graphics interface akin
+to OpenGL or Dx11.
+
+<a href="https://www.vulkan.org/">Vulkan</a> is a low-level graphics and compute API developed by Khronos. Their aim
+was to bring an API that doesn't rely on complex drivers translating high-level functionality into the actual commands
+that need to be sent to the device. Such translation, for example in the OpenGL and Dx11 APIs, required the driver
+to track the used resources, make guesses about the future to insert synchronization and compile pipelines on the fly.
+An interface that allows the user to directly push those commands in a cross-platform and cross-vendor way is a major
+boon for bringing better performance and control. However, much of the same functionality that the driver used to do
+now needs to be implemented by the user.
+A <a href="https://github.com/SaschaWillems/Vulkan/blob/master/examples/triangle/triangle.cpp">simple demo</a> that
+renders a single triangle on the screen takes more than a thousand lines of code and is hard to extend and maintain.
+
+There is an unreachable goal of having the same convenience of the old APIs, but with the advantages of the new. Tephra
+tries to get as close to that goal as possible. It implements automatic synchronization and resource tracking much like
+the drivers used to do, but only for the high-level commands where it is needed the most. Low-level commands, like
+binds, draws and dispatches enjoy very low overhead and the possibility of multi-threaded recording. Tephra asks for
+more information from the user and earlier, compared to OpenGL, but it is still a lot less verbose than Vulkan. A
+similar demo could be written in Tephra in around 100 lines.
+
+Besides this user guide, Tephra also has an extensive API documentation in Doxygen, which can be browsed
+<a href="annotated.html">here</a>. Every symbol mentioned in this user guide also links to its documentation here. The
+generated documentation is also <b>fully searchable</b> - notice the search icon in the top right corner of this page.
+
+<br>
+@subsection ug-introduction-setup-and-build Setup and build
+
+Tephra is designed to be used as a statically loaded library. Differences in build configuration or minor/major library
+version between its interface and the source may break binary compatibility. It is recommended to always build the
+library within your solution. Tephra also accepts several preprocessor defines to toggle debug information,
+see ug-general-concepts-debugging-and-validation. These are only used in the library's source files and do not
+affect binary compatibility.
+
+<a href="https://www.lunarg.com/vulkan-sdk/">Vulkan SDK</a> must be installed to build Tephra. The Visual Studio project
+uses the `VULKAN_SDK` environment variable to find the Vulkan include files. The minimum supported version of the Vulkan
+interface can be queried with tp::Version::getMaxUsedVulkanAPIVersion. The minimum supported version of Vulkan that the
+target device needs to support is then tp::Version::getMinSupportedVulkanDeviceVersion.
+
+Only Visual Studio is officially supported as the build environment, but the library does not use any Windows specific
+features and it shouldn't be difficult to get it running on other platforms.
+
+<br>
+@subsection ug-introduction-folder-structure Folder structure
+
+- `/build` - Project files used for building the library, tests, examples and documentation.
+- `/documentation/dox` - Documentation source files.
+- `/documentation/html` - HTML output of this documentation.
+- `/examples` - @ref e-examples "Example projects and demos" showcasing the use of the library.
+- `/include` - Include file directory of Tephra and the third party libraries used.
+    - `/include/tephra` - The core Tephra interface.
+        - `/include/tephra/tools` - Generic classes used to simplify the interface.
+        - `/include/tephra/utils` - Optional Tephra utilities that build upon the base interface.
+    - `/include/vma/` - <a href="https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator">Vulkan Memory Allocator</a>
+include directory.
+    - `/include/interface_glue.hpp` - A user editable file for easier integration of the library.
+- `/src` - The source code files for Tephra and its third party libraries.
+- `/tests` - @ref e-examples "Testing suite" for the library.
+
+<br><hr>
+@section ug-general-concepts General concepts
+
+This section introduces concepts and design choices that apply to the library as a whole. While they are important to
+understand and deserve an early mention, for a quick start, feel free to skip to the @ref ug-initialization
+section and return back to this one later.
+
+@subsection ug-general-concepts-interface-tools Interface tools
+
+Tephra provides several tools to assist with forming its interface and allowing easier integration into existing
+codebases. The `/include/interface_glue.hpp` file provides means for customizing this interface.
+
+Many objects have a lifetime which must be managed by the user through ownership semantics. By default, tp::OwningPtr
+is defined to be `std::unique_ptr` in the `interface_glue.hpp` file, but if needed, it can be changed to
+`std::shared_ptr` or any custom owning pointer implementation. All ownable objects inherit from tp::Ownable, which is
+also customizable.
+
+All arrays in the interface are represented by tp::ArrayView and tp::ArrayParameter. They are both non-owning views of
+a variable number of consecutive elements. Because it is non-owning, tp::ArrayView may not refer to temporary arrays,
+meaning @code{.cpp} tp::ArrayView<int> view = {1, 2, 3}; @endcode won't compile. tp::ArrayParameter does not have this
+limitation, but it is intended to only be used for function parameters that will get consumed immediately, as it may
+be viewing a temporary array. Thanks to this, you can still write @code{.cpp} tp::someFunction({1, 2, 3}); @endcode
+
+These array views may also be constructed from existing arrays and objects with the tp::view, tp::viewRange and
+tp::viewOne functions. `interface_glue.hpp` may be a good place to provide additional overloads to those functions
+for custom collections of contiguous elements. See `/include/tephra/tools/array.hpp` for existing overloads for
+C style arrays, `std::vector` and `std::array`.
+
+Another useful tool is the tp::EnumBitMask that simplifies operations on bit masks and clarifies when a single bit or
+a mask is expected with strong typing. All bit enums in Tephra also have their mask variant type.
+
+<br>
+@subsection ug-general-concepts-debugging-and-validation Debugging and validation
+
+Drivers implementing the Vulkan API aren't required to check that it is being used correctly by the user. Incorrect
+behavior is more often than not unspecified and can lead to anything from driver crashes to working perfectly fine on
+your machine, the latter being more insidious. As such, validation layers are shipped as part of the Vulkan SDK, which
+can be then enabled during development. They are then able to validate correct usage without impacting performance when
+they are not needed.
+
+Tephra validation works similarly. The library by default doesn't check for correct usage, only when built with the
+#TEPHRA_ENABLE_DEBUG preprocessor define. Doing so has a performance impact and so is only recommended for debug builds.
+Vulkan validation can be toggled without needing to rebuild through tp::VulkanValidationSetup or simply by using the
+Vulkan Configurator that comes with the SDK.
+
+Tephra validation is far from complete. User errors or bugs in the library may silently manifest as incorrect usage of
+the Vulkan API, so it is recommended to also enable Vulkan validation during development. To allow Tephra to consume the
+resulting validation messages and direct them to the debug report handler, the tp::ApplicationExtension::EXT_DebugUtils
+extension must also be enabled.
+
+The library also needs to be given a way to report validation and other kinds of messages. The tp::DebugReportHandler
+base class exists for that purpose. A user-provided implementation can translate incoming tp::DebugMessage messages and
+report or log them in whatever way it sees fit. Exceptions that are about to be thrown can also be logged.
+For the sake of convenience, a utility class is provided that implements tp::DebugReportHandler with a predefined
+message formatting style: tp::utils::StandardReportHandler. See @ref ug-utilities-standard-report-handler for more
+details or the example in @ref ug-initialization-application "Application initialization" for a common setup.
+
+Most Tephra functions that create an object also accept a debug name parameter. The name can be later used to better
+identify the objects in validation messages. If the tp::ApplicationExtension::EXT_DebugUtils extension is enabled, it
+will also be exposed to Vulkan validation and debugging utilities, like RenderDoc. Since Tephra objects don't always
+correspond one-to-one with Vulkan objects, it takes extra care to ensure all names propagate properly. Defining
+#TEPHRA_ENABLE_DEBUG_NAMES allows Tephra to store debug names and pass them onto internal Vulkan objects. By default,
+Tephra also suballocates resources, which can make identifying them with Vulkan utilities difficult. This can be
+turned off for debugging purposes by using the tp::JobResourcePoolFlag::DisableSuballocation flag during job resource
+pool creation.
+
+It is recommended to name your objects and label command ranges extensively. It will be invaluable when debugging your
+application.
+
+<br>
+@subsection ug-general-concepts-object-lifetime-and-hierarchy Object lifetime and hierarchy
+
+There are two kinds of types in the base library: The first are pure data structures like tp::ApplicationSetup that
+can be created through their constructor and destroyed at any time. The other, more interesting types, are objects
+like tp::Application, tp::Device, tp::Image, etc. These form a parent-child hierarchy. They can only be created through
+their parent type's methods, like tp::Application::createDevice or tp::Device::allocateImage and they cannot be used
+after their parent has been destroyed. The special case is tp::Application, which has no parent, but is instead created
+through the tp::Application::createApplication static method.
+
+Below is the parent-child hierarchy of Tephra's objects. Some of these objects follow special rules, as indicated by
+the symbols next to their names in [] and explained below.
+
+- tp::Application [FL]
+    - tp::Device [FL]
+        - tp::Buffer [E]
+            - tp::BufferView
+        - tp::DescriptorSetLayout [E]
+        - tp::DescriptorPool
+            - tp::DescriptorSet
+                - tp::DescriptorSetView
+        - tp::Image [E]
+            - tp::ImageView
+        - tp::JobResourcePool
+            - tp::Job [L]
+                - tp::BufferView
+                - tp::ImageView
+                - tp::DescriptorSetView
+                - tp::CommandPool [N]
+                - tp::ComputeList
+                - tp::RenderList
+        - tp::Pipeline
+        - tp::PipelineCache
+        - tp::PipelineLayout
+        - tp::RenderPassLayout [E]
+        - tp::Sampler
+        - tp::ShaderModule
+        - tp::Swapchain [E]
+            - tp::ImageView
+    - tp::PhysicalDevice [N]
+
+Symbol legend:
+- [F]: All children created from this object must be destroyed by the time the object itself is destroyed.
+- [L]: All children created from this object must only be used locally, in the same context as its parent. For example,
+a tp::Buffer created by a particular device must only be used in jobs of that device. Similarly job-local objects may
+only be used inside their parent job.
+- [E]: The object's lifetime must be extended during job recording. When the object is used inside a command recorded to
+a tp::Job, the object must not be destroyed until the job is either enqueued or destroyed. The use of its children also
+counts, like when using the tp::ImageView of an tp::Image, the parent image must stay alive.
+- [N]: The object is not owned by the user, its lifetime is always managed by the library.
+
+@m_class{m-note m-dim}
+
+@parblock
+Vulkan requires most of its handles to stay alive during the entire time the GPU is using them, which, in a renderer
+setting, means keeping them around for several frames. Tephra handles this by extending the lifetime of all objects that
+hold such Vulkan handles. When an object gets destroyed, its handles get stored in a per-device container with
+information about the jobs that have been enqueued so far. On some device method calls, like
+tp::Device::updateSemaphores and tp::Device::submitPresentImagesKHR, the jobs are checked for completion on the device
+and the relevant Vulkan handles will finally be destroyed.
+
+This is done efficiently through the use of globally incrementing job IDs that are used as values for Vulkan's timeline
+semaphores. When a handle is to be destroyed, a value T gets assigned to it, which is the ID of the last enqueued job.
+To test whether it can be freed at a later time, the value T is compared to the state of every device queue.
+If the last signalled timeline semaphore value for that queue is greater than T, or if the queue has finished executing
+every job previously submitted to it, the handle is guaranteed not to be used and can be safely destroyed.
+
+This method avoids tracking how the handles are actually used, but comes with the downside that the lifetime is extended
+regardless of whether the object has actually been used in recent jobs or not. For most handles this does not matter,
+but it may delay the release of potentially large amounts of memory held by buffers and images. An alternative solution
+for resources may be implemented in the future.
+@endparblock
+
+<br>
+@subsection ug-general-concepts-thread-safety Thread safety
+
+Whenever possible, Tephra offers thread safety by virtue of immutability. Many objects cannot be changed after they were
+created and so pose no harm being used from different threads at the same time. The default rule is that any object may
+be accessed by multiple threads if both of those acceses are read-only, such as through const methods or by being passed
+as a const reference. Recording a command like tp::Job::cmdClearImage still counts as a read-only access for the image,
+since the write operation takes place later on the gpu, not in the thread itself.
+
+For the sake of convenience, tp::Device is made thread-safe, too. The exception are device methods that operate on
+tp::DeviceQueue. Only one thread may enqueue or submit to a single queue at a time. Further, tp::PipelineCache is also
+thread-safe by extension of the Vulkan @vksymbol{VkPipelineCache} being thread-safe, to simplify multithreaded pipeline
+compilation.
+
+Generally, pool objects like tp::JobResourcePool, tp::DescriptorPool and tp::CommandPool not only aren't thread-safe by
+themselves, but also objects allocated from them must collectively only be modified by a single thread at a time. The
+intended way to record commands from multiple threads is to create a separate pool for each thread.
+
+Examples of <b>allowed</b> multithreaded usage:
+- Allocating objects from the same tp::Device.
+- Recording commands that operate on the same object to different tp::Job instances, as long as the jobs were created
+  from different tp::JobResourcePool instances.
+- Allocating tp::DescriptorSet objects that refer to the same resource from different tp::DescriptorPool instances.
+- Mapping and writing to disjoint regions of the same tp::Buffer.
+- Recording commands to distinct tp::CommandList objects that will execute within the same tp::Job, as long as the lists
+  are being recorded with different tp::CommandPool instances.
+- Compiling pipelines on the same tp::Device and using the same tp::PipelineCache.
+- Destroying an object created from a pool while that pool is in use by another thread.
+
+Examples of <b>incorrect</b> multithreaded usage:
+- Destroying an object while another thread is still using it.
+- Recording commands to the same tp::Job or tp::CommandList.
+- Recording commands to different tp::Job instances that were created from the same tp::JobResourcePool.
+- Recording commands to different tp::CommandList instances that were created using the same tp::CommandPool.
+- Allocating tp::DescriptorSet objects from the same tp::DescriptorPool.
+- Enqueuing different tp::Job instances to the same tp::DeviceQueue.
+- Enqueuing a tp::Job while recording commands to another one that was created from the same tp::JobResourcePool.
+
+<br>
+@subsection ug-general-concepts-vulkan-interoperation Vulkan interoperation
+
+While this area is still in progress, the library intends to provide a high degree of interoperability with base Vulkan,
+so that bleeding-edge extensions and third party libraries can be used more comfortably. For providing additional
+extension-specific information to Vulkan, many functions and setup structures accept a `void*` pointer that will be
+appended as the `pNext` pointer to the relevant Vulkan call. Tephra enums that are marked as Vulkan-compatible can
+also accept Vulkan values for the corresponding enums that are added by extensions. The extensions offered in
+tp::ApplicationExtension and tp::DeviceExtension namespaces are fully integrated into Tephra and should not need
+Vulkan interoperation.
+
+Some Tephra objects can be created from existing Vulkan handles. First, a handle tp::Lifeguard must be constructed
+from them. The lifeguard provides functionality for automatically destroying the handle. If this is desired, the
+lifeguard should be constructed with tp::Device::vkMakeHandleLifeguard. Or instead, the tp::Lifeguard::NonOwning factory
+method can be used to create a non-owning lifeguard that will not destroy the handle at the end of its lifetime.
+The wrapped handle can then either be passed directly to the Tephra object's constructors, or by using special device
+methods such as tp::Device::vkCreateExternalBuffer and tp::Device::vkCreateExternalImage. Tephra may not know how to
+destroy some types of Vulkan handles. Even for those, however, it offers a convenient way to handle their safe
+destruction through user-defined cleanup callbacks passed to tp::Device::addCleanupCallback.
+
+Most objects also expose access to the internal Vulkan handles with methods like tp::Device::vkGetDeviceHandle.
+This can be used, for example, to record an extension Vulkan command to a Tephra command list. For convenience, Vulkan
+device-level procedures can be loaded directly with tp::Device::vkLoadDeviceProcedure.
+
+<br><hr>
+@section ug-initialization Initialization
+@subsection ug-initialization-application Application
+
+The first stepping stone is to create a tp::Application object, which initializes Tephra and the underlying Vulkan
+implementation for use in the application's context. To do that, we must create a tp::ApplicationSetup structure that
+holds the parameters needed to construct it. In this case all of them are optional, but let's go through them anyway.
+
+The first is tp::ApplicationIdentifier, which lets you provide the name and version of your application straight to the
+Vulkan driver. In case your application becomes popular enough, the driver may use this information to identify and
+optimize for your app. A tall order for now, but I think it's cute to define it anyway.
+
+Two essential debugging parameters follow. tp::VulkanValidationSetup lets you enable Vulkan validation. It should be
+enabled when debugging, along with the #TEPHRA_ENABLE_DEBUG define, which enables Tephra's own validation. Both will
+warn about various mistakes when using the library. See the @ref ug-general-concepts-debugging-and-validation section
+for more details. These messages will be reported to a debug handler that can be provided as the third parameter.
+
+The debug handler is an interface that will be used by the library when a validation message or an error occurs. For
+simplicity, there is a standard implementation of it in Tephra's utilities that outputs to a C++ stream, filtered by
+the chosen message severities and types. See @ref ug-utilities-standard-report-handler.
+If all validation and messaging is disabled, the debug handler is unused.
+
+Next, we can define any requested extensions. These can be either one of the predefined tp::ApplicationExtension
+extensions, or any other Vulkan instance extensions. They add additional optional functionality to what the base API
+offers. One of the most useful ones being tp::ApplicationExtension::KHR_Surface, which will later enable us to present
+rendered images to the screen. Whenever you see a Tephra function or class name with the KHR, EXT or other suffix, it
+is likely a part of either a device or instance extension. The next parameter allows you to specify any additional
+Vulkan layers, used for letting tools hook into your API calls.
+
+To finally create the application object, call the static method tp::Application::createApplication. On success, it will
+return an owning pointer to the object. If the method fails, likely because something was not supported, a
+tp::RuntimeError exception will be thrown. It is also possible to check for support ahead of time with the other static
+methods, like tp::Application::isExtensionAvailable.
+
+@code{.cpp}
+#include <tephra/tephra.hpp>
+#include <tephra/utils/standard_report_handler.hpp>
+
+int main() {
+    bool debugMode = true; // Turn off for release
+
+    auto debugHandler = tp::utils::StandardReportHandler(std::cerr,
+        tp::DebugMessageSeverity::Warning | tp::DebugMessageSeverity::Error);
+
+    // Request surface extension, so we can output to a window
+    std::vector<const char*> appExtensions = {
+        tp::ApplicationExtension::KHR_Surface
+    };
+
+    auto appSetup = tp::ApplicationSetup(
+        tp::ApplicationIdentifier("Tephra user guide"),
+        tp::VulkanValidationSetup(debugMode),
+        &debugHandler,
+        tp::view(appExtensions));
+
+    std::unique_ptr<tp::Application> app;
+    try {
+        app = tp::Application::createApplication(appSetup);
+    } catch (tp::RuntimeError) {
+        // Not supported
+        return;
+    }
+}
+@endcode
+
+<br>
+@subsection ug-initialization-choosing-a-device Choosing a device
+
+The main purpose of the tp::Application object is to allow you to pick a tp::PhysicalDevice available on the system and
+create a tp::Device for it, through which most functionality of Tephra can be accessed. To iterate over the available
+supported devices, call tp::Application::getPhysicalDevices. The devices are ordered in a platform dependent manner,
+but usually the first device is the one the operating system deems as primary. Generally, picking the first device in
+the list that meets your criteria is sufficient. Each tp::PhysicalDevice provides all kinds of information about the
+associated device. Refer to the documentation to see what is directly provided. Additional information can be queried
+directly from Vulkan through the tp::PhysicalDevice::vkQueryProperties and tp::PhysicalDevice::vkQueryFeatures methods.
+
+@code{.cpp}
+std::vector<const char*> deviceExtensions = { tp::DeviceExtension::KHR_Swapchain };
+
+const tp::PhysicalDevice* chosenDevice = nullptr;
+for (const tp::PhysicalDevice& candidateDevice : application->getPhysicalDevices()) {
+    // Choose a discrete GPU that supports swapchains, geometry shaders and 32-bit depth buffers
+    if (candidateDevice.type != tp::DeviceType::DiscreteGPU) {
+        continue;
+    }
+    for (const char* ext : deviceExtensions) {
+        if (!candidateDevice.isExtensionAvailable(ext))
+            continue;
+    }
+    if (!candidateDevice.vkQueryFeatures<VkPhysicalDeviceFeatures>().geometryShader) {
+        continue;
+    }
+    auto depthCaps = candidateDevice.queryFormatCapabilities(tp::Format::DEPTH32_D32_SFLOAT);
+    if (!depthCaps.usageMask.contains(tp::FormatUsage::DepthStencilAttachment))
+        continue;
+
+    chosenDevice = &candidateDevice;
+    break;
+}
+
+if (chosenDevice == nullptr) {
+    // No physical device supported
+    return;
+}
+@endcode
+
+<br>
+@subsection ug-initialization-creating-a-device Creating a device
+
+Creating a tp::Device out of a particular tp::PhysicalDevice you wish to commit to using is similar to creating a
+tp::Application object, it starts by filling out a setup structure.
+
+The second parameter, after the physical device pointer, is a list of device queues you wish to use with the device.
+tp::DeviceQueue identifies a queue to which jobs can be submitted for executing on the device. Each device queue has a
+type that describes what kind of commands it can support:
+- tp::QueueType::Transfer for transfer-only operations, like copying data from one resource to another.
+- tp::QueueType::Compute for compute workloads executing compute shaders. It also supports transfer operations.
+- tp::QueueType::Graphics for graphics workloads executing the graphics pipeline. It also supports compute and transfer
+  operations.
+The graphics queue is the most powerful and a useful default, but may not be supported on some compute-only accelerator
+cards that do not support rendering.
+
+A tp::DeviceQueue is a combination of a queue type and an index of the queue within that type. One reason why you might
+want to have multiple queues is asynchronous execution. A transfer queue is often able to copy data around while a
+graphics queue is busy rendering. Running a compute shader on a compute queue simultaneously to rendering is known as
+"async-compute" and may result in speedups as well. Another good reason is for thread safety. Multiple queues allow
+several independent parts of your engine to submit work at the same time using the same Tephra device.
+
+After you have selected the queues, you must select the extensions. These are similar to application extensions, but are
+drawn from tp::DeviceExtension instead (or other Vulkan device extensions) and affect only the device-level
+functionality. Support for them can be checked through the physical device, as shown in the previous section. A notable
+extension, and a counterpart to tp::ApplicationExtension::KHR_Surface is tp::DeviceExtension::KHR_Swapchain, which
+handles presenting images to the surface with a tp::Swapchain object. See the @ref ug-swapchain section for more details
+on that.
+
+Besides extensions, some functionality of the device needs to be enabled by the use of features. There is
+@vksymbol{VkPhysicalDeviceFeatures} as well as other feature structs provided by Vulkan that contain a boolean value
+for each feature that can be enabled. You've already seen in the previous example how the device support for a feature
+can be queried with tp::PhysicalDevice::vkQueryFeatures, but to actually enable it, its value must be set to
+@code{.cpp} true @endcode in a tp::VkFeatureMap that gets passed to the device as a parameter. Initially, the map starts
+with all features turned off. Turning one on is as simple as:
+
+@code{.cpp}
+tp::VkFeatureMap features;
+features.get<VkPhysicalDeviceFeatures>().geometryShader = true;
+@endcode
+
+Next up is an optional configuration of Tephra's internal memory allocator,
+<a href="https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator">VMA</a>, which is used to satisfy all memory
+needs of resources you can request through the library. Because it is more efficient in Vulkan to allocate larger blocks
+of memory, but it's difficult to find the right block size for every application, it is available as a configurable
+parameter, set to 256 MB by default.
+
+Finally, we can create the device using the prepared setup structure, but instead of using a static method, a device
+is created through a tp::Application object's tp::Application::createDevice method, becoming its child object.
+
+@code{.cpp}
+// Create one main queue and two transfer queues for this example
+tp::DeviceQueue mainQueue = tp::DeviceQueue(tp::QueueType::Graphics);
+tp::DeviceQueue copyQueues[] = {
+    tp::DeviceQueue(tp::QueueType::Transfer, 0),
+    tp::DeviceQueue(tp::QueueType::Transfer, 1)
+};
+tp::DeviceQueue allQueues[] = { mainQueue, copyQueues[0], copyQueues[1] };
+
+// We have already prepared the supported physical device, extensions and features
+auto deviceSetup = tp::DeviceSetup(
+    chosenDevice, tp::view(allQueues), tp::view(deviceExtensions), &features);
+
+std::unique_ptr<tp::Device> = application->createDevice(deviceSetup);
+@endcode
+
+@m_class{m-note m-dim}
+
+@parblock
+Tephra's queues do not map one-to-one to Vulkan queues. A Vulkan physical device can expose any number of queues, which
+themselves don't necessarily map to the actual hardware queues. Therefore, Tephra offers the user to create as many
+queues of any supported type. If more queues are requested than what are available, they get assigned to Vulkan queues
+in a round-robin fashion. The details about the mapping of any particular tp::DeviceQueue to a Vulkan queue can be
+queried with tp::PhysicalDevice::getQueueTypeInfo.
+@endparblock
+
+<br><hr>
+@section ug-resources Resources
+
+Most meaningful operations that can be done on devices read and write data from objects in memory called "resources".
+In Tephra, a resource is either a tp::Buffer or a tp::Image object. Each describes where the data is stored in memory
+and how it can be accessed. For buffers that's simply a size and optionally a format, but for images that can also be
+the dimensionality, number of mipmaps, etc. Resource objects can be allocated through tp::Device::allocateBuffer and
+tp::Device::allocateImage functions. Their contents are undefined upon being allocated. Destroying them releases the
+associated memory, though only after Tephra ensures it is no longer being used by the device.
+
+Commands generally don't operate on resource objects directly, but instead through resource views - tp::BufferView and
+tp::ImageView. These act like non-owning references to a range of the parent resource. For example, to use `size` bytes
+starting at some `offset` of a tp::Buffer, you would create a tp::BufferView like so:
+@code{.cpp} buffer->getView(offset, size); @endcode and then bind the view instead. For convenience, resource views
+have a very similar interface to the resources themselves and a resource is also implicitly convertible to a default
+view of its entire range. The idea is that you can be pass these views around in your code whenever you don't need
+the ownership semantics of passing the actual resource.
+
+<br>
+@subsection ug-resources-buffers Buffers
+
+tp::Buffer represents a one-dimensional resource of a given size. It can be used to store vertex and index buffers, to
+provide single dimensioned data to shaders or to serve as an intermediate step for copying linear image data to
+tp::Image resources.
+
+Buffers can be created through tp::Device::allocateBuffer with two parameters. The standard tp::BufferSetup structure
+takes a size in bytes and a usage mask that specifies how the buffer is going to be used - the rest will not be allowed
+during the lifetime of the buffer.
+
+The second parameter describes the types of memory that the buffer may be allocated from. Different devices may have
+different types of memory available and as such it is important to be able to run your application efficiently on any
+device. Tephra exposes device memory locations along three different aspects. First, memory can be device-local. Every
+kind of memory that may be allocated through the library are accessible by the device, but only device-local locations
+can be used at peak performance. With discrete GPUs, this means the memory is present in VRAM, compared to CPU RAM for
+non-device-local memory. Second, only host visible memory locations are directly accessible by the host (the CPU).
+Host-visible memory can also be cached, which helps with host read performance.
+
+These aspects are combined into 5 distinct tp::MemoryLocation types. tp::MemoryLocation::DeviceLocal represents the
+fast memory that only the device can access. tp::MemoryLocation::DeviceLocalHostVisible and
+tp::MemoryLocation::DeviceLocalHostCached offer the same performance, but also allow direct host-side access, which is
+ideal, but memory of these types can be of limited size on many systems. Finally, tp::MemoryLocation::HostVisible and
+tp::MemoryLocation::HostCached usually offer large amounts of host-visible memory, but the buffers allocated from it
+may be slower to access from the GPU.
+
+Because the availability of memory locations may differ on different platforms, Tephra offers an additional layer of
+abstraction here. The second parameter of tp::Device::allocateBuffer accepts a tp::MemoryPreference, which is a sequence
+of memory locations in the order that they should be prioritized. The buffer will be allocated from the first memory
+location in the sequence that has available capacity. The chosen location can then be queried with
+tp::Buffer::getMemoryLocation. There are a couple of predefined preferences, which should be enough for most use cases:
+
+- tp::MemoryPreference::Device guarantees that only device-local memory will be allocated, otherwise memory allocation
+  error is thrown. This preference should be used when the resource does not need to be directly accessible by the host,
+  but fast access by the device is needed.
+- tp::MemoryPreference::Host can be used for resources that should live in host memory. Meant for large data that is
+  being read by the device infrequently and shouldn't be wasting the potentially limited device-local, host visible
+  memory. This is the best progression for staging buffers used to copy data to device-local memory.
+- tp::MemoryPreference::UploadStream should be used for priority resources that are written to by the host and need to
+  be read by the device with low latency. If device locality is required, the resulting memory location of the
+  allocation should be checked for a potential fallback to be used as a staging buffer.
+- tp::MemoryPreference::ReadbackStream is to be used for priority resources that are written to by the device and need
+  to be read by the host with low latency.
+
+Buffers that were allocated from a location that is visible by the host - so all of them besides
+tp::MemoryLocation::DeviceLocal - can be mapped for host access with tp::Buffer::mapForHostAccess. It returns a
+tp::HostMappedMemory object that provides this access during its lifetime. tp::HostMappedMemory::getPtr can be used to
+finally retrieve an ordinary pointer of the given type and at the given byte offset. The object should be destroyed
+soon after the access is complete.
+
+@code{.cpp}
+template <typename T>
+void copyDataToBuffer(tp::BufferView& buffer, const std::vector<T>& data) {
+    tp::HostMappedMemory memory = buffer.mapForHostAccess(tp::MemoryAccess::WriteOnly);
+    std::copy(data.begin(), data.end(), memory.getPtr<T*>());
+}
+@endcode
+
+Note that the device executes work asynchronously from the host and low-level graphics APIs like Vulkan do not abstract
+away that fact. Any data you write to a buffer on the CPU that is then further accessed by the GPU must not be
+overwritten until all of those accesses finish. For uploading temporary or frequently changing data, Tephra offers a
+safer and more convenient method described in @ref ug-submits-job-local-resources.
+
+Regular buffer views can be created through tp::Buffer::getView or tp::BufferView::getView, taking the size and offset
+in bytes describing the viewed range relative to the parent buffer or view. The offset must be a multiple of
+tp::Buffer::getRequiredViewAlignment, which will be at most 256 bytes, and the size must not be greater than the size
+of the parent buffer or view.
+Texel buffer views are special buffer views used for binding to a texel or storage texel buffer desciptor. They can be
+created with tp::Buffer::createTexelView or tp::BufferView::createTexelView, which additionally take a tp::Format that
+determines how the data will be interpreted inside a shader when bound. Texel buffer views may be more expensive to
+create (involving Vulkan API calls) than regular buffer views (hence `createTexelView` rather than `getTexelView`), but
+are still cheap to copy once created.
+
+@code{.cpp}
+// Rounds the value to the nearest larger multiple of m.
+template <typename T>
+constexpr T roundUpToMultiple(T v, T m) {
+    return ((v + m - 1) / m) * m;
+}
+
+// Container for vertex and index data
+struct Mesh {
+    const std::vector<std::byte>* vertexData;
+    const std::vector<std::byte>* indexData;
+};
+
+// Holds vertex and index data for multiple meshes all in a single buffer
+struct VertexIndexBuffer {
+    std::unique_ptr<tp::Buffer> buffer;
+    std::vector<tp::BufferView> meshVertices;
+    std::vector<tp::BufferView> meshIndices;
+
+    VertexIndexBuffer(tp::Device* device, const std::vector<Mesh>& meshes, const char* name) {
+        // For now put the buffer into host-visible memory so we can map and write to it directly.
+        // Later on you will see how to use staging buffers to upload data to resources in
+        // device-only memory.
+        const tp::MemoryPreference& memory = tp::MemoryPreference::UploadStream;
+        // We can put both vertex and index data in one buffer
+        tp::BufferUsageMask usage = tp::BufferUsage::HostMapped | tp::BufferUsage::VertexBuffer |
+            tp::BufferUsage::IndexBuffer;
+        std::size_t alignment = tp::Buffer::getRequiredViewAlignment(device, usage);
+        std::size_t bufferSize = 0;
+    
+        // Suballocate all data from one buffer, ensuring correct alignment
+        for (const Mesh& mesh : meshes) {
+            bufferSize = roundUpToMultiple(bufferSize + mesh.vertexData->size(), alignment);
+            bufferSize = roundUpToMultiple(bufferSize + mesh.indexData->size(), alignment);
+        }
+    
+        // Create the buffer now that we know the full size
+        buffer = device->allocateBuffer({ bufferSize, usage }, memory, name);
+    
+        // Store the views to all sections and write their data
+        std::size_t offset = 0;
+        for (const Mesh& mesh : meshes) {
+            meshVertices.push_back(buffer->getView(offset, mesh.vertexData->size()));
+            copyDataToBuffer(meshVertices.back(), *mesh.vertexData);
+            offset = roundUpToMultiple(offset + mesh.vertexData->size(), alignment);
+    
+            meshIndices.push_back(buffer->getView(offset, mesh.indexData->size()));
+            copyDataToBuffer(meshIndices.back(), *mesh.indexData);
+            offset = roundUpToMultiple(offset + mesh.indexData->size(), alignment);
+        }
+    }
+};
+@endcode
+
+<br>
+@subsection ug-resources-images Images
+
+tp::Image represents a single or higher-dimensional resource that supports various filtering operations, such as
+interpolation and mipmapping. Their most common use in computer graphics is as textures and render targets. Unlike
+buffers, they can only reside in device-local memory, so you don't need to specify the memory preference upon creation.
+This also means they cannot be mapped directly. To upload image data, a staging buffer and a
+tp::Job::cmdCopyBufferToImage command is needed.
+
+The tp::ImageSetup structure makes up for it in terms of available options. tp::ImageType is the first parameter,
+determining the dimensionality of the image and the types of image views can be created out of it later. Images
+can be one, two or three-dimensional. Two-dimensional images can optionally support cubemap views and three-dimensional
+ones views of each z slice as a 2D layer. The second parameter is the usage mask describing how the image will be used.
+
+You can also specify the format of the image and the extent in texels across all three dimensions. The values in the
+extra dimensions beyond the type of the image must be set to 1. Images can also be created with mipmaps, with each level
+having half the extent of the previous one, rounded up. The number of mip levels and the number of array layers are
+given next. Note that for 3D images, the number of array levels must be set to 1. 2D images can also have a
+multisampling level set above x1 for antialiasing purposes.
+
+Image views can be created with a different format than that of the parent image. To allow that, all the required
+formats must be listed in the `compatibleFormats` field. The formats must be in the same tp::FormatCompatibilityClass.
+tp::getFormatCompatibilityClass can be used to determine the class of a format. tp::getFormatClassProperties
+additionally exposes various useful properties of the format class, like the size of a texel block in bytes.
+
+To create a tp::ImageView, you provide a tp::ImageViewType and a format into a tp::ImageViewSetup structure to determine
+how the image data should be interpreted. You also specify a tp::ImageSubresourceRange. The range for buffer views was
+defined by just an offset and a size, but with image views, it's a little more complicated. An image view can reference
+a range of array layers, a range of mip levels and an "aspect" mask that chooses between depth and stencil for images
+with the relevant formats.
+
+The easiest way to specify a subresource range is to call tp::Image::getWholeRange or tp::ImageView::getWholeRange. This
+will return the subresource range encompassing the entire image or view (relative to it, `baseMipLevel` and
+`baseArrayLevel` will always be 0). This range can then be reduced with tp::ImageSubresourceRange::pickLayer or
+`pickLayers`, tp::ImageSubresourceRange::pickMipLevel or `pickMipLevels`. A subresource range with only one mip level,
+but potentially multiple array layers is defined as tp::ImageSubresourceLayers. A subresource range with only one mip
+level and one array layer is then tp::ImageSubresource. The final parameter is an optional tp::ComponentMapping, that
+can be used to swizzle the image during sampling operations in shaders.
+
+@code{.cpp}
+struct Cubemap {
+    std::unique_ptr<tp::Image> image;
+    tp::ImageView cubemapView;
+    std::array<tp::ImageView, 6> sliceViews;
+
+    Cubemap(tp::Device* device, uint32_t faceSize, tp::Format format, const char* name) {
+        tp::ImageUsageMask usage = tp::ImageUsage::SampledImage | tp::ImageUsage::TransferDst;
+        auto extent = tp::Extent3D(faceSize, faceSize, 1);
+        // Include mipmap chain
+        uint32_t mips = static_cast<uint32_t>(std::ceil(std::log2(faceSize)));
+        // 6 faces to a cubemap
+        uint32_t arrayLayerCount = 6;
+    
+        // Create a cubemap-compatible 2D image array
+        auto setup = tp::ImageSetup(tp::ImageType::Image2DCubeCompatible, usage, format,
+            extent, mips, arrayLayerCount);
+        image = device->allocateImage(setup, name);
+    
+        // Default image view will consider this image as a 2D image array,
+        // so create a cubemap view:
+        auto cubemapViewSetup = tp::ImageViewSetup(
+            tp::ImageViewType::ViewCube, image->getWholeRange());
+        cubemapView = image->createView(cubemapViewSetup);
+    
+        // Also create views for each slice:
+        for (uint32_t i = 0; i < arrayLayerCount; i++) {
+            auto sliceViewSetup = tp::ImageViewSetup(
+                tp::ImageViewType::View2D, image->getWholeRange().pickLayer(i));
+            sliceViews[i] = image->createView(sliceViewSetup);
+        }
+    }
+};
+@endcode
+
+@m_class{m-note m-dim}
+
+@parblock
+Resource views in Tephra are intended to be easy and relatively cheap to create, even image and texel buffer views.
+This does not directly fit Vulkan's model of resource views, which have handles that must be explicitly created and
+destroyed. To facilitate this, all required view handles are created and owned by their parent resources. They are
+cached and reused, so requesting the same view twice doesn't create any duplicate Vulkan handles. These handles only get
+destroyed when the parent resource gets destroyed. There is currently no way to clean them up earlier, but this
+shouldn't be an issue for most use cases that only create at most a couple dozen views per image or texel buffer views
+for buffers.
+@endparblock
+
+<br><hr>
+@section ug-submits Submitting work
+@subsection ug-submits-jobs Jobs
+
+To have the device perform any kind of work, a tp::Job needs to be created, recorded, enqueued and finally submitted to
+one of the prepared queues. A job encompasses a sequence of commands to be executed on the device, along with any
+job-local resources that may be requested for it.
+
+To create jobs, a tp::JobResourcePool must be created first. The pool primarily handles efficient allocation of
+resources for jobs that will be submitted to the same queue. As such, its setup structure only has one required
+parameter - the queue that any jobs created from this pool are allowed to be submitted to. The other parameters let you
+specify additional flags or change growth factors for better control over how the pool allocates resources.
+
+@code{.cpp}
+auto jobPoolSetup = tp::JobResourcePoolSetup(mainQueue);
+std::unique_ptr<tp::JobResourcePool> mainJobPool =
+    device->createJobResourcePool(jobPoolSetup, "Main job pool");
+@endcode
+
+A single job pool should be used repeatedly for many jobs. It works best for similar tasks, like rendering a scene
+every frame, where each frame's jobs use a similar amount of resources that can be efficiently reused from frame to
+frame. By default, the allocated memory is only released when the pool gets destroyed, but anything that has been unused
+for a certain amount of time can be released manually by calling tp::JobResourcePool::trim. It can either be called
+periodically, after an expensive one-off job, or only when running out of memory. One can query how much memory the
+pool uses by calling tp::JobResourcePool::getStatistics, and tp::JobResourcePool::trim also returns the number of bytes
+that were freed by the call.
+
+The pool can be used, through tp::JobResourcePool::createJob, to create tp::Job objects that provide an interface
+for recording high-level commands. Once the needed commands are recorded into the job, it can be enqueued by calling
+tp::Device::enqueueJob. Doing so gives up the ownership of the job, so that no more commands can be recorded to it.
+In exchange, you are given a tp::JobSemaphore handle, which represents a synchronization primitive that becomes
+signalled when the job finishes executing on the device. It can be waited upon either by the host through
+tp::Device::waitForJobSemaphores or by another job by passing it as the `waitJobSemaphores` parameter of
+tp::Device::enqueueJob. The execution order of jobs submitted to the same queue is already determined by the order
+in which they were enqueued, so the use of semaphores on the device is only useful for synchronizing jobs across
+different queues.
+
+Enqueued jobs don't actually start executing until they have been submitted. To submit all the jobs that have been
+enqueued to a particular queue so far, call tp::Device::submitQueuedJobs. Pay in mind that submitting jobs is a
+relatively expensive operation.
+
+@code{.cpp}
+// Create and record the job
+tp::Job job = mainJobPool->createJob({}, "Example job");
+recordSomeCommands(job);
+
+// Enqueue the job to finalize the recording
+tp::JobSemaphore semaphore = device->enqueueJob(mainQueue, std::move(job));
+
+// Finally submit it for execution and, for demonstration purposes, immediately wait for it to be
+// done on the device
+device->submitQueuedJobs(mainQueue);
+device->waitForJobSemaphores({ semaphore });
+@endcode
+
+@m_class{m-note m-dim}
+
+@parblock
+tp::JobSemaphore represents a value of a Vulkan timeline semaphore. It is considered signalled when the value of the
+timeline semaphore becomes greater or equal the value given by the tp::JobSemaphore. The values assigned to each job
+come from a single device-wide counter that gets atomically incremented for every job enqueued to any queue.
+
+The reason timeline semaphores are used instead of the usual binary semaphores is that the latter is limited to one
+signal - one wait pair, meaning you would have to specify how many times you will wait on any given semaphore ahead of
+time, which would be very inconvenient. A single device-wide counter instead of separate counters for each queue make
+it simple to determine the set of enqueued or submitted jobs that an object could have been used in, simplifying
+the extension of lifetimes of Vulkan handles, as described by the implementation note in the
+@ref ug-general-concepts-object-lifetime-and-hierarchy section.
+@endparblock
+
+<br>
+@subsection ug-submits-job-command-recording Job command recording
+
+A tp::Job object has two types of functions. Functions that start with `cmd` are the command functions. They record work
+into the job in the order that they are called, which is then the same order that they will be executed in. The other
+kind of functions serve to create job-local resources, to be discussed in a later section.
+
+The command recording design in Tephra has two levels. The commands recorded into a tp::Job are the "high-level" commands.
+They perform some operation on a set of provided resources and their synchronization is managed automatically. These are
+mainly operations that involve copying, clearing, resolving and exporting resources, but also commands to execute
+compute and render passes, where the actual work happens. These passes contain command lists into which "low-level"
+commands can be recorded, such as the binding of pipelines and descriptors, as well as issuing draw calls. Such commands,
+on the other hand, are designed for very low overhead and multithreaded recording.
+
+A single pass represents a scope of commands that, from the job's point of view, consumes data in a set of resources as
+input to write some data to another set of resources as output. A render pass defines a set of attachments, aka
+"render targets", that its draw commands can render to. For example, rendering a single shadow map will likely be
+represented as a single render pass with many draw commands inside for drawing all the visible geometry. A tonemapping
+post-processing pass could also be a render pass with a single draw command for rendering a full-screen quad
+(or triangle). A compute pass similarly needs to be provided a list of resources that the compute dispatches inside will
+be writing to. Resources that are only used as input don't need to be listed explicitly in render and compute passes,
+so long as they were exported beforehand with tp::Job::cmdExportResource.
+
+The calls to tp::Job::cmdExecuteComputePass and tp::Job::cmdExecuteRenderPass also need to describe how the commands
+that are to be executed inside each pass should be recorded. This can be done in two ways. You can provide an array
+of default-constructed command lists to the call. After it, the array will be populated with valid command lists
+that will be executed in that order inside the pass. Your responsibility is to then record commands to them, once the
+job is enqueued, but before it gets submitted. For that you will also need to request a command pool from the job
+through tp::Job::createCommandPool. They can be reused between all passes inside the same job, but you must only have
+one thread using each pool at a time.
+
+Sometimes the scalability of deferred recording of multiple command lists is overkill if all you want to do is a single
+draw for your post-processing. For that there is another, more convenient way of recording commands to a pass: Inline
+callbacks. Instead of providing an array of command lists, you can pass a function that will be called by Tephra to
+record the commands just-in-time during tp::Device::submitQueuedJobs. That way, the code that records your job commands
+and the code that records the pass commands can be kept together.
+
+@m_class{m-note m-dim}
+
+@parblock
+As mentioned above, command functions in tp::CommandList are just thin wrappers around the Vulkan API. In fact, you can
+use tp::CommandList::vkGetCommandBufferHandle to get the Vulkan command buffer and record any commands yourself, which
+can be especially useful with extensions that Tephra doesn't natively support.
+
+Job command recording is somewhat more interesting. Job commands, along with all their data, get recorded into an
+internal command buffer. This buffer is composed of 4kB blocks of memory that are allocated as needed. Each command can
+store arbitrary amounts of data (either stored inline if small enough, otherwise using a separate allocation). These
+allocations get reused for subsequent jobs created from the same pool.
+
+This command buffer gets replayed during tp::Device::submitQueuedJobs two times - once to resolve automatic
+synchronization and generate barriers, and the second time to record the commands, along with the barriers, to a Vulkan
+command buffer.
+@endparblock
+
+<br>
+@subsection ug-submits-compute-passes Compute Passes
+
+Compute passes are the simpler of the two passes that can be executed inside a tp::Job. The tp::ComputePassSetup
+structure only takes a list of tp::BufferComputeAccess and a list of tp::ImageComputeAccess. These help provide the
+necessary information to Tephra about which resources are going to be accessed inside the pass and how. The access
+structures can be constructed from a view of the resource, optionally limiting it to a subresource range, and a
+tp::ComputeAccess mask that describes how the resource is going to be used. This must cover <b>all</b> of the resource
+accesses inside the pass, unless the access is read-only and the resource has been previously exported for that
+access - see the @ref ug-submits-synchronization section. Considering that most read-only resources, like uniform
+buffers and textures, should end up exported for the sake of this convenience, the most common access value for
+resources in a compute pass tends to be tp::ComputeAccess::ComputeShaderStorageWrite.
+
+The second parameter for tp::Job::cmdExecuteComputePass determines how the commands inside the compute pass are to be
+recorded. This was talked about in the previous section. You have the option of passing a list of tp::ComputeList
+objects that will be initialized by the call and can be recorded to after the job is enqueued. For that, a
+tp::CommandPool is needed from tp::Job::createCommandPool. A command pool is an opaque object that is intended to be
+passed to tp::ComputeList::beginRecording once the job gets enqueued to facilitate the recording. It can be used for
+multiple compute lists, but it is not thread-safe. Meaning, to record command lists from multiple threads, each thread
+must pass a different tp::CommandPool to their command lists. After you have finished recording, but before the job is
+submitted, tp::ComputeList::endRecording must be called. Note that command lists will be executed in the order they were
+provided in the list, regardless of the order in which they were recorded.
+
+Alternatively, you can pass a tp::ComputeInlineCallback function to tp::Job::cmdExecuteComputePass instead of a list
+of compute lists. This callback function will be called during tp::Device::submitQueuedJobs to record the commands
+inline. It should accept a tp::ComputeList as a parameter to record the commands into. In this case,
+tp::ComputeList::beginRecording and tp::ComputeList::endRecording must <b>not</b> be called.
+
+tp::ComputeList is, in either case, the main interface for recording low-level commands inside a compute pass. It has
+commands like tp::ComputeList::cmdBindComputePipeline, tp::CommandList::cmdBindDescriptorSets and
+tp::CommandList::cmdPushConstants that modify various current state. This state is local to the command list and starts
+undefined at first. There will be more on @ref ug-pipelines and @ref ug-descriptors later.
+
+Then there are tp::ComputeList::cmdDispatch and tp::ComputeList::cmdDispatchIndirect. These dispatch a compute pipeline
+that has been bound previously, using all the descriptor sets and other state that has been set as well. This is finally
+how you execute meaningful work on the device in the form of a compute shader.
+
+There can be multiple dispatches inside a single compute pass, but beware that any execution and memory dependencies
+between the dispatches need to be synchronized manually, such as when a later dispatch reads data written by the
+previous one. This can be handled by calling tp::ComputeList::cmdPipelineBarrier between the pair of dispatches. The
+function takes a list of dependencies, where each dependency is represented by a pair of tp::ComputeAccess masks.
+The first value are the accesses performed by any of the previous dispatches, the second are the accesses of the
+following dispatches. Each of those accesses must also be passed to the compute pass setup. Note that atomic accesses
+don't need to be synchronized against each other.
+
+If manual synchronization seems daunting, you can always split the dispatches into separate compute passes, which will
+then get handled automatically, as long as the accesses in each pass are defined properly.
+
+@code{.cpp}
+// Divides v by d and rounds up to the nearest integer
+template <typename T>
+constexpr T divideRoundUp(T v, T d) {
+    return (v + d - 1) / d;
+}
+
+// Records commands to perform a separable gaussian blur with a compute shader
+class SeparableBlur {
+public:
+    SeparableBlur(tp::Device* device) {
+        // Shader pipeline initialization here, see later examples
+    }
+
+    // Blur the given image in-place using the provided temporary image. Records to the job inline.
+    void doBlur(tp::Job& job, const tp::ImageView& inOutImage, const tp::ImageView& tempImage) {
+        // Get the size of the image, assume the temporary image is compatible
+        tp::Extent3D extent = inOutImage.getExtent();
+
+        // Horizontal pass samples inOutImage and writes to tempImage
+        tp::ImageComputeAccess horizontalPassAccesses[] = {
+            { inOutImage, inOutImage.getWholeRange(), tp::ComputeAccess::ComputeShaderSampledRead },
+            { tempImage, tempImage.getWholeRange(), tp::ComputeAccess::ComputeShaderStorageWrite }
+        };
+        tp::DescriptorSetView horizontalPassResources = job.allocateLocalDescriptorSet(
+            &blurPassDescriptorLayout, { inOutImage, tempImage });
+
+        job.cmdExecuteComputePass(
+            tp::ComputePassSetup({}, tp::view(horizontalPassAccesses)),
+            [=](tp::ComputeList& computeList) {
+                computeList.cmdBindComputePipeline(blurPassPipeline);
+
+                // Bind inOutImage to input slot, tempImage to output slot
+                computeList.cmdBindDescriptorSets(blurPassPipelineLayout, { horizontalPassResources });
+                // Set the horizontalPass shader push constant to true
+                computeList.cmdPushConstants(blurPassPipelineLayout, tp::ShaderStage::Compute, true);
+
+                // In a horizontal pass, each workgroup will blur 256x1 pixels
+                computeList.cmdDispatch(divideRoundUp(extent.width, ShaderWorkgroupSize), extent.height);
+            },
+            "Blur horizontal pass");
+
+        // Vertical pass samples tempImage and writes back to inOutImage
+        tp::ImageComputeAccess verticalPassAccesses[] = {
+            { tempImage, tempImage.getWholeRange(), tp::ComputeAccess::ComputeShaderSampledRead },
+            { inOutImage, inOutImage.getWholeRange(), tp::ComputeAccess::ComputeShaderStorageWrite }
+        };
+        tp::DescriptorSetView verticalPassResources = job.allocateLocalDescriptorSet(
+            &blurPassDescriptorLayout, { tempImage, inOutImage });
+
+        job.cmdExecuteComputePass(
+            tp::ComputePassSetup({}, tp::view(verticalPassAccesses)),
+            [=](tp::ComputeList& computeList) {
+                computeList.cmdBindComputePipeline(blurPassPipeline);
+
+                // Bind inOutImage to input slot, tempImage to output slot
+                computeList.cmdBindDescriptorSets(blurPassPipelineLayout, { verticalPassResources });
+                // Set the horizontalPass shader push constant to false
+                computeList.cmdPushConstants(blurPassPipelineLayout, tp::ShaderStage::Compute, false);
+
+                // In a vertical pass, each workgroup will blur 1x256 pixels
+                computeList.cmdDispatch(extent.width, divideRoundUp(extent.height, ShaderWorkgroupSize));
+            },
+            "Blur vertical pass");
+    }
+
+private:
+    // The workgroup size of the shader
+    static constexpr uint32_t ShaderWorkgroupSize = 256;
+
+    tp::PipelineLayout blurPassPipelineLayout;
+    tp::DescriptorSetLayout blurPassDescriptorLayout;
+    tp::Pipeline blurPassPipeline;
+};
+@endcode
+
+<br>
+@subsection ug-submits-render-passes Render Passes
+
+Render passes are the graphics counterpart of compute passes. As mentioned before, a render pass is a collection
+of rendering commands that share the same set of attachments, aka render targets. Before you can execute a render pass
+inside a tp::Job, you must first create a tp::RenderPassLayout object through tp::Device::createRenderPassLayout. This
+object distills the core characteristics of render passes that participate in the compilation of graphics pipelines.
+
+The render pass layout creation takes as its first parameter a list of tp::AttachmentDescription structures. They
+describe the format and optionally the multisample level of the attachments to be used by the render passes. The order
+of the attachments can be arbitrary, but they will get referenced by their index moving forward.
+
+The next parameter is a list of subpass layouts. A subpass is what actually assigns the attachments to meaningful bind
+points as used by the shaders. For simplicity, you can define all your render passes with only a single subpass.
+Multiple subpasses within a render pass are useful for mobile devices and tiled architectures in general, which may be
+able to execute such a combined render pass more efficiently. The tp::SubpassLayout setup structure can be constructed
+with a list of tp::AttachmentBinding structs that reference and bind the attachments to the various bind points. The
+first parameter is a tp::AttachmentBindPoint that identifies a bind point by the type and number. You can use its static
+factory methods, for example @code{.cpp} tp::AttachmentBindPoint::Color(0) @endcode to bind to the first color
+attachment binding. The second parameter is then the index that identifies the attachment that will be assigned to the
+binding. Attachments can also be used to automatically resolve a multisampled render target.
+@code{.cpp} tp::AttachmentBindPoint::@endcode @code{.cpp}ResolveFromColor(index) @endcode will ensure that after the
+subpass ends, the color attachment with the given index in the same subpass will be resolved to the image bound to the
+resolve attachment.
+
+With a tp::RenderPassLayout ready, we can record the tp::Job::cmdExecuteRenderPass command. The tp::RenderPassSetup
+structure takes a pointer to the layout and a list of tp::RenderPassAttachment structs that assign an actual image view
+to each attachment. It also has you specify the load and store operations for the attachment that take place at the start and
+end of the render pass. The tp::AttachmentLoadOp determines whether the contents of the image view should cleared to
+some color, be loaded to preserve what was there previously, or discarded with `DontCare`. Similarly, the
+tp::AttachmentStoreOp specifies whether the contents need to be accessible after the render pass ends, or also discarded
+with `DontCare`, for example when a depth buffer is to be used just for depth tests and its contents won't be needed
+afterwards. The last parameter of tp::RenderPassAttachment has you specify the clear value, if you used a `Clear` load op.
+Using attachment load ops is the fastest and also a convenient way of clearing your images at the start of rendering,
+just like resolve attachments are useful for resolving multisampled renders.
+
+The tp::RenderPassSetup structure also takes a list of tp::BufferRenderAccess and tp::ImageRenderAccess, which,
+similarly to the compute pass, allow you to specify additional unexported resources accessed directly from the shaders.
+Next, it optionally takes a render area, through which you can promise to the implementation that you will only render
+to a smaller rectangular area of the attachments. Otherwise, the entire extent of the views is used. For multi-view
+rendering support, there is also the option to render to more than one layer.
+
+At this point, the recording is similar to compute passes and was described in the previous section. The main
+differences are that we are using tp::RenderList instead of a tp::ComputeList, and that you must record each subpass
+separately. tp::RenderList offers various drawing commands, as well as more stateful commands besides the usual pipeline
+and descriptor set binding. Notably, before any draws are issued, the viewport and scissor regions must be set with
+tp::RenderList::cmdSetViewport and tp::RenderList::cmdSetScissor. It is likely you will also need to bind an index and
+a vertex buffer, for which there are commands, too. If your graphics pipeline has any dynamic state, there are functions
+for setting that dynamically into the render list as well.
+
+An important note to reiterate is that each render pass only renders to a fixed render area. For something like a bloom
+effect, which may render to progressively smaller render targets, each render target must be rendered to with a separate
+render pass.
+
+@code{.cpp}
+// Showcase of a simple render pass with a multisampled color and depth buffer with resolve
+class RenderPassExample {
+public:
+    RenderPassExample(tp::Device* device, tp::MultisampleLevel multisampleLevel)
+        : multisampleLevel(multisampleLevel) {
+        // Create the render pass layout, starting by specifying the attachments
+        tp::AttachmentDescription attachments[] = {
+            { tp::Format::DEPTH32_D32_SFLOAT, multisampleLevel },
+            { tp::Format::COL32_B8G8R8A8_UNORM, multisampleLevel },
+            // Extra attachment for the resolved color:
+            { tp::Format::COL32_B8G8R8A8_UNORM, tp::MultisampleLevel::x1 },
+        };
+
+        // Then bind those attachments to slots. With only one subpass, this is straightforward
+        tp::AttachmentBinding bindings[] = {
+            { tp::AttachmentBindPoint::DepthStencil(), 0 },
+            { tp::AttachmentBindPoint::Color(0), 1 },
+            { tp::AttachmentBindPoint::ResolveFromColor(0), 2 },
+        };
+
+        auto subpassLayout = tp::SubpassLayout(tp::view(bindings), {});
+        renderPassLayout = device->createRenderPassLayout(tp::view(attachments), { subpassLayout });
+    }
+
+    // Adds the render pass to the job and allocates resources for it
+    void setupPass(tp::Job& job, const tp::ImageView& resolvedImage) {
+        // Create the extra attachments as job-local images, see the next chapter for details
+        auto imageSetup = tp::ImageSetup(tp::ImageType::Image2D, tp::ImageUsage::ColorAttachment,
+            tp::Format::COL32_B8G8R8A8_UNORM, resolvedImage.getExtent(), 1, 1, multisampleLevel);
+        tp::ImageView colorImage = job.allocateLocalImage(imageSetup, "Multisampled color");
+
+        imageSetup.usage = tp::ImageUsage::DepthStencilAttachment;
+        imageSetup.format = tp::Format::DEPTH32_D32_SFLOAT;
+        tp::ImageView depthImage = job.allocateLocalImage(imageSetup, "Multisampled depth");
+
+        // Let's clear the images as part of the render pass
+        tp::ClearValue clearColor = tp::ClearValue::ColorFloat(0.0f, 0.0f, 0.0f, 0.0f);
+        tp::ClearValue clearDepth = tp::ClearValue::DepthStencil(1.0f, 0);
+
+        // Must provide the attachments in the same order as they were defined in the layout
+        tp::RenderPassAttachment attachments[] = {
+            // We clear the depth and color images, but we don't need the data after the render pass
+            { depthImage, tp::AttachmentLoadOp::Clear, tp::AttachmentStoreOp::DontCare, clearDepth },
+            { colorImage, tp::AttachmentLoadOp::Clear, tp::AttachmentStoreOp::DontCare, clearColor },
+            // Resolve image gets overwritten, so no load needed, but we want the resolved data
+            { resolvedImage, tp::AttachmentLoadOp::DontCare, tp::AttachmentStoreOp::Store}
+        };
+
+        // Record the render pass, no additional non-attachment accesses to declare
+        auto renderPassSetup = tp::RenderPassSetup(&renderPassLayout, tp::view(attachments), {}, {});
+        // Record to a list this time, rather than using an inline callback
+        job.cmdExecuteRenderPass(renderPassSetup, { tp::viewOne(renderList) });
+        // We need a command pool for that
+        commandPool = job.createCommandPool();
+    }
+
+    // Draws objects to the g-buffer subpass after setupPass gets called and the job is enqueued,
+    // but before its submitted
+    void drawObjects(const std::vector<Object>& objects, tp::Viewport viewport, tp::Rect2D scissor) {
+        renderList.beginRecording(commandPool);
+        renderList.cmdSetViewport({ viewport });
+        renderList.cmdSetScissor({ scissor });
+
+        for (const Object& object : objects) {
+            object.Draw();
+        }
+
+        renderList.endRecording();
+    }
+
+private:
+    tp::MultisampleLevel multisampleLevel;
+    tp::RenderPassLayout renderPassLayout;
+    tp::CommandPool* commandPool;
+    tp::RenderList renderList;
+};
+@endcode
+
+<br>
+@subsection ug-submits-job-local-resources Job-local resources
+
+While the Tephra device provides means to allocate persistent resources that can be used at any time until they are
+destroyed, a tp::Job allows the user to allocate resources that can only be used within that job. This comes with
+several advantages - they are more convenient than having to manage temporary resources yourself, and they also come
+with performance and memory usage benefits due to various sub-allocation and reuse strategies. Job-local resources are
+automatically reused between jobs allocated from the same job resource pool. This can happen even within the same job:
+If two similar job-local resources allocated in the same job aren't being used at the same time (by two overlapping
+ranges of commands), then the same Vulkan resource may be used for both, leading to reduced overall memory usage.
+
+Job-local buffers, images and descriptor sets can only be used within the scope of the job they were allocated from.
+The cannot be used in commands of other jobs and job-local buffers and images cannot be exported to other queues. They
+also internally don't get created until the job gets enqueued. The visible consequence of this is that persistent
+descriptor sets can only be created out of job-local resources after the parent job has been enqueued. Job-local
+descriptor sets exist to circumvent this problem, as their creation is also deferred to when the job gets enqueued.
+
+Pre-initialized buffers, on the other hand, are created the moment they are allocated from the job and are primarily
+meant to be used for conveniently uploading data to the device. They can serve either as temporary staging buffers with
+data that just gets copied over to an image, or for other kinds of data that is only useful in this job, such as shader
+constants. The lifetime of pre-initialized buffers still ends when the job finishes executing and their memory cannot
+be safely accessed after the job has been submitted. For that reason they are not suitable for any readback of data to
+the host, where persistent buffers must be used. See also @ref ug-utilities-growable-ring-buffer.
+
+Otherwise, tp::Job::allocateLocalBuffer, tp::Job::allocateLocalImage and tp::Job::allocatePreinitializedBuffer are
+very similar to the tp::Device resource allocation methods, with the main exception that they return views to the
+resource, rather than an owning handle. This is both because the resources are owned by the job and because these
+resources get sub-allocated for efficiency, meaning the resource view you get can only be a part of a full resource.
+
+The way job-local and pre-initialized resources get allocated and aliased can be controlled through the
+tp::JobResourcePoolSetup that was used to create the job. An important reminder - by default the memory used for
+job-local and pre-initialized resources doesn't get freed until the tp::JobResourcePool is destroyed, but it can be
+trimmed at any point to reclaim some (or all) of it.
+
+@code{.cpp}
+// Records commands to the given job to upload data to the first mip level of the image and
+// generates the rest of the mip chain.
+void uploadTex(tp::Job& job, const tp::ImageView& image, const std::vector<std::byte>& data) {
+    // Allocate a temporary staging buffer for the job.
+    auto stagingBufferSetup = tp::BufferSetup(
+        data.size(), tp::BufferUsage::HostMapped | tp::BufferUsage::ImageTransfer);
+    tp::BufferView stagingBuffer = job.allocatePreinitializedBuffer(
+        stagingBufferSetup, tp::MemoryPreference::Host);
+
+    {
+        // Copy the data to the staging buffer. Can also be done later, at any point until the job
+        // gets submitted.
+        tp::HostMappedMemory memory = stagingBuffer.mapForHostAccess(tp::MemoryAccess::WriteOnly);
+        memcpy(memory.getPtr<std::byte*>(), data.data(), data.size());
+    }
+
+    // Record a command to copy the data to the first mip level of the image.
+    tp::ImageSubresourceRange imageRange = image.getWholeRange();
+    auto copyRegion = tp::BufferImageCopyRegion(
+        0, imageRange.pickMipLevel(0), tp::Offset3D(0, 0, 0), image.getExtent());
+    job.cmdCopyBufferToImage(stagingBuffer, image, { copyRegion });
+
+    // Build mipmap chain by blitting to each mip level from the last.
+    for (int targetMip = 1; targetMip < imageRange.mipLevelCount; targetMip++) {
+        int sourceMip = targetMip - 1;
+        auto blitRegion = tp::ImageBlitRegion(
+            imageRange.pickMipLevel(sourceMip), { 0, 0, 0 }, image.getExtent(sourceMip),
+            imageRange.pickMipLevel(targetMip), { 0, 0, 0 }, image.getExtent(targetMip));
+        job.cmdBlitImage(image, image, { blitRegion });
+    }
+
+    // Export it for reading it as a texture
+    job.cmdExportResource(image, tp::ReadAccess::FragmentShaderSampled);
+}
+@endcode
+
+@m_class{m-note m-dim}
+
+@parblock
+The job-local resource implementation needs to do the following to optimize for memory usage and performance:
+- Recycling: The backing resources should be reused in subsequent jobs created from the same pool. Creating Vulkan
+resources is potentially expensive and recycling allows to have zero such allocations on stable periodic workloads.
+- Suballocation: Multiple compatible requested resources should be served by a single backing resource to further reduce
+overhead.
+- Aliasing: If multiple compatible requested resources aren't being used at the same time, they can be assigned to the
+same region of a backing resource. This can reduce memory usage over a naive approach, potentially at the cost of
+additional synchronization. Tephra aliases on the resource level, rather than on the memory level.
+
+Job-local buffers and images implement all three. The suballocation of images works over layers. If you request two
+identical job-local images, then Tephra will create a single `VkImage` resource with two layers, if possible, and the
+images cannot be aliased together into just one layer. The tp::JobResourcePoolFlag::AliasCompatibleFormats flag allows
+suballocating images that differ in format, as long as they are from the same format compatibility class.
+Suballocation and aliasing can be disabled altogether with tp::JobResourcePoolFlag::DisableSuballocation.
+
+Each command recorded into a job that operates on a job-local resource marks that resource with the command's index.
+Each such resource of a job then keeps the minimum and maximum indices of the commands they were used in, which defines
+the usage range of the resource. Export operations are special and leave the maximum index unbound.
+
+Requested resources are first sorted into "backing groups" by compatibility. Each group has a list of backing resources
+that are used to fulfill the requests. Those requests are allocated from the backing resources with respect to their
+usage range. The algorithm for this is contained in the `AliasingSuballocator` class. Since it is a greedy algorithm,
+the list of requested resources are first sorted by size in a descending order, so that the large resources are
+allocated first and don't have large allocations "stolen" from them by small resources. The algorithm then assigns each
+resource, one by one, to the leftmost available space that it fits in. Anything left over will prompt the creation of
+a new backing resource. Recycling works trivially, since jobs allocated from the same pool can never overlap.
+
+Pre-initialized resources work somewhat differently, since their lifetime starts at the moment of the
+tp::Job::allocatePreinitializedBuffer call, rather than when the job starts executing on the device. That means there
+is no opportunity for aliasing, but on the other hand the recycling becomes more complex. At the heart of this
+allocator stands the tp::utils::GrowableRingBuffer, which is useful enough that it is also exposed separately as a
+utility. It is composed of several backing buffers that individually function just like regular ring buffers. When one
+runs out of space, the allocator switches to the next one that is free. The available space can then be grown just by
+adding another backing buffer. Allocations are tracked, so that they can be freed in the same order that they were
+allocated in.
+
+The pre-initialized buffers can only be released for recycling once the job finishes executing on the device. This is
+why we are using ring buffers, but care must be taken to allow recording multiple jobs from the same pool at the same
+time and enqueuing them in any order. In that case we can't rely on the buffers becoming available in allocation order.
+To resolve this, each job claims exclusive access to its tp::utils::GrowableRingBuffer until it is enqueued. Any
+requests from other jobs during that time must create a new buffer. In some situations this can waste memory, so caution
+is recommended when recording multiple jobs that were allocated from the same pool simultaneously.
+
+@endparblock
+
+<br>
+@subsection ug-submits-synchronization Synchronization
+
+Within the scope of a job, Tephra synchronizes accesses fully automatically, like in OpenGL. Beyond it, however, it
+needs some help from the user. We've already discussed tp::JobSemaphore, which synchronizes the execution of jobs.
+Every tp::Job signals a tp::JobSemaphore that any other job can wait upon before its execution starts. Any job that
+relies on the results of another job that was submitted to a different queue must wait on its semaphore.
+
+Another such responsibility on the side of the user is to describe the accesses of resources that happen inside command
+lists, which the library does not analyze for performance reasons. However, even this is not as daunting as it may seem.
+It was mentioned that render and compute passes need a list of resources that they will access and how. The library
+also has a more convenient way that declares read-only accesses for *all* future passes - job export operations.
+
+tp::Job::cmdExportResource can be recorded after you write some data to a resource to notify Tephra how you intend to
+read that data in the future. You can only specify read-only accesses for the resource, and accessing the resource in
+any other way afterwards will invalidate the export. With a resource exported, you can use it in the provided way
+without having to specify it in each pass that wishes to access it, even across different jobs. Exports are very useful
+in the majority of cases where you write to a resource rarely and then read from it many times after. For convenience,
+the tp::DescriptorBinding::getReadAccessMask function returns the mask of all read accesses that can be performed
+through that binding. Consider this pseudocode example:
+
+@code{.cpp}
+tp::ImageView texture = job.allocateLocalImage(setup);
+// Render something to the texture and bind it for use in future shaders.
+// The implementation of these functions isn't important for now.
+renderToTexture(job, texture);
+bindTexture(binding, texture);
+
+// The above is all you would need to do in traditional APIs, but Tephra also requires an export operation
+// to expose the results of the rendering to a set of read accesses, in this case to the binding:
+job.cmdExportResource(texture, binding.getReadAccessMask());
+
+// Now we can do some other renders that use the above texture through the binding, or any other binding
+// of the same type.
+renderToScreen(job);
+
+// Let's say later on we want to copy from this texture, which is an access we haven't exported to.
+// For job commands like this one, that is still legal, but it invalidates the above export.
+job.cmdCopyImage(texture, someOtherTexture, regions);
+
+// We must re-export now to allow accessing the texture through the binding again
+job.cmdExportResource(texture, binding.getReadAccessMask());
+@endcode
+
+Exports are also needed when you want to access the contents of a resource from a different queue than the one that
+has last written to it, even with all the proper semaphore synchronization. A cross-queue export just takes an extra
+parameter, specifying the queue type that the contents should be exported to. After that, the resource and its data can
+be accessed from any queue of that type, as long as it was also properly synchronized with a semaphore. Invalidating the
+export, such as by accessing the resource through a different access type, will make the resource's contents
+inaccessible to other queues again. A cross-queue export with an empty access mask is therefore enough to just transfer
+ownership to another queue.
+
+Note that an export is needed even if the queue types of the reader and the writer queue match. A situation where an
+export isn't required is the case where the current contents of the resource aren't important and can be discarded. The
+export may be omitted then, but semaphore synchronization is still necessary.
+
+The last use of an export operation is for readback of data to the CPU. To be able to read back the contents of a buffer
+in host-visible memory, you must export it with the tp::ReadAccess::Host access and ensure the job doing the export has
+finished executing, either through tp::Device::isJobSemaphoreSignalled or tp::Device::waitForJobSemaphores. Only then
+you may map the memory and safely read the up-to-date data.
+
+As a potential optimization for tp::Image resources, you may also call tp::Job::cmdDiscardContents to hint at Tephra
+that the current contents of the image are not needed and can be discarded.
+
+@m_class{m-note m-dim}
+
+@parblock
+These paragraphs contain a brief explanation of how automatic synchronization is handled in Tephra. Knowledge of Vulkan
+synchronization concepts is assumed. If you aren't familiar with Vulkan semaphores and barriers, feel free to skip
+this section.
+
+Let's first consider the synchronization needed within the scope of a single tp::Job. We need a relevant barrier between
+each pair of commands that access the same resources. For most commands these are known inputs, and for compute and
+render passes they are provided by the user. After an export operation to the current queue type, we add a barrier
+between the last use of the resource and the first compute or render pass following the export (or the end of the job).
+
+To do this, we track certain state for each resource in what is called an access map. It stores, for any subresource
+range, information about the last accesses made to it, as well as what barriers were already used to synchronize them,
+if any. The latter allows us to re-use existing barriers efficiently. To process the next command, we first find any
+previous accesses that intersect the command's accesses to the resource and extend the barrier list with the proper
+synchronization between them. Afterwards, we update the access map with the new accesses to sync any future commands.
+
+There are usually multiple ways two accesses can be synchronized in the presence of other commands and barriers in
+between. Tephra tries to minimize the number of pipeline barriers and otherwise inserts any new barriers as late as
+possible in the command buffer. It does not attempt to reorder the commands, as that is best left in the hands of the
+user. After we know what barriers to insert and where, we iterate over the job's commands again, but this time we
+translate them to Vulkan commands into the job's primary command buffer while inserting the appropriate barriers. This
+is also when inline callbacks of compute and render passes get invoked.
+
+The access maps are kept persistent within each queue, so that we can also naturally ensure correct synchronization
+against accesses of previous jobs in the same queue. When it comes to accessing resources from other queues, we need the
+appropriate export operation to be able to properly communicate the correct image layouts and potentially issue special
+queue family ownership transfer barriers. This is done through simple message passing between queues. Each one has its
+own access maps with local state, but on export it can broadcast a part of that state of a particular resource range
+to all queues of the chosen queue type. The queues consume these broadcasts at the start of every submit, updating
+their own access map.
+
+@endparblock
+
+<br><hr>
+@section ug-descriptors Resource descriptors
+@subsection ug-descriptors-layouts Descriptor set layouts
+
+Descriptors in Vulkan, and by extension in Tephra, facilitate the binding of resources for use in shaders. Rather than
+binding resources one at a time, you create and bind entire sets at once. Multiple descriptor sets can be bound at the
+same time, which is why resource bindings are identified by both their descriptor set number and the binding index
+inside that set. All resource bindings declared in a shader must also be defined by a tp::DescriptorSetLayout for each
+of the sets with a matching tp::DescriptorBinding struct.
+
+To create a tp::DescriptorSetLayout, you pass a list of these tp::DescriptorBinding structs to
+tp::Device::createDescriptorSetLayout. Each of those describes one resource binding as it is used in a shader.
+A tp::DescriptorBinding is composed of a binding number that together with the descriptor set number identifies the
+binding, the tp::DescriptorType matching the type of the resource binding in the shader, the array size and a stage mask
+specifying which shader stages the binding can be accessed from. For example, a texture declared in a GLSL fragment
+shader as @code{.glsl} layout (set = 0, binding = 1) uniform sampler2D tex; @endcode can be in Tephra represented as
+@code{.cpp} tp::DescriptorBinding(1, tp::DescriptorType::CombinedImageSampler, tp::ShaderStage::Fragment) @endcode when
+creating a layout for the set 0. The order of descriptor bindings passed to tp::Device::createDescriptorSetLayout can be
+arbitrary, but the same order then must be respected when creating descriptor sets for that layout.
+
+A tp::PipelineLayout can then be created out of a list of tp::DescriptorSetLayout objects with
+tp::Device::createPipelineLayout. Their order in the list then determines the descriptor set number of their bindings.
+Another optional parameter is a list of tp::PushConstantRange structs. Push constants provide efficient means to pass
+a very small amount of data (usually under 128 bytes, query device properties for limits) to shaders without having
+to do any descriptor set bindings. A tp::PipelineLayout is later used for creating pipelines and binding descriptor
+sets.
+
+<br>
+@subsection ug-descriptors-sets Descriptor sets
+
+With descriptor set layouts in hand, we can look at how to actually allocate and bind tp::DescriptorSet objects.
+In Tephra, descriptor sets represent an immutable set of descriptors given at creation that can then be bound as a
+single unit. A descriptor is a simple wrapper around either a buffer view, an image view or an image view with an
+attached sampler.
+
+Descriptor sets are allocated from a tp::DescriptorPool, which can be created with tp::Device::createDescriptorPool.
+Beware that the descriptor pool, like any other pool isn't thread safe and descriptor sets can be allocated from it
+by only one thread at a time. Finally, you can call tp::DescriptorPool::allocateDescriptorSets to allocate a number of
+descriptor sets of a given layout. You provide a list of tp::DescriptorSetSetup structs and a corresponding list of
+tp::DescriptorSet pointers, to which the created sets will be written.
+
+A tp::DescriptorSetSetup is simply a list of tp::Descriptor objects representing the resource views to bind, along with
+some optional flags and a debug name. The order of the descriptors must follow the order of bindings provided when the
+given descriptor set layout was created. The descriptors do not correspond 1:1 to bindings, but instead as many
+descriptors are needed as is the `arraySize` of the corresponding binding. These descriptors are then tightly packed in
+the list.
+
+For example, if we have a tp::DescriptorSetLayout created like so:
+
+@code{.cpp}
+tp::DescriptorSetLayout layout = device->createDescriptorSetLayout({
+    tp::DescriptorBinding(0, tp::DescriptorType::UniformBuffer, tp::ShaderStage::Vertex),
+    tp::DescriptorBinding(1, tp::DescriptorType::UniformBuffer, tp::ShaderStage::Fragment),
+    tp::DescriptorBinding(2, tp::DescriptorType::Sampler, tp::ShaderStage::Fragment),
+    tp::DescriptorBinding(3, tp::DescriptorType::SampledImage, tp::ShaderStage::Fragment, 4),
+});
+@endcode
+
+Then we can allocate a tp::DescriptorSet for it as such:
+
+@code{.cpp}
+std::vector<tp::Descriptor> descriptors;
+descriptors.push_back(vertexConstants);
+descriptors.push_back(fragmentConstants);
+descriptors.push_back(linearSampler);
+
+for (int i = 0; i < 4; i++) {
+    descriptors.push_back(textures[i]);
+}
+
+auto descSetSetup = tp::DescriptorSetSetup(tp::view(descriptors));
+tp::DescriptorSet descriptorSet;
+descriptorPool->allocateDescriptorSets(&layout, { descSetSetup }, { &descriptorSet });
+@endcode
+
+Descriptors cannot reference job-local resources before the job has been enqueued - this is because internally, the
+resources don't actually exist until then. This is a fairly common use case, however. For that reason, you can also
+create job-local descriptor sets with tp::Job::allocateLocalDescriptorSet. Just like job-local resources, their
+lifetime is limited to just the single job and are reused internally, so they are also ideal for sets that change
+from frame to frame. You can create them by filling up an array of tp::FutureDescriptor instead and only get a
+non-owning view of the descriptor set. All descriptor sets are used mainly through this tp::DescriptorSetView,
+accessible with tp::DescriptorSet::getView.
+
+By default, all descriptors provided to tp::DescriptorSetSetup must be valid. Sometimes we know that not all of the
+descriptors in a descriptor set will end up being used. Rather than having to create dummy resources, we can set the
+tp::DescriptorSetFlag::IgnoreNullDescriptors flag, which will relax the above requirement and let us use empty
+descriptors when allocating descriptor sets. Note also that if a pipeline contains any access to the descriptor, even if
+it is behind a branch that won't be taken, it is still considered to be (statically) using the descriptor, which means
+it must not be null. The tp::DescriptorBindingFlag::PartiallyBound flag relaxes that even further for particular
+bindings, forbidding null descriptors only where they will actually be accessed by the active code path (dynamically
+used).
+
+@m_class{m-note m-dim}
+
+@parblock
+If you're familiar with Vulkan descriptor sets, you might notice that unlike those, Tephra's descriptor sets are
+immutable. Mutating descriptor sets in Vulkan involves waiting until they are no longer in use by the device, something
+we generally want to avoid. The common solution then is to just allocate a new set now and recycle the old one later.
+Tephra just embraces this pattern. When mutability might be convenient, there is the tp::utils::MutableDescriptorSet
+utility class, but even that just builds upon the basic immutable descriptor sets.
+
+The descriptor set allocator separates the sets by their layout. This makes all the descriptor sets allocated from each
+pool have the same size and simplifies the allocation algorithm. Job resource pools internally have the same descriptor
+pool for serving job-local descriptor set allocations. Their allocation just gets deferred until the job is enqueued.
+@endparblock
+
+<br>
+@subsection ug-descriptors-binding Binding descriptor sets
+
+tp::RenderList and tp::ComputeList keep the state of currently bound descriptor sets for each set number. Any time a
+draw or dispatch call is made with a compatible pipeline bound, it can access the resources referenced by the currently
+bound descriptor sets in the command list state. tp::CommandList::cmdBindDescriptorSets is responsible for changing that
+state. It operates with a given tp::PipelineLayout, a list of tp::DescriptorSetView objects to bind, the set number that
+the first set in the list should be bound to and optionally a list of dynamic offsets.
+
+Dynamic offsets are used for tp::DescriptorType::UniformBufferDynamic and tp::DescriptorType::StorageBufferDynamic
+descriptors, which are useful when needing to pass different parts of the same buffer for use in shaders efficiently,
+without creating new descriptor sets each time. The most common example of that being uniform buffers for shader
+constants.
+
+Calling tp::CommandList::cmdBindDescriptorSets may sometimes unbind other previously bound descriptor sets depending
+on the pipeline layout used. If the new pipeline layout was created with a descriptor set layout that was defined
+differently from the one currently used for the same set number, then that descriptor set becomes unbound (and accesses
+made to its resources will be undefined). Additionally, all descriptor sets with a higher set number will get
+unbound, too. A good mental picture to explain this behavior is to imagine that there exists a flat buffer storing the
+currently bound resource descriptors. Pipeline layouts then keep offsets into this buffer for each of its descriptor set
+layouts. Upon calling `tp::CommandList::cmdBindDescriptorSets`, the contents of the descriptor sets simply get copied
+according to the offset.
+
+The consequence of this is that frequently changing descriptor set layouts should be assigned to a higher set number
+than ones that are shared among many pipeline layouts. For example, it makes sense to put all the "global" bindings
+that can be used by many different pipelines, such as shadow maps, to set number 0, while various material-dependent
+bindings ought to be in higher set numbers. That way, changing "material" descriptor set layout won't disturb the
+"global" descriptor set layout.
+
+<br><hr>
+@section ug-pipelines Pipelines
+@subsection ug-pipelines-shaders Shaders
+
+Tephra, just like Vulkan, consumes shaders in SPIR-V. This language, rather than being human readable, serves as an
+easy-to-parse intermediate representation in a binary format. It is the user's responsibility to compile shaders from
+other shader languages, like GLSL or HLSL, to SPIR-V using external tools. The Vulkan SDK contains
+Khronos <a href="https://github.com/KhronosGroup/glslang">glslangValidator</a> and Microsoft
+<a href="https://github.com/microsoft/DirectXShaderCompiler">DXC</a> binaries for compiling GLSL / HLSL to SPIR-V,
+respectively. If you are already familiar with these languages, note that their use for Vulkan carries some differences.
+Consult these pages for
+<a href="https://github.com/KhronosGroup/GLSL/blob/master/extensions/khr/GL_KHR_vulkan_glsl.txt">GLSL</a> and
+<a href="https://github.com/Microsoft/DirectXShaderCompiler/blob/main/docs/SPIR-V.rst">HLSL</a> for details about how
+they translate to SPIR-V.
+
+tp::ShaderModule objects are then used to hold the SPIR-V shader binaries and pass them to other parts of the library.
+They can be created by calling tp::Device::createShaderModule with the SPIR-V binary data. This step is fairly cheap,
+no driver compilation happens at this stage.
+
+<br>
+@subsection ug-pipelines-compute Compute pipelines
+
+To compile a compute tp::Pipeline, the tp::ComputePipelineSetup object needs to be prepared. Pipeline setup objects
+behave somewhat differently than other setup structures. Only the mandatory or commonly defined parameters are passed
+in the constructor. Most of them, however, can be provided through setter methods. This can be used to easily define
+multiple similar pipeline setups - just copy the setup object and change what is required.
+
+The constructor of tp::ComputePipelineSetup takes a pointer to a tp::PipelineLayout, which we've shown how to create in
+the @ref ug-descriptors-layouts section. The next parameter is a tp::ShaderStageSetup describing the only stage in a
+compute pipeline. This is an ordinary struct that stores a pointer to a tp::ShaderModule object providing the shader
+bytecode, the name of the entry point function and optionally a list of tp::SpecializationConstant structs.
+Specialization constants can be used to modify the behavior of a shader just before pipeline compilation. The only
+property of compute pipeline setups that isn't present in the constructor are the pipeline flags, for adjusting the
+behavior of the pipeline and its compilation.
+
+To compile compute pipelines, call tp::Device::compileComputePipelines with an input list of pipeline setups and an
+output list of tp::Pipeline handles. A pointer to a tp::PipelineCache object can additionally be provided.
+tp::PipelineCache serves as an opaque cache of compiled pipelines that the driver can use to speed up their compilation.
+The cache data can be saved to disk and loaded back during a later run. The data is specific to the device that was
+used to compile pipelines the first time, so the cache isn't portable across devices or even driver versions. The
+pipeline cache is thread-safe in regards to being used for pipeline compilation from multiple threads simultaneously.
+
+A compute pipeline can be bound to the current state of a compute list with tp::ComputeList::cmdBindComputePipeline.
+Any further dispatch commands in that list, such as tp::ComputeList::cmdDispatch, will use the given pipeline until
+another one gets bound.
+
+<br>
+@subsection ug-pipelines-graphics Graphics pipelines
+
+Graphics tp::Pipeline compilation works the same way as compute pipelines, but with more complexity and state to set.
+
+In the constructor, tp::GraphicsPipelineSetup accepts besides the pointer to a tp::PipelineLayout also a pointer to a
+tp::RenderPassLayout, which we've discussed in the @ref ug-submits-render-passes section, along with a subpass index.
+These define the fragment shader output interface and limit the pipeline to being executed only within render passes of
+the given layout.
+
+Speaking of shaders, the only required stage is the vertex shader stage. It, along with the often used fragment shader
+stage can also be provided in the constructor. Other stages can be set with tp::GraphicsPipelineSetup::setGeometryStage
+and tp::GraphicsPipelineSetup::setTessellationStages.
+
+Another commonly set property is an array of tp::VertexInputBinding describing the input interface of the vertex
+processing. One binding in the array corresponds to one vertex buffer bound at the same index. The structure contains a
+list of tp::VertexInputAttribute structs describing the layout of the attributes within this buffer and how they map to
+the attribute indices used in the shader. tp::VertexInputBinding also specifies whether the binding is to be consumed
+per-vertex, or per-instance. They can be set trough tp::GraphicsPipelineSetup::setVertexInputBindings. The topology of
+the input primitives, by default set to tp::PrimitiveTopology::TriangleList, can be changed with
+tp::GraphicsPipelineSetup::setTopology.
+
+There are many other configurable properties affecting all parts of the graphics pipeline. One of the more important
+ones is tp::GraphicsPipelineSetup::setDepthTest. By default, all depth operations are disabled. Setting `enable` to true
+enables depth operations with the given depth test comparison operator. `enableWrite` also optionally enables depth
+writes. If depth operations are enabled, the used tp::RenderPassLayout must contain a depth attachment.
+
+By default, face culling is also disabled. That can be changed by calling tp::GraphicsPipelineSetup::setCullMode, while
+also allowing you to specify which faces should be considered as front facing with
+tp::GraphicsPipelineSetup::setFrontFace.
+
+Attachment blending also needs to be explicitly enabled with either tp::GraphicsPipelineSetup::setBlending or, if
+different blending modes for each of the color attachments are desired,
+tp::GraphicsPipelineSetup::setIndependentBlending. Either of them take the tp::AttachmentBlendState structure, which
+describes the tp::BlendState for the color and alpha components, as well as a mask disabling/enabling the individual
+components. tp::BlendState is defined as a pair of tp::BlendFactor settings, the first applied to the source value and the
+other to the destination value and a tp::BlendOp that determines how they will be combined.
+
+Some state can also be declared as dynamic through tp::GraphicsPipelineSetup::addDynamicState. Dynamic state will ignore
+whatever values are defined for it in the pipeline setup and must instead be set at runtime with the various
+state setter methods in tp::RenderList. This may help reduce the number of pipelines needing to be compiled.
+
+@code{.cpp}
+// Read compiled SPIR-V shaders from disk
+std::vector<uint32_t> vertexShaderCode = loadShader("vsExample.spv");
+std::vector<uint32_t> fragmentShaderCode = loadShader("fsExample.spv");
+
+tp::ShaderModule vertexShader = device->createShaderModule(tp::view(vertexShaderCode));
+tp::ShaderModule fragmentShader = device->createShaderModule(tp::view(fragmentShaderCode));
+
+auto vertexShaderSetup = tp::ShaderStageSetup(&vertexShader, "main");
+auto fragmentShaderSetup = tp::ShaderStageSetup(&fragmentShader, "main");
+
+// Use already prepared pipeline layout and single-subpass render pass layout
+int subpassIndex = 0;
+auto pipelineSetup = tp::GraphicsPipelineSetup(
+    &pipelineLayout, &renderPassLayout, subpassIndex, vertexShaderSetup, fragmentShaderSetup);
+
+// Back face culling
+pipelineSetup.setCullMode(tp::CullModeFlag::BackFace);
+// Depth test without writing
+pipelineSetup.setDepthTest(true, tp::CompareOp::LessOrEqual, false);
+// Use alpha blending, disable writing to the alpha channel
+auto alphaBlendState = tp::AttachmentBlendState(
+    tp::BlendState(tp::BlendFactor::SrcAlpha, tp::BlendFactor::OneMinusSrcAlpha), // colorBlend
+    tp::BlendState::NoBlend(), // alphaBlend
+    tp::ColorComponent::Red | tp::ColorComponent::Green | tp::ColorComponent::Blue // writeMask
+);
+pipelineSetup.setBlending(true, alphaBlendState);
+
+// Create a version with multisampling, which also needs a different render pass layout
+tp::GraphicsPipelineSetup msPipelineSetup = pipelineSetup;
+msPipelineSetup.setRenderPassLayout(&msRenderPassLayout, subpassIndex);
+msPipelineSetup.setMultisampling(tp::MultisampleLevel::x4);
+
+device->compileGraphicsPipelines(
+    { &pipelineSetup, &msPipelineSetup }, nullptr, { &pipeline, &msPipeline });
+@endcode
+
+<br><hr>
+@section ug-swapchain Swapchain
+
+To actually display the contents of an image to the screen requires the use of a tp::Swapchain. This is an optional
+feature - Tephra will work in a headless scenario and may even be run on a graphics device that does not support any
+display output. The support should be checked and enabled on an application level with the
+tp::ApplicationExtension::KHR_Surface application extension, and on device level with the
+tp::DeviceExtension::KHR_Swapchain device extension.
+
+To create a tp::Swapchain for a device that has the needed extensions enabled, call tp::Device::createSwapchainKHR.
+The method accepts a tp::SwapchainSetup setup structure that holds most of the required parameters, as well as an
+optional pointer to an old tp::Swapchain object. If given, the implementation will be able to reuse resources from
+it, transitioning it to a tp::SwapchainStatus::Retired state. More on those later.
+
+The first parameter of the tp::SwapchainSetup structure is the Vulkan @vksymbol{VkSurfaceKHR} handle, representing
+a window, display or other surface that the swapchain can present onto. This handle needs to be acquired through
+platform-specific ways and is out of scope of this library. Other libraries, like
+<a href="https://www.glfw.org/docs/3.3/vulkan_guide.html">GLFW</a> can assist with creating a surface handle in a
+platform-independent way.
+
+Before a @vksymbol{VkSurfaceKHR} handle can be used, you should check whether your device supports presenting to
+that particular surface. This can be done with tp::PhysicalDevice::querySurfaceCapabilitiesKHR. The method returns a
+tp::SurfaceCapabilities structure for that particular surface-device combination. tp::SurfaceCapabilities::isSupported
+can be called if the surface can be presented to at all. The rest of the capability values in the structure should be
+used to help fill out the remaining parameters in the tp::SwapchainSetup setup structure.
+
+Its second parameter, the tp::PresentMode enum, chooses how presenting consecutive frames will be handled, and together
+with the next parameter `minImageCount` allows making trade-offs between display latency, tearing and stability. The
+`imageUsage`, `imageFormat`, `imageExtent` and `imageArrayLayerCount` work similarly to the equivalent parameters of
+tp::ImageSetup, except that they are limited by the capabilities of both the surface and the device. They apply to
+images that the swapchain creates for the purposes of presentation. `imageCompatibleFormatsKHR` also allows specifying
+additional formats that views of those images can take, however the use of this parameter additionally requires the
+tp::DeviceExtension::KHR_SwapchainMutableFormat extension to be enabled. There are other optional parameters that can
+further modify various aspects of presentation and composition. See the tp::SwapchainSetup documentation for details.
+
+@code{.cpp}
+// Manages drawing to a window using the Tephra swapchain
+class Window {
+public:
+    Window(const tp::Device* physicalDevice, tp::Device* device)
+        : physicalDevice(physicalDevice), device(device) {
+        // VkSurfaceKHR gets created here in some platform-dependent way, or with a library
+    }
+
+    bool recreateSwapchain(uint32_t& width, uint32_t& height) {
+        auto capabilities = physicalDevice->querySurfaceCapabilitiesKHR(surface);
+
+        // Prefer the extent specified by the surface over what's provided
+        if (capabilities.currentExtent.width != ~0) {
+            width = capabilities.currentExtent.width;
+            height = capabilities.currentExtent.height;
+        }
+
+        // Prefer triple buffering
+        uint32_t minImageCount = 3;
+        if (capabilities.maxImageCount != 0 && capabilities.maxImageCount < minImageCount)
+            minImageCount = capabilities.maxImageCount;
+
+        // Prefer RelaxedFIFO if available, otherwise fallback to FIFO, which is always supported
+        auto presentMode = tp::PresentMode::FIFO;
+        for (tp::PresentMode m : capabilities.supportedPresentModes) {
+            if (m == tp::PresentMode::RelaxedFIFO) {
+                presentMode = tp::PresentMode::RelaxedFIFO;
+                break;
+            }
+        }
+
+        // Check if the swapchain supports the required format
+        constexpr tp::Format imageFormat = tp::Format::COL32_B8G8R8A8_UNORM;
+        bool supportsRequiredFormat = false;
+        for (tp::Format format : capabilities.supportedFormatsSRGB) {
+            if (format == imageFormat)
+                supportsRequiredFormat = true;
+        }
+        if (!supportsRequiredFormat) {
+            return false;
+        }
+
+        auto swapchainSetup = tp::SwapchainSetup(
+            surface,
+            presentMode,
+            minImageCount,
+            tp::ImageUsage::ColorAttachment,
+            imageFormat,
+            { width, height });
+
+        // Reuse old swapchain, if available
+        swapchain = device->createSwapchainKHR(swapchainSetup, swapchain.get());
+        return true;
+    }
+
+private:
+    const tp::PhysicalDevice* physicalDevice;
+    tp::Device* device;
+    VkSurfaceKHR surface;
+    std::unique_ptr<tp::Swapchain> swapchain;
+    // List of past frame's semaphores that we will use to limit framerate
+    std::deque<tp::JobSemaphore> frameSemaphores;
+};
+@endcode
+
+Once created, the swapchain will be in the tp::SwapchainStatus::Optimal status. You can check this by calling the
+tp::Swapchain::getStatus() method. The optimal status means the swapchain is ready for presentation and also matches
+the surface properties. The status can change during swapchain operations, so it is recommended to check periodically.  
+tp::SwapchainStatus::Suboptimal means the swapchain can still be used, but it may not match surface properties anymore
+and you should consider recreating it when convenient. tp::SwapchainStatus::OutOfDate, on the other hand, means that
+the swapchain is no longer compatible and any further operations on it will fail. tp::SwapchainStatus::SurfaceLost is
+even worse, making you create a new @vksymbol{VkSurfaceKHR}, too. When something causes the swapchain to go out of
+date or lose its surface inside a swapchain operation, a tp::OutOfDateError and tp::SurfaceLostError errors also get
+raised, respectively. Most `Suboptimal` and `OutOfDate` status changes happen due to the underlying window being
+resized. It might be more convenient to handle resize events of your windowing system pre-emptively, so that these
+errors never happen.
+
+To receive an image to draw onto and later present, call tp::Swapchain::acquireNextImage with an optional timeout
+value. As a result, if successful, it returns tp::AcquireImageInfo structure consisting of the image itself, the index
+of the image in the swapchain's internal array and an acquire and present semaphores. The swapchain operations must be
+synchronized with rendering using those semaphores. The first tp::Job that will access the newly acquired image must
+wait on the acquire semaphore (`waitExternalSemaphores` parameter of tp::Device::enqueueJob) to make sure the image is
+ready.
+
+The last job writing to the image before the present operation must export it with tp::Job::cmdExportResource using the
+tp::ReadAccess::ImagePresentKHR read access and also include the present semaphore in its `signalExternalSemaphores`
+parameter upon enqueue. Only once all jobs are enqueued and submitted in the correct order, you can finally call
+tp::Device::submitPresent, specifying a tp::DeviceQueue, the swapchain itself and the index of the image previously
+acquired. The queue type must be one of the supported ones in tp::SurfaceCapabilities, which the graphics queue type
+almost always is. Once an image has been submitted for presentation, it must not be accessed until it gets acquired
+again.
+
+Conceptually, tp::Swapchain maintains a list of images created specifically for displaying them on the given surface.
+The acquire operation either grabs one of those images, if possible, or blocks until one is available. The user then can
+write data to it data through the rest of the API just like it is an ordinary image. A later tp::Device::submitPresent
+operation then queues the image to be displayed onto the screen, making it unable to be acquired until the presentation
+engine is done with it. Older APIs like OpenGL have both of these operations merged in a single glutSwapBuffers call.
+
+@code{.cpp}
+bool Window::drawFrame() {
+    // Limit the number of outstanding frames being rendered - this is better than relying on
+    // acquire to block for us
+    if (frameSemaphores.size() >= 2) {
+        device->waitForJobSemaphores({ frameSemaphores.front() });
+        frameSemaphores.pop_front();
+    }
+
+    if (swapchain->getStatus() != tp::SwapchainStatus::Optimal) {
+        // Recreate out of date or suboptimal swapchain
+        recreateSwapchain(getWindowWidth(), getWindowHeight());
+    }
+
+    // Acquire a swapchain image to draw the frame to
+    tp::AcquiredImageInfo acquiredImage;
+    try {
+        acquiredImage = swapchain->acquireNextImage().value();
+    } catch (const tp::OutOfDateError&) {
+        // Try next frame
+        return false;
+    } catch (const tp::SurfaceLostError&) {
+        // Recreate surface in a platform-dependent way and try next frame
+        return false;
+    }
+
+    // Create a simple example job to draw the frame
+    tp::Job renderJob = jobResourcePool->createJob();
+
+    // We don't need the swapchain image's old contents. It's good practice to discard.
+    renderJob.cmdDiscardContents(*acquiredImage.image);
+
+    renderJob.cmdClearImage(*acquiredImage.image, tp::ClearValue::ColorFloat(1.0f, 0.0f, 1.0f, 1.0f));
+
+    // Finally export for present
+    renderJob.cmdExportResource(*acquiredImage.image, tp::ReadAccess::ImagePresentKHR);
+
+    // Enqueue and submit the job, synchronizing it with the presentation engine's semaphores
+    tp::JobSemaphore jobSemaphore = device->enqueueJob(
+        tp::QueueType::Graphics,
+        std::move(renderJob),
+        {},
+        { acquiredImage.acquireSemaphore },  // the wait semaphore
+        { acquiredImage.presentSemaphore }); // the signal semaphore
+
+    device->submitQueuedJobs(tp::QueueType::Graphics);
+
+    // Keep the job's semaphore so we can wait on it later.
+    frameSemaphores.push_back(jobSemaphore);
+
+    // Present the image
+    try {
+        device->submitPresentImagesKHR(
+            tp::QueueType::Graphics,
+            { swapchain.get() },
+            { acquiredImage.imageIndex });
+    } catch (const tp::OutOfDateError&) {
+        // Let the swapchain be recreated next frame
+        return false;
+    }
+
+    return true;
+}
+@endcode
+
+<br><hr>
+@section ug-utilities Utilities
+
+Tephra also provides some additional utilities built on top of the base API. They live in the tp::utils namespace and
+must be included separately. They can be either used directly, or as examples of what can be build on top of the API.
+
+<br>
+@subsection ug-utilities-standard-report-handler Standard report handler
+
+The tp::utils::StandardReportHandler is an implementation of tp::DebugReportHandler meant to simplify the process of
+reporting messages coming from Tephra and Vulkan. It can be used in two ways. The most straight forward is to
+instantiate it as-is, passing a `std::ostream` that messages will be directed to, and optionally specifying the
+message severity and types to report. The last parameter can additionally cause the handler to try and trigger a
+breakpoint of any attached debugger when an error occurs.
+
+The second way is to make your own implementation of tp::DebugReportHandler, but use the various static methods of the
+helper class for convenience. It provides the tp::utils::StandardReportHandler::formatDebugMessage method, returning a
+formatted string compiling all the relevant message information. Similarly,
+tp::utils::StandardReportHandler::formatRuntimeError formats information about errors. The breakpoint trigger is also
+exposed as tp::utils::StandardReportHandler::triggerDebugTrap, powered by
+<a href="https://github.com/nemequ/portable-snippets">Evan Nemerson's snippet</a>.
+
+<br>
+@subsection ug-utilities-growable-ring-buffer Growable ring buffer
+
+Tephra performs various allocation strategies when requesting pre-initialized buffers to offer a low memory usage and
+high performance when allocating temporary buffers for transferring data from the host to the device. Some of those
+strategies may be useful even outside of what tp::Job allows. For example, periodically reading back data from the
+device also requires buffering, but pre-initialized buffers cannot be accessed after job submit, so they are not an
+option. The usual solution is to implement a ring buffer out of a regular buffer and checking when its data can be read
+and reused. This is similar to what Tephra does internally, so it is useful to expose it in a standard, more capable
+form.
+
+As the name suggests, this implementation of ring buffers is resizable. A tp::utils::GrowableRingBuffer starts at zero
+size when created. It first needs to be fed with at least one backing buffer with tp::utils::GrowableRingBuffer::grow
+that can be used to serve further allocation requests. Calling tp::utils::GrowableRingBuffer::push with a given size
+will then try to allocate a buffer view of that size from the set of backing buffers.
+tp::utils::GrowableRingBuffer::pop, on the other hand, will free the least recently allocated view, so that its space
+in one of the backing buffers can be reused. Similarly, tp::utils::GrowableRingBuffer::shrink will attempt to release
+a backing buffer, if no allocations are using it at the moment.
+
+The above can still require a considerable amount of management to create the backing buffers and ensure no allocations
+get popped prematurely. There is also a more user-friendly wrapper around this class, tp::utils::AutoRingBuffer, which
+manages the creation of backing buffers automatically. In its constructor, you provide a tp::Device and all the
+parameters it needs to create and destroy its backing buffers. It also helps with correct popping of allocations. In
+tp::utils::AutoRingBuffer::push, you also provide an arbitrary monotonically increasing "timestamp" value that gets
+assigned to the allocation. The tp::utils::AutoRingBuffer::pop method then accepts another timestamp value, freeing all
+allocations with a value less or equal than that. The timestamp may be literally tp::JobSemaphore::timestamp or any
+other useful value.
+
+Another use of the ring buffers can be for job-local data of a size that you don't know when the job is being recorded.
+It may be more convenient to write down shader constants at the same time as recording the actual draw calls to command
+lists. In that case a ring buffer may be used to allocate the constant data separately from a job, with a little bit of
+extra management. Similarly, you may have data that changes somewhat frequently, but can be used in the span of
+multiple jobs. A ring buffer may be useful there as well.
+
+<br>
+@subsection ug-utilities-mutable-descriptor-set Mutable descriptor set
+
+Tephra's descriptor sets are immutable and best suited for small sets of material-specific resources that are easily
+reusable. You may, however, want to additionally keep a set of "global" resources which can get bound and unbound at
+any time in a stateful fashion. tp::utils::MutableDescriptorSet offers exactly that. You create it for a specific
+tp::DescriptorSetLayout, just like a regular tp::DescriptorSet. tp::utils::MutableDescriptorSet::set then assigns a
+given tp::Descriptor to a descriptor index, but the changes don't actually take effect until
+tp::utils::MutableDescriptorSet::commit gets called. At that point a tp::DescriptorSet gets allocated using the state
+that has been set so far and the function returns a tp::DescriptorSetView that can be bound. At the end of the
+recording, tp::utils::MutableDescriptorSet::releaseAndReset should be called to let the set release its resources.
+
+Note also that any descriptors that weren't set by the time tp::utils::MutableDescriptorSet::commit gets called are
+considered to be null descriptors and the same restrictions apply to them as mentioned in the @ref ug-descriptors-sets
+section, potentially also requiring the tp::DescriptorBindingFlag::PartiallyBound flag.
+
+The mutable descriptor set can also be used to facilitate "bindless" setups, where all the resources used by all shaders
+in a frame get bound to the same descriptor set into large array bindings. In such cases it may be preferrable to
+update parts of the existing descriptor set, rather than allocating a fresh one, through the
+tp::utils::MutableDescriptorSet::setImmediate function. Note, however, that there are some restrictions and features
+that need to be enabled to be able to update a descriptor set that has already been bound and is in use.
+
+**/

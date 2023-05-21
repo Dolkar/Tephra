@@ -1,0 +1,450 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="..\src\tephra\job\accesses.cpp">
+      <Filter>Source Files\Job</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\tephra\application\application_dispatch.cpp">
+      <Filter>Source Files\Application</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\tephra\job\barriers.cpp">
+      <Filter>Source Files\Job</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\tephra\buffer_dispatch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\tephra\buffer_impl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\tephra\device\command_pool.cpp">
+      <Filter>Source Files\Device</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\tephra\job\command_recording.cpp">
+      <Filter>Source Files\Job</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\tephra\compute.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\tephra\descriptor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\tephra\descriptor_pool_impl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\tephra\device\device_dispatch.cpp">
+      <Filter>Source Files\Device</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\tephra\errors.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\tephra\utils\growable_ring_buffer.cpp">
+      <Filter>Source Files\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\tephra\device\handle_lifeguard.cpp">
+      <Filter>Source Files\Device</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\tephra\image_dispatch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\tephra\image_impl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\tephra\application\instance.cpp">
+      <Filter>Source Files\Application</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\tephra\vulkan\interface.cpp">
+      <Filter>Source Files\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\tephra\job\job.cpp">
+      <Filter>Source Files\Job</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\tephra\job\job_compile.cpp">
+      <Filter>Source Files\Job</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\tephra\vulkan\loader.cpp">
+      <Filter>Source Files\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\tephra\job\local_buffer_allocator.cpp">
+      <Filter>Source Files\Job</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\tephra\job\local_images.cpp">
+      <Filter>Source Files\Job</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\tephra\job\local_image_allocator.cpp">
+      <Filter>Source Files\Job</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\tephra\job\local_descriptor_sets.cpp">
+      <Filter>Source Files\Job</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\tephra\job\local_buffers.cpp">
+      <Filter>Source Files\Job</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\tephra\memory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\tephra\device\memory_allocator.cpp">
+      <Filter>Source Files\Device</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\tephra\physical_device.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\tephra\pipeline.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\tephra\device\queue_map.cpp">
+      <Filter>Source Files\Device</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\tephra\device\queue_state.cpp">
+      <Filter>Source Files\Device</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\tephra\render.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\tephra\job\resource_pool_dispatch.cpp">
+      <Filter>Source Files\Job</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\tephra\swapchain_impl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\tephra\device\timeline_manager.cpp">
+      <Filter>Source Files\Device</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\vma\vk_mem_alloc.cpp">
+      <Filter>External</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\tephra\application\vulkan_globals.cpp">
+      <Filter>Source Files\Application</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\tephra\device\logical_device.cpp">
+      <Filter>Source Files\Device</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\tephra\debug_reporter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\tephra\debugging.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\tephra\job\compute_pass.cpp">
+      <Filter>Source Files\Job</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\tephra\job\render_pass.cpp">
+      <Filter>Source Files\Job</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\tephra\utils\mutable_descriptor_set.cpp">
+      <Filter>Source Files\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\tephra\job\preinit_buffer_allocator.cpp">
+      <Filter>Source Files\Job</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\tephra\job\job_data.cpp">
+      <Filter>Source Files\Job</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\tephra\command_list.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\tephra\pipeline_builder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\tephra\device\cross_queue_sync.cpp">
+      <Filter>Source Files\Device</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\tephra\utils\standard_report_handler.cpp">
+      <Filter>Source Files\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\tephra\job\aliasing_suballocator.cpp">
+      <Filter>Source Files\Job</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\include\tephra\application.hpp">
+      <Filter>Interface Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\tephra\buffer.hpp">
+      <Filter>Interface Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\tephra\common.hpp">
+      <Filter>Interface Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\tephra\compute.hpp">
+      <Filter>Interface Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\tephra\debug_handler.hpp">
+      <Filter>Interface Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\tephra\descriptor.hpp">
+      <Filter>Interface Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\tephra\device.hpp">
+      <Filter>Interface Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\tephra\errors.hpp">
+      <Filter>Interface Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\tephra\format.hpp">
+      <Filter>Interface Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\tephra\format_compatibility.hpp">
+      <Filter>Interface Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\tephra\vulkan\enums.hpp">
+      <Filter>Interface Files\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\tephra\vulkan\handles.hpp">
+      <Filter>Interface Files\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\tephra\vulkan\header.hpp">
+      <Filter>Interface Files\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\tephra\image.hpp">
+      <Filter>Interface Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\interface_glue.hpp">
+      <Filter>Interface Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\tephra\job.hpp">
+      <Filter>Interface Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\tephra\macros.hpp">
+      <Filter>Interface Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\tephra\pipeline.hpp">
+      <Filter>Interface Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\tephra\memory.hpp">
+      <Filter>Interface Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\tephra\render.hpp">
+      <Filter>Interface Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\tephra\sampler.hpp">
+      <Filter>Interface Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\tephra\swapchain.hpp">
+      <Filter>Interface Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\tephra\physical_device.hpp">
+      <Filter>Interface Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\tephra\vulkan\structures.hpp">
+      <Filter>Interface Files\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\tephra\vulkan\types.hpp">
+      <Filter>Interface Files\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\tephra\version.hpp">
+      <Filter>Interface Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\tephra\tephra.hpp">
+      <Filter>Interface Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\vma\vk_mem_alloc.h">
+      <Filter>External</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\debug-trap.h">
+      <Filter>External</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\tephra\tools\array.hpp">
+      <Filter>Interface Files\Tools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\tephra\tools\enum_tools.hpp">
+      <Filter>Interface Files\Tools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\tephra\tools\structure_map.hpp">
+      <Filter>Interface Files\Tools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\tephra\utils\growable_ring_buffer.hpp">
+      <Filter>Interface Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\tephra\utils\mutable_descriptor_set.hpp">
+      <Filter>Interface Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\tephra\command_list.hpp">
+      <Filter>Interface Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\tephra\vulkan\interface.hpp">
+      <Filter>Source Files\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\tephra\vulkan\loader.hpp">
+      <Filter>Source Files\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\tephra\application\application_container.hpp">
+      <Filter>Source Files\Application</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\tephra\application\instance.hpp">
+      <Filter>Source Files\Application</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\tephra\application\vulkan_globals.hpp">
+      <Filter>Source Files\Application</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\tephra\device\command_pool.hpp">
+      <Filter>Source Files\Device</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\tephra\device\cross_queue_sync.hpp">
+      <Filter>Source Files\Device</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\tephra\device\deferred_destructor.hpp">
+      <Filter>Source Files\Device</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\tephra\device\device_container.hpp">
+      <Filter>Source Files\Device</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\tephra\device\memory_allocator.hpp">
+      <Filter>Source Files\Device</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\tephra\device\queue_map.hpp">
+      <Filter>Source Files\Device</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\tephra\device\queue_state.hpp">
+      <Filter>Source Files\Device</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\tephra\device\timeline_manager.hpp">
+      <Filter>Source Files\Device</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\tephra\job\accesses.hpp">
+      <Filter>Source Files\Job</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\tephra\job\barriers.hpp">
+      <Filter>Source Files\Job</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\tephra\job\command_recording.hpp">
+      <Filter>Source Files\Job</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\tephra\job\compute_pass.hpp">
+      <Filter>Source Files\Job</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\tephra\job\job_compile.hpp">
+      <Filter>Source Files\Job</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\tephra\job\job_data.hpp">
+      <Filter>Source Files\Job</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\tephra\job\local_buffer_allocator.hpp">
+      <Filter>Source Files\Job</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\tephra\job\local_buffers.hpp">
+      <Filter>Source Files\Job</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\tephra\job\local_descriptor_sets.hpp">
+      <Filter>Source Files\Job</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\tephra\job\local_image_allocator.hpp">
+      <Filter>Source Files\Job</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\tephra\job\local_images.hpp">
+      <Filter>Source Files\Job</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\tephra\job\preinit_buffer_allocator.hpp">
+      <Filter>Source Files\Job</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\tephra\job\render_pass.hpp">
+      <Filter>Source Files\Job</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\tephra\job\resource_pool_container.hpp">
+      <Filter>Source Files\Job</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\tephra\utils\data_block_allocator.hpp">
+      <Filter>Source Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\tephra\utils\math.hpp">
+      <Filter>Source Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\tephra\utils\object_pool.hpp">
+      <Filter>Source Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\tephra\buffer_impl.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\tephra\common_impl.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\tephra\debug_reporter.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\tephra\debugging.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\tephra\descriptor_pool_impl.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\tephra\error_reporting.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\tephra\image_impl.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\tephra\pipeline_builder.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\tephra\swapchain_impl.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\tephra\utils\standard_report_handler.hpp">
+      <Filter>Interface Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\tephra\job\aliasing_suballocator.hpp">
+      <Filter>Source Files\Job</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\tephra\device\logical_device.hpp">
+      <Filter>Source Files\Device</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\tephra\utils\scratch_allocator.hpp">
+      <Filter>Source Files\Utils</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Interface Files">
+      <UniqueIdentifier>{f8f827fb-bfb2-4b19-92b9-6054c52a2188}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Interface Files\Vulkan">
+      <UniqueIdentifier>{9426a596-e12c-471f-87c9-b0c42ab777da}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="External">
+      <UniqueIdentifier>{d18307b0-d84f-42bd-9133-e479594da8c4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Interface Files\Tools">
+      <UniqueIdentifier>{3e69f185-0b64-4104-92c9-71d85ec699f1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Interface Files\Utils">
+      <UniqueIdentifier>{c12f348a-20bc-450e-a1b7-3517dc3642b2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4516bcee-eeab-42e1-834e-82db93ce873e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Application">
+      <UniqueIdentifier>{616800b9-76a3-468d-a306-bcd288b8159d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Device">
+      <UniqueIdentifier>{f2fea918-0efc-4b5b-96f1-c61eec099a62}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Job">
+      <UniqueIdentifier>{6df35ec9-63b8-425b-a18f-3afe7ac4d63e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Vulkan">
+      <UniqueIdentifier>{b3713ba8-fd28-4be2-b594-3a91ce1860c1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Utils">
+      <UniqueIdentifier>{45a67211-d00d-4a03-a173-4d55deaa7cbe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Documentation">
+      <UniqueIdentifier>{e8b68180-0f6e-4f23-a81a-c27d5f4c12ba}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\.editorconfig" />
+    <None Include="..\documentation\dox\examples.dox">
+      <Filter>Documentation</Filter>
+    </None>
+    <None Include="..\documentation\dox\user_guide.dox">
+      <Filter>Documentation</Filter>
+    </None>
+    <None Include="..\README.md">
+      <Filter>Documentation</Filter>
+    </None>
+    <None Include="..\documentation\dox\changelog.dox">
+      <Filter>Documentation</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="NatvisFile.natvis" />
+  </ItemGroup>
+</Project>

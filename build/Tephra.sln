@@ -1,0 +1,36 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27428.2043
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tephra", "Tephra.vcxproj", "{12676BE6-E359-41C9-8CE3-B9DB319E6CBB}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TephraIntegrationTests", "..\tests\TephraIntegrationTests.vcxproj", "{A0F5A93E-26A9-4A4B-B864-EC57EA754986}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TephraExamples", "..\examples\TephraExamples.vcxproj", "{DD4D2770-676B-40E0-A691-A42806ED2CD6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{12676BE6-E359-41C9-8CE3-B9DB319E6CBB}.Debug|x64.ActiveCfg = Debug|x64
+		{12676BE6-E359-41C9-8CE3-B9DB319E6CBB}.Debug|x64.Build.0 = Debug|x64
+		{12676BE6-E359-41C9-8CE3-B9DB319E6CBB}.Release|x64.ActiveCfg = Release|x64
+		{12676BE6-E359-41C9-8CE3-B9DB319E6CBB}.Release|x64.Build.0 = Release|x64
+		{A0F5A93E-26A9-4A4B-B864-EC57EA754986}.Debug|x64.ActiveCfg = Debug|x64
+		{A0F5A93E-26A9-4A4B-B864-EC57EA754986}.Debug|x64.Build.0 = Debug|x64
+		{A0F5A93E-26A9-4A4B-B864-EC57EA754986}.Release|x64.ActiveCfg = Release|x64
+		{DD4D2770-676B-40E0-A691-A42806ED2CD6}.Debug|x64.ActiveCfg = Debug|x64
+		{DD4D2770-676B-40E0-A691-A42806ED2CD6}.Debug|x64.Build.0 = Debug|x64
+		{DD4D2770-676B-40E0-A691-A42806ED2CD6}.Release|x64.ActiveCfg = Release|x64
+		{DD4D2770-676B-40E0-A691-A42806ED2CD6}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {7822B66A-437B-49AD-BED4-6FAA5BADA4FA}
+	EndGlobalSection
+EndGlobal

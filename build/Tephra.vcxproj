@@ -1,0 +1,233 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\tephra\application\application_dispatch.cpp" />
+    <ClCompile Include="..\src\tephra\application\instance.cpp" />
+    <ClCompile Include="..\src\tephra\application\vulkan_globals.cpp" />
+    <ClCompile Include="..\src\tephra\buffer_dispatch.cpp" />
+    <ClCompile Include="..\src\tephra\command_list.cpp" />
+    <ClCompile Include="..\src\tephra\compute.cpp" />
+    <ClCompile Include="..\src\tephra\debugging.cpp" />
+    <ClCompile Include="..\src\tephra\debug_reporter.cpp" />
+    <ClCompile Include="..\src\tephra\descriptor.cpp" />
+    <ClCompile Include="..\src\tephra\descriptor_pool_impl.cpp" />
+    <ClCompile Include="..\src\tephra\device\command_pool.cpp" />
+    <ClCompile Include="..\src\tephra\device\cross_queue_sync.cpp" />
+    <ClCompile Include="..\src\tephra\device\device_dispatch.cpp" />
+    <ClCompile Include="..\src\tephra\device\handle_lifeguard.cpp" />
+    <ClCompile Include="..\src\tephra\device\logical_device.cpp" />
+    <ClCompile Include="..\src\tephra\device\memory_allocator.cpp" />
+    <ClCompile Include="..\src\tephra\device\queue_map.cpp" />
+    <ClCompile Include="..\src\tephra\device\queue_state.cpp" />
+    <ClCompile Include="..\src\tephra\device\timeline_manager.cpp" />
+    <ClCompile Include="..\src\tephra\errors.cpp" />
+    <ClCompile Include="..\src\tephra\image_dispatch.cpp" />
+    <ClCompile Include="..\src\tephra\image_impl.cpp" />
+    <ClCompile Include="..\src\tephra\job\aliasing_suballocator.cpp" />
+    <ClCompile Include="..\src\tephra\job\barriers.cpp" />
+    <ClCompile Include="..\src\tephra\job\command_recording.cpp" />
+    <ClCompile Include="..\src\tephra\job\compute_pass.cpp" />
+    <ClCompile Include="..\src\tephra\job\job.cpp" />
+    <ClCompile Include="..\src\tephra\job\job_data.cpp" />
+    <ClCompile Include="..\src\tephra\job\local_buffers.cpp" />
+    <ClCompile Include="..\src\tephra\job\local_buffer_allocator.cpp" />
+    <ClCompile Include="..\src\tephra\job\local_descriptor_sets.cpp" />
+    <ClCompile Include="..\src\tephra\job\local_images.cpp" />
+    <ClCompile Include="..\src\tephra\job\local_image_allocator.cpp" />
+    <ClCompile Include="..\src\tephra\job\preinit_buffer_allocator.cpp" />
+    <ClCompile Include="..\src\tephra\job\render_pass.cpp" />
+    <ClCompile Include="..\src\tephra\job\resource_pool_dispatch.cpp" />
+    <ClCompile Include="..\src\tephra\job\job_compile.cpp" />
+    <ClCompile Include="..\src\tephra\job\accesses.cpp" />
+    <ClCompile Include="..\src\tephra\memory.cpp" />
+    <ClCompile Include="..\src\tephra\physical_device.cpp" />
+    <ClCompile Include="..\src\tephra\pipeline.cpp" />
+    <ClCompile Include="..\src\tephra\buffer_impl.cpp" />
+    <ClCompile Include="..\src\tephra\pipeline_builder.cpp" />
+    <ClCompile Include="..\src\tephra\render.cpp" />
+    <ClCompile Include="..\src\tephra\swapchain_impl.cpp" />
+    <ClCompile Include="..\src\tephra\utils\mutable_descriptor_set.cpp" />
+    <ClCompile Include="..\src\tephra\utils\growable_ring_buffer.cpp" />
+    <ClCompile Include="..\src\tephra\utils\standard_report_handler.cpp" />
+    <ClCompile Include="..\src\tephra\vulkan\loader.cpp" />
+    <ClCompile Include="..\src\tephra\vulkan\interface.cpp" />
+    <ClCompile Include="..\src\vma\vk_mem_alloc.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\include\debug-trap.h" />
+    <ClInclude Include="..\include\tephra\command_list.hpp" />
+    <ClInclude Include="..\include\tephra\tools\array.hpp" />
+    <ClInclude Include="..\include\tephra\tools\enum_tools.hpp" />
+    <ClInclude Include="..\include\tephra\tools\structure_map.hpp" />
+    <ClInclude Include="..\include\tephra\utils\mutable_descriptor_set.hpp" />
+    <ClInclude Include="..\include\tephra\utils\growable_ring_buffer.hpp" />
+    <ClInclude Include="..\include\tephra\utils\standard_report_handler.hpp" />
+    <ClInclude Include="..\src\tephra\application\application_container.hpp" />
+    <ClInclude Include="..\src\tephra\application\instance.hpp" />
+    <ClInclude Include="..\src\tephra\application\vulkan_globals.hpp" />
+    <ClInclude Include="..\src\tephra\buffer_impl.hpp" />
+    <ClInclude Include="..\src\tephra\common_impl.hpp" />
+    <ClInclude Include="..\src\tephra\debugging.hpp" />
+    <ClInclude Include="..\src\tephra\debug_reporter.hpp" />
+    <ClInclude Include="..\src\tephra\descriptor_pool_impl.hpp" />
+    <ClInclude Include="..\src\tephra\device\command_pool.hpp" />
+    <ClInclude Include="..\src\tephra\device\cross_queue_sync.hpp" />
+    <ClInclude Include="..\src\tephra\device\deferred_destructor.hpp" />
+    <ClInclude Include="..\src\tephra\device\device_container.hpp" />
+    <ClInclude Include="..\src\tephra\device\logical_device.hpp" />
+    <ClInclude Include="..\src\tephra\device\memory_allocator.hpp" />
+    <ClInclude Include="..\src\tephra\device\queue_map.hpp" />
+    <ClInclude Include="..\src\tephra\device\queue_state.hpp" />
+    <ClInclude Include="..\src\tephra\device\timeline_manager.hpp" />
+    <ClInclude Include="..\src\tephra\error_reporting.hpp" />
+    <ClInclude Include="..\src\tephra\image_impl.hpp" />
+    <ClInclude Include="..\src\tephra\job\aliasing_suballocator.hpp" />
+    <ClInclude Include="..\src\tephra\job\barriers.hpp" />
+    <ClInclude Include="..\src\tephra\job\command_recording.hpp" />
+    <ClInclude Include="..\src\tephra\job\compute_pass.hpp" />
+    <ClInclude Include="..\src\tephra\job\local_buffers.hpp" />
+    <ClInclude Include="..\src\tephra\job\local_buffer_allocator.hpp" />
+    <ClInclude Include="..\src\tephra\job\local_descriptor_sets.hpp" />
+    <ClInclude Include="..\src\tephra\job\local_images.hpp" />
+    <ClInclude Include="..\src\tephra\job\local_image_allocator.hpp" />
+    <ClInclude Include="..\src\tephra\job\preinit_buffer_allocator.hpp" />
+    <ClInclude Include="..\src\tephra\job\render_pass.hpp" />
+    <ClInclude Include="..\src\tephra\job\resource_pool_container.hpp" />
+    <ClInclude Include="..\src\tephra\job\job_data.hpp" />
+    <ClInclude Include="..\src\tephra\job\job_compile.hpp" />
+    <ClInclude Include="..\src\tephra\job\accesses.hpp" />
+    <ClInclude Include="..\src\tephra\pipeline_builder.hpp" />
+    <ClInclude Include="..\src\tephra\swapchain_impl.hpp" />
+    <ClInclude Include="..\src\tephra\utils\math.hpp" />
+    <ClInclude Include="..\src\tephra\utils\object_pool.hpp" />
+    <ClInclude Include="..\src\tephra\utils\data_block_allocator.hpp" />
+    <ClInclude Include="..\src\tephra\utils\scratch_allocator.hpp" />
+    <ClInclude Include="..\src\tephra\vulkan\loader.hpp" />
+    <ClInclude Include="..\src\tephra\vulkan\interface.hpp" />
+    <ClInclude Include="..\include\interface_glue.hpp" />
+    <ClInclude Include="..\include\tephra\application.hpp" />
+    <ClInclude Include="..\include\tephra\common.hpp" />
+    <ClInclude Include="..\include\tephra\compute.hpp" />
+    <ClInclude Include="..\include\tephra\debug_handler.hpp" />
+    <ClInclude Include="..\include\tephra\descriptor.hpp" />
+    <ClInclude Include="..\include\tephra\device.hpp" />
+    <ClInclude Include="..\include\tephra\errors.hpp" />
+    <ClInclude Include="..\include\tephra\format.hpp" />
+    <ClInclude Include="..\include\tephra\format_compatibility.hpp" />
+    <ClInclude Include="..\include\tephra\macros.hpp" />
+    <ClInclude Include="..\include\tephra\render.hpp" />
+    <ClInclude Include="..\include\tephra\image.hpp" />
+    <ClInclude Include="..\include\tephra\job.hpp" />
+    <ClInclude Include="..\include\tephra\memory.hpp" />
+    <ClInclude Include="..\include\tephra\physical_device.hpp" />
+    <ClInclude Include="..\include\tephra\pipeline.hpp" />
+    <ClInclude Include="..\include\tephra\buffer.hpp" />
+    <ClInclude Include="..\include\tephra\sampler.hpp" />
+    <ClInclude Include="..\include\tephra\swapchain.hpp" />
+    <ClInclude Include="..\include\tephra\tephra.hpp" />
+    <ClInclude Include="..\include\tephra\version.hpp" />
+    <ClInclude Include="..\include\tephra\vulkan\enums.hpp" />
+    <ClInclude Include="..\include\tephra\vulkan\structures.hpp" />
+    <ClInclude Include="..\include\tephra\vulkan\header.hpp" />
+    <ClInclude Include="..\include\tephra\vulkan\handles.hpp" />
+    <ClInclude Include="..\include\tephra\vulkan\types.hpp" />
+    <ClInclude Include="..\include\vma\vk_mem_alloc.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\.editorconfig" />
+    <None Include="..\documentation\dox\changelog.dox" />
+    <None Include="..\documentation\dox\examples.dox" />
+    <None Include="..\documentation\dox\user_guide.dox" />
+    <None Include="..\README.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="NatvisFile.natvis" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{12676BE6-E359-41C9-8CE3-B9DB319E6CBB}</ProjectGuid>
+    <RootNamespace>Tephra</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="VulkanHeaderPath.props" />
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="VulkanHeaderPath.props" />
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>..\lib\$(ProjectName)_$(Configuration)_$(Platform)_$(VCToolsVersion)\</OutDir>
+    <IntDir>..\obj\$(ProjectName)_$(Configuration)_$(Platform)_$(VCToolsVersion)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>..\lib\$(ProjectName)_$(Configuration)_$(Platform)_$(VCToolsVersion)\</OutDir>
+    <IntDir>..\obj\$(ProjectName)_$(Configuration)_$(Platform)_$(VCToolsVersion)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>false</SDLCheck>
+      <AdditionalIncludeDirectories>$(VulkanHeaderPath);$(ProjectDir)\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>TEPHRA_ENABLE_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <DisableSpecificWarnings>26812</DisableSpecificWarnings>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>Debug</GenerateDebugInformation>
+      <AdditionalDependencies />
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>false</SDLCheck>
+      <AdditionalIncludeDirectories>$(VulkanHeaderPath);$(ProjectDir)\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies />
+      <Profile>true</Profile>
+    </Link>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

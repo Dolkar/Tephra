@@ -1,0 +1,157 @@
+/*
+    This file is part of m.css.
+
+    Copyright © 2017, 2018, 2019, 2020, 2021, 2022
+              Vladimír Vondruš <mosra@centrum.cz>
+
+    Permission is hereby granted, free of charge, to any person obtaining a
+    copy of this software and associated documentation files (the "Software"),
+    to deal in the Software without restriction, including without limitation
+    the rights to use, copy, modify, merge, publish, distribute, sublicense,
+    and/or sell copies of the Software, and to permit persons to whom the
+    Software is furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included
+    in all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+    THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+    DEALINGS IN THE SOFTWARE.
+*/
+
+:root {
+  /* Text properties */
+  --font: 'Source Sans Pro', sans-serif;
+  --code-font: 'Source Code Pro', monospace;
+  --font-size: 16px;
+  --code-font-size: 0.9em; /* *not* rem, so it follows surrounding font size */
+  --line-height: normal;
+  --paragraph-indent: 1.5rem;
+  --paragraph-align: justify;
+  --link-decoration: underline;
+  --link-decoration-nav: none;
+  --link-decoration-heading: none;
+  --nav-brand-case: none;
+  --nav-menu-case: none;
+  --nav-heading-case: uppercase;
+  --nav-categories-case: lowercase;
+  --landing-header-case: lowercase;
+  --heading-font-weight: 600;
+
+  /* Shapes */
+  --border-radius: 0.2rem;
+
+  /* Basics */
+  --background-color: #2c1915;
+  --color: #dcdcdc;
+  --line-color: #664444;
+  --link-color: #e47575;
+  --link-active-color: #e2a2a2;
+  --mark-color: #2f83cc;
+  --mark-background-color: #c7cf2f;
+  --code-color: #e6e6e6;
+  --code-inverted-color: rgba(230, 230, 230, 0.33);
+  --console-color: var(--code-color);
+  --console-inverted-color: var(--code-inverted-color);
+  --code-background-color: #3c2521;
+  --code-note-background-color: rgba(50, 40, 38, 0.5);
+  --console-background-color: #1a1c1d;
+  --button-background-color: var(--code-background-color);
+
+  /* Header */
+  --header-border-width: 0 0 0.25rem 0;
+  --header-color: #ffffff;
+  --header-breadcrumb-color: #949494;
+  --header-background-color: #442d2a;
+  --header-background-color-landing: rgba(50, 40, 38, 0.75);
+  --header-background-color-jumbo: rgba(50, 40, 38, 0.25);
+  --header-link-color: #ffffff;
+  --header-link-active-color: var(--link-active-color);
+  --header-link-current-color: var(--link-color);
+  --header-link-active-background-color: var(--code-background-color);
+  --header-link-active-background-color-semi: rgba(41, 47, 55, 0.5);
+
+  /* Footer */
+  --footer-font-size: 0.85rem;
+  --footer-color: #c5c5c5;
+  --footer-background-color: var(--header-background-color);
+  --footer-link-color: #ffffff;
+  --footer-link-active-color: var(--link-active-color);
+
+  /* Cover image */
+  --cover-image-background-color: #0f1217;
+
+  /* Search (used only by m-documentation.css) */
+  --search-overlay-color: var(--header-background-color-landing);
+  --search-background-color: var(--header-background-color);
+
+  /* Article */
+  --article-header-color: #f0f0f0;
+  --article-footer-color: #c5c5c5;
+  --article-heading-color: var(--link-active-color);
+  --article-heading-active-color: #dcdcdc;
+
+  /* Right navigation panel */
+  --navpanel-link-color: #ffffff;
+  --navpanel-link-active-color: var(--link-active-color);
+
+  /* Plots */
+  --plot-background-color: var(--header-background-color);
+  --plot-error-color: #ffffff;
+
+  /* Colored components */
+  --default-color: #dcdcdc;
+  --default-link-active-color: var(--link-active-color);
+  --default-filled-color: #dcdcdc;
+  --default-filled-background-color: var(--header-background-color);
+  --default-filled-link-color: var(--link-color);
+  --default-filled-link-active-color: var(--link-active-color);
+
+  --primary-color: var(--link-active-color);
+  --primary-link-active-color: #dcdcdc;
+  --primary-filled-color: var(--background-color);
+  --primary-filled-background-color: #a5c2db;
+  --primary-filled-link-color: #2a75b6;
+  --primary-filled-link-active-color: var(--background-color);
+
+  --success-color: var(--link-active-color);
+  --success-link-active-color: #acecbe;
+  --success-filled-color: #acecbe;
+  --success-filled-background-color: #2a703f;
+  --success-filled-link-color: #3bd267;
+  --success-filled-link-active-color: #acecbe;
+
+  --warning-color: var(--link-active-color);
+  --warning-link-active-color: #e9ecae;
+  --warning-filled-color: #e9ecae;
+  --warning-filled-background-color: #6d702a;
+  --warning-filled-link-color: #b8bf2b;
+  --warning-filled-link-active-color: #e9ecae;
+
+  --danger-color: var(--link-active-color);
+  --danger-link-active-color: #ff9391;
+  --danger-filled-color: #ff9391;
+  --danger-filled-background-color: #702b2a;
+  --danger-filled-link-color: #d85c59;
+  --danger-filled-link-active-color: #ff9391;
+
+  --info-color: var(--link-active-color);
+  --info-link-active-color: #5297d7;
+  --info-filled-color: #a5caeb;
+  --info-filled-background-color: #2a4f70;
+  --info-filled-link-color: #5297d7;
+  --info-filled-link-active-color: #a5caeb;
+
+  --dim-color: var(--link-active-color);
+  --dim-link-color: #acacac;
+  --dim-link-active-color: #9c9c9c;
+  --dim-filled-color: #9c9c9c;
+  --dim-filled-background-color: var(--header-background-color);
+  --dim-filled-link-color: #acacac;
+  --dim-filled-link-active-color: #9c9c9c;
+  --dim-button-active-color: #acacac;
+}

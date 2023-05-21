@@ -1,0 +1,28 @@
+#pragma once
+
+#define VK_NO_PROTOTYPES
+#include <vulkan/vulkan.h>
+#undef VK_NO_PROTOTYPES
+
+#ifndef VK_KHR_XLIB_SURFACE_EXTENSION_NAME
+    #define VK_KHR_XLIB_SURFACE_EXTENSION_NAME "VK_KHR_xlib_surface"
+#endif
+#ifndef VK_KHR_XCB_SURFACE_EXTENSION_NAME
+    #define VK_KHR_XCB_SURFACE_EXTENSION_NAME "VK_KHR_xcb_surface"
+#endif
+#ifndef VK_KHR_WAYLAND_SURFACE_EXTENSION_NAME
+    #define VK_KHR_WAYLAND_SURFACE_EXTENSION_NAME "VK_KHR_wayland_surface"
+#endif
+#ifndef VK_KHR_MIR_SURFACE_EXTENSION_NAME
+    #define VK_KHR_MIR_SURFACE_EXTENSION_NAME "VK_KHR_mir_surface"
+#endif
+#ifndef VK_KHR_ANDROID_SURFACE_EXTENSION_NAME
+    #define VK_KHR_ANDROID_SURFACE_EXTENSION_NAME "VK_KHR_android_surface"
+#endif
+#ifndef VK_KHR_WIN32_SURFACE_EXTENSION_NAME
+    #define VK_KHR_WIN32_SURFACE_EXTENSION_NAME "VK_KHR_win32_surface"
+#endif
+
+#define VMA_STATIC_VULKAN_FUNCTIONS 0
+#define VMA_DYNAMIC_VULKAN_FUNCTIONS 0
+#include "vma/vk_mem_alloc.h"

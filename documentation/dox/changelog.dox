@@ -1,0 +1,13 @@
+/** @page changelog Changelog
+
+@brief The history of changes of Tephra in the main branch is described here. Early development versions (0.x) have breaking
+changes in minor version increments. Once stable (1.x & onward), breaking changes will happen only on major version
+increments.
+
+@tableofcontents
+
+@section v0-1 In-dev version 0.1
+Released 2023-05-06
+- Initial release
+
+**/

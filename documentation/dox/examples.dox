@@ -1,0 +1,58 @@
+/** @page examples Examples and Tests
+
+@brief A list of included examples and integration tests
+
+@section e-examples Examples
+
+Examples showcasing the use of the Tephra library are present in the `/examples` folder. So far there is just one -
+a reimplementation of the
+<a href="https://github.com/KhronosGroup/Vulkan-LoaderAndValidationLayers/blob/master/demos/cube.cpp">official Vulkan
+C++ cube demo</a>, which displays a textured rotating cube. The Tephra implementation follows its example and does not
+make use of any third party windowing library. In your own code, you should preferably use something like GLFW instead,
+see the <a href="https://www.glfw.org/docs/3.3/vulkan_guide.html">GLFW Vulkan guide</a> for details. All the
+platform-dependent code and the window event loop is contained in `/examples/window.hpp`. It has only been tested on
+Windows, so if you find it not working on other platforms, please let me know or submit a PR :).
+
+The `/examples/examples_common.hpp` file contains an `Example` abstract class with a number of virtual methods used to
+update and render images. This allows the windowing class to run any example that implements that interface. 
+`/examples/tephra-examples.cpp` then contains an entry point for the project that just dispatches one of the examples.
+
+<br>
+@section e-tests Integration Test Suite
+
+Tephra also contains tests of its basic functionality, located in `/tests`, using the
+<a href="https://learn.microsoft.com/en-us/visualstudio/test/how-to-use-microsoft-test-framework-for-cpp?view=vs-2022">
+Microsoft Unit Testing Framework for C++</a>. The `/tests/tests_common.hpp` file contains common setup for those tests -
+it creates a basic Tephra tp::Application and tp::Device and for each of the several queues used during testing, also a
+tp::JobResourcePool. It also loads data shared between several tests, such as shader pipelines. Unlike the code in the
+examples, it does not create a window and functions fully headlessly. Rather than functioning as unit tests, they set
+up scenarios from the point of view of the user of the API and check for the correct result, sometimes by making use of
+Tephra's reporting of statistics. As such, they currently work only in debug build configuration.
+
+The tests are split up by category:
+
+@subsection e-tests-setup Setup Tests
+Tests to verify the functionality of setting up a basic Tephra environment. That involves creating an tp::Application,
+choosing a physical device, creating a logical device from it and creating tp::JobResourcePool objects. These tests run
+prior to the common code in `/tests/tests_common.hpp` to ensure it is functional for further tests.
+
+@subsection e-tests-buffer Buffer Tests
+Tests to verify the creation, memory allocation and use of tp::Buffer objects and their views. They are tested as
+persistent (created through tp::Device::allocateBuffer), as well as job-local and pre-initialized buffers when used
+inside a tp::Job. In the latter case, Tephra must be able to correctly alias buffers with non-overlapping usages.
+A naive allocator would fail the tests. Host mapping and readback is checked here as well, so it can be used to verify
+results in further tests.
+
+@subsection e-tests-image Image Tests
+Similar tests as above, but with tp::Image and tp::ImageView objects. Images have some additional complexity to deal
+with, such as arrays, mipmaps and, for the purposes of automatic synchronization, layouts.
+
+@subsection e-tests-job General Job Tests
+These tests verify the basic functionality of jobs, like creation, submission and synchronization. The number of
+barriers is checked to match expectations
+
+@subsection e-tests-compute Compute Tests
+Tests for compute passes, inline and deferred recording of tp::ComputeList objects, and their proper synchronization
+within a job. Properly functioning pipelines and descriptors are also required for this.
+
+**/
