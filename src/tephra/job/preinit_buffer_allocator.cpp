@@ -28,7 +28,7 @@ BufferView PreinitializedBufferAllocator::allocateJobBuffer(
     std::size_t backingGroupIndex = 0;
     for (; backingGroupIndex < backingBufferGroups.size(); backingGroupIndex++) {
         auto& group = backingBufferGroups[backingGroupIndex];
-        if (group.memoryPreference.hash == memoryPreference.hash && group.usageMask == bufferSetup.usage &&
+        if (group.memoryPreference.hash == memoryPreference.hash &&
             (group.recordingJobId == NoJobRecordingId || group.recordingJobId == jobId)) {
             break;
         }
@@ -36,7 +36,6 @@ BufferView PreinitializedBufferAllocator::allocateJobBuffer(
     if (backingGroupIndex == backingBufferGroups.size()) {
         backingBufferGroups.emplace_back();
         BackingBufferGroup& backingGroup = backingBufferGroups.back();
-        backingGroup.usageMask = bufferSetup.usage;
         backingGroup.memoryPreference = memoryPreference;
 
         // Create one ring buffer for each memory location, by order of progression
@@ -183,8 +182,8 @@ std::pair<BufferView, uint32_t> PreinitializedBufferAllocator::allocateBufferFro
     // TODO: Handle out of memory exception, fallback to allocating a smaller buffer
     uint64_t sizeToAlloc = overallocationBehavior.apply(bufferSetup.size, currentBackingGroupSize);
     uint64_t backingBufferIndex = backingGroup.backingBuffers.size();
-    backingGroup.backingBuffers.push_back(JobLocalBufferAllocator::allocateBackingBuffer(
-        deviceImpl, sizeToAlloc, backingGroup.usageMask, backingGroup.memoryPreference));
+    backingGroup.backingBuffers.push_back(
+        JobLocalBufferAllocator::allocateBackingBuffer(deviceImpl, sizeToAlloc, backingGroup.memoryPreference));
     Buffer* backingBuffer = backingGroup.backingBuffers[backingBufferIndex].get();
     totalAllocationCount++;
     totalAllocationSize += backingBuffer->getSize();

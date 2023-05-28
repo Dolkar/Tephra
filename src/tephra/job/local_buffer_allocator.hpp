@@ -14,7 +14,7 @@ public:
         const OverallocationBehavior& overallocationBehavior,
         JobResourcePoolFlagMask poolFlags);
 
-    // Allocates the requested buffer
+    // Allocates the requested buffers
     void allocateJobBuffers(JobLocalBuffers* bufferResources, uint64_t currentTimestamp, const char* jobName);
 
     // Frees all backing buffers that were last used up to the given timestamp
@@ -32,39 +32,28 @@ public:
     static std::unique_ptr<Buffer> allocateBackingBuffer(
         DeviceContainer* deviceImpl,
         uint64_t sizeToAllocate,
-        BufferUsageMask usageMask,
         const MemoryPreference& memoryPreference);
 
 private:
-    struct BackingBufferGroup {
-        BufferUsageMask usageMask;
-        // Pointers to the backing buffers along with the last used timestamp
-        std::vector<std::pair<std::unique_ptr<Buffer>, uint64_t>> buffers;
-    };
-
     struct AssignInfo : ResourceUsageRange {
         uint64_t size;
+        BufferUsageMask usageMask;
         JobLocalBufferImpl* resourcePtr;
     };
 
     DeviceContainer* deviceImpl;
     OverallocationBehavior overallocationBehavior;
     JobResourcePoolFlagMask poolFlags;
-    std::vector<BackingBufferGroup> backingBufferGroups;
+    // Pointers to the backing buffers along with the last used timestamp
+    std::vector<std::pair<std::unique_ptr<Buffer>, uint64_t>> backingBuffers;
     uint64_t totalAllocationSize = 0;
     uint32_t totalAllocationCount = 0;
 
-    // Allocate requested buffers from the given backing group, returns the number of bytes used
-    uint64_t allocateJobBufferGroup(
-        BackingBufferGroup* backingGroup,
-        ArrayView<AssignInfo> buffersToAlloc,
-        uint64_t currentTimestamp);
+    // Allocate requested buffers, returns the number of bytes used
+    uint64_t allocateJobBufferGroup(ArrayView<AssignInfo> buffersToAlloc, uint64_t currentTimestamp);
 
-    // Allocate requested buffers from the given backing group, returns the number of bytes used
-    uint64_t allocateJobBufferGroupNoAlias(
-        BackingBufferGroup* backingGroup,
-        ArrayView<AssignInfo> buffersToAlloc,
-        uint64_t currentTimestamp);
+    // Allocate requested buffers, returns the number of bytes used
+    uint64_t allocateJobBufferGroupNoAlias(ArrayView<AssignInfo> buffersToAlloc, uint64_t currentTimestamp);
 };
 
 }

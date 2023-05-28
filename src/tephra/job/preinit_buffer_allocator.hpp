@@ -44,7 +44,6 @@ private:
     static constexpr uint64_t NoJobRecordingId = ~0ull;
 
     struct BackingBufferGroup {
-        BufferUsageMask usageMask;
         MemoryPreference memoryPreference;
         uint64_t recordingJobId = NoJobRecordingId;
         std::vector<utils::GrowableRingBuffer> ringBuffers;
