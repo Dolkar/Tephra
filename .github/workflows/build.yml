@@ -47,7 +47,7 @@ jobs:
       run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} /t:Tephra:Rebuild ${{env.SOLUTION_FILE_PATH}}
       
   build_docs:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     
     steps:
     - uses: actions/checkout@v3
