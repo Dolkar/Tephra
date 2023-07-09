@@ -488,16 +488,12 @@ void Descriptor::debugValidateAgainstBinding(
           expectedType == Descriptor::ResourceType::CombinedImageSampler) &&
         // Allow null descriptors
         !(resourceType == Descriptor::ResourceType::None && ignoreNullDescriptors)) {
-        std::string message = "Descriptor at index " + std::to_string(descriptorIndex) +
-            "referencing a resource of type '" + resourceTypeToString(resourceType) +
-            "' is being bound to a DescriptorBinding with expected resource type '" +
-            resourceTypeToString(expectedType) + "'";
         reportDebugMessage(
             DebugMessageSeverity::Error,
             DebugMessageType::Validation,
             "Descriptor at index ",
             descriptorIndex,
-            "referencing a resource of type '",
+            " referencing a resource of type '",
             resourceTypeToString(resourceType),
             "' is being bound to a DescriptorBinding expecting a resource type '",
             resourceTypeToString(expectedType),

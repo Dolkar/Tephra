@@ -13,6 +13,7 @@ public:
     }
     bool isInstanceExtensionAvailable(const char* extName) const;
     bool isInstanceLayerAvailable(const char* layerName) const;
+    bool queryLayerExtension(const char* layerName, const char* extName) const;
 
     VkInstanceHandle createVulkanInstance(
         const VkApplicationInfo& applicationInfo,
