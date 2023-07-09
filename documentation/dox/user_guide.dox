@@ -85,6 +85,25 @@ include directory.
 - `/src` - The source code files for Tephra and its third party libraries.
 - `/tests` - @ref e-examples "Testing suite" for the library.
 
+<br>
+@subsection ug-introduction-additional-resources Additional resources
+
+While familiarity of the Vulkan API should not be required, a broad understanding of how it works may help give some
+context to the rest of this user guide. Its ecosystem is very wide and a large part of it is applicable to the users of
+Tephra as well. Here is a brief list of relevant resources and material for further reading:
+
+- <a href="https://renderdoc.org/vulkan-in-30-minutes.html">Vulkan in 30 minutes</a> - A nice introduction to the
+concepts in the API.
+- <a href="https://vkguide.dev/">VulkanGuide</a> - One of the better tutorials that will guide you through the use of
+the Vulkan API in more detail.
+- <a href="https://registry.khronos.org/vulkan/specs/1.3/html/vkspec.html">Vulkan specification</a> - The main reference
+for the functionality of the Vulkan API.
+- <a href="https://vulkan.gpuinfo.org/">Vulkan hardware database</a> - User reported list of the capabilities of every
+Vulkan compatible device. Very useful for
+figuring out which features, extensions and formats are commonly supported.
+- <a href="https://github.com/vinjn/awesome-vulkan">The "Awesome Vulkan" repo</a> - A comprehensive list of anything
+else you might ever need about Vulkan.
+
 <br><hr>
 @section ug-general-concepts General concepts
 

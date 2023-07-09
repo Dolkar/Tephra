@@ -49,6 +49,23 @@ bool VulkanGlobals::isInstanceLayerAvailable(const char* layerName) const {
     return false;
 }
 
+bool VulkanGlobals::queryLayerExtension(const char* layerName, const char* extName) const {
+    ScratchVector<VkExtensionProperties> layerExtensions;
+
+    uint32_t count;
+    throwRetcodeErrors(vkiGlobal.enumerateInstanceExtensionProperties(layerName, &count, nullptr));
+    layerExtensions.resize(count);
+    throwRetcodeErrors(vkiGlobal.enumerateInstanceExtensionProperties(layerName, &count, layerExtensions.data()));
+    layerExtensions.resize(count);
+
+    for (const VkExtensionProperties& extInfo : layerExtensions) {
+        if (strcmp(extName, extInfo.extensionName) == 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
 VkInstanceHandle VulkanGlobals::createVulkanInstance(
     const VkApplicationInfo& applicationInfo,
     ArrayParameter<const char* const> extensions,

@@ -69,8 +69,11 @@ enum class ReadAccess : uint64_t {
     /// Image present operation access through tp::Device::submitPresentImagesKHR.
     ImagePresentKHR = 1ull << 62,
 
-    /// Represents an unspecified read access.
+    /// Represents an unknown or generic read access.
+    /// @remarks
+    ///     If you don't wish to specify any access, use tp::ReadAccessMask::None() instead.
     Unknown = 1ull << 63
+
 };
 TEPHRA_MAKE_ENUM_BIT_MASK(ReadAccessMask, ReadAccess);
 

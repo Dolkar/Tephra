@@ -109,7 +109,8 @@ VkInstanceHandle initCreateVulkanInstance(const VulkanGlobals* vulkanGlobals, co
         (appSetup.vulkanValidation.enabledFeatures != ValidationFeatureEnableMask::None() ||
          appSetup.vulkanValidation.disabledFeatures != ValidationFeatureDisableMask::None())) {
         // Need to enable the validation feature extension and set it up through the extension pointer
-        if (vulkanGlobals->isInstanceExtensionAvailable(VK_EXT_VALIDATION_FEATURES_EXTENSION_NAME)) {
+        if (vulkanGlobals->queryLayerExtension(
+                StandardValidationLayerName, VK_EXT_VALIDATION_FEATURES_EXTENSION_NAME)) {
             extensions.push_back(VK_EXT_VALIDATION_FEATURES_EXTENSION_NAME);
 
             initPrepareValidationFeatures(appSetup.vulkanValidation, &validationFeaturesSetup);
@@ -120,7 +121,7 @@ VkInstanceHandle initCreateVulkanInstance(const VulkanGlobals* vulkanGlobals, co
                 DebugMessageSeverity::Warning,
                 DebugMessageType::General,
                 "Specific validation features were requested, but Vulkan instance does not support "
-                "the " VK_EXT_VALIDATION_FLAGS_EXTENSION_NAME " extension.");
+                "the " VK_EXT_VALIDATION_FEATURES_EXTENSION_NAME " extension.");
         }
     }
 

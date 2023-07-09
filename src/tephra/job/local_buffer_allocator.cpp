@@ -16,71 +16,40 @@ void JobLocalBufferAllocator::allocateJobBuffers(
     JobLocalBuffers* bufferResources,
     uint64_t currentTimestamp,
     const char* jobName) {
-    // Split the buffer resources into groups by usage and process each group separately
-    ScratchVector<bool> processed;
-    processed.resize(bufferResources->buffers.size(), false);
-    ScratchVector<AssignInfo> groupAssignInfos;
-    groupAssignInfos.reserve(bufferResources->buffers.size());
+    ScratchVector<AssignInfo> assignInfos;
+    assignInfos.reserve(bufferResources->buffers.size());
 
+    // Process the requested buffers
     uint64_t bufferBytesRequested = 0;
-    uint64_t bufferBytesCommitted = 0;
-
     for (int i = 0; i < bufferResources->buffers.size(); i++) {
-        if (processed[i])
+        const JobLocalBufferImpl& localBuffer = bufferResources->buffers[i];
+        const BufferSetup& bufferSetup = localBuffer.getBufferSetup();
+        bufferBytesRequested += bufferSetup.size;
+
+        const ResourceUsageRange& bufLocalUsage = bufferResources->usageRanges[i];
+        if (bufLocalUsage.firstUsage == ~0) {
+            // Buffer is never used so ignore it
             continue;
-
-        // Find all other local buffer resources with the same usage masks
-        const JobLocalBufferImpl& firstLocalBuffer = bufferResources->buffers[i];
-        BufferUsageMask groupUsageMask = firstLocalBuffer.getBufferSetup().usage;
-
-        for (int j = i; j < bufferResources->buffers.size(); j++) {
-            const JobLocalBufferImpl& localBuffer = bufferResources->buffers[j];
-            const BufferSetup& bufferSetup = localBuffer.getBufferSetup();
-            if (bufferSetup.usage != groupUsageMask) {
-                continue;
-            }
-
-            processed[j] = true;
-            bufferBytesRequested += bufferSetup.size;
-
-            const ResourceUsageRange& bufLocalUsage = bufferResources->usageRanges[j];
-            if (bufLocalUsage.firstUsage == ~0) {
-                // Buffer is never used so ignore it
-                continue;
-            }
-
-            AssignInfo assignInfo;
-            assignInfo.firstUsage = bufLocalUsage.firstUsage;
-            assignInfo.lastUsage = bufLocalUsage.lastUsage;
-            assignInfo.size = bufferSetup.size;
-            assignInfo.resourcePtr = &bufferResources->buffers[j];
-            groupAssignInfos.push_back(assignInfo);
-        }
-        if (groupAssignInfos.empty())
-            continue;
-
-        // Find a matching group of backing buffers or create one
-        BackingBufferGroup* backingGroup = nullptr;
-        for (auto& group : backingBufferGroups) {
-            if (group.usageMask == groupUsageMask) {
-                backingGroup = &group;
-                break;
-            }
-        }
-        if (backingGroup == nullptr) {
-            backingBufferGroups.emplace_back();
-            backingGroup = &backingBufferGroups.back();
-            backingGroup->usageMask = groupUsageMask;
         }
 
-        // Assign job buffers to this group
-        if (!poolFlags.contains(JobResourcePoolFlag::DisableSuballocation))
-            bufferBytesCommitted += allocateJobBufferGroup(backingGroup, view(groupAssignInfos), currentTimestamp);
-        else
-            bufferBytesCommitted += allocateJobBufferGroupNoAlias(
-                backingGroup, view(groupAssignInfos), currentTimestamp);
-        groupAssignInfos.clear();
+        AssignInfo assignInfo;
+        assignInfo.firstUsage = bufLocalUsage.firstUsage;
+        assignInfo.lastUsage = bufLocalUsage.lastUsage;
+        assignInfo.size = bufferSetup.size;
+        assignInfo.usageMask = bufferSetup.usage;
+        assignInfo.resourcePtr = &bufferResources->buffers[i];
+        assignInfos.push_back(assignInfo);
     }
+
+    if (assignInfos.empty())
+        return;
+
+    // Allocate and assign the job buffers
+    uint64_t bufferBytesCommitted;
+    if (!poolFlags.contains(JobResourcePoolFlag::DisableSuballocation))
+        bufferBytesCommitted = allocateJobBufferGroup(view(assignInfos), currentTimestamp);
+    else
+        bufferBytesCommitted = allocateJobBufferGroupNoAlias(view(assignInfos), currentTimestamp);
 
     if constexpr (StatisticEventsEnabled) {
         reportStatisticEvent(StatisticEventType::JobLocalBufferRequestedBytes, bufferBytesRequested, jobName);
@@ -91,35 +60,40 @@ void JobLocalBufferAllocator::allocateJobBuffers(
 }
 
 void JobLocalBufferAllocator::trim(uint64_t upToTimestamp) {
-    for (BackingBufferGroup& backingGroup : backingBufferGroups) {
-        auto removeIt = std::remove_if(
-            backingGroup.buffers.begin(),
-            backingGroup.buffers.end(),
-            [&totalAllocationSize = this->totalAllocationSize,
-             &totalAllocationCount = this->totalAllocationCount,
-             upToTimestamp](const auto& el) {
-                const auto& [backingBuffer, lastUseTimestamp] = el;
-                bool trimmable = lastUseTimestamp <= upToTimestamp;
+    auto removeIt = std::remove_if(
+        backingBuffers.begin(),
+        backingBuffers.end(),
+        [&totalAllocationSize = this->totalAllocationSize,
+         &totalAllocationCount = this->totalAllocationCount,
+         upToTimestamp](const auto& el) {
+            const auto& [backingBuffer, lastUseTimestamp] = el;
+            bool trimmable = lastUseTimestamp <= upToTimestamp;
 
-                if (trimmable) {
-                    TEPHRA_ASSERT(totalAllocationSize >= backingBuffer->getSize());
-                    TEPHRA_ASSERT(totalAllocationCount >= 1);
-                    totalAllocationSize -= backingBuffer->getSize();
-                    totalAllocationCount--;
-                    // Destroy the handles immediately, since we already know the buffer isn't being used
-                    static_cast<BufferImpl*>(backingBuffer.get())->destroyHandles(true);
-                }
-                return trimmable;
-            });
-        backingGroup.buffers.erase(removeIt, backingGroup.buffers.end());
-    }
+            if (trimmable) {
+                TEPHRA_ASSERT(totalAllocationSize >= backingBuffer->getSize());
+                TEPHRA_ASSERT(totalAllocationCount >= 1);
+                totalAllocationSize -= backingBuffer->getSize();
+                totalAllocationCount--;
+                // Destroy the handles immediately, since we already know the buffer isn't being used
+                static_cast<BufferImpl*>(backingBuffer.get())->destroyHandles(true);
+            }
+            return trimmable;
+        });
+    backingBuffers.erase(removeIt, backingBuffers.end());
 }
 
 std::unique_ptr<Buffer> JobLocalBufferAllocator::allocateBackingBuffer(
     DeviceContainer* deviceImpl,
     uint64_t sizeToAllocate,
-    BufferUsageMask usageMask,
     const MemoryPreference& memoryPreference) {
+    // Assume that buffer usage only affects alignment, meaning it's ok to include usages that aren't actually needed,
+    // provided that the allocated buffers are large enough.
+    BufferUsageMask usageMask = BufferUsage::ImageTransfer | BufferUsage::HostMapped | BufferUsage::TexelBuffer |
+        BufferUsage::UniformBuffer | BufferUsage::StorageBuffer | BufferUsage::IndexBuffer | BufferUsage::VertexBuffer |
+        BufferUsage::IndirectBuffer;
+    if (deviceImpl->getLogicalDevice()->isFunctionalityAvailable(tp::Functionality::BufferDeviceAddress))
+        usageMask |= BufferUsage::DeviceAddress;
+
     BufferSetup backingBufferSetup = BufferSetup(sizeToAllocate, usageMask);
     auto [bufferHandleLifeguard, allocationHandleLifeguard] = deviceImpl->getMemoryAllocator()->allocateBuffer(
         backingBufferSetup, memoryPreference);
@@ -133,13 +107,12 @@ std::unique_ptr<Buffer> JobLocalBufferAllocator::allocateBackingBuffer(
 }
 
 uint64_t JobLocalBufferAllocator::allocateJobBufferGroup(
-    BackingBufferGroup* backingGroup,
     ArrayView<AssignInfo> buffersToAlloc,
     uint64_t currentTimestamp) {
     // Suballocate the buffers from the backing allocations with aliasing
     ScratchVector<uint64_t> backingBufferSizes;
-    backingBufferSizes.reserve(backingGroup->buffers.size());
-    for (const auto& [backingBuffer, lastUseTimestamp] : backingGroup->buffers) {
+    backingBufferSizes.reserve(backingBuffers.size());
+    for (const auto& [backingBuffer, lastUseTimestamp] : backingBuffers) {
         backingBufferSizes.push_back(backingBuffer->getSize());
     }
 
@@ -150,19 +123,19 @@ uint64_t JobLocalBufferAllocator::allocateJobBufferGroup(
         return left.size > right.size;
     });
 
-    uint64_t requiredAlignment = BufferImpl::getRequiredViewAlignment_(deviceImpl, backingGroup->usageMask);
-
     // Index and offset of leftover buffers that didn't fit
     ScratchVector<std::pair<int, uint64_t>> leftoverBuffers;
     leftoverBuffers.reserve(buffersToAlloc.size());
     uint64_t leftoverSize = 0;
 
     for (int i = 0; i < buffersToAlloc.size(); i++) {
+        uint64_t requiredAlignment = BufferImpl::getRequiredViewAlignment_(deviceImpl, buffersToAlloc[i].usageMask);
+
         auto [backingBufferIndex, offset] = suballocator.allocate(
             buffersToAlloc[i].size, ResourceUsageRange(buffersToAlloc[i]), requiredAlignment);
-        if (backingBufferIndex < backingGroup->buffers.size()) {
+        if (backingBufferIndex < backingBuffers.size()) {
             // The allocation fits - assign and update timestamp
-            auto& [backingBuffer, lastUseTimestamp] = backingGroup->buffers[backingBufferIndex];
+            auto& [backingBuffer, lastUseTimestamp] = backingBuffers[backingBufferIndex];
             buffersToAlloc[i].resourcePtr->assignUnderlyingBuffer(backingBuffer.get(), offset);
             lastUseTimestamp = currentTimestamp;
         } else {
@@ -177,25 +150,23 @@ uint64_t JobLocalBufferAllocator::allocateJobBufferGroup(
 
     // Some of the buffers still haven't been assigned. Create a new backing buffer to host them.
     uint64_t currentBackingGroupSize = 0;
-    for (auto& [backingBuffer, lastUseTimestamp] : backingGroup->buffers) {
+    for (auto& [backingBuffer, lastUseTimestamp] : backingBuffers) {
         currentBackingGroupSize += backingBuffer->getSize();
     }
 
     // TODO: Handle out of memory exception, fallback to allocating a smaller buffer
     uint64_t sizeToAlloc = overallocationBehavior.apply(leftoverSize, currentBackingGroupSize);
     std::pair<std::unique_ptr<Buffer>, uint64_t> newEntry = std::make_pair(
-        allocateBackingBuffer(deviceImpl, sizeToAlloc, backingGroup->usageMask, MemoryPreference::Device),
-        currentTimestamp);
+        allocateBackingBuffer(deviceImpl, sizeToAlloc, MemoryPreference::Device), currentTimestamp);
     Buffer* newBackingBuffer = newEntry.first.get();
     totalAllocationSize += newBackingBuffer->getSize();
     totalAllocationCount++;
 
     // Insert the new backing buffer to the list so that the largest buffer appears first
-    auto pos = std::find_if(
-        backingGroup->buffers.begin(), backingGroup->buffers.end(), [sizeToAlloc](const auto& entry) {
-            return entry.first->getSize() < sizeToAlloc;
-        });
-    backingGroup->buffers.insert(pos, std::move(newEntry));
+    auto pos = std::find_if(backingBuffers.begin(), backingBuffers.end(), [sizeToAlloc](const auto& entry) {
+        return entry.first->getSize() < sizeToAlloc;
+    });
+    backingBuffers.insert(pos, std::move(newEntry));
 
     // Assign the leftover resources to the new backing buffer
     for (auto& [bufferIndex, offset] : leftoverBuffers) {
@@ -206,7 +177,6 @@ uint64_t JobLocalBufferAllocator::allocateJobBufferGroup(
 }
 
 uint64_t JobLocalBufferAllocator::allocateJobBufferGroupNoAlias(
-    BackingBufferGroup* backingGroup,
     ArrayView<AssignInfo> buffersToAlloc,
     uint64_t currentTimestamp) {
     // Sort buffers in descending order by their size for more efficient memory allocations
@@ -221,16 +191,16 @@ uint64_t JobLocalBufferAllocator::allocateJobBufferGroupNoAlias(
     int backingBufferIndex = 0;
     for (AssignInfo& bufferToAlloc : buffersToAlloc) {
         Buffer* backingBuffer;
-        if (backingBufferIndex < backingGroup->buffers.size() &&
-            bufferToAlloc.size <= backingGroup->buffers[backingBufferIndex].first->getSize()) {
+        if (backingBufferIndex < backingBuffers.size() &&
+            bufferToAlloc.size <= backingBuffers[backingBufferIndex].first->getSize()) {
             // Can reuse existing backing buffer
-            backingBuffer = backingGroup->buffers[backingBufferIndex].first.get();
-            backingGroup->buffers[backingBufferIndex].second = currentTimestamp;
+            backingBuffer = backingBuffers[backingBufferIndex].first.get();
+            backingBuffers[backingBufferIndex].second = currentTimestamp;
             backingBufferIndex++;
         } else {
             // Create a new backing buffer of the exact size as requested
-            newBackingBuffers.emplace_back(allocateBackingBuffer(
-                deviceImpl, bufferToAlloc.size, backingGroup->usageMask, MemoryPreference::Device));
+            newBackingBuffers.emplace_back(
+                allocateBackingBuffer(deviceImpl, bufferToAlloc.size, MemoryPreference::Device));
             backingBuffer = newBackingBuffers.back().get();
 
             totalAllocationCount++;
@@ -245,14 +215,12 @@ uint64_t JobLocalBufferAllocator::allocateJobBufferGroupNoAlias(
 
     // Insert the new backing buffers to the list so that the largest buffer appears first
     for (std::unique_ptr<Buffer>& newBackingBuffer : newBackingBuffers) {
-        auto pos = std::find_if(
-            backingGroup->buffers.begin(), backingGroup->buffers.end(), [&newBackingBuffer](const auto& entry) {
-                return entry.first->getSize() < newBackingBuffer->getSize();
-            });
-        backingGroup->buffers.insert(pos, std::make_pair(std::move(newBackingBuffer), currentTimestamp));
+        auto pos = std::find_if(backingBuffers.begin(), backingBuffers.end(), [&newBackingBuffer](const auto& entry) {
+            return entry.first->getSize() < newBackingBuffer->getSize();
+        });
+        backingBuffers.insert(pos, std::make_pair(std::move(newBackingBuffer), currentTimestamp));
     }
 
     return totalSize;
 }
-
 }
