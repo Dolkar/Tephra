@@ -54,6 +54,9 @@ jobs:
     
     - name: Setup Doxygen
       uses: ssciwr/doxygen-install@v1.0.0
+      
+    - name: Setup Python environment
+      run: pip install Jinja2 Pygments
 
     - name: Build Documentation
       working-directory: ./build
