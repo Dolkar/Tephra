@@ -47,8 +47,6 @@ public:
 
     // Synchronize exports before a command that might use the exported resources
     void flushExports(uint32_t cmdIndex) {
-        uint32_t reusableBarrierIndex = barriers->getBarrierCount();
-
         // Treat each export like a special access
         for (NewBufferAccess& newAccess : queuedBufferExports) {
             VkBufferHandle handle = newAccess.vkResourceHandle;
@@ -56,7 +54,7 @@ public:
             if (mapHit == queueSyncState->bufferResourceMap.end())
                 mapHit = queueSyncState->bufferResourceMap.emplace(handle, BufferAccessMap(handle)).first;
             mapHit->second.synchronizeNewAccess(newAccess, cmdIndex, *barriers);
-            mapHit->second.insertNewAccess(newAccess, reusableBarrierIndex, false, true);
+            mapHit->second.insertNewAccess(newAccess, barriers->getBarrierCount(), false, true);
         }
         queuedBufferExports.clear();
 
@@ -66,15 +64,13 @@ public:
             if (mapHit == queueSyncState->imageResourceMap.end())
                 mapHit = queueSyncState->imageResourceMap.emplace(handle, ImageAccessMap(handle)).first;
             mapHit->second.synchronizeNewAccess(newAccess, cmdIndex, *barriers);
-            mapHit->second.insertNewAccess(newAccess, reusableBarrierIndex, false, true);
+            mapHit->second.insertNewAccess(newAccess, barriers->getBarrierCount(), false, true);
         }
         queuedImageExports.clear();
     }
 
     void finishSubmit() {
         ResourceAccess bottomOfPipeAccess = { VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, 0 };
-        uint32_t reusableBarrierIndex = barriers->getBarrierCount(); // not gonna get reused anyway
-
         flushExports(~0);
 
         // Split the cross-queue exports into two barriers. The first transitions the resources to a known state, while
@@ -90,7 +86,7 @@ public:
             // Use bottom of pipe access as it can be used in all queues
             auto exportAccess = NewBufferAccess(access.vkResourceHandle, access.range, bottomOfPipeAccess);
             mapHit->second.synchronizeNewAccess(exportAccess, ~0, *barriers);
-            mapHit->second.insertNewAccess(exportAccess, reusableBarrierIndex);
+            mapHit->second.insertNewAccess(exportAccess, barriers->getBarrierCount());
         }
 
         for (const auto& [access, dstQueueFamilyIndex] : qfotImageExports) {
@@ -105,7 +101,7 @@ public:
             mapHit->second.synchronizeNewAccess(exportAccess, ~0, *barriers);
             // The image can now only be accessed from this queue by discarding its contents, so set undefined layout
             exportAccess.layout = VK_IMAGE_LAYOUT_UNDEFINED;
-            mapHit->second.insertNewAccess(exportAccess, reusableBarrierIndex);
+            mapHit->second.insertNewAccess(exportAccess, barriers->getBarrierCount());
         }
 
         // Add pure QFOT release barriers
@@ -117,7 +113,7 @@ public:
                 bottomOfPipeAccess,
                 currentQueueFamilyIndex,
                 dstQueueFamilyIndex);
-            barriers->synchronizeDependency(qfotDependency, ~0, reusableBarrierIndex, false);
+            barriers->synchronizeDependency(qfotDependency, ~0, barriers->getBarrierCount(), false);
         }
 
         for (const auto& [access, dstQueueFamilyIndex] : qfotImageExports) {
@@ -130,7 +126,7 @@ public:
                 access.layout,
                 currentQueueFamilyIndex,
                 dstQueueFamilyIndex);
-            barriers->synchronizeDependency(qfotDependency, ~0, reusableBarrierIndex, false);
+            barriers->synchronizeDependency(qfotDependency, ~0, barriers->getBarrierCount(), false);
         }
 
         qfotBufferExports.clear();
