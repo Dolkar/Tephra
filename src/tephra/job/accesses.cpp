@@ -483,7 +483,7 @@ void BufferAccessMap::synchronizeNewAccess(
                         readAfterWriteDependency, entry.barrierAfterWriteAccess);
                 } else {
                     entry.barrierAfterWriteAccess = barriers.synchronizeDependency(
-                        readAfterWriteDependency, commandIndex, entry.barrierIndexAfterWriteAccess);
+                        readAfterWriteDependency, commandIndex, entry.barrierIndexAfterWriteAccess, entry.wasExported);
                 }
             }
         } else {
@@ -496,7 +496,7 @@ void BufferAccessMap::synchronizeNewAccess(
                 auto writeAfterReadDependency = BufferDependency(
                     vkBufferHandle, intersectionRange, entry.lastReadAccesses, newAccess);
                 lastBarrier = barriers.synchronizeDependency(
-                    writeAfterReadDependency, commandIndex, entry.barrierIndexAfterReadAccesses);
+                    writeAfterReadDependency, commandIndex, entry.barrierIndexAfterReadAccesses, entry.wasExported);
             }
 
             if (!entry.lastWriteAccess.isNull()) {
@@ -510,16 +510,21 @@ void BufferAccessMap::synchronizeNewAccess(
                     barriers.synchronizeDependency(writeAfterWriteDependency, lastBarrier);
                 } else {
                     barriers.synchronizeDependency(
-                        writeAfterWriteDependency, commandIndex, entry.barrierIndexAfterWriteAccess);
+                        writeAfterWriteDependency, commandIndex, entry.barrierIndexAfterWriteAccess, entry.wasExported);
                 }
             }
         }
     }
 }
 
-void BufferAccessMap::insertNewAccess(const NewBufferAccess& newAccess, uint32_t nextBarrierIndex, bool forceOverwrite) {
+void BufferAccessMap::insertNewAccess(
+    const NewBufferAccess& newAccess,
+    uint32_t nextBarrierIndex,
+    bool forceOverwrite,
+    bool isExport) {
     TEPHRA_ASSERT(!newAccess.isNull());
     TEPHRA_ASSERT(!newAccess.range.isNull());
+    TEPHRA_ASSERT(!isExport || newAccess.isReadOnly());
 
     // Iterate over all overlapping ranges
     auto rangeIts = accessMap.equal_range(newAccess.range);
@@ -530,6 +535,7 @@ void BufferAccessMap::insertNewAccess(const NewBufferAccess& newAccess, uint32_t
 
             entry.lastReadAccesses = entry.lastReadAccesses | newAccess;
             entry.barrierIndexAfterReadAccesses = nextBarrierIndex;
+            entry.wasExported = entry.wasExported || isExport;
         }
     } else {
         // Erase all overlapping ranges
@@ -539,7 +545,8 @@ void BufferAccessMap::insertNewAccess(const NewBufferAccess& newAccess, uint32_t
         }
 
         // With the space for the new access free, add its entry
-        accessMap.emplace_hint(rangeIts.second, newAccess.range, BufferRangeEntry(newAccess, nextBarrierIndex));
+        accessMap.emplace_hint(
+            rangeIts.second, newAccess.range, BufferRangeEntry(newAccess, nextBarrierIndex, isExport));
     }
 }
 
@@ -558,7 +565,7 @@ void BufferAccessMap::clear() {
     // Initialize the access map to the given access
     // We don't know the actual size of the buffer, so improvise
     auto wholeRange = BufferAccessRange(0, ~0ull);
-    auto defaultEntry = BufferRangeEntry({}, 0);
+    auto defaultEntry = BufferRangeEntry({}, 0, false);
     accessMap.emplace(wholeRange, defaultEntry);
 }
 
@@ -628,7 +635,7 @@ void ImageAccessMap::synchronizeNewAccess(const NewImageAccess& newAccess, uint3
                         readAfterWriteDependency, entry.barrierAfterWriteAccess);
                 } else {
                     entry.barrierAfterWriteAccess = barriers.synchronizeDependency(
-                        readAfterWriteDependency, commandIndex, entry.barrierIndexAfterWriteAccess);
+                        readAfterWriteDependency, commandIndex, entry.barrierIndexAfterWriteAccess, entry.wasExported);
                 }
             }
         } else {
@@ -641,7 +648,7 @@ void ImageAccessMap::synchronizeNewAccess(const NewImageAccess& newAccess, uint3
                 auto writeAfterReadDependency = ImageDependency(
                     vkImageHandle, intersectionRange, entry.lastReadAccesses, newAccess, entry.layout, newAccess.layout);
                 lastBarrier = barriers.synchronizeDependency(
-                    writeAfterReadDependency, commandIndex, entry.barrierIndexAfterReadAccesses);
+                    writeAfterReadDependency, commandIndex, entry.barrierIndexAfterReadAccesses, entry.wasExported);
             }
 
             if (!entry.lastWriteAccess.isNull()) {
@@ -656,7 +663,7 @@ void ImageAccessMap::synchronizeNewAccess(const NewImageAccess& newAccess, uint3
                     barriers.synchronizeDependency(writeAfterWriteDependency, lastBarrier);
                 } else {
                     lastBarrier = barriers.synchronizeDependency(
-                        writeAfterWriteDependency, commandIndex, entry.barrierIndexAfterWriteAccess);
+                        writeAfterWriteDependency, commandIndex, entry.barrierIndexAfterWriteAccess, entry.wasExported);
                 }
             }
 
@@ -667,7 +674,7 @@ void ImageAccessMap::synchronizeNewAccess(const NewImageAccess& newAccess, uint3
                     auto transitionDependency = ImageDependency(
                         vkImageHandle, intersectionRange, noneAccess, newAccess, entry.layout, newAccess.layout);
                     lastBarrier = barriers.synchronizeDependency(
-                        transitionDependency, commandIndex, entry.barrierIndexAfterWriteAccess);
+                        transitionDependency, commandIndex, entry.barrierIndexAfterWriteAccess, entry.wasExported);
                 }
 
                 if (newAccess.isReadOnly()) {
@@ -684,9 +691,14 @@ void ImageAccessMap::synchronizeNewAccess(const NewImageAccess& newAccess, uint3
     }
 }
 
-void ImageAccessMap::insertNewAccess(const NewImageAccess& newAccess, uint32_t nextBarrierIndex, bool forceOverwrite) {
+void ImageAccessMap::insertNewAccess(
+    const NewImageAccess& newAccess,
+    uint32_t nextBarrierIndex,
+    bool forceOverwrite,
+    bool isExport) {
     TEPHRA_ASSERT(!newAccess.isNull());
     TEPHRA_ASSERT(!newAccess.range.isNull());
+    TEPHRA_ASSERT(!isExport || newAccess.isReadOnly());
 
     if (newAccess.isReadOnly() && !forceOverwrite) {
         // Read accesses don't subdivide previous accesses, just extend them, except when they need
@@ -702,12 +714,14 @@ void ImageAccessMap::insertNewAccess(const NewImageAccess& newAccess, uint32_t n
             if (!hadLayoutTransition) {
                 entry.lastReadAccesses = entry.lastReadAccesses | newAccess;
                 entry.barrierIndexAfterReadAccesses = nextBarrierIndex;
+                entry.wasExported = entry.wasExported || isExport;
             } else {
                 // Read access with layout transition. Treat the transition as a new write access, but keep the
                 // references to the original transition barrier (if it exists), so we can potentially reuse it later.
                 entry.lastWriteAccess = static_cast<tp::ResourceAccess>(newAccess);
                 entry.lastReadAccesses = static_cast<tp::ResourceAccess>(newAccess);
                 entry.barrierIndexAfterReadAccesses = nextBarrierIndex;
+                entry.wasExported = isExport;
                 entry.layout = newAccess.layout;
             }
         }
@@ -720,7 +734,8 @@ void ImageAccessMap::insertNewAccess(const NewImageAccess& newAccess, uint32_t n
                 splitOverlappingRange(i, newAccess.range);
 
                 if (!hasAddedEntry) {
-                    accessMap[i] = { newAccess.range, ImageRangeEntry(newAccess, nextBarrierIndex, newAccess.layout) };
+                    accessMap[i] = { newAccess.range,
+                                     ImageRangeEntry(newAccess, nextBarrierIndex, newAccess.layout, isExport) };
                     hasAddedEntry = true;
                 } else {
                     accessMap[i].first = {};
@@ -747,7 +762,7 @@ void ImageAccessMap::clear() {
     accessMap.clear();
 
     // Initialize the access map to set the layout of the entire image to undefined
-    auto defaultEntry = ImageRangeEntry({}, 0, VK_IMAGE_LAYOUT_UNDEFINED);
+    auto defaultEntry = ImageRangeEntry({}, 0, VK_IMAGE_LAYOUT_UNDEFINED, false);
     // We don't know the actual range of the whole image, so improvise
     ImageAccessRange wholeRange = ImageAccessRange(
         ImageAspect::Color | ImageAspect::Depth | ImageAspect::Stencil, 0, ~0u, ~0u);

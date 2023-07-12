@@ -49,14 +49,14 @@ public:
     void flushExports(uint32_t cmdIndex) {
         uint32_t reusableBarrierIndex = barriers->getBarrierCount();
 
-        // Treat each export like an access
+        // Treat each export like a special access
         for (NewBufferAccess& newAccess : queuedBufferExports) {
             VkBufferHandle handle = newAccess.vkResourceHandle;
             auto mapHit = queueSyncState->bufferResourceMap.find(handle);
             if (mapHit == queueSyncState->bufferResourceMap.end())
                 mapHit = queueSyncState->bufferResourceMap.emplace(handle, BufferAccessMap(handle)).first;
             mapHit->second.synchronizeNewAccess(newAccess, cmdIndex, *barriers);
-            mapHit->second.insertNewAccess(newAccess, reusableBarrierIndex);
+            mapHit->second.insertNewAccess(newAccess, reusableBarrierIndex, false, true);
         }
         queuedBufferExports.clear();
 
@@ -66,14 +66,14 @@ public:
             if (mapHit == queueSyncState->imageResourceMap.end())
                 mapHit = queueSyncState->imageResourceMap.emplace(handle, ImageAccessMap(handle)).first;
             mapHit->second.synchronizeNewAccess(newAccess, cmdIndex, *barriers);
-            mapHit->second.insertNewAccess(newAccess, reusableBarrierIndex);
+            mapHit->second.insertNewAccess(newAccess, reusableBarrierIndex, false, true);
         }
         queuedImageExports.clear();
     }
 
     void finishSubmit() {
         ResourceAccess bottomOfPipeAccess = { VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, 0 };
-        uint32_t reusableBarrierIndex = barriers->getBarrierCount();
+        uint32_t reusableBarrierIndex = barriers->getBarrierCount(); // not gonna get reused anyway
 
         flushExports(~0);
 
@@ -90,7 +90,7 @@ public:
             // Use bottom of pipe access as it can be used in all queues
             auto exportAccess = NewBufferAccess(access.vkResourceHandle, access.range, bottomOfPipeAccess);
             mapHit->second.synchronizeNewAccess(exportAccess, ~0, *barriers);
-            mapHit->second.insertNewAccess(exportAccess, barriers->getBarrierCount());
+            mapHit->second.insertNewAccess(exportAccess, reusableBarrierIndex);
         }
 
         for (const auto& [access, dstQueueFamilyIndex] : qfotImageExports) {
@@ -105,7 +105,7 @@ public:
             mapHit->second.synchronizeNewAccess(exportAccess, ~0, *barriers);
             // The image can now only be accessed from this queue by discarding its contents, so set undefined layout
             exportAccess.layout = VK_IMAGE_LAYOUT_UNDEFINED;
-            mapHit->second.insertNewAccess(exportAccess, barriers->getBarrierCount());
+            mapHit->second.insertNewAccess(exportAccess, reusableBarrierIndex);
         }
 
         // Add pure QFOT release barriers
@@ -117,7 +117,7 @@ public:
                 bottomOfPipeAccess,
                 currentQueueFamilyIndex,
                 dstQueueFamilyIndex);
-            barriers->synchronizeDependency(qfotDependency, ~0, reusableBarrierIndex);
+            barriers->synchronizeDependency(qfotDependency, ~0, reusableBarrierIndex, false);
         }
 
         for (const auto& [access, dstQueueFamilyIndex] : qfotImageExports) {
@@ -130,7 +130,7 @@ public:
                 access.layout,
                 currentQueueFamilyIndex,
                 dstQueueFamilyIndex);
-            barriers->synchronizeDependency(qfotDependency, ~0, reusableBarrierIndex);
+            barriers->synchronizeDependency(qfotDependency, ~0, reusableBarrierIndex, false);
         }
 
         qfotBufferExports.clear();
@@ -153,7 +153,7 @@ public:
                 auto mapHit = queueSyncState->bufferResourceMap.find(handle);
                 if (mapHit == queueSyncState->bufferResourceMap.end())
                     mapHit = queueSyncState->bufferResourceMap.emplace(handle, BufferAccessMap(handle)).first;
-                mapHit->second.insertNewAccess(access, nextBarrierIndex, true);
+                mapHit->second.insertNewAccess(access, nextBarrierIndex, true, true);
 
                 // Add the QFOT acquire barrier
                 auto qfotDependency = BufferDependency(
@@ -163,7 +163,7 @@ public:
                     access,
                     exportEntry.currentQueueFamilyIndex,
                     exportEntry.dstQueueFamilyIndex);
-                barriers->synchronizeDependency(qfotDependency, 0, 0);
+                barriers->synchronizeDependency(qfotDependency, 0, 0, false);
 
             } else {
                 const NewImageAccess& access = std::get<NewImageAccess>(exportEntry.access);
@@ -173,7 +173,7 @@ public:
                 auto mapHit = queueSyncState->imageResourceMap.find(handle);
                 if (mapHit == queueSyncState->imageResourceMap.end())
                     mapHit = queueSyncState->imageResourceMap.emplace(handle, ImageAccessMap(handle)).first;
-                mapHit->second.insertNewAccess(access, nextBarrierIndex, true);
+                mapHit->second.insertNewAccess(access, nextBarrierIndex, true, true);
 
                 // Add the QFOT acquire barrier
                 auto qfotDependency = ImageDependency(
@@ -185,7 +185,7 @@ public:
                     access.layout,
                     exportEntry.currentQueueFamilyIndex,
                     exportEntry.dstQueueFamilyIndex);
-                barriers->synchronizeDependency(qfotDependency, 0, 0);
+                barriers->synchronizeDependency(qfotDependency, 0, 0, false);
             }
         }
     }
@@ -285,7 +285,7 @@ void prepareBarriers(
             auto mapHit = queueSyncState->bufferResourceMap.find(vkBufferHandle);
             if (mapHit != queueSyncState->bufferResourceMap.end()) {
                 mapHit->second.insertNewAccess(
-                    { vkBufferHandle, range, data->access }, barriers.getBarrierCount(), true);
+                    { vkBufferHandle, range, data->access }, barriers.getBarrierCount(), true, true);
             }
             break;
         }
@@ -298,7 +298,7 @@ void prepareBarriers(
             auto mapHit = queueSyncState->imageResourceMap.find(vkImageHandle);
             if (mapHit != queueSyncState->imageResourceMap.end()) {
                 mapHit->second.insertNewAccess(
-                    { vkImageHandle, range, data->access, data->vkImageLayout }, barriers.getBarrierCount(), true);
+                    { vkImageHandle, range, data->access, data->vkImageLayout }, barriers.getBarrierCount(), true, true);
             }
             break;
         }
@@ -308,6 +308,7 @@ void prepareBarriers(
 
             identifyCommandResourceAccesses(cmd, newBufferAccesses, newImageAccesses);
             processAccesses(cmdIndex, view(newBufferAccesses), view(newImageAccesses), barriers, queueSyncState);
+            barriers.markExportedResourceUsage();
             break;
         }
         case JobCommandTypes::ExecuteRenderPass: {
@@ -317,6 +318,7 @@ void prepareBarriers(
             // Process regular accesses
             identifyCommandResourceAccesses(cmd, newBufferAccesses, newImageAccesses);
             processAccesses(cmdIndex, view(newBufferAccesses), view(newImageAccesses), barriers, queueSyncState);
+            barriers.markExportedResourceUsage();
 
             // Attachments get synchronized internally in Vulkan render passes, so we must overwrite the access state
             // with the latest usage, similarly to ImportExternalImage
