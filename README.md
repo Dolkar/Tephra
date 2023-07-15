@@ -19,12 +19,12 @@ and relevance. To that end, Tephra provides:
   API)
 - Low-level command lists that can be recorded in parallel and with minimal overhead
 - An easy and efficient way to create temporary images, staging buffers and scratch memory
-- A simple, general-purpose interface that tries not to force architectural decisions upon the user (such as render
-  graphs, the bindless resource model, recording callbacks, or the concept of frames)
+- A simple, general-purpose interface that tries not to force architectural decisions upon the user (such as recording
+  callbacks, the concept of frames or a bindless resource model)
 - The ability to use bleeding-edge features of graphics hardware through direct interoperability with the Vulkan API
 - An introductory [user guide](https://dolkar.github.io/Tephra/user-guide.html), extensive
-  [documentation](https://dolkar.github.io/Tephra/annotated.html) and examples for getting started with using the
-  library without prior knowledge of Vulkan
+  [documentation](https://dolkar.github.io/Tephra/annotated.html) and [examples](https://dolkar.github.io/Tephra/examples.html)
+  for getting started with using the library without prior knowledge of Vulkan
 - Debugging features, usage validation and testing suite (WIP)
 
 _Tephra is being used and partially developed by [Bohemia Interactive Simulations](https://bisimulations.com/)._
@@ -34,11 +34,11 @@ _Tephra is being used and partially developed by [Bohemia Interactive Simulation
 One of the main differences when moving over from these older graphics APIs is the execution model. Much like in Vulkan,
 your draw calls don't take effect immediately in Tephra, but are instead recorded into either jobs or command lists that
 then get executed at a later time. There is no "immediate context". This allows for easy parallel recording and
-full control over the execution of workloads. This recording is usually done in two passes. A "job" first defines
+full control over the execution of workloads. Recording commands is usually done in two passes. A "job" first defines
 high-level commands such as:
 - Allocation of temporary job-local resources
 - Clears, copies, blits and resolves
-- Render and compute passes specifying target resources and a set of command lists to record
+- Render and compute passes specifying target resources and a set of command lists to execute
 - Resource export commands and Vulkan interop commands
 
 The actual draw and dispatch commands then get recorded into the command lists of each pass after the job itself has
@@ -51,7 +51,7 @@ needs to be handled by specifying all the resource accesses of each render / com
 read-only accesses, the library offers the much more convenient "export" mechanism. Once an image or buffer is written
 to by a prior command or pass, it can be exported for all future accesses of a certain type, for example as a sampled
 texture. In effect, this means that you generally need to specify if and how a resource is going to be read from inside
-your shaders after each time you write into it.
+your shaders in the future, after each time you write into it.
 
 Another system inherited from Vulkan is its binding model. By default, resources get bound as descriptors in sets,
 rather than individually. You can think of a material's textures - the albedo map, normal map, roughness map, etc -
@@ -85,15 +85,22 @@ the user. All dependencies are resolved on a subresource level, including byte r
 levels for images. Synchronization across different queues is handled with timeline semaphores and resource exports in
 a thread safe manner.
 
+Many other Vulkan abstractions opt for
+[render graphs](https://themaister.net/blog/2017/08/15/render-graphs-and-vulkan-a-deep-dive/) to manage synchronization
+and resource aliasing. Tephra's approach is similar to a render graph that does not reorder passes, but has a smaller
+API footprint, does not force resource virtualization and is already familiar to users of last-gen graphics APIs. A
+render graph solution can be easily implemented on top of Tephra, if desired.
+
 Descriptor sets differ from Vulkan's by being immutable. Changing them requires waiting until the device is done with
 any workload that uses it, which is infeasible in practice. Instead, Tephra recycles and reuses old descriptor sets
 to create new ones in the background. Besides these ordinary descriptor sets, a mutable descriptor set implementation is
 also provided. It can be useful for emulating the binding of individual resources, or to assist with a bindless resource
 model.
 
-Tephra provides many other abstractions around the Vulkan API, such as pipelines, swapchain and others to form an
-all-encompassing graphics library. You do not need to use Vulkan symbols except when working with extensions that Tephra
-does not natively support, or when interacting with various device properties and features.
+Tephra provides many other abstractions around Vulkan, such as pools, pipelines, swapchain and others to form an
+all-encompassing, high-level-ish graphics library. You generally do not need to use the Vulkan API directly, except when
+working with extensions that Tephra does not natively support, or when interacting with various device properties and
+features.
 
 ## Feature list
 
@@ -101,9 +108,11 @@ The following features are already present:
 - All of the compute and graphics commands supported by core Vulkan
 - Automatic synchronization and resource state tracking inside and across queues
 - Temporary resource allocator that leverages aliasing to reduce memory usage
+- Support for multi-threaded recording and device-level thread safety
 - Multi-subpass render passes
-- Extended image and buffer views
+- Improved image and buffer views
 - Safe delayed destruction of Vulkan handles
+- Interoperability with plain Vulkan (WIP)
 - Debug logging, statistics, tests and partial usage validation (WIP)
 
 The following features are planned and will likely be available in the future:
@@ -121,6 +130,10 @@ The following features are out of scope for the library and won't be included:
 - Sparse buffers and images
 - Linear images
 - Rendering algorithms - this is not a renderer or a game engine
+
+See the [user guide](https://dolkar.github.io/Tephra/user-guide.html) for more detailed explanations and inline code
+examples of Tephra's features, or the [examples](https://github.com/Dolkar/Tephra/tree/main/examples) folder for a
+runnable showcase.
 
 ## Prerequisities
 
