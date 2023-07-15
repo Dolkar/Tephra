@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>tp::SwapchainSetup struct | Tephra Documentation</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="m-dark-tephra.css" />
+  <link rel="stylesheet" href="m-documentation.css" />
+  <link rel="stylesheet" href="m-theme-dark-tephra.css" />
+  <link rel="stylesheet" href="m-grid.css" />
+  <link rel="stylesheet" href="m-components.css" />
+  <link rel="stylesheet" href="m-layout.css" />
+  <link rel="stylesheet" href="pygments-dark.css" />
+  <link rel="stylesheet" href="pygments-console.css" />
+  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#2c1b15" />
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <span id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">
+        <a href="https://github.com/Dolkar/Tephra">Tephra</a> <span class="m-breadcrumb">|</span> <a href="index.html" class="m-thin">Documentation</a>
+      </span>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li><a href="user-guide.html">User Guide</a></li>
+            <li><a href="examples.html">Examples and Tests</a></li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="3">
+            <li><a href="changelog.html">Changelog</a></li>
+            <li><a href="https://github.com/Dolkar/Tephra/discussions">Discussions</a></li>
+            <li><a href="annotated.html">API</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          <span class="m-breadcrumb"><a href="namespacetp.html">tp</a>::<wbr/></span>SwapchainSetup <span class="m-thin">struct</span>
+        </h1>
+        <p>Used as configuration for creating a new <a href="classtp_1_1_swapchain.html" class="m-doc">tp::<wbr />Swapchain</a> object.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="classtp_1_1_device.html#ace820228473cae7aa2a9cf30d978483a" class="m-doc">tp::<wbr />Device::<wbr />createSwapchainKHR</a></p><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkSwapchainCreateInfoKHR.html" class="m-doc-external">VkSwapchainCreateInfoKHR</a></p></aside>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a5b908bde6ec3c6bb17dde6783e1885fb" class="m-doc">SwapchainSetup</a>(</span><span class="m-doc-wrap">VkSurfaceKHR vkSurfaceHandle,
+              <a href="namespacetp.html#ad7c69a8d8b81187a779224a594b4ed27" class="m-doc">PresentMode</a> presentMode,
+              uint32_t minImageCount,
+              <a href="namespacetp.html#a30a831f16dcc9703a77ff823685825c1" class="m-doc">ImageUsageMask</a> imageUsage,
+              <a href="namespacetp.html#a575466ff8f546f00468d04124cee38b5" class="m-doc">Format</a> imageFormat,
+              <a href="structtp_1_1_extent2_d.html" class="m-doc">Extent2D</a> imageExtent,
+              uint32_t imageArrayLayerCount = 1,
+              <a href="classtp_1_1_array_view.html" class="m-doc">ArrayView</a>&lt;<a href="namespacetp.html#a575466ff8f546f00468d04124cee38b5" class="m-doc">Format</a>&gt; imageCompatibleFormatsKHR = {},
+              bool clipped = true,
+              <a href="namespacetp.html#a4b9ef31a79898b23c45cf42e1e2f875a" class="m-doc">SurfaceTransform</a> preTransform = <a href="namespacetp.html#a4b9ef31a79898b23c45cf42e1e2f875aa770bea10446cbaf700c64daa39dfe3d4" class="m-doc">SurfaceTransform::<wbr />UseCurrentTransform</a>,
+              <a href="namespacetp.html#a98c0da3e03273ad1faa3fe9a2eea521d" class="m-doc">CompositeAlpha</a> compositeAlpha = CompositeAlpha::Opaque,
+              <a href="namespacetp.html#aa30595b7d2b5b260981eb588779df6ea" class="m-doc">SwapchainFlagMask</a> flags = <a href="classtp_1_1_enum_bit_mask.html#a4a96274820fc2248949544d995cd5992" class="m-doc">SwapchainFlagMask::<wbr />None</a>(),
+              void* vkCreateInfoExtPtr = nullptr)</span>
+            </dt>
+            <dd></dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a5b908bde6ec3c6bb17dde6783e1885fb"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> tp::<wbr />SwapchainSetup::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5b908bde6ec3c6bb17dde6783e1885fb" class="m-doc-self">SwapchainSetup</a>(</span><span class="m-doc-wrap">VkSurfaceKHR vkSurfaceHandle,
+              <a href="namespacetp.html#ad7c69a8d8b81187a779224a594b4ed27" class="m-doc">PresentMode</a> presentMode,
+              uint32_t minImageCount,
+              <a href="namespacetp.html#a30a831f16dcc9703a77ff823685825c1" class="m-doc">ImageUsageMask</a> imageUsage,
+              <a href="namespacetp.html#a575466ff8f546f00468d04124cee38b5" class="m-doc">Format</a> imageFormat,
+              <a href="structtp_1_1_extent2_d.html" class="m-doc">Extent2D</a> imageExtent,
+              uint32_t imageArrayLayerCount = 1,
+              <a href="classtp_1_1_array_view.html" class="m-doc">ArrayView</a>&lt;<a href="namespacetp.html#a575466ff8f546f00468d04124cee38b5" class="m-doc">Format</a>&gt; imageCompatibleFormatsKHR = {},
+              bool clipped = true,
+              <a href="namespacetp.html#a4b9ef31a79898b23c45cf42e1e2f875a" class="m-doc">SurfaceTransform</a> preTransform = <a href="namespacetp.html#a4b9ef31a79898b23c45cf42e1e2f875aa770bea10446cbaf700c64daa39dfe3d4" class="m-doc">SurfaceTransform::<wbr />UseCurrentTransform</a>,
+              <a href="namespacetp.html#a98c0da3e03273ad1faa3fe9a2eea521d" class="m-doc">CompositeAlpha</a> compositeAlpha = CompositeAlpha::Opaque,
+              <a href="namespacetp.html#aa30595b7d2b5b260981eb588779df6ea" class="m-doc">SwapchainFlagMask</a> flags = <a href="classtp_1_1_enum_bit_mask.html#a4a96274820fc2248949544d995cd5992" class="m-doc">SwapchainFlagMask::<wbr />None</a>(),
+              void* vkCreateInfoExtPtr = nullptr)</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">vkSurfaceHandle</td>
+                  <td>The surface onto which images will be presented.</td>
+                </tr>
+                <tr>
+                  <td>presentMode</td>
+                  <td>Determines how present operations will be processed and queued internally.</td>
+                </tr>
+                <tr>
+                  <td>minImageCount</td>
+                  <td>The minimum number of swapchain images that the application needs. More images can be created if necessary.</td>
+                </tr>
+                <tr>
+                  <td>imageUsage</td>
+                  <td>A mask of <a href="namespacetp.html#a6664b04e5b0dd2db10648d870477c899" class="m-doc">tp::<wbr />ImageUsage</a> specifying the permitted set of usages of the swapchain images.</td>
+                </tr>
+                <tr>
+                  <td>imageFormat</td>
+                  <td>The format the data will be interpreted as.</td>
+                </tr>
+                <tr>
+                  <td>imageExtent</td>
+                  <td>The extent of the swapchain images in two dimensions.</td>
+                </tr>
+                <tr>
+                  <td>imageArrayLayerCount</td>
+                  <td>The number of array layers the swapchain images should have.</td>
+                </tr>
+                <tr>
+                  <td>imageCompatibleFormatsKHR</td>
+                  <td>The list of additional compatible formats that the <a href="classtp_1_1_image_view.html" class="m-doc">tp::<wbr />ImageView</a> objects viewing the swapchain images are permitted to have. Requires <a href="namespacetp_1_1_device_extension.html#aadba691ebfaae8d05299093553ea8ffc" class="m-doc">DeviceExtension::<wbr />KHR_SwapchainMutableFormat</a>.</td>
+                </tr>
+                <tr>
+                  <td>clipped</td>
+                  <td>Specifies whether the implementation is allowed to discard rendering operations that affect regions of the surface that are not visible.</td>
+                </tr>
+                <tr>
+                  <td>preTransform</td>
+                  <td>Describes the transform applied to image content prior to presentation.</td>
+                </tr>
+                <tr>
+                  <td>compositeAlpha</td>
+                  <td>The alpha compositing mode.</td>
+                </tr>
+                <tr>
+                  <td>flags</td>
+                  <td>Additional flags for creation of the swapchain.</td>
+                </tr>
+                <tr>
+                  <td>vkCreateInfoExtPtr</td>
+                  <td>A pointer to additional Vulkan structures to be passed in <code>pNext</code> of   <a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkSwapchainCreateInfoKHR.html" class="m-doc-external">VkSwapchainCreateInfoKHR</a>.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>Remark</h4><p>The values that can be provided to create a valid <a href="classtp_1_1_swapchain.html" class="m-doc">Swapchain</a> object must conform to the surface capabilities queried by <a href="classtp_1_1_physical_device.html#a47e886aaff9e5bf92e96899dfb64060f" class="m-doc">tp::<wbr />PhysicalDevice::<wbr />querySurfaceCapabilitiesKHR</a> for the used Vulkan surface handle.</p></aside>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <p>Tephra Documentation. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.6 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

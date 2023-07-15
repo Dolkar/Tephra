@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>tp::GraphicsPipelineSetup class | Tephra Documentation</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="m-dark-tephra.css" />
+  <link rel="stylesheet" href="m-documentation.css" />
+  <link rel="stylesheet" href="m-theme-dark-tephra.css" />
+  <link rel="stylesheet" href="m-grid.css" />
+  <link rel="stylesheet" href="m-components.css" />
+  <link rel="stylesheet" href="m-layout.css" />
+  <link rel="stylesheet" href="pygments-dark.css" />
+  <link rel="stylesheet" href="pygments-console.css" />
+  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#2c1b15" />
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <span id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">
+        <a href="https://github.com/Dolkar/Tephra">Tephra</a> <span class="m-breadcrumb">|</span> <a href="index.html" class="m-thin">Documentation</a>
+      </span>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li><a href="user-guide.html">User Guide</a></li>
+            <li><a href="examples.html">Examples and Tests</a></li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="3">
+            <li><a href="changelog.html">Changelog</a></li>
+            <li><a href="https://github.com/Dolkar/Tephra/discussions">Discussions</a></li>
+            <li><a href="annotated.html">API</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          <span class="m-breadcrumb"><a href="namespacetp.html">tp</a>::<wbr/></span>GraphicsPipelineSetup <span class="m-thin">class</span>
+        </h1>
+        <p>Used as configuration for creating a new graphics <a href="classtp_1_1_pipeline.html" class="m-doc">tp::<wbr />Pipeline</a> object for use inside render passes.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="classtp_1_1_device.html#ab23e1bd4fe693ef3cf5d8c2c92bb1deb" class="m-doc">tp::<wbr />Device::<wbr />compileGraphicsPipelines</a></p><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkGraphicsPipelineCreateInfo.html" class="m-doc-external">VkGraphicsPipelineCreateInfo</a></p></aside>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#abc4393edbb1263239ed1ef9f086aa9ae" class="m-doc">GraphicsPipelineSetup</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_pipeline_layout.html" class="m-doc">PipelineLayout</a>* pipelineLayout,
+              const <a href="classtp_1_1_render_pass_layout.html" class="m-doc">RenderPassLayout</a>* renderPassLayout,
+              uint32_t subpassIndex,
+              <a href="structtp_1_1_shader_stage_setup.html" class="m-doc">ShaderStageSetup</a> vertexStageSetup,
+              <a href="structtp_1_1_shader_stage_setup.html" class="m-doc">ShaderStageSetup</a> fragmentStageSetup = {},
+              const char* debugName = nullptr)</span>
+            </dt>
+            <dd></dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt id="a4df4a4bf5eb1657eebf99af79d4608fc">
+              <span class="m-doc-wrap-bumper">auto <a href="#a4df4a4bf5eb1657eebf99af79d4608fc" class="m-doc-self">addDynamicState</a>(</span><span class="m-doc-wrap"><a href="namespacetp.html#a8d68684e76a2f3ad68b401360669a4d0" class="m-doc">DynamicState</a> dynamicState) -&gt; <a href="classtp_1_1_graphics_pipeline_setup.html" class="m-doc">GraphicsPipelineSetup</a>&amp;</span>
+            </dt>
+            <dd>Adds a dynamic state flag, ignoring the associated fields in <a href="classtp_1_1_graphics_pipeline_setup.html" class="m-doc">tp::<wbr />GraphicsPipelineSetup</a> in favor of setting them dynamically through the methods in <a href="classtp_1_1_render_list.html" class="m-doc">tp::<wbr />RenderList</a>.</dd>
+            <dt id="a2fa2ff3bacf4017ea3198f09c16f28fd">
+              <span class="m-doc-wrap-bumper">auto <a href="#a2fa2ff3bacf4017ea3198f09c16f28fd" class="m-doc-self">addFlags</a>(</span><span class="m-doc-wrap"><a href="namespacetp.html#a0b3b3c0f906c067eb95cbb14b6d65345" class="m-doc">PipelineFlagMask</a> flags) -&gt; <a href="classtp_1_1_graphics_pipeline_setup.html" class="m-doc">GraphicsPipelineSetup</a>&amp;</span>
+            </dt>
+            <dd>Adds the pipeline flags.</dd>
+            <dt id="a17a307e672f3a2077c3afbc7a0b53a7a">
+              <span class="m-doc-wrap-bumper">auto <a href="#a17a307e672f3a2077c3afbc7a0b53a7a" class="m-doc-self">clearDynamicState</a>(</span><span class="m-doc-wrap">) -&gt; <a href="classtp_1_1_graphics_pipeline_setup.html" class="m-doc">GraphicsPipelineSetup</a>&amp;</span>
+            </dt>
+            <dd>Clears all dynamic state flags.</dd>
+            <dt id="a4824308098607ed5d56c6d4d3c0e2d28">
+              <span class="m-doc-wrap-bumper">auto <a href="#a4824308098607ed5d56c6d4d3c0e2d28" class="m-doc-self">clearFlags</a>(</span><span class="m-doc-wrap">) -&gt; <a href="classtp_1_1_graphics_pipeline_setup.html" class="m-doc">GraphicsPipelineSetup</a>&amp;</span>
+            </dt>
+            <dd>Clears all pipeline flags.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a740865db83eea467d647b311c66738f8" class="m-doc">setAlphaToCoverage</a>(</span><span class="m-doc-wrap">bool enable = false,
+              bool alphaToOneEnable = false) -&gt; <a href="classtp_1_1_graphics_pipeline_setup.html" class="m-doc">GraphicsPipelineSetup</a>&amp;</span>
+            </dt>
+            <dd>Sets the alpha to coverage functionality.</dd>
+            <dt id="a4e04a1b35006e7284538c4202729e3c0">
+              <span class="m-doc-wrap-bumper">auto <a href="#a4e04a1b35006e7284538c4202729e3c0" class="m-doc-self">setBlendConstants</a>(</span><span class="m-doc-wrap">float blendConstants[4]) -&gt; <a href="classtp_1_1_graphics_pipeline_setup.html" class="m-doc">GraphicsPipelineSetup</a>&amp;</span>
+            </dt>
+            <dd>Sets the constants used for certain blend factors during blending operations.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aa442a5723c5e2a4c7601d7404a521307" class="m-doc">setBlending</a>(</span><span class="m-doc-wrap">bool enable = false,
+              <a href="structtp_1_1_attachment_blend_state.html" class="m-doc">AttachmentBlendState</a> blendState = {}) -&gt; <a href="classtp_1_1_graphics_pipeline_setup.html" class="m-doc">GraphicsPipelineSetup</a>&amp;</span>
+            </dt>
+            <dd>Sets the attachment blending functionality.</dd>
+            <dt id="ae7b3cf9e0dcf932df65373e6805116d9">
+              <span class="m-doc-wrap-bumper">auto <a href="#ae7b3cf9e0dcf932df65373e6805116d9" class="m-doc-self">setCullMode</a>(</span><span class="m-doc-wrap"><a href="namespacetp.html#a13eb03d4189fceaff4085cb950701bc1" class="m-doc">CullModeFlagMask</a> cullMode = <a href="classtp_1_1_enum_bit_mask.html#a4a96274820fc2248949544d995cd5992" class="m-doc">CullModeFlagMask::<wbr />None</a>()) -&gt; <a href="classtp_1_1_graphics_pipeline_setup.html" class="m-doc">GraphicsPipelineSetup</a>&amp;</span>
+            </dt>
+            <dd>Sets whether front and/or back faces should be culled.</dd>
+            <dt id="a23f9564ab89c02275e9072c05f3e5b16">
+              <span class="m-doc-wrap-bumper">auto <a href="#a23f9564ab89c02275e9072c05f3e5b16" class="m-doc-self">setDebugName</a>(</span><span class="m-doc-wrap">const char* debugName = nullptr) -&gt; <a href="classtp_1_1_graphics_pipeline_setup.html" class="m-doc">GraphicsPipelineSetup</a>&amp;</span>
+            </dt>
+            <dd>Sets a debug name identifier for the object.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aaefec897c0408b7372b71083232d6a41" class="m-doc">setDepthBias</a>(</span><span class="m-doc-wrap">bool enable = false,
+              float constantFactor = 0.0f,
+              float slopeFactor = 0.0f,
+              float biasClamp = 0.0f) -&gt; <a href="classtp_1_1_graphics_pipeline_setup.html" class="m-doc">GraphicsPipelineSetup</a>&amp;</span>
+            </dt>
+            <dd>Sets the depth bias functionality.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a84ca455adc987ec9c73cd86ced520d64" class="m-doc">setDepthBoundsTest</a>(</span><span class="m-doc-wrap">bool enable = false,
+              float minDepthBounds = 0.0f,
+              float maxDepthBounds = 1.0f) -&gt; <a href="classtp_1_1_graphics_pipeline_setup.html" class="m-doc">GraphicsPipelineSetup</a>&amp;</span>
+            </dt>
+            <dd>Sets the depth bounds testing functionality.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a6254ffe9a1134518ac0f6da87e47f873" class="m-doc">setDepthClamp</a>(</span><span class="m-doc-wrap">bool enable = false) -&gt; <a href="classtp_1_1_graphics_pipeline_setup.html" class="m-doc">GraphicsPipelineSetup</a>&amp;</span>
+            </dt>
+            <dd>Sets the depth clamp funcionality.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7560349463b825d56caef78574f6ec1f" class="m-doc">setDepthTest</a>(</span><span class="m-doc-wrap">bool enable = false,
+              <a href="namespacetp.html#ab0d53b2900e95e6841cafefc5f75fb8c" class="m-doc">CompareOp</a> compareOp = CompareOp::Always,
+              bool enableWrite = false) -&gt; <a href="classtp_1_1_graphics_pipeline_setup.html" class="m-doc">GraphicsPipelineSetup</a>&amp;</span>
+            </dt>
+            <dd>Sets the depth testing functionality.</dd>
+            <dt id="af72723d597c25ac36420cb70ee40fbc1">
+              <span class="m-doc-wrap-bumper">auto <a href="#af72723d597c25ac36420cb70ee40fbc1" class="m-doc-self">setFragmentStage</a>(</span><span class="m-doc-wrap"><a href="structtp_1_1_shader_stage_setup.html" class="m-doc">ShaderStageSetup</a> fragmentStageSetup = {}) -&gt; <a href="classtp_1_1_graphics_pipeline_setup.html" class="m-doc">GraphicsPipelineSetup</a>&amp;</span>
+            </dt>
+            <dd>Sets the fragment shader stage.</dd>
+            <dt id="ad003a9fb714346ec3b16ae6b05ec13fc">
+              <span class="m-doc-wrap-bumper">auto <a href="#ad003a9fb714346ec3b16ae6b05ec13fc" class="m-doc-self">setFrontFace</a>(</span><span class="m-doc-wrap">bool frontFaceIsClockwise = false) -&gt; <a href="classtp_1_1_graphics_pipeline_setup.html" class="m-doc">GraphicsPipelineSetup</a>&amp;</span>
+            </dt>
+            <dd>Sets whether or not the clockwise winding order of primitives should be considered as front facing.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a69b6bf7674666787cfcc6a06772c129b" class="m-doc">setGeometryStage</a>(</span><span class="m-doc-wrap"><a href="structtp_1_1_shader_stage_setup.html" class="m-doc">ShaderStageSetup</a> geometryStageSetup = {}) -&gt; <a href="classtp_1_1_graphics_pipeline_setup.html" class="m-doc">GraphicsPipelineSetup</a>&amp;</span>
+            </dt>
+            <dd>Sets the geometry shader stage.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a48e38e3dc0417ce7ffe6503c47c127f5" class="m-doc">setIndependentBlending</a>(</span><span class="m-doc-wrap">bool enable = false,
+              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const <a href="structtp_1_1_attachment_blend_state.html" class="m-doc">AttachmentBlendState</a>&gt; blendStates = {}) -&gt; <a href="classtp_1_1_graphics_pipeline_setup.html" class="m-doc">GraphicsPipelineSetup</a>&amp;</span>
+            </dt>
+            <dd>Sets the attachment blending functionality with an independent blend state for each attachment.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2a90bfc1bf60a696ba8988acf45936e3" class="m-doc">setLineWidth</a>(</span><span class="m-doc-wrap">float width = 1.0f) -&gt; <a href="classtp_1_1_graphics_pipeline_setup.html" class="m-doc">GraphicsPipelineSetup</a>&amp;</span>
+            </dt>
+            <dd>Sets the width of rasterized line segments.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a01d88c7a032073308e0809198724119b" class="m-doc">setLogicBlendOp</a>(</span><span class="m-doc-wrap">bool enable = false,
+              <a href="namespacetp.html#ad3517ebcddd999d1c09952449ca9a1ef" class="m-doc">LogicOp</a> logicOp = LogicOp::And) -&gt; <a href="classtp_1_1_graphics_pipeline_setup.html" class="m-doc">GraphicsPipelineSetup</a>&amp;</span>
+            </dt>
+            <dd>Sets the logic blend operation functinality.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aad55237ef1adde45faaba8d8465e5164" class="m-doc">setMultisampling</a>(</span><span class="m-doc-wrap"><a href="namespacetp.html#ab3d0ece6c3b49e1866143d74ead604dd" class="m-doc">MultisampleLevel</a> level = MultisampleLevel::Undefined,
+              uint64_t sampleMask = ~0,
+              bool sampleShadingEnable = false,
+              float minSampleShading = 1.0f) -&gt; <a href="classtp_1_1_graphics_pipeline_setup.html" class="m-doc">GraphicsPipelineSetup</a>&amp;</span>
+            </dt>
+            <dd>Sets the multisampling functionality.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a332de71eb47680ca108d4844c6531251" class="m-doc">setRasterizationMode</a>(</span><span class="m-doc-wrap"><a href="namespacetp.html#a65671ead4547e19c32dc453c79d304f9" class="m-doc">RasterizationMode</a> mode = <a href="namespacetp.html#a65671ead4547e19c32dc453c79d304f9adb3e3f51c9107e26c9bccf9a188ce2ed" class="m-doc">RasterizationMode::<wbr />Fill</a>) -&gt; <a href="classtp_1_1_graphics_pipeline_setup.html" class="m-doc">GraphicsPipelineSetup</a>&amp;</span>
+            </dt>
+            <dd>Sets the rasterization mode.</dd>
+            <dt id="a078fe58bd48518a0f971bc2f8b1cd14d">
+              <span class="m-doc-wrap-bumper">auto <a href="#a078fe58bd48518a0f971bc2f8b1cd14d" class="m-doc-self">setRenderPassLayout</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_render_pass_layout.html" class="m-doc">RenderPassLayout</a>* renderPassLayout,
+              uint32_t subpassIndex) -&gt; <a href="classtp_1_1_graphics_pipeline_setup.html" class="m-doc">GraphicsPipelineSetup</a>&amp;</span>
+            </dt>
+            <dd>Sets the render pass layout the pipeline will be compatible with and the subpass index.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a21cdf16e18a25b67ea2a6c8979c47add" class="m-doc">setStencilTest</a>(</span><span class="m-doc-wrap">bool enable = false,
+              <a href="structtp_1_1_stencil_state.html" class="m-doc">StencilState</a> frontFaceStencilState = {},
+              <a href="structtp_1_1_stencil_state.html" class="m-doc">StencilState</a> backFaceStencilState = {}) -&gt; <a href="classtp_1_1_graphics_pipeline_setup.html" class="m-doc">GraphicsPipelineSetup</a>&amp;</span>
+            </dt>
+            <dd>Sets the stencil testing functionality.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aeeabc8fab07cd2ea784377d0df47fd06" class="m-doc">setStencilTest</a>(</span><span class="m-doc-wrap">bool enable = false,
+              <a href="structtp_1_1_stencil_state.html" class="m-doc">StencilState</a> stencilState = {}) -&gt; <a href="classtp_1_1_graphics_pipeline_setup.html" class="m-doc">GraphicsPipelineSetup</a>&amp;</span>
+            </dt>
+            <dd>Sets the stencil testing functionality.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a93604963147558e22a9dc453f39c470c" class="m-doc">setTessellationStages</a>(</span><span class="m-doc-wrap"><a href="structtp_1_1_shader_stage_setup.html" class="m-doc">ShaderStageSetup</a> tessellationControlStageSetup = {},
+              <a href="structtp_1_1_shader_stage_setup.html" class="m-doc">ShaderStageSetup</a> tessellationEvaluationStageSetup = {},
+              uint32_t patchControlPoints = 0) -&gt; <a href="classtp_1_1_graphics_pipeline_setup.html" class="m-doc">GraphicsPipelineSetup</a>&amp;</span>
+            </dt>
+            <dd>Sets the tessellation control stages.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8aaadd9354c1da9a3ad07220b5b572c7" class="m-doc">setTopology</a>(</span><span class="m-doc-wrap"><a href="namespacetp.html#a12b2dbc0529baf76533e072273ffaf14" class="m-doc">PrimitiveTopology</a> topology = <a href="namespacetp.html#a12b2dbc0529baf76533e072273ffaf14af5beeab7a1f452e5b0e9b03b44f0de92" class="m-doc">PrimitiveTopology::<wbr />TriangleList</a>,
+              bool primitiveRestartEnable = false) -&gt; <a href="classtp_1_1_graphics_pipeline_setup.html" class="m-doc">GraphicsPipelineSetup</a>&amp;</span>
+            </dt>
+            <dd>Sets the input primitive topology.</dd>
+            <dt id="a82b2e250869b94ed0e89d14899180122">
+              <span class="m-doc-wrap-bumper">auto <a href="#a82b2e250869b94ed0e89d14899180122" class="m-doc-self">setVertexInputBindings</a>(</span><span class="m-doc-wrap"><a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const <a href="structtp_1_1_vertex_input_binding.html" class="m-doc">VertexInputBinding</a>&gt; vertexInputBindings = {}) -&gt; <a href="classtp_1_1_graphics_pipeline_setup.html" class="m-doc">GraphicsPipelineSetup</a>&amp;</span>
+            </dt>
+            <dd>Sets the bindings for the vertex input buffers to the given array.</dd>
+            <dt id="acc61437d8e39f54a8dc5c0ae0e93eac5">
+              <span class="m-doc-wrap-bumper">auto <a href="#acc61437d8e39f54a8dc5c0ae0e93eac5" class="m-doc-self">setVertexStage</a>(</span><span class="m-doc-wrap"><a href="structtp_1_1_shader_stage_setup.html" class="m-doc">ShaderStageSetup</a> vertexStageSetup) -&gt; <a href="classtp_1_1_graphics_pipeline_setup.html" class="m-doc">GraphicsPipelineSetup</a>&amp;</span>
+            </dt>
+            <dd>Sets the vertex shader stage.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#af542ca588cc7a5674c4dff14c09ec22e" class="m-doc">setViewportCount</a>(</span><span class="m-doc-wrap">uint32_t viewportCount = 1) -&gt; <a href="classtp_1_1_graphics_pipeline_setup.html" class="m-doc">GraphicsPipelineSetup</a>&amp;</span>
+            </dt>
+            <dd>Sets the number of viewports.</dd>
+            <dt id="a17c7136d0fdc8614269b826c01c80297">
+              <span class="m-doc-wrap-bumper">auto <a href="#a17c7136d0fdc8614269b826c01c80297" class="m-doc-self">vkSetCreateInfoExtPtr</a>(</span><span class="m-doc-wrap">void* pNext) -&gt; <a href="classtp_1_1_graphics_pipeline_setup.html" class="m-doc">GraphicsPipelineSetup</a>&amp;</span>
+            </dt>
+            <dd>Sets the pointer to additional Vulkan structures to be passed in <code>pNext</code> of   <a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkGraphicsPipelineCreateInfo.html" class="m-doc-external">VkGraphicsPipelineCreateInfo</a>.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="abc4393edbb1263239ed1ef9f086aa9ae"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> tp::<wbr />GraphicsPipelineSetup::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abc4393edbb1263239ed1ef9f086aa9ae" class="m-doc-self">GraphicsPipelineSetup</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_pipeline_layout.html" class="m-doc">PipelineLayout</a>* pipelineLayout,
+              const <a href="classtp_1_1_render_pass_layout.html" class="m-doc">RenderPassLayout</a>* renderPassLayout,
+              uint32_t subpassIndex,
+              <a href="structtp_1_1_shader_stage_setup.html" class="m-doc">ShaderStageSetup</a> vertexStageSetup,
+              <a href="structtp_1_1_shader_stage_setup.html" class="m-doc">ShaderStageSetup</a> fragmentStageSetup = {},
+              const char* debugName = nullptr)</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">pipelineLayout</td>
+                  <td>The pipeline layout to use.</td>
+                </tr>
+                <tr>
+                  <td>renderPassLayout</td>
+                  <td>The render pass layout the pipeline will be compatible with.</td>
+                </tr>
+                <tr>
+                  <td>subpassIndex</td>
+                  <td>The specific index of the subpass the pipeline will be compatible with.</td>
+                </tr>
+                <tr>
+                  <td>vertexStageSetup</td>
+                  <td>The setup of the vertex shader stage.</td>
+                </tr>
+                <tr>
+                  <td>fragmentStageSetup</td>
+                  <td>The setup of the optional fragment shader stage.</td>
+                </tr>
+                <tr>
+                  <td>debugName</td>
+                  <td>The debug name identifier for the object.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a740865db83eea467d647b311c66738f8"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="classtp_1_1_graphics_pipeline_setup.html" class="m-doc">GraphicsPipelineSetup</a>&amp; tp::<wbr />GraphicsPipelineSetup::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a740865db83eea467d647b311c66738f8" class="m-doc-self">setAlphaToCoverage</a>(</span><span class="m-doc-wrap">bool enable = false,
+              bool alphaToOneEnable = false)</span></span>
+            </h3>
+            <p>Sets the alpha to coverage functionality.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">enable</td>
+                  <td>Enables alpha to coverage if <code>true</code>, generating coverage based on the alpha component of the fragment&#x27;s first color output.</td>
+                </tr>
+                <tr>
+                  <td>alphaToOneEnable</td>
+                  <td>If <code>true</code>, replaces the alpha component with 1 afterwards.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>Remark</h4><p>The   <a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkPhysicalDeviceFeatures.html" class="m-doc-external">VkPhysicalDeviceFeatures</a>::<code>alphaToOne</code> feature must be enabled for <code>alphaToOneEnable == true</code>.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="aa442a5723c5e2a4c7601d7404a521307"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="classtp_1_1_graphics_pipeline_setup.html" class="m-doc">GraphicsPipelineSetup</a>&amp; tp::<wbr />GraphicsPipelineSetup::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa442a5723c5e2a4c7601d7404a521307" class="m-doc-self">setBlending</a>(</span><span class="m-doc-wrap">bool enable = false,
+              <a href="structtp_1_1_attachment_blend_state.html" class="m-doc">AttachmentBlendState</a> blendState = {})</span></span>
+            </h3>
+            <p>Sets the attachment blending functionality.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">enable</td>
+                  <td>Enables blending operations on color attachments if <code>true</code>.</td>
+                </tr>
+                <tr>
+                  <td>blendState</td>
+                  <td>The blend state used for all color attachments.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aaefec897c0408b7372b71083232d6a41"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="classtp_1_1_graphics_pipeline_setup.html" class="m-doc">GraphicsPipelineSetup</a>&amp; tp::<wbr />GraphicsPipelineSetup::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aaefec897c0408b7372b71083232d6a41" class="m-doc-self">setDepthBias</a>(</span><span class="m-doc-wrap">bool enable = false,
+              float constantFactor = 0.0f,
+              float slopeFactor = 0.0f,
+              float biasClamp = 0.0f)</span></span>
+            </h3>
+            <p>Sets the depth bias functionality.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">enable</td>
+                  <td>Enables depth bias if <code>true</code>.</td>
+                </tr>
+                <tr>
+                  <td>constantFactor</td>
+                  <td>Controls the constant depth value added to each fragment.</td>
+                </tr>
+                <tr>
+                  <td>slopeFactor</td>
+                  <td>Controls the slope dependent depth value added to each fragment.</td>
+                </tr>
+                <tr>
+                  <td>biasClamp</td>
+                  <td>Sets the maximum depth bias of a fragment.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>Remark</h4><p>The   <a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkPhysicalDeviceFeatures.html" class="m-doc-external">VkPhysicalDeviceFeatures</a>::<code>depthBiasClamp</code> feature must be enabled for <code>biasClamp != 0.0f</code>.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a84ca455adc987ec9c73cd86ced520d64"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="classtp_1_1_graphics_pipeline_setup.html" class="m-doc">GraphicsPipelineSetup</a>&amp; tp::<wbr />GraphicsPipelineSetup::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a84ca455adc987ec9c73cd86ced520d64" class="m-doc-self">setDepthBoundsTest</a>(</span><span class="m-doc-wrap">bool enable = false,
+              float minDepthBounds = 0.0f,
+              float maxDepthBounds = 1.0f)</span></span>
+            </h3>
+            <p>Sets the depth bounds testing functionality.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">enable</td>
+                  <td>Enables depth bounds testing if <code>true</code>, discarding samples if the existing depth value in the depth attachment falls outside the given range.</td>
+                </tr>
+                <tr>
+                  <td>minDepthBounds</td>
+                  <td>The minimum depth value.</td>
+                </tr>
+                <tr>
+                  <td>maxDepthBounds</td>
+                  <td>The maximum depth value.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>Remark</h4><p>The values must be between 0.0 and 1.0 inclusive.</p><p>The   <a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkPhysicalDeviceFeatures.html" class="m-doc-external">VkPhysicalDeviceFeatures</a>::<code>depthBounds</code> feature must be enabled.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a6254ffe9a1134518ac0f6da87e47f873"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="classtp_1_1_graphics_pipeline_setup.html" class="m-doc">GraphicsPipelineSetup</a>&amp; tp::<wbr />GraphicsPipelineSetup::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6254ffe9a1134518ac0f6da87e47f873" class="m-doc-self">setDepthClamp</a>(</span><span class="m-doc-wrap">bool enable = false)</span></span>
+            </h3>
+            <p>Sets the depth clamp funcionality.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">enable</td>
+                  <td>Enables depth clamp if <code>true</code>, clamping the output sample depth to the minimum and maximum depth values as set by <a href="classtp_1_1_render_list.html#ae5867b99343daf5dfd928061cb823742" class="m-doc">tp::<wbr />RenderList::<wbr />cmdSetViewport</a>.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>Remark</h4><p>The   <a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkPhysicalDeviceFeatures.html" class="m-doc-external">VkPhysicalDeviceFeatures</a>::<code>depthClamp</code> feature must be enabled.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a7560349463b825d56caef78574f6ec1f"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="classtp_1_1_graphics_pipeline_setup.html" class="m-doc">GraphicsPipelineSetup</a>&amp; tp::<wbr />GraphicsPipelineSetup::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7560349463b825d56caef78574f6ec1f" class="m-doc-self">setDepthTest</a>(</span><span class="m-doc-wrap">bool enable = false,
+              <a href="namespacetp.html#ab0d53b2900e95e6841cafefc5f75fb8c" class="m-doc">CompareOp</a> compareOp = CompareOp::Always,
+              bool enableWrite = false)</span></span>
+            </h3>
+            <p>Sets the depth testing functionality.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">enable</td>
+                  <td>Enables depth operations if <code>true</code>.</td>
+                </tr>
+                <tr>
+                  <td>compareOp</td>
+                  <td>The comparison operator to use for depth testing.</td>
+                </tr>
+                <tr>
+                  <td>enableWrite</td>
+                  <td>If <code>true</code> and depth testing is enabled, also enables depth writes.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a69b6bf7674666787cfcc6a06772c129b"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="classtp_1_1_graphics_pipeline_setup.html" class="m-doc">GraphicsPipelineSetup</a>&amp; tp::<wbr />GraphicsPipelineSetup::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a69b6bf7674666787cfcc6a06772c129b" class="m-doc-self">setGeometryStage</a>(</span><span class="m-doc-wrap"><a href="structtp_1_1_shader_stage_setup.html" class="m-doc">ShaderStageSetup</a> geometryStageSetup = {})</span></span>
+            </h3>
+            <p>Sets the geometry shader stage.</p>
+<aside class="m-note m-default"><h4>Remark</h4><p>The   <a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkPhysicalDeviceFeatures.html" class="m-doc-external">VkPhysicalDeviceFeatures</a>::<code>geometryShader</code> feature must be enabled.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a48e38e3dc0417ce7ffe6503c47c127f5"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="classtp_1_1_graphics_pipeline_setup.html" class="m-doc">GraphicsPipelineSetup</a>&amp; tp::<wbr />GraphicsPipelineSetup::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a48e38e3dc0417ce7ffe6503c47c127f5" class="m-doc-self">setIndependentBlending</a>(</span><span class="m-doc-wrap">bool enable = false,
+              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const <a href="structtp_1_1_attachment_blend_state.html" class="m-doc">AttachmentBlendState</a>&gt; blendStates = {})</span></span>
+            </h3>
+            <p>Sets the attachment blending functionality with an independent blend state for each attachment.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">enable</td>
+                  <td>Enables blending operations on color attachments if <code>true</code>.</td>
+                </tr>
+                <tr>
+                  <td>blendStates</td>
+                  <td>The blend states used for each color attachment.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>Remark</h4><p>Must match the number of color attachments in the render pass layout&#x27;s subpass.</p><p>The   <a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkPhysicalDeviceFeatures.html" class="m-doc-external">VkPhysicalDeviceFeatures</a>::<code>independentBlend</code> feature must be enabled.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a2a90bfc1bf60a696ba8988acf45936e3"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="classtp_1_1_graphics_pipeline_setup.html" class="m-doc">GraphicsPipelineSetup</a>&amp; tp::<wbr />GraphicsPipelineSetup::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2a90bfc1bf60a696ba8988acf45936e3" class="m-doc-self">setLineWidth</a>(</span><span class="m-doc-wrap">float width = 1.0f)</span></span>
+            </h3>
+            <p>Sets the width of rasterized line segments.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">width</td>
+                  <td>The width of the rasterized line segments in pixels.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>Remark</h4><p>The   <a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkPhysicalDeviceFeatures.html" class="m-doc-external">VkPhysicalDeviceFeatures</a>::<code>wideLines</code> feature must be enabled for <code>width != 1.0</code>.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a01d88c7a032073308e0809198724119b"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="classtp_1_1_graphics_pipeline_setup.html" class="m-doc">GraphicsPipelineSetup</a>&amp; tp::<wbr />GraphicsPipelineSetup::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a01d88c7a032073308e0809198724119b" class="m-doc-self">setLogicBlendOp</a>(</span><span class="m-doc-wrap">bool enable = false,
+              <a href="namespacetp.html#ad3517ebcddd999d1c09952449ca9a1ef" class="m-doc">LogicOp</a> logicOp = LogicOp::And)</span></span>
+            </h3>
+            <p>Sets the logic blend operation functinality.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">enable</td>
+                  <td>Enables logic blending on integer color attachment formats if <code>true</code>.</td>
+                </tr>
+                <tr>
+                  <td>logicOp</td>
+                  <td>The logical operator to use.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>Remark</h4><p>The   <a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkPhysicalDeviceFeatures.html" class="m-doc-external">VkPhysicalDeviceFeatures</a>::<code>logicOp</code> feature must be enabled.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="aad55237ef1adde45faaba8d8465e5164"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="classtp_1_1_graphics_pipeline_setup.html" class="m-doc">GraphicsPipelineSetup</a>&amp; tp::<wbr />GraphicsPipelineSetup::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aad55237ef1adde45faaba8d8465e5164" class="m-doc-self">setMultisampling</a>(</span><span class="m-doc-wrap"><a href="namespacetp.html#ab3d0ece6c3b49e1866143d74ead604dd" class="m-doc">MultisampleLevel</a> level = MultisampleLevel::Undefined,
+              uint64_t sampleMask = ~0,
+              bool sampleShadingEnable = false,
+              float minSampleShading = 1.0f)</span></span>
+            </h3>
+            <p>Sets the multisampling functionality.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">level</td>
+                  <td>The multisampling level to use, specifying the number of samples used in rasterization.</td>
+                </tr>
+                <tr>
+                  <td>sampleMask</td>
+                  <td>The mask of samples to be applied to coverage.</td>
+                </tr>
+                <tr>
+                  <td>sampleShadingEnable</td>
+                  <td>Enables shading of individual samples separately.</td>
+                </tr>
+                <tr>
+                  <td>minSampleShading</td>
+                  <td>If <code>sampleShadingEnable</code> is true, specifies the minimum of samples to be shaded separately as a fraction.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>Remark</h4><p>If <code>level</code> is tp::MultisampleLevel::Undefined, the multisample level of the subpass attachments is used. If there are no attachments, x1 is assumed.</p><p>The   <a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkPhysicalDeviceFeatures.html" class="m-doc-external">VkPhysicalDeviceFeatures</a>::<code>sampleRateShading</code> feature must be enabled for <code>sampleShadingEnable == true</code>.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a332de71eb47680ca108d4844c6531251"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="classtp_1_1_graphics_pipeline_setup.html" class="m-doc">GraphicsPipelineSetup</a>&amp; tp::<wbr />GraphicsPipelineSetup::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a332de71eb47680ca108d4844c6531251" class="m-doc-self">setRasterizationMode</a>(</span><span class="m-doc-wrap"><a href="namespacetp.html#a65671ead4547e19c32dc453c79d304f9" class="m-doc">RasterizationMode</a> mode = <a href="namespacetp.html#a65671ead4547e19c32dc453c79d304f9adb3e3f51c9107e26c9bccf9a188ce2ed" class="m-doc">RasterizationMode::<wbr />Fill</a>)</span></span>
+            </h3>
+            <p>Sets the rasterization mode.</p>
+<aside class="m-note m-default"><h4>Remark</h4><p>The   <a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkPhysicalDeviceFeatures.html" class="m-doc-external">VkPhysicalDeviceFeatures</a>::<code>fillModeNonSolid</code> feature must be enabled for <code>mode == <a href="namespacetp.html#a65671ead4547e19c32dc453c79d304f9a4803e6b9e63dabf04de980788d6a13c4" class="m-doc">RasterizationMode::<wbr />Line</a></code> or <code>mode == <a href="namespacetp.html#a65671ead4547e19c32dc453c79d304f9a2a3cd5946cfd317eb99c3d32e35e2d4c" class="m-doc">RasterizationMode::<wbr />Point</a></code>.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a21cdf16e18a25b67ea2a6c8979c47add"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="classtp_1_1_graphics_pipeline_setup.html" class="m-doc">GraphicsPipelineSetup</a>&amp; tp::<wbr />GraphicsPipelineSetup::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a21cdf16e18a25b67ea2a6c8979c47add" class="m-doc-self">setStencilTest</a>(</span><span class="m-doc-wrap">bool enable = false,
+              <a href="structtp_1_1_stencil_state.html" class="m-doc">StencilState</a> frontFaceStencilState = {},
+              <a href="structtp_1_1_stencil_state.html" class="m-doc">StencilState</a> backFaceStencilState = {})</span></span>
+            </h3>
+            <p>Sets the stencil testing functionality.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">enable</td>
+                  <td>Enables stencil testing if <code>true</code>.</td>
+                </tr>
+                <tr>
+                  <td>frontFaceStencilState</td>
+                  <td>The stencil state to use for front faces.</td>
+                </tr>
+                <tr>
+                  <td>backFaceStencilState</td>
+                  <td>The stencil state to use for back faces.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aeeabc8fab07cd2ea784377d0df47fd06"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="classtp_1_1_graphics_pipeline_setup.html" class="m-doc">GraphicsPipelineSetup</a>&amp; tp::<wbr />GraphicsPipelineSetup::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aeeabc8fab07cd2ea784377d0df47fd06" class="m-doc-self">setStencilTest</a>(</span><span class="m-doc-wrap">bool enable = false,
+              <a href="structtp_1_1_stencil_state.html" class="m-doc">StencilState</a> stencilState = {})</span></span>
+            </h3>
+            <p>Sets the stencil testing functionality.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">enable</td>
+                  <td>Enables stencil testing if <code>true</code>.</td>
+                </tr>
+                <tr>
+                  <td>stencilState</td>
+                  <td>The stencil state to use for both front faces and back faces.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a93604963147558e22a9dc453f39c470c"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="classtp_1_1_graphics_pipeline_setup.html" class="m-doc">GraphicsPipelineSetup</a>&amp; tp::<wbr />GraphicsPipelineSetup::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a93604963147558e22a9dc453f39c470c" class="m-doc-self">setTessellationStages</a>(</span><span class="m-doc-wrap"><a href="structtp_1_1_shader_stage_setup.html" class="m-doc">ShaderStageSetup</a> tessellationControlStageSetup = {},
+              <a href="structtp_1_1_shader_stage_setup.html" class="m-doc">ShaderStageSetup</a> tessellationEvaluationStageSetup = {},
+              uint32_t patchControlPoints = 0)</span></span>
+            </h3>
+            <p>Sets the tessellation control stages.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">tessellationControlStageSetup</td>
+                  <td>The setup of the tessellation control shader stage.</td>
+                </tr>
+                <tr>
+                  <td>tessellationEvaluationStageSetup</td>
+                  <td>The setup of the tessellation evaluation shader stage.</td>
+                </tr>
+                <tr>
+                  <td>patchControlPoints</td>
+                  <td>Specifies the number of control points per patch.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>Remark</h4><p>The   <a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkPhysicalDeviceFeatures.html" class="m-doc-external">VkPhysicalDeviceFeatures</a>::<code>tessellationShader</code> feature must be enabled.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a8aaadd9354c1da9a3ad07220b5b572c7"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="classtp_1_1_graphics_pipeline_setup.html" class="m-doc">GraphicsPipelineSetup</a>&amp; tp::<wbr />GraphicsPipelineSetup::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8aaadd9354c1da9a3ad07220b5b572c7" class="m-doc-self">setTopology</a>(</span><span class="m-doc-wrap"><a href="namespacetp.html#a12b2dbc0529baf76533e072273ffaf14" class="m-doc">PrimitiveTopology</a> topology = <a href="namespacetp.html#a12b2dbc0529baf76533e072273ffaf14af5beeab7a1f452e5b0e9b03b44f0de92" class="m-doc">PrimitiveTopology::<wbr />TriangleList</a>,
+              bool primitiveRestartEnable = false)</span></span>
+            </h3>
+            <p>Sets the input primitive topology.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">topology</td>
+                  <td>The primitive topology.</td>
+                </tr>
+                <tr>
+                  <td>primitiveRestartEnable</td>
+                  <td>When enabled, a special vertex index value (~0) in the index buffer restarts the primitive assembly.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="af542ca588cc7a5674c4dff14c09ec22e"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="classtp_1_1_graphics_pipeline_setup.html" class="m-doc">GraphicsPipelineSetup</a>&amp; tp::<wbr />GraphicsPipelineSetup::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af542ca588cc7a5674c4dff14c09ec22e" class="m-doc-self">setViewportCount</a>(</span><span class="m-doc-wrap">uint32_t viewportCount = 1)</span></span>
+            </h3>
+            <p>Sets the number of viewports.</p>
+<aside class="m-note m-default"><h4>Remark</h4><p>The   <a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkPhysicalDeviceFeatures.html" class="m-doc-external">VkPhysicalDeviceFeatures</a>::<code>multiViewport</code> feature must be enabled for <code>viewportCount != 1</code>.</p></aside>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <p>Tephra Documentation. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.6 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

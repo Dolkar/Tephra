@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>tp::ImageView class | Tephra Documentation</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="m-dark-tephra.css" />
+  <link rel="stylesheet" href="m-documentation.css" />
+  <link rel="stylesheet" href="m-theme-dark-tephra.css" />
+  <link rel="stylesheet" href="m-grid.css" />
+  <link rel="stylesheet" href="m-components.css" />
+  <link rel="stylesheet" href="m-layout.css" />
+  <link rel="stylesheet" href="pygments-dark.css" />
+  <link rel="stylesheet" href="pygments-console.css" />
+  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#2c1b15" />
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <span id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">
+        <a href="https://github.com/Dolkar/Tephra">Tephra</a> <span class="m-breadcrumb">|</span> <a href="index.html" class="m-thin">Documentation</a>
+      </span>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li><a href="user-guide.html">User Guide</a></li>
+            <li><a href="examples.html">Examples and Tests</a></li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="3">
+            <li><a href="changelog.html">Changelog</a></li>
+            <li><a href="https://github.com/Dolkar/Tephra/discussions">Discussions</a></li>
+            <li><a href="annotated.html">API</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          <span class="m-breadcrumb"><a href="namespacetp.html">tp</a>::<wbr/></span>ImageView <span class="m-thin">class</span>
+        </h1>
+        <p>Represents the view of a subresource range of <a href="classtp_1_1_image.html" class="m-doc">tp::<wbr />Image</a>.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+                <li><a href="#friends">Friends</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<p>Optionally, it can be made to interpret the data in a different format than that of the viewed <a href="classtp_1_1_image.html" class="m-doc">tp::<wbr />Image</a> or with a different <a href="structtp_1_1_component_mapping.html" class="m-doc">tp::<wbr />ComponentMapping</a>.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="classtp_1_1_image.html#a7c73baf2482633e5c366c0acd5409112" class="m-doc">tp::<wbr />Image::<wbr />createView</a></p><p><a href="classtp_1_1_image_view.html#aa1e9a6d8f872ffecd5e21b45a77c1f60" class="m-doc">tp::<wbr />ImageView::<wbr />createView</a></p><p><a href="classtp_1_1_job.html#a65f36e2c51ae63531c0f0ada99ac4f58" class="m-doc">tp::<wbr />Job::<wbr />allocateLocalImage</a></p><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkImageView.html" class="m-doc-external">VkImageView</a></p></aside>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt id="a45ce9198535735d590d6ae3b58fbd0e9">
+              <span class="m-doc-wrap-bumper"><a href="#a45ce9198535735d590d6ae3b58fbd0e9" class="m-doc-self">ImageView</a>(</span><span class="m-doc-wrap">)</span>
+            </dt>
+            <dd>Constructs a null <a href="classtp_1_1_image_view.html" class="m-doc">tp::<wbr />ImageView</a>.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aa1e9a6d8f872ffecd5e21b45a77c1f60" class="m-doc">createView</a>(</span><span class="m-doc-wrap"><a href="structtp_1_1_image_view_setup.html" class="m-doc">ImageViewSetup</a> subviewSetup) -&gt; <a href="classtp_1_1_image_view.html" class="m-doc">ImageView</a></span>
+            </dt>
+            <dd>Creates another view of the viewed image relative to this view.</dd>
+            <dt id="ae07c83e2f571f22d9936c3e22d73ac04">
+              <span class="m-doc-wrap-bumper">auto <a href="#ae07c83e2f571f22d9936c3e22d73ac04" class="m-doc-self">getExtent</a>(</span><span class="m-doc-wrap">uint32_t mipLevel = 0) const -&gt; <a href="structtp_1_1_extent3_d.html" class="m-doc">Extent3D</a></span>
+            </dt>
+            <dd>Returns the extent of a specific mip level of the image view.</dd>
+            <dt id="a2cd434542acfe2437b44c4d5dacd760f">
+              <span class="m-doc-wrap-bumper">auto <a href="#a2cd434542acfe2437b44c4d5dacd760f" class="m-doc-self">getFormat</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespacetp.html#a575466ff8f546f00468d04124cee38b5" class="m-doc">Format</a></span>
+            </dt>
+            <dd>Returns the format of the image view.</dd>
+            <dt id="a5f6372153bc5b7e0f34fcfd8bb5078c1">
+              <span class="m-doc-wrap-bumper">auto <a href="#a5f6372153bc5b7e0f34fcfd8bb5078c1" class="m-doc-self">getSampleLevel</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespacetp.html#ab3d0ece6c3b49e1866143d74ead604dd" class="m-doc">MultisampleLevel</a></span>
+            </dt>
+            <dd>Returns the multisampling level of the image view.</dd>
+            <dt id="a6dd48649c9ed8a31d67737be2480be4a">
+              <span class="m-doc-wrap-bumper">auto <a href="#a6dd48649c9ed8a31d67737be2480be4a" class="m-doc-self">getViewType</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespacetp.html#a0d27ef619231fa3c59ec96267d66a4bd" class="m-doc">ImageViewType</a></span>
+            </dt>
+            <dd>Returns the type of the image view.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a6dff90b365271152f22d9d10b12a9253" class="m-doc">getWholeRange</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="structtp_1_1_image_subresource_range.html" class="m-doc">ImageSubresourceRange</a></span>
+            </dt>
+            <dd>Returns the image subresource range encompassing the entire range of the image view.</dd>
+            <dt id="a1b8caa8812dfecd70f24d8806cb11909">
+              <span class="m-doc-wrap-bumper">auto <a href="#a1b8caa8812dfecd70f24d8806cb11909" class="m-doc-self">isNull</a>(</span><span class="m-doc-wrap">) const -&gt; bool</span>
+            </dt>
+            <dd>Returns <code>true</code> if the image view is null and does not view any resource.</dd>
+            <dt id="a537955da46eaa8a05fb8e8055d65eb8c">
+              <span class="m-doc-wrap-bumper">auto <a href="#a537955da46eaa8a05fb8e8055d65eb8c" class="m-doc-self">viewsJobLocalImage</a>(</span><span class="m-doc-wrap">) const -&gt; bool</span>
+            </dt>
+            <dd>Returns <code>true</code> if the instance views a job-local image. Returns <code>false</code> if it views a persistent one.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a71cb1f4fd53aa81e4c3b870d3417f703" class="m-doc">vkGetImageViewHandle</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="structtp_1_1_vk_object_handle.html" class="m-doc">VkImageViewHandle</a></span>
+            </dt>
+            <dd>Returns the associated Vulkan   <a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkImageView.html" class="m-doc-external">VkImageView</a> handle if it exists, <code>VK_NULL_HANDLE</code> otherwise.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#af465ef45abb70c15f8f377d7cc2c1fd6" class="m-doc">vkResolveImageHandle</a>(</span><span class="m-doc-wrap">uint32_t* baseMipLevel,
+              uint32_t* baseArrayLevel) const -&gt; <a href="structtp_1_1_vk_object_handle.html" class="m-doc">VkImageHandle</a></span>
+            </dt>
+            <dd>Resolves and returns the underlying   <a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkImage.html" class="m-doc-external">VkImage</a> handle of this view or <code>VK_NULL_HANDLE</code> if it doesn&#x27;t exist.</dd>
+          </dl>
+        </section>
+        <section id="friends">
+          <h2><a href="#friends">Friends</a></h2>
+          <dl class="m-doc">
+            <dt id="a4188668c260b8a7daf3d5bd89858c3db">
+              <span class="m-doc-wrap-bumper">auto <a href="#a4188668c260b8a7daf3d5bd89858c3db" class="m-doc-self">operator==</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_image_view.html" class="m-doc">ImageView</a>&amp;,
+              const <a href="classtp_1_1_image_view.html" class="m-doc">ImageView</a>&amp;) -&gt; bool</span>
+            </dt>
+            <dd>Equality operator for <a href="classtp_1_1_image_view.html" class="m-doc">tp::<wbr />ImageView</a>.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="aa1e9a6d8f872ffecd5e21b45a77c1f60"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="classtp_1_1_image_view.html" class="m-doc">ImageView</a> tp::<wbr />ImageView::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa1e9a6d8f872ffecd5e21b45a77c1f60" class="m-doc-self">createView</a>(</span><span class="m-doc-wrap"><a href="structtp_1_1_image_view_setup.html" class="m-doc">ImageViewSetup</a> subviewSetup)</span></span>
+            </h3>
+            <p>Creates another view of the viewed image relative to this view.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">subviewSetup</td>
+                  <td>The setup structure describing the view.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>Remark</h4><p>The subresource range of the new view must be fully contained inside this view.</p><p>This is effectively a shorthand for <a href="classtp_1_1_image.html#a7c73baf2482633e5c366c0acd5409112" class="m-doc">tp::<wbr />Image::<wbr />createView</a>. This means that it isn&#x27;t thread safe with respect to the underlying image. For job-local image views, this extends to the parent <a href="classtp_1_1_job_resource_pool.html" class="m-doc">tp::<wbr />JobResourcePool</a>.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a6dff90b365271152f22d9d10b12a9253"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="structtp_1_1_image_subresource_range.html" class="m-doc">ImageSubresourceRange</a> tp::<wbr />ImageView::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6dff90b365271152f22d9d10b12a9253" class="m-doc-self">getWholeRange</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Returns the image subresource range encompassing the entire range of the image view.</p>
+<aside class="m-note m-default"><h4>Remark</h4><p>The returned range is relative to the view, therefore tp::ImageSubresourceRange::baseMipLevel and tp::ImageSubresourceRange::baseArrayLevel are always 0. To resolve the actual offsets to the underlying image, see tp::ImageView::resolveUnderlyingImage.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a71cb1f4fd53aa81e4c3b870d3417f703"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="structtp_1_1_vk_object_handle.html" class="m-doc">VkImageViewHandle</a> tp::<wbr />ImageView::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a71cb1f4fd53aa81e4c3b870d3417f703" class="m-doc-self">vkGetImageViewHandle</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Returns the associated Vulkan   <a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkImageView.html" class="m-doc-external">VkImageView</a> handle if it exists, <code>VK_NULL_HANDLE</code> otherwise.</p>
+<aside class="m-note m-default"><h4>Remark</h4><p>If the viewed image is a job-local image, the   <a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkImageView.html" class="m-doc-external">VkImageView</a> handle will exist only after the <a href="classtp_1_1_job.html" class="m-doc">tp::<wbr />Job</a> has been enqueued.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="af465ef45abb70c15f8f377d7cc2c1fd6"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="structtp_1_1_vk_object_handle.html" class="m-doc">VkImageHandle</a> tp::<wbr />ImageView::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af465ef45abb70c15f8f377d7cc2c1fd6" class="m-doc-self">vkResolveImageHandle</a>(</span><span class="m-doc-wrap">uint32_t* baseMipLevel,
+              uint32_t* baseArrayLevel) const</span></span>
+            </h3>
+            <p>Resolves and returns the underlying   <a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkImage.html" class="m-doc-external">VkImage</a> handle of this view or <code>VK_NULL_HANDLE</code> if it doesn&#x27;t exist.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">baseMipLevel</td>
+                  <td>An output parameter to which the base mip level of the view will be set if the underlying image exists.</td>
+                </tr>
+                <tr>
+                  <td>baseArrayLevel</td>
+                  <td>An output parameter to which the base array level of the view will be set if the underlying image exists.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>Remark</h4><p>If the viewed image is a job-local image, the underlying   <a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkImage.html" class="m-doc-external">VkImage</a> handle will exist only after the <a href="classtp_1_1_job.html" class="m-doc">tp::<wbr />Job</a> has been enqueued.</p></aside>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <p>Tephra Documentation. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.6 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

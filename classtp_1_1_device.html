@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>tp::Device class | Tephra Documentation</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="m-dark-tephra.css" />
+  <link rel="stylesheet" href="m-documentation.css" />
+  <link rel="stylesheet" href="m-theme-dark-tephra.css" />
+  <link rel="stylesheet" href="m-grid.css" />
+  <link rel="stylesheet" href="m-components.css" />
+  <link rel="stylesheet" href="m-layout.css" />
+  <link rel="stylesheet" href="pygments-dark.css" />
+  <link rel="stylesheet" href="pygments-console.css" />
+  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#2c1b15" />
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <span id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">
+        <a href="https://github.com/Dolkar/Tephra">Tephra</a> <span class="m-breadcrumb">|</span> <a href="index.html" class="m-thin">Documentation</a>
+      </span>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li><a href="user-guide.html">User Guide</a></li>
+            <li><a href="examples.html">Examples and Tests</a></li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="3">
+            <li><a href="changelog.html">Changelog</a></li>
+            <li><a href="https://github.com/Dolkar/Tephra/discussions">Discussions</a></li>
+            <li><a href="annotated.html">API</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          <span class="m-breadcrumb"><a href="namespacetp.html">tp</a>::<wbr/></span>Device <span class="m-thin">class</span>
+        </h1>
+        <p>Represents a connection to a <a href="classtp_1_1_physical_device.html" class="m-doc">tp::<wbr />PhysicalDevice</a>, through which its functionality can be accessed.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<p>A device object is the main means of interacting with the actual device on the platform. Through it most other objects in Tephra are created. Such objects can only be used with this device and other objects created from it. The device also provides the means to submit work to the device, by enqueueing <a href="classtp_1_1_job.html" class="m-doc">tp::<wbr />Job</a> objects to a particular <a href="structtp_1_1_device_queue.html" class="m-doc">tp::<wbr />DeviceQueue</a> with <a href="classtp_1_1_device.html#a1fb94f90c9cd0968b70750ec5be5a41b" class="m-doc">tp::<wbr />Device::<wbr />enqueueJob</a> and then submitting them for execution with <a href="classtp_1_1_device.html#a3d189d3b755453d419416c99cd279617" class="m-doc">tp::<wbr />Device::<wbr />submitQueuedJobs</a>.</p><aside class="m-note m-default"><h4>Remark</h4><p>Access to the <a href="classtp_1_1_device.html" class="m-doc">Device</a> object is internally synchronized, meaning it is safe to operate on it from multiple threads at the same time. However, beware that the device&#x27;s queues aren&#x27;t. Only one method may operate on a particular <a href="structtp_1_1_device_queue.html" class="m-doc">tp::<wbr />DeviceQueue</a> at any time.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="classtp_1_1_application.html#a415c0b6fcd2e3500caa020f2d96e90d9" class="m-doc">tp::<wbr />Application::<wbr />createDevice</a></p><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkDevice.html" class="m-doc-external">VkDevice</a></p></aside>
+        <section id="base-classes">
+          <h2><a href="#base-classes">Base classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              class <a href="classtp_1_1_ownable.html" class="m-doc">Ownable</a>
+            </dt>
+            <dd>A customizable base class that is used for objects returned by the API in an OwningPtr.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#aac252df59320053535d752f681b990e5" class="m-doc">addCleanupCallback</a>(</span><span class="m-doc-wrap"><a href="namespacetp.html#a727813b28780be1bccf259d8fe7736a0" class="m-doc">CleanupCallback</a> callback)</span>
+            </dt>
+            <dd>Stores a function that will be called after all currently enqueued or submitted jobs have finished executing on the device, allowing it to free external resources that were used up until this point in time.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab1f7c9dd53018893e062d06b01719c97" class="m-doc">allocateBuffer</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_buffer_setup.html" class="m-doc">BufferSetup</a>&amp; setup,
+              const <a href="structtp_1_1_memory_preference.html" class="m-doc">MemoryPreference</a>&amp; memoryPreference,
+              const char* debugName = nullptr) -&gt; <a href="namespacetp.html#ae6eb5f06ba3b55ca0acded49e2f6b754" class="m-doc">OwningPtr</a>&lt;<a href="classtp_1_1_buffer.html" class="m-doc">Buffer</a>&gt;</span>
+            </dt>
+            <dd>Creates a <a href="classtp_1_1_buffer.html" class="m-doc">tp::<wbr />Buffer</a> object according to the given setup structure and allocates memory for it according to the memory preference.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7e9b856dc12cb80a9e140f6c8f3a0aab" class="m-doc">allocateImage</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_image_setup.html" class="m-doc">ImageSetup</a>&amp; setup,
+              const char* debugName = nullptr) -&gt; <a href="namespacetp.html#ae6eb5f06ba3b55ca0acded49e2f6b754" class="m-doc">OwningPtr</a>&lt;<a href="classtp_1_1_image.html" class="m-doc">Image</a>&gt;</span>
+            </dt>
+            <dd>Creates a <a href="classtp_1_1_image.html" class="m-doc">tp::<wbr />Image</a> object according to the given setup structure and allocates memory for it.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a4278774363f368844a23f8aa311275d8" class="m-doc">compileComputePipelines</a>(</span><span class="m-doc-wrap"><a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const <a href="classtp_1_1_compute_pipeline_setup.html" class="m-doc">ComputePipelineSetup</a>*const&gt; pipelineSetups,
+              const <a href="classtp_1_1_pipeline_cache.html" class="m-doc">PipelineCache</a>* pipelineCache,
+              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;<a href="classtp_1_1_pipeline.html" class="m-doc">Pipeline</a>*const&gt; compiledPipelines)</span>
+            </dt>
+            <dd>Batch compiles multiple compute <a href="classtp_1_1_pipeline.html" class="m-doc">tp::<wbr />Pipeline</a> objects.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#ab23e1bd4fe693ef3cf5d8c2c92bb1deb" class="m-doc">compileGraphicsPipelines</a>(</span><span class="m-doc-wrap"><a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const <a href="classtp_1_1_graphics_pipeline_setup.html" class="m-doc">GraphicsPipelineSetup</a>*const&gt; pipelineSetups,
+              const <a href="classtp_1_1_pipeline_cache.html" class="m-doc">PipelineCache</a>* pipelineCache,
+              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;<a href="classtp_1_1_pipeline.html" class="m-doc">Pipeline</a>*const&gt; compiledPipelines)</span>
+            </dt>
+            <dd>Batch compiles multiple graphics <a href="classtp_1_1_pipeline.html" class="m-doc">tp::<wbr />Pipeline</a> objects.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a39b93e3ea48231a3e736779ff30346bc" class="m-doc">createDescriptorPool</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_descriptor_pool_setup.html" class="m-doc">DescriptorPoolSetup</a>&amp; setup,
+              const char* debugName = nullptr) -&gt; <a href="namespacetp.html#ae6eb5f06ba3b55ca0acded49e2f6b754" class="m-doc">OwningPtr</a>&lt;<a href="classtp_1_1_descriptor_pool.html" class="m-doc">DescriptorPool</a>&gt;</span>
+            </dt>
+            <dd>Creates a <a href="classtp_1_1_descriptor_pool.html" class="m-doc">tp::<wbr />DescriptorPool</a> object according to the given setup structure.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#afbd384e7dd4404796818f72625356f6f" class="m-doc">createDescriptorSetLayout</a>(</span><span class="m-doc-wrap"><a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const <a href="structtp_1_1_descriptor_binding.html" class="m-doc">DescriptorBinding</a>&gt; descriptorBindings,
+              const char* debugName = nullptr) -&gt; <a href="classtp_1_1_descriptor_set_layout.html" class="m-doc">DescriptorSetLayout</a></span>
+            </dt>
+            <dd>Creates a <a href="classtp_1_1_descriptor_set_layout.html" class="m-doc">tp::<wbr />DescriptorSetLayout</a> object from the given bindings.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae28ed84d6e1480c029b0dd3798c06a02" class="m-doc">createJobResourcePool</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_job_resource_pool_setup.html" class="m-doc">JobResourcePoolSetup</a>&amp; setup,
+              const char* debugName = nullptr) -&gt; <a href="namespacetp.html#ae6eb5f06ba3b55ca0acded49e2f6b754" class="m-doc">OwningPtr</a>&lt;<a href="classtp_1_1_job_resource_pool.html" class="m-doc">JobResourcePool</a>&gt;</span>
+            </dt>
+            <dd>Creates a <a href="classtp_1_1_job_resource_pool.html" class="m-doc">tp::<wbr />JobResourcePool</a> object according to the given setup structure.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4ae814c520d5c7e5a944f82d9d0ae4b7" class="m-doc">createPipelineCache</a>(</span><span class="m-doc-wrap"><a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const std::byte&gt; data = {}) -&gt; <a href="classtp_1_1_pipeline_cache.html" class="m-doc">PipelineCache</a></span>
+            </dt>
+            <dd>Creates a <a href="classtp_1_1_pipeline_cache.html" class="m-doc">tp::<wbr />PipelineCache</a> object.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a28a9c08a3b4f90add2d86cb9ed4e1924" class="m-doc">createPipelineLayout</a>(</span><span class="m-doc-wrap"><a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const <a href="classtp_1_1_descriptor_set_layout.html" class="m-doc">DescriptorSetLayout</a>*const&gt; descriptorSetLayouts,
+              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const <a href="structtp_1_1_push_constant_range.html" class="m-doc">PushConstantRange</a>&gt; pushConstantRanges = {},
+              const char* debugName = nullptr) -&gt; <a href="classtp_1_1_pipeline_layout.html" class="m-doc">PipelineLayout</a></span>
+            </dt>
+            <dd>Creates a <a href="classtp_1_1_pipeline_layout.html" class="m-doc">tp::<wbr />PipelineLayout</a> object from the given descriptor set and push constant layouts.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a6e8ef72bf6b97308b8b3a0c771665cd7" class="m-doc">createRenderPassLayout</a>(</span><span class="m-doc-wrap"><a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const <a href="structtp_1_1_attachment_description.html" class="m-doc">AttachmentDescription</a>&gt; attachmentDescriptions,
+              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const <a href="structtp_1_1_subpass_layout.html" class="m-doc">SubpassLayout</a>&gt; subpassLayouts,
+              const char* debugName = nullptr) -&gt; <a href="classtp_1_1_render_pass_layout.html" class="m-doc">RenderPassLayout</a></span>
+            </dt>
+            <dd>Creates a <a href="classtp_1_1_render_pass_layout.html" class="m-doc">tp::<wbr />RenderPassLayout</a> object from the given attachment descriptions and subpass layouts.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#adc4fbef87e05ca7209197ab272c4cc99" class="m-doc">createSampler</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_sampler_setup.html" class="m-doc">SamplerSetup</a>&amp; setup,
+              const char* debugName = nullptr) -&gt; <a href="classtp_1_1_sampler.html" class="m-doc">Sampler</a></span>
+            </dt>
+            <dd>Creates a <a href="classtp_1_1_sampler.html" class="m-doc">tp::<wbr />Sampler</a> object according to the given setup structure.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ade1b332f6a449b7bb2b4317dadb32d67" class="m-doc">createShaderModule</a>(</span><span class="m-doc-wrap"><a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const uint32_t&gt; shaderCode,
+              const char* debugName = nullptr) -&gt; <a href="classtp_1_1_shader_module.html" class="m-doc">ShaderModule</a></span>
+            </dt>
+            <dd>Creates a <a href="classtp_1_1_shader_module.html" class="m-doc">tp::<wbr />ShaderModule</a> object out of the given SPIR-V shader code.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ace820228473cae7aa2a9cf30d978483a" class="m-doc">createSwapchainKHR</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_swapchain_setup.html" class="m-doc">SwapchainSetup</a>&amp; setup,
+              <a href="classtp_1_1_swapchain.html" class="m-doc">Swapchain</a>* oldSwapchain = nullptr,
+              const char* debugName = nullptr) -&gt; <a href="namespacetp.html#ae6eb5f06ba3b55ca0acded49e2f6b754" class="m-doc">OwningPtr</a>&lt;<a href="classtp_1_1_swapchain.html" class="m-doc">Swapchain</a>&gt;</span>
+            </dt>
+            <dd>Creates a <a href="classtp_1_1_swapchain.html" class="m-doc">tp::<wbr />Swapchain</a> object according to the given setup structure.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1fb94f90c9cd0968b70750ec5be5a41b" class="m-doc">enqueueJob</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_device_queue.html" class="m-doc">DeviceQueue</a>&amp; queue,
+              <a href="classtp_1_1_job.html" class="m-doc">Job</a> job,
+              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const <a href="structtp_1_1_job_semaphore.html" class="m-doc">JobSemaphore</a>&gt; waitJobSemaphores = {},
+              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const <a href="structtp_1_1_external_semaphore.html" class="m-doc">ExternalSemaphore</a>&gt; waitExternalSemaphores = {},
+              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const <a href="structtp_1_1_external_semaphore.html" class="m-doc">ExternalSemaphore</a>&gt; signalExternalSemaphores = {}) -&gt; <a href="structtp_1_1_job_semaphore.html" class="m-doc">JobSemaphore</a></span>
+            </dt>
+            <dd>Enqueues the given <a href="classtp_1_1_job.html" class="m-doc">tp::<wbr />Job</a> to the specified queue, creating and initializing its local resources.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3e8698a40cdca1e5a6ce1ebaac63927e" class="m-doc">getMemoryHeapStatistics</a>(</span><span class="m-doc-wrap">uint32_t memoryHeapIndex) const -&gt; <a href="structtp_1_1_memory_heap_statistics.html" class="m-doc">MemoryHeapStatistics</a></span>
+            </dt>
+            <dd>Returns the statistics for the Vulkan memory heap with the given index.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a0455917394375f8fd22472c5dcaeb972" class="m-doc">isJobSemaphoreSignalled</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_job_semaphore.html" class="m-doc">JobSemaphore</a>&amp; semaphore) -&gt; bool</span>
+            </dt>
+            <dd>Returns <code>true</code> if the given <a href="structtp_1_1_job_semaphore.html" class="m-doc">tp::<wbr />JobSemaphore</a> has been signalled, meaning the job has finished executing on the device.</dd>
+            <dt id="a65d0479d5d669bdab98e4e6c26cf0195">
+              <span class="m-doc-wrap-bumper">auto <a href="#a65d0479d5d669bdab98e4e6c26cf0195" class="m-doc-self">mergePipelineCaches</a>(</span><span class="m-doc-wrap"><a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const <a href="classtp_1_1_pipeline_cache.html" class="m-doc">PipelineCache</a>*const&gt; srcCaches) -&gt; <a href="classtp_1_1_pipeline_cache.html" class="m-doc">PipelineCache</a></span>
+            </dt>
+            <dd>Creates a new <a href="classtp_1_1_pipeline_cache.html" class="m-doc">tp::<wbr />PipelineCache</a> object by merging together multiple existing <a href="classtp_1_1_pipeline_cache.html" class="m-doc">tp::<wbr />PipelineCache</a> objects.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a229a32a200a0848ecec78210ca09ab1d" class="m-doc">submitPresentImagesKHR</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_device_queue.html" class="m-doc">DeviceQueue</a>&amp; queue,
+              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;<a href="classtp_1_1_swapchain.html" class="m-doc">Swapchain</a>*const&gt; swapchains,
+              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const uint32_t&gt; imageIndices)</span>
+            </dt>
+            <dd>Submits a present operation to the specified queue for each of the given <a href="classtp_1_1_swapchain.html" class="m-doc">tp::<wbr />Swapchain</a> objects, queueing the given acquired image from each swapchain for presentation.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a3d189d3b755453d419416c99cd279617" class="m-doc">submitQueuedJobs</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_device_queue.html" class="m-doc">DeviceQueue</a>&amp; queue)</span>
+            </dt>
+            <dd>Submits all <a href="classtp_1_1_job.html" class="m-doc">tp::<wbr />Job</a> objects previously enqueued to the specified queue and schedules them to be executed on the device.</dd>
+            <dt id="aac2faa875acd46b70fa584acdbab14f8">
+              <span class="m-doc-wrap-bumper">void <a href="#aac2faa875acd46b70fa584acdbab14f8" class="m-doc-self">updateSemaphores</a>(</span><span class="m-doc-wrap">)</span>
+            </dt>
+            <dd>Updates the status of job semaphores and triggers the freeing of resources and calling cleanup callbacks if some jobs have finished executing since the last update.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab0c1d0f65c291890e9b51d34d84528da" class="m-doc">vkCreateExternalBuffer</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_buffer_setup.html" class="m-doc">BufferSetup</a>&amp; setup,
+              <a href="classtp_1_1_lifeguard.html" class="m-doc">Lifeguard</a>&lt;<a href="structtp_1_1_vk_object_handle.html" class="m-doc">VkBufferHandle</a>&gt;&amp;&amp; bufferHandle,
+              <a href="classtp_1_1_lifeguard.html" class="m-doc">Lifeguard</a>&lt;<a href="structtp_1_1_vk_object_handle.html" class="m-doc">VmaAllocationHandle</a>&gt;&amp;&amp; memoryAllocationHandle,
+              const char* debugName = nullptr) -&gt; <a href="namespacetp.html#ae6eb5f06ba3b55ca0acded49e2f6b754" class="m-doc">OwningPtr</a>&lt;<a href="classtp_1_1_buffer.html" class="m-doc">Buffer</a>&gt;</span>
+            </dt>
+            <dd>Creates a <a href="classtp_1_1_buffer.html" class="m-doc">tp::<wbr />Buffer</a> object out of a raw Vulkan buffer handle and an optional VMA memory allocation handle.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a75969925a0cbafbdfdc8c4163cfa0f5e" class="m-doc">vkCreateExternalImage</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_image_setup.html" class="m-doc">ImageSetup</a>&amp; setup,
+              <a href="classtp_1_1_lifeguard.html" class="m-doc">Lifeguard</a>&lt;<a href="structtp_1_1_vk_object_handle.html" class="m-doc">VkImageHandle</a>&gt;&amp;&amp; imageHandle,
+              <a href="classtp_1_1_lifeguard.html" class="m-doc">Lifeguard</a>&lt;<a href="structtp_1_1_vk_object_handle.html" class="m-doc">VmaAllocationHandle</a>&gt;&amp;&amp; memoryAllocationHandle,
+              const char* debugName = nullptr) -&gt; <a href="namespacetp.html#ae6eb5f06ba3b55ca0acded49e2f6b754" class="m-doc">OwningPtr</a>&lt;<a href="classtp_1_1_image.html" class="m-doc">Image</a>&gt;</span>
+            </dt>
+            <dd>Creates a <a href="classtp_1_1_image.html" class="m-doc">tp::<wbr />Image</a> object out of a raw Vulkan image handle and an optional VMA memory allocation handle.</dd>
+            <dt id="a0c36ebc5af1d5a1e12ed2427481bc843">
+              <span class="m-doc-wrap-bumper">auto <a href="#a0c36ebc5af1d5a1e12ed2427481bc843" class="m-doc-self">vkGetDeviceHandle</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="structtp_1_1_vk_object_handle.html" class="m-doc">VkDeviceHandle</a></span>
+            </dt>
+            <dd>Returns the Vulkan   <a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkDevice.html" class="m-doc-external">VkDevice</a> handle.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a832e021603ef88a515b25c3c71eb03ac" class="m-doc">vkGetQueueHandle</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_device_queue.html" class="m-doc">DeviceQueue</a>&amp; queue) const -&gt; <a href="structtp_1_1_vk_object_handle.html" class="m-doc">VkQueueHandle</a></span>
+            </dt>
+            <dd>Returns the Vulkan   <a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkQueue.html" class="m-doc-external">VkQueue</a> handle associated with the given <a href="structtp_1_1_device_queue.html" class="m-doc">tp::<wbr />DeviceQueue</a>.</dd>
+            <dt id="a59bf909458f12faa276cc3deeffd8334">
+              <span class="m-doc-wrap-bumper">auto <a href="#a59bf909458f12faa276cc3deeffd8334" class="m-doc-self">vkLoadDeviceProcedure</a>(</span><span class="m-doc-wrap">const char* procedureName) const -&gt; void*</span>
+            </dt>
+            <dd>Loads a Vulkan device procedure with the given name and returns a pointer to it, or <code>nullptr</code> if not successful.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename TypedHandle&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1100041005d269717f7489e9037d6b1f" class="m-doc">vkMakeHandleLifeguard</a>(</span><span class="m-doc-wrap">TypedHandle vkHandle) -&gt; <a href="classtp_1_1_lifeguard.html" class="m-doc">Lifeguard</a>&lt;TypedHandle&gt;</span>
+            </dt>
+            <dd>Wraps the given Vulkan handle object in an owning <a href="classtp_1_1_lifeguard.html" class="m-doc">tp::<wbr />Lifeguard</a>, ensuring its safe deletion after the lifeguard gets destroyed. Example usage: <code>device-&gt;vkMakeHandleLifeguard(VkImageHandle(vkImage))</code></dd>
+            <dt id="aea5c25785b3480432a167ff8e9ab0da4">
+              <span class="m-doc-wrap-bumper">auto <a href="#aea5c25785b3480432a167ff8e9ab0da4" class="m-doc-self">vmaGetAllocatorHandle</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="structtp_1_1_vk_object_handle.html" class="m-doc">VmaAllocatorHandle</a></span>
+            </dt>
+            <dd>Returns the VMA   &lt;a href=&#x27;<a href="https://gpuopen-librariesandsdks.github.io/VulkanMemoryAllocator/html/struct_vma_allocator.html" class="m-doc-external">https://gpuopen-librariesandsdks.github.io/VulkanMemoryAllocator/html/struct_<wbr />vma_<wbr />allocator.html</a>&quot;&gt;VmaAllocator handle.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a9bfb80a23eb821a93abe25945f914bda" class="m-doc">waitForIdle</a>(</span><span class="m-doc-wrap">)</span>
+            </dt>
+            <dd>Waits until the device becomes idle. It guarantees that all submitted jobs have finished executing and their corresponding semaphores have been signalled.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aba627ca9495503070e0e2fb2f2cbfea5" class="m-doc">waitForJobSemaphores</a>(</span><span class="m-doc-wrap"><a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const <a href="structtp_1_1_job_semaphore.html" class="m-doc">JobSemaphore</a>&gt; semaphores,
+              bool waitAll = true,
+              <a href="structtp_1_1_timeout.html" class="m-doc">Timeout</a> timeout = <a href="structtp_1_1_timeout.html#ae1e03a7254db84ede81055aac1c843d2" class="m-doc">Timeout::<wbr />Indefinite</a>()) -&gt; bool</span>
+            </dt>
+            <dd>Waits until the given <a href="structtp_1_1_job_semaphore.html" class="m-doc">tp::<wbr />JobSemaphore</a> handles have been signalled or until the timeout has been reached.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="aac252df59320053535d752f681b990e5"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />Device::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aac252df59320053535d752f681b990e5" class="m-doc-self">addCleanupCallback</a>(</span><span class="m-doc-wrap"><a href="namespacetp.html#a727813b28780be1bccf259d8fe7736a0" class="m-doc">CleanupCallback</a> callback)</span></span>
+            </h3>
+            <p>Stores a function that will be called after all currently enqueued or submitted jobs have finished executing on the device, allowing it to free external resources that were used up until this point in time.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">callback</td>
+                  <td>The function to be called.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>Remark</h4><p>The function will <strong>not</strong> be called the moment the semaphores become signalled. Their status is only checked occasionally as part of various other API calls. This update can be triggered explicitly through <a href="classtp_1_1_device.html#aac2faa875acd46b70fa584acdbab14f8" class="m-doc">tp::<wbr />Device::<wbr />updateSemaphores</a>.</p><p>Other device methods that operate on queues (e.g. enqueuing a follow-up job) must <strong>not</strong> be called from within the callback function.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="ab1f7c9dd53018893e062d06b01719c97"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="namespacetp.html#ae6eb5f06ba3b55ca0acded49e2f6b754" class="m-doc">OwningPtr</a>&lt;<a href="classtp_1_1_buffer.html" class="m-doc">Buffer</a>&gt; tp::<wbr />Device::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab1f7c9dd53018893e062d06b01719c97" class="m-doc-self">allocateBuffer</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_buffer_setup.html" class="m-doc">BufferSetup</a>&amp; setup,
+              const <a href="structtp_1_1_memory_preference.html" class="m-doc">MemoryPreference</a>&amp; memoryPreference,
+              const char* debugName = nullptr)</span></span>
+            </h3>
+            <p>Creates a <a href="classtp_1_1_buffer.html" class="m-doc">tp::<wbr />Buffer</a> object according to the given setup structure and allocates memory for it according to the memory preference.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">setup</td>
+                  <td>The setup structure describing the object.</td>
+                </tr>
+                <tr>
+                  <td>memoryPreference</td>
+                  <td>The memory preference progression that will be used for allocating memory for the object.</td>
+                </tr>
+                <tr>
+                  <td>debugName</td>
+                  <td>The debug name identifier for the object.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a7e9b856dc12cb80a9e140f6c8f3a0aab"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="namespacetp.html#ae6eb5f06ba3b55ca0acded49e2f6b754" class="m-doc">OwningPtr</a>&lt;<a href="classtp_1_1_image.html" class="m-doc">Image</a>&gt; tp::<wbr />Device::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7e9b856dc12cb80a9e140f6c8f3a0aab" class="m-doc-self">allocateImage</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_image_setup.html" class="m-doc">ImageSetup</a>&amp; setup,
+              const char* debugName = nullptr)</span></span>
+            </h3>
+            <p>Creates a <a href="classtp_1_1_image.html" class="m-doc">tp::<wbr />Image</a> object according to the given setup structure and allocates memory for it.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">setup</td>
+                  <td>The setup structure describing the object.</td>
+                </tr>
+                <tr>
+                  <td>debugName</td>
+                  <td>The debug name identifier for the object.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a4278774363f368844a23f8aa311275d8"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />Device::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4278774363f368844a23f8aa311275d8" class="m-doc-self">compileComputePipelines</a>(</span><span class="m-doc-wrap"><a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const <a href="classtp_1_1_compute_pipeline_setup.html" class="m-doc">ComputePipelineSetup</a>*const&gt; pipelineSetups,
+              const <a href="classtp_1_1_pipeline_cache.html" class="m-doc">PipelineCache</a>* pipelineCache,
+              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;<a href="classtp_1_1_pipeline.html" class="m-doc">Pipeline</a>*const&gt; compiledPipelines)</span></span>
+            </h3>
+            <p>Batch compiles multiple compute <a href="classtp_1_1_pipeline.html" class="m-doc">tp::<wbr />Pipeline</a> objects.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">pipelineSetups</td>
+                  <td>The setup structures describing the compute pipelines that are to be compiled.</td>
+                </tr>
+                <tr>
+                  <td>pipelineCache</td>
+                  <td>The <a href="classtp_1_1_pipeline_cache.html" class="m-doc">tp::<wbr />PipelineCache</a> object to be used to accelerate the compilation, can be nullptr.</td>
+                </tr>
+                <tr>
+                  <td>compiledPipelines</td>
+                  <td>An output array of pointers to <a href="classtp_1_1_pipeline.html" class="m-doc">tp::<wbr />Pipeline</a> objects that will represent the compiled pipelines. The size of this array must match the size of <code>pipelineSetups</code> and all of the elements must point be valid pointers.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>Remark</h4><p><a href="classtp_1_1_pipeline.html" class="m-doc">Pipeline</a> compilation can be slow. The use of a tp::pipelineCache is recommended as is splitting the pipeline compilation into multiple threads.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="ab23e1bd4fe693ef3cf5d8c2c92bb1deb"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />Device::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab23e1bd4fe693ef3cf5d8c2c92bb1deb" class="m-doc-self">compileGraphicsPipelines</a>(</span><span class="m-doc-wrap"><a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const <a href="classtp_1_1_graphics_pipeline_setup.html" class="m-doc">GraphicsPipelineSetup</a>*const&gt; pipelineSetups,
+              const <a href="classtp_1_1_pipeline_cache.html" class="m-doc">PipelineCache</a>* pipelineCache,
+              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;<a href="classtp_1_1_pipeline.html" class="m-doc">Pipeline</a>*const&gt; compiledPipelines)</span></span>
+            </h3>
+            <p>Batch compiles multiple graphics <a href="classtp_1_1_pipeline.html" class="m-doc">tp::<wbr />Pipeline</a> objects.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">pipelineSetups</td>
+                  <td>The setup structures describing the graphics pipelines that are to be compiled.</td>
+                </tr>
+                <tr>
+                  <td>pipelineCache</td>
+                  <td>The <a href="classtp_1_1_pipeline_cache.html" class="m-doc">tp::<wbr />PipelineCache</a> object to be used to accelerate the compilation, can be nullptr.</td>
+                </tr>
+                <tr>
+                  <td>compiledPipelines</td>
+                  <td>An output array of pointers to <a href="classtp_1_1_pipeline.html" class="m-doc">tp::<wbr />Pipeline</a> objects that will represent the compiled pipelines. The size of this array must match the size of <code>pipelineSetups</code> and all of the elements must point be valid pointers.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>Remark</h4><p><a href="classtp_1_1_pipeline.html" class="m-doc">Pipeline</a> compilation can be slow. The use of a tp::pipelineCache is recommended as is splitting the pipeline compilation into multiple threads.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a39b93e3ea48231a3e736779ff30346bc"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="namespacetp.html#ae6eb5f06ba3b55ca0acded49e2f6b754" class="m-doc">OwningPtr</a>&lt;<a href="classtp_1_1_descriptor_pool.html" class="m-doc">DescriptorPool</a>&gt; tp::<wbr />Device::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a39b93e3ea48231a3e736779ff30346bc" class="m-doc-self">createDescriptorPool</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_descriptor_pool_setup.html" class="m-doc">DescriptorPoolSetup</a>&amp; setup,
+              const char* debugName = nullptr)</span></span>
+            </h3>
+            <p>Creates a <a href="classtp_1_1_descriptor_pool.html" class="m-doc">tp::<wbr />DescriptorPool</a> object according to the given setup structure.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">setup</td>
+                  <td>The setup structure describing the object.</td>
+                </tr>
+                <tr>
+                  <td>debugName</td>
+                  <td>The debug name identifier for the object.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="afbd384e7dd4404796818f72625356f6f"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="classtp_1_1_descriptor_set_layout.html" class="m-doc">DescriptorSetLayout</a> tp::<wbr />Device::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afbd384e7dd4404796818f72625356f6f" class="m-doc-self">createDescriptorSetLayout</a>(</span><span class="m-doc-wrap"><a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const <a href="structtp_1_1_descriptor_binding.html" class="m-doc">DescriptorBinding</a>&gt; descriptorBindings,
+              const char* debugName = nullptr)</span></span>
+            </h3>
+            <p>Creates a <a href="classtp_1_1_descriptor_set_layout.html" class="m-doc">tp::<wbr />DescriptorSetLayout</a> object from the given bindings.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">descriptorBindings</td>
+                  <td>The descriptor bindings that define the layout.</td>
+                </tr>
+                <tr>
+                  <td>debugName</td>
+                  <td>The debug name identifier for the object.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ae28ed84d6e1480c029b0dd3798c06a02"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="namespacetp.html#ae6eb5f06ba3b55ca0acded49e2f6b754" class="m-doc">OwningPtr</a>&lt;<a href="classtp_1_1_job_resource_pool.html" class="m-doc">JobResourcePool</a>&gt; tp::<wbr />Device::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae28ed84d6e1480c029b0dd3798c06a02" class="m-doc-self">createJobResourcePool</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_job_resource_pool_setup.html" class="m-doc">JobResourcePoolSetup</a>&amp; setup,
+              const char* debugName = nullptr)</span></span>
+            </h3>
+            <p>Creates a <a href="classtp_1_1_job_resource_pool.html" class="m-doc">tp::<wbr />JobResourcePool</a> object according to the given setup structure.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">setup</td>
+                  <td>The setup structure describing the object.</td>
+                </tr>
+                <tr>
+                  <td>debugName</td>
+                  <td>The debug name identifier for the object.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a4ae814c520d5c7e5a944f82d9d0ae4b7"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="classtp_1_1_pipeline_cache.html" class="m-doc">PipelineCache</a> tp::<wbr />Device::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4ae814c520d5c7e5a944f82d9d0ae4b7" class="m-doc-self">createPipelineCache</a>(</span><span class="m-doc-wrap"><a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const std::byte&gt; data = {})</span></span>
+            </h3>
+            <p>Creates a <a href="classtp_1_1_pipeline_cache.html" class="m-doc">tp::<wbr />PipelineCache</a> object.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">data</td>
+                  <td>An optional parameter specifying the source binary data that the <a href="classtp_1_1_pipeline_cache.html" class="m-doc">tp::<wbr />PipelineCache</a> should be initialized to. This data would previously come from <a href="classtp_1_1_pipeline_cache.html#ab3553b9b3b2e5620349a87190087bb7f" class="m-doc">tp::<wbr />PipelineCache::<wbr />getData</a>.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>Remark</h4><p>The intention is that the data may be saved to disk between runs of the application to speed up compilation on the next launch if <a href="classtp_1_1_physical_device.html#a9cc2dd0980b2f2c936d80ef8dc544372" class="m-doc">tp::<wbr />PhysicalDevice::<wbr />pipelineCacheUUID</a> matches.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a28a9c08a3b4f90add2d86cb9ed4e1924"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="classtp_1_1_pipeline_layout.html" class="m-doc">PipelineLayout</a> tp::<wbr />Device::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a28a9c08a3b4f90add2d86cb9ed4e1924" class="m-doc-self">createPipelineLayout</a>(</span><span class="m-doc-wrap"><a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const <a href="classtp_1_1_descriptor_set_layout.html" class="m-doc">DescriptorSetLayout</a>*const&gt; descriptorSetLayouts,
+              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const <a href="structtp_1_1_push_constant_range.html" class="m-doc">PushConstantRange</a>&gt; pushConstantRanges = {},
+              const char* debugName = nullptr)</span></span>
+            </h3>
+            <p>Creates a <a href="classtp_1_1_pipeline_layout.html" class="m-doc">tp::<wbr />PipelineLayout</a> object from the given descriptor set and push constant layouts.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">descriptorSetLayouts</td>
+                  <td>An array describing the layout of descriptor sets that will be accessed by the pipelines and that will need to be bound to each set number.</td>
+                </tr>
+                <tr>
+                  <td>pushConstantRanges</td>
+                  <td>The layout of push constants that will be accessed by the pipelines.</td>
+                </tr>
+                <tr>
+                  <td>debugName</td>
+                  <td>The debug name identifier for the object.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>Remark</h4><p>The set number provided during the creation of each <a href="classtp_1_1_descriptor_set_layout.html" class="m-doc">tp::<wbr />DescriptorSetLayout</a> must match its index in the array.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a6e8ef72bf6b97308b8b3a0c771665cd7"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="classtp_1_1_render_pass_layout.html" class="m-doc">RenderPassLayout</a> tp::<wbr />Device::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6e8ef72bf6b97308b8b3a0c771665cd7" class="m-doc-self">createRenderPassLayout</a>(</span><span class="m-doc-wrap"><a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const <a href="structtp_1_1_attachment_description.html" class="m-doc">AttachmentDescription</a>&gt; attachmentDescriptions,
+              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const <a href="structtp_1_1_subpass_layout.html" class="m-doc">SubpassLayout</a>&gt; subpassLayouts,
+              const char* debugName = nullptr)</span></span>
+            </h3>
+            <p>Creates a <a href="classtp_1_1_render_pass_layout.html" class="m-doc">tp::<wbr />RenderPassLayout</a> object from the given attachment descriptions and subpass layouts.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">attachmentDescriptions</td>
+                  <td>Describes the layout and properties of attachments that will be used during a render pass executed with this layout.</td>
+                </tr>
+                <tr>
+                  <td>subpassLayouts</td>
+                  <td>Describes the layout and properties of the subpasses inside the render pass created with this layout.</td>
+                </tr>
+                <tr>
+                  <td>debugName</td>
+                  <td>The debug name identifier for the object.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="adc4fbef87e05ca7209197ab272c4cc99"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="classtp_1_1_sampler.html" class="m-doc">Sampler</a> tp::<wbr />Device::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adc4fbef87e05ca7209197ab272c4cc99" class="m-doc-self">createSampler</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_sampler_setup.html" class="m-doc">SamplerSetup</a>&amp; setup,
+              const char* debugName = nullptr)</span></span>
+            </h3>
+            <p>Creates a <a href="classtp_1_1_sampler.html" class="m-doc">tp::<wbr />Sampler</a> object according to the given setup structure.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">setup</td>
+                  <td>The setup structure describing the object.</td>
+                </tr>
+                <tr>
+                  <td>debugName</td>
+                  <td>The debug name identifier for the object.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ade1b332f6a449b7bb2b4317dadb32d67"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="classtp_1_1_shader_module.html" class="m-doc">ShaderModule</a> tp::<wbr />Device::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ade1b332f6a449b7bb2b4317dadb32d67" class="m-doc-self">createShaderModule</a>(</span><span class="m-doc-wrap"><a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const uint32_t&gt; shaderCode,
+              const char* debugName = nullptr)</span></span>
+            </h3>
+            <p>Creates a <a href="classtp_1_1_shader_module.html" class="m-doc">tp::<wbr />ShaderModule</a> object out of the given SPIR-V shader code.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">shaderCode</td>
+                  <td>The SPIR-V code to be used to create the shader module.</td>
+                </tr>
+                <tr>
+                  <td>debugName</td>
+                  <td>The debug name identifier for the object.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ace820228473cae7aa2a9cf30d978483a"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="namespacetp.html#ae6eb5f06ba3b55ca0acded49e2f6b754" class="m-doc">OwningPtr</a>&lt;<a href="classtp_1_1_swapchain.html" class="m-doc">Swapchain</a>&gt; tp::<wbr />Device::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ace820228473cae7aa2a9cf30d978483a" class="m-doc-self">createSwapchainKHR</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_swapchain_setup.html" class="m-doc">SwapchainSetup</a>&amp; setup,
+              <a href="classtp_1_1_swapchain.html" class="m-doc">Swapchain</a>* oldSwapchain = nullptr,
+              const char* debugName = nullptr)</span></span>
+            </h3>
+            <p>Creates a <a href="classtp_1_1_swapchain.html" class="m-doc">tp::<wbr />Swapchain</a> object according to the given setup structure.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">setup</td>
+                  <td>The setup structure describing the object.</td>
+                </tr>
+                <tr>
+                  <td>oldSwapchain</td>
+                  <td>An old swapchain to reuse resources of. It will be switched to a retired state and new images can no longer be acquired from it.</td>
+                </tr>
+                <tr>
+                  <td>debugName</td>
+                  <td>The debug name identifier for the object.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>Remark</h4><p>The use of this function requires the <a href="namespacetp_1_1_device_extension.html#adc15a5a63bec60fa63cc6ea59d1ea392" class="m-doc">tp::<wbr />DeviceExtension::<wbr />KHR_Swapchain</a> extension to be enabled.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a1fb94f90c9cd0968b70750ec5be5a41b"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="structtp_1_1_job_semaphore.html" class="m-doc">JobSemaphore</a> tp::<wbr />Device::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1fb94f90c9cd0968b70750ec5be5a41b" class="m-doc-self">enqueueJob</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_device_queue.html" class="m-doc">DeviceQueue</a>&amp; queue,
+              <a href="classtp_1_1_job.html" class="m-doc">Job</a> job,
+              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const <a href="structtp_1_1_job_semaphore.html" class="m-doc">JobSemaphore</a>&gt; waitJobSemaphores = {},
+              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const <a href="structtp_1_1_external_semaphore.html" class="m-doc">ExternalSemaphore</a>&gt; waitExternalSemaphores = {},
+              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const <a href="structtp_1_1_external_semaphore.html" class="m-doc">ExternalSemaphore</a>&gt; signalExternalSemaphores = {})</span></span>
+            </h3>
+            <p>Enqueues the given <a href="classtp_1_1_job.html" class="m-doc">tp::<wbr />Job</a> to the specified queue, creating and initializing its local resources.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">queue</td>
+                  <td>The queue that the job will be submitted to. The queue must match the queue used for creating the <a href="classtp_1_1_job_resource_pool.html" class="m-doc">tp::<wbr />JobResourcePool</a> object that is the parent of the enqueued job.</td>
+                </tr>
+                <tr>
+                  <td>job</td>
+                  <td>The <a href="classtp_1_1_job.html" class="m-doc">tp::<wbr />Job</a> object to enqueue. The ownership is transferred from the user over to the implementation.</td>
+                </tr>
+                <tr>
+                  <td>waitJobSemaphores</td>
+                  <td>A list of job semaphores that the job will wait on before actually executing on the device. It is only necessary to wait on semaphores of jobs submitted to other queues.</td>
+                </tr>
+                <tr>
+                  <td>waitExternalSemaphores</td>
+                  <td>A list of external semaphores the job will wait on before executing on the device.</td>
+                </tr>
+                <tr>
+                  <td>signalExternalSemaphores</td>
+                  <td>A list of external semaphores the job will signal once it finishes executing on the device.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Returns a job semaphore that will be signalled once the job finishes executing on the device.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>When the job gets enqueued, all of the job-local resources get created and become accessible, and command lists can be recorded. To actually schedule execution of the job on the device, <a href="classtp_1_1_device.html#a3d189d3b755453d419416c99cd279617" class="m-doc">tp::<wbr />Device::<wbr />submitQueuedJobs</a> must be called.</p><aside class="m-note m-default"><h4>Remark</h4><p>The semaphores specified in <code>waitJobSemaphores</code> must belong to jobs that will be submitted through <a href="classtp_1_1_device.html#a3d189d3b755453d419416c99cd279617" class="m-doc">tp::<wbr />Device::<wbr />submitQueuedJobs</a> before this job gets submitted. The same applies to <code>waitExternalSemaphores</code>, which must have a signalling operation submitted before this job.</p><p>It is recommended to call <a href="classtp_1_1_device.html#a3d189d3b755453d419416c99cd279617" class="m-doc">tp::<wbr />Device::<wbr />submitQueuedJobs</a> within a reasonable timeframe. Jobs that are hanging in the enqueued state may prevent some resources from being deallocated.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a3e8698a40cdca1e5a6ce1ebaac63927e"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="structtp_1_1_memory_heap_statistics.html" class="m-doc">MemoryHeapStatistics</a> tp::<wbr />Device::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3e8698a40cdca1e5a6ce1ebaac63927e" class="m-doc-self">getMemoryHeapStatistics</a>(</span><span class="m-doc-wrap">uint32_t memoryHeapIndex) const</span></span>
+            </h3>
+            <p>Returns the statistics for the Vulkan memory heap with the given index.</p>
+<aside class="m-note m-default"><h4>Remark</h4><p>Use <a href="classtp_1_1_physical_device.html#aaa1b24735e9d5042757ce745d08d2de4" class="m-doc">tp::<wbr />PhysicalDevice::<wbr />getMemoryLocationInfo</a> to retrieve the heap index associated with a particular <a href="namespacetp.html#a0ae67108bd96881f5af690bbec57c181" class="m-doc">tp::<wbr />MemoryLocation</a>.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a0455917394375f8fd22472c5dcaeb972"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">bool tp::<wbr />Device::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0455917394375f8fd22472c5dcaeb972" class="m-doc-self">isJobSemaphoreSignalled</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_job_semaphore.html" class="m-doc">JobSemaphore</a>&amp; semaphore)</span></span>
+            </h3>
+            <p>Returns <code>true</code> if the given <a href="structtp_1_1_job_semaphore.html" class="m-doc">tp::<wbr />JobSemaphore</a> has been signalled, meaning the job has finished executing on the device.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">semaphore</td>
+                  <td>The job semaphore to query the state of.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a229a32a200a0848ecec78210ca09ab1d"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />Device::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a229a32a200a0848ecec78210ca09ab1d" class="m-doc-self">submitPresentImagesKHR</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_device_queue.html" class="m-doc">DeviceQueue</a>&amp; queue,
+              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;<a href="classtp_1_1_swapchain.html" class="m-doc">Swapchain</a>*const&gt; swapchains,
+              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const uint32_t&gt; imageIndices)</span></span>
+            </h3>
+            <p>Submits a present operation to the specified queue for each of the given <a href="classtp_1_1_swapchain.html" class="m-doc">tp::<wbr />Swapchain</a> objects, queueing the given acquired image from each swapchain for presentation.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">queue</td>
+                  <td>The queue that the present operation will be submitted to.</td>
+                </tr>
+                <tr>
+                  <td>swapchains</td>
+                  <td>An array of swapchains whose images will be presented.</td>
+                </tr>
+                <tr>
+                  <td>imageIndices</td>
+                  <td>An array of indices of the acquired swapchain images to be presented. The indices should be the <a href="structtp_1_1_acquired_image_info.html#ad1b88181ba7229db85e8be5d60a9d3cc" class="m-doc">tp::<wbr />AcquiredImageInfo::<wbr />imageIndex</a> of an image previously acquired from the corresponding swapchain in the <code>swapchains</code> array.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>Remark</h4><p>The sizes of the <code>swapchains</code> and <code>imageIndices</code> arrays must be the same.</p><p>Each image to be presented must have been exported with the <a href="classtp_1_1_job.html#a967f5a891d8e50cb73d0f6b7c6cec066" class="m-doc">tp::<wbr />Job::<wbr />cmdExportResource</a> command to the presenting queue for present operations as part of a previously submitted job.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="classtp_1_1_swapchain.html" class="m-doc">tp::<wbr />Swapchain</a> documentation for an overview of the presentation workflow.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a3d189d3b755453d419416c99cd279617"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />Device::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3d189d3b755453d419416c99cd279617" class="m-doc-self">submitQueuedJobs</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_device_queue.html" class="m-doc">DeviceQueue</a>&amp; queue)</span></span>
+            </h3>
+            <p>Submits all <a href="classtp_1_1_job.html" class="m-doc">tp::<wbr />Job</a> objects previously enqueued to the specified queue and schedules them to be executed on the device.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">queue</td>
+                  <td>The queue to have its enqueued jobs submitted for execution.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ab0c1d0f65c291890e9b51d34d84528da"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="namespacetp.html#ae6eb5f06ba3b55ca0acded49e2f6b754" class="m-doc">OwningPtr</a>&lt;<a href="classtp_1_1_buffer.html" class="m-doc">Buffer</a>&gt; tp::<wbr />Device::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab0c1d0f65c291890e9b51d34d84528da" class="m-doc-self">vkCreateExternalBuffer</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_buffer_setup.html" class="m-doc">BufferSetup</a>&amp; setup,
+              <a href="classtp_1_1_lifeguard.html" class="m-doc">Lifeguard</a>&lt;<a href="structtp_1_1_vk_object_handle.html" class="m-doc">VkBufferHandle</a>&gt;&amp;&amp; bufferHandle,
+              <a href="classtp_1_1_lifeguard.html" class="m-doc">Lifeguard</a>&lt;<a href="structtp_1_1_vk_object_handle.html" class="m-doc">VmaAllocationHandle</a>&gt;&amp;&amp; memoryAllocationHandle,
+              const char* debugName = nullptr)</span></span>
+            </h3>
+            <p>Creates a <a href="classtp_1_1_buffer.html" class="m-doc">tp::<wbr />Buffer</a> object out of a raw Vulkan buffer handle and an optional VMA memory allocation handle.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">setup</td>
+                  <td>The setup structure that would result in a similar buffer if created with <a href="classtp_1_1_device.html#ab1f7c9dd53018893e062d06b01719c97" class="m-doc">tp::<wbr />Device::<wbr />allocateBuffer</a>.</td>
+                </tr>
+                <tr>
+                  <td>bufferHandle</td>
+                  <td>A lifeguard handle for a Vulkan buffer created from the same Vulkan device as returned by <a href="classtp_1_1_device.html#a0c36ebc5af1d5a1e12ed2427481bc843" class="m-doc">tp::<wbr />Device::<wbr />vkGetDeviceHandle</a>.</td>
+                </tr>
+                <tr>
+                  <td>memoryAllocationHandle</td>
+                  <td>A lifeguard handle for the associated VMA memory allocation that has been allocated with the same VMA allocator as returned by <a href="classtp_1_1_device.html#aea5c25785b3480432a167ff8e9ab0da4" class="m-doc">tp::<wbr />Device::<wbr />vmaGetAllocatorHandle</a>. It can be null, but if it is, <a href="classtp_1_1_buffer.html#a2922fe5d7595ba0dfe93d202f54d6747" class="m-doc">tp::<wbr />Buffer::<wbr />mapForHostAccess</a>, <a href="classtp_1_1_buffer.html#ad09f3bf5312b3e5d8c80d15eb1b70295" class="m-doc">tp::<wbr />Buffer::<wbr />getMemoryLocation</a> and <a href="classtp_1_1_buffer.html#a1328e75d47779bcbad60fd865b1c93a4" class="m-doc">tp::<wbr />Buffer::<wbr />getRequiredViewAlignment</a> must not be called on the resulting buffer.</td>
+                </tr>
+                <tr>
+                  <td>debugName</td>
+                  <td>The debug name identifier for the object.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>Remark</h4><p><code>bufferHandle</code> must have been created from the same Vulkan device as returned by <a href="classtp_1_1_device.html#a0c36ebc5af1d5a1e12ed2427481bc843" class="m-doc">tp::<wbr />Device::<wbr />vkGetDeviceHandle</a>. <code>memoryAllocationHandle</code> must have</p><p>The lifeguard handles can be either owning or non-owning, which determines whether the handles will be properly disposed of when the buffer is destroyed. See <a href="classtp_1_1_device.html#a1100041005d269717f7489e9037d6b1f" class="m-doc">tp::<wbr />Device::<wbr />vkMakeHandleLifeguard</a> or <a href="classtp_1_1_lifeguard.html#a2a3f1ed8111198255e0a353bcb861ccd" class="m-doc">tp::<wbr />Lifeguard::<wbr />NonOwning</a>.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a75969925a0cbafbdfdc8c4163cfa0f5e"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="namespacetp.html#ae6eb5f06ba3b55ca0acded49e2f6b754" class="m-doc">OwningPtr</a>&lt;<a href="classtp_1_1_image.html" class="m-doc">Image</a>&gt; tp::<wbr />Device::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a75969925a0cbafbdfdc8c4163cfa0f5e" class="m-doc-self">vkCreateExternalImage</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_image_setup.html" class="m-doc">ImageSetup</a>&amp; setup,
+              <a href="classtp_1_1_lifeguard.html" class="m-doc">Lifeguard</a>&lt;<a href="structtp_1_1_vk_object_handle.html" class="m-doc">VkImageHandle</a>&gt;&amp;&amp; imageHandle,
+              <a href="classtp_1_1_lifeguard.html" class="m-doc">Lifeguard</a>&lt;<a href="structtp_1_1_vk_object_handle.html" class="m-doc">VmaAllocationHandle</a>&gt;&amp;&amp; memoryAllocationHandle,
+              const char* debugName = nullptr)</span></span>
+            </h3>
+            <p>Creates a <a href="classtp_1_1_image.html" class="m-doc">tp::<wbr />Image</a> object out of a raw Vulkan image handle and an optional VMA memory allocation handle.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">setup</td>
+                  <td>The setup structure that would result in a similar image if created with <a href="classtp_1_1_device.html#a7e9b856dc12cb80a9e140f6c8f3a0aab" class="m-doc">tp::<wbr />Device::<wbr />allocateImage</a>.</td>
+                </tr>
+                <tr>
+                  <td>imageHandle</td>
+                  <td>A lifeguard handle for a Vulkan image created from the same Vulkan device as returned by <a href="classtp_1_1_device.html#a0c36ebc5af1d5a1e12ed2427481bc843" class="m-doc">tp::<wbr />Device::<wbr />vkGetDeviceHandle</a>.</td>
+                </tr>
+                <tr>
+                  <td>memoryAllocationHandle</td>
+                  <td>A lifeguard handle for the associated VMA memory allocation that has been allocated with the same VMA allocator as returned by <a href="classtp_1_1_device.html#aea5c25785b3480432a167ff8e9ab0da4" class="m-doc">tp::<wbr />Device::<wbr />vmaGetAllocatorHandle</a>. It can be null, but if it is, <a href="classtp_1_1_image.html#af565fc04c6e7c1255c818708f7f33e4d" class="m-doc">tp::<wbr />Image::<wbr />getMemoryLocation</a> must not be called on the resulting image.</td>
+                </tr>
+                <tr>
+                  <td>debugName</td>
+                  <td>The debug name identifier for the object.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>Remark</h4><p>The lifeguard handles can be either owning or non-owning, which determines whether the handles will be properly disposed of when the image is destroyed. See <a href="classtp_1_1_device.html#a1100041005d269717f7489e9037d6b1f" class="m-doc">tp::<wbr />Device::<wbr />vkMakeHandleLifeguard</a> or <a href="classtp_1_1_lifeguard.html#a2a3f1ed8111198255e0a353bcb861ccd" class="m-doc">tp::<wbr />Lifeguard::<wbr />NonOwning</a>.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a832e021603ef88a515b25c3c71eb03ac"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="structtp_1_1_vk_object_handle.html" class="m-doc">VkQueueHandle</a> tp::<wbr />Device::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a832e021603ef88a515b25c3c71eb03ac" class="m-doc-self">vkGetQueueHandle</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_device_queue.html" class="m-doc">DeviceQueue</a>&amp; queue) const</span></span>
+            </h3>
+            <p>Returns the Vulkan   <a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkQueue.html" class="m-doc-external">VkQueue</a> handle associated with the given <a href="structtp_1_1_device_queue.html" class="m-doc">tp::<wbr />DeviceQueue</a>.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">queue</td>
+                  <td>The queue to return the handle for.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a1100041005d269717f7489e9037d6b1f"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename TypedHandle&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="classtp_1_1_lifeguard.html" class="m-doc">Lifeguard</a>&lt;TypedHandle&gt; tp::<wbr />Device::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1100041005d269717f7489e9037d6b1f" class="m-doc-self">vkMakeHandleLifeguard</a>(</span><span class="m-doc-wrap">TypedHandle vkHandle)</span></span>
+            </h3>
+            <p>Wraps the given Vulkan handle object in an owning <a href="classtp_1_1_lifeguard.html" class="m-doc">tp::<wbr />Lifeguard</a>, ensuring its safe deletion after the lifeguard gets destroyed. Example usage: <code>device-&gt;vkMakeHandleLifeguard(VkImageHandle(vkImage))</code></p>
+<aside class="m-note m-default"><h4>Remark</h4><p>The handle must have been created from this device.</p><p>A non-owning handle can be created with <a href="classtp_1_1_lifeguard.html#a2a3f1ed8111198255e0a353bcb861ccd" class="m-doc">tp::<wbr />Lifeguard::<wbr />NonOwning</a>.</p><p>Only certain types of handles (those that Tephra knows how to destroy) are supported. For others, consider using <a href="classtp_1_1_device.html#aac252df59320053535d752f681b990e5" class="m-doc">tp::<wbr />Device::<wbr />addCleanupCallback</a> instead.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a9bfb80a23eb821a93abe25945f914bda"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />Device::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9bfb80a23eb821a93abe25945f914bda" class="m-doc-self">waitForIdle</a>(</span><span class="m-doc-wrap">)</span></span>
+            </h3>
+            <p>Waits until the device becomes idle. It guarantees that all submitted jobs have finished executing and their corresponding semaphores have been signalled.</p>
+<aside class="m-note m-default"><h4>Remark</h4><p>Waiting alone does not guarantee that the data will be visible to the host. An appropriate export operation is also required.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="aba627ca9495503070e0e2fb2f2cbfea5"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">bool tp::<wbr />Device::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aba627ca9495503070e0e2fb2f2cbfea5" class="m-doc-self">waitForJobSemaphores</a>(</span><span class="m-doc-wrap"><a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const <a href="structtp_1_1_job_semaphore.html" class="m-doc">JobSemaphore</a>&gt; semaphores,
+              bool waitAll = true,
+              <a href="structtp_1_1_timeout.html" class="m-doc">Timeout</a> timeout = <a href="structtp_1_1_timeout.html#ae1e03a7254db84ede81055aac1c843d2" class="m-doc">Timeout::<wbr />Indefinite</a>())</span></span>
+            </h3>
+            <p>Waits until the given <a href="structtp_1_1_job_semaphore.html" class="m-doc">tp::<wbr />JobSemaphore</a> handles have been signalled or until the timeout has been reached.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">semaphores</td>
+                  <td>The semaphores to wait for.</td>
+                </tr>
+                <tr>
+                  <td>waitAll</td>
+                  <td>If <code>true</code>, the function returns when all of the given semaphores have been signalled. Otherwise, it returns when at least one of them has been signalled.</td>
+                </tr>
+                <tr>
+                  <td>timeout</td>
+                  <td>The timeout limit or waiting.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Returns <code>true</code> if all (or at least one of, depending on the <code>waitAll</code> parameter) the semaphores have been signalled. Returns <code>false</code> when the timeout has been reached and the semaphores are still unsignalled.</td>
+                </tr>
+              </tfoot>
+            </table>
+<aside class="m-note m-default"><h4>Remark</h4><p>The jobs signalling the semaphores must already be submitted for execution, otherwise the semaphores will never be signalled.</p><p>Waiting alone does not guarantee that the data will be visible to the host. An appropriate export operation is also required.</p></aside>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <p>Tephra Documentation. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.6 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

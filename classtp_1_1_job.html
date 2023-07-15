@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>tp::Job class | Tephra Documentation</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="m-dark-tephra.css" />
+  <link rel="stylesheet" href="m-documentation.css" />
+  <link rel="stylesheet" href="m-theme-dark-tephra.css" />
+  <link rel="stylesheet" href="m-grid.css" />
+  <link rel="stylesheet" href="m-components.css" />
+  <link rel="stylesheet" href="m-layout.css" />
+  <link rel="stylesheet" href="pygments-dark.css" />
+  <link rel="stylesheet" href="pygments-console.css" />
+  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#2c1b15" />
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <span id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">
+        <a href="https://github.com/Dolkar/Tephra">Tephra</a> <span class="m-breadcrumb">|</span> <a href="index.html" class="m-thin">Documentation</a>
+      </span>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li><a href="user-guide.html">User Guide</a></li>
+            <li><a href="examples.html">Examples and Tests</a></li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="3">
+            <li><a href="changelog.html">Changelog</a></li>
+            <li><a href="https://github.com/Dolkar/Tephra/discussions">Discussions</a></li>
+            <li><a href="annotated.html">API</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          <span class="m-breadcrumb"><a href="namespacetp.html">tp</a>::<wbr/></span>Job <span class="m-thin">class</span>
+        </h1>
+        <p>A job represents a single instance of work to be done on the device.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<p>A job is created in a recording state, in which its methods can be called for recording commands and allocating resources. The job can then be enqueued to a device queue by calling <a href="classtp_1_1_device.html#a1fb94f90c9cd0968b70750ec5be5a41b" class="m-doc">tp::<wbr />Device::<wbr />enqueueJob</a>, returning ownership of the handle and transitioning it to the enqueued state. To actually schedule the job for execution, <a href="classtp_1_1_device.html#a3d189d3b755453d419416c99cd279617" class="m-doc">tp::<wbr />Device::<wbr />submitQueuedJobs</a> needs to be called, moving it to the submitted state.</p><p>Buffers, images and descriptor sets can be allocated for use within the job and the render and compute lists it executes. This allocation is handled by the parent <a href="classtp_1_1_job_resource_pool.html" class="m-doc">tp::<wbr />JobResourcePool</a> and may be more efficient than a global allocation. These resources have a limited lifetime bound to the execution of the job and they may not be accessed outside of it.</p><aside class="m-note m-default"><h4>Remark</h4><p>All methods of <a href="classtp_1_1_job.html" class="m-doc">tp::<wbr />Job</a> and <a href="classtp_1_1_device.html#a1fb94f90c9cd0968b70750ec5be5a41b" class="m-doc">tp::<wbr />Device::<wbr />enqueueJob</a> also access the parent <a href="classtp_1_1_job_resource_pool.html" class="m-doc">tp::<wbr />JobResourcePool</a> that the job was created from. This access must be synchronized - no two threads may operate on jobs that were created from the same pool at the same time.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="classtp_1_1_job_resource_pool.html#ae3e43178d4d141772e605e47e13c9c8e" class="m-doc">tp::<wbr />JobResourcePool::<wbr />createJob</a></p><p><a href="classtp_1_1_device.html#a1fb94f90c9cd0968b70750ec5be5a41b" class="m-doc">tp::<wbr />Device::<wbr />enqueueJob</a></p></aside>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a10e5565ef8b6c2553c9d4572ac223852" class="m-doc">allocateLocalBuffer</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_buffer_setup.html" class="m-doc">BufferSetup</a>&amp; setup,
+              const char* debugName = nullptr) -&gt; <a href="classtp_1_1_buffer_view.html" class="m-doc">BufferView</a></span>
+            </dt>
+            <dd>Allocates a job-local buffer for use within this job.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac6bb755680a758beacd00637176b8f9e" class="m-doc">allocateLocalDescriptorSet</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_descriptor_set_layout.html" class="m-doc">DescriptorSetLayout</a>* descriptorSetLayout,
+              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const <a href="classtp_1_1_future_descriptor.html" class="m-doc">FutureDescriptor</a>&gt; descriptors,
+              const char* debugName = nullptr) -&gt; <a href="classtp_1_1_descriptor_set_view.html" class="m-doc">DescriptorSetView</a></span>
+            </dt>
+            <dd>Allocates a job-local descriptor set for use within this job.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a65f36e2c51ae63531c0f0ada99ac4f58" class="m-doc">allocateLocalImage</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_image_setup.html" class="m-doc">ImageSetup</a>&amp; setup,
+              const char* debugName = nullptr) -&gt; <a href="classtp_1_1_image_view.html" class="m-doc">ImageView</a></span>
+            </dt>
+            <dd>Allocates a job-local image for use within this job.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae59e1c14bc1cd1e7ecc2aa403d134a23" class="m-doc">allocatePreinitializedBuffer</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_buffer_setup.html" class="m-doc">BufferSetup</a>&amp; setup,
+              const <a href="structtp_1_1_memory_preference.html" class="m-doc">MemoryPreference</a>&amp; memoryPreference,
+              const char* debugName = nullptr) -&gt; <a href="classtp_1_1_buffer_view.html" class="m-doc">BufferView</a></span>
+            </dt>
+            <dd>Allocates a preinitialized buffer for use within this job, with initial contents provided outside of it.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a2f39a93b1597cde8e30a493daf444102" class="m-doc">cmdBeginDebugLabel</a>(</span><span class="m-doc-wrap">const char* name,
+              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;float&gt; color = {})</span>
+            </dt>
+            <dd>Begins a debug label, marking the following commands until the next <a href="classtp_1_1_job.html#a95656466061cff2de6c61a68e8d827f2" class="m-doc">tp::<wbr />Job::<wbr />cmdEndDebugLabel</a> with the given name and optional color for display in validation and debugging tools.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a24e3bb2bee2947f4312153b53f25fa35" class="m-doc">cmdBlitImage</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_image_view.html" class="m-doc">ImageView</a>&amp; srcImage,
+              const <a href="classtp_1_1_image_view.html" class="m-doc">ImageView</a>&amp; dstImage,
+              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const <a href="structtp_1_1_image_blit_region.html" class="m-doc">ImageBlitRegion</a>&gt; blitRegions,
+              <a href="namespacetp.html#ae199b5e28f6985b81882e95edb9f4858" class="m-doc">Filter</a> filter = Filter::Linear)</span>
+            </dt>
+            <dd>Copies regions of one image&#x27;s contents to another, potentially performing format conversion, arbitrary scaling and filtering.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a4aed4f4ac99e3090785561c937170f5b" class="m-doc">cmdClearImage</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_image_view.html" class="m-doc">ImageView</a>&amp; dstImage,
+              <a href="structtp_1_1_clear_value.html" class="m-doc">ClearValue</a> value)</span>
+            </dt>
+            <dd>Clears contents of the image to a fixed value.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a35673a68b54628a1dd79de5527a2c3c1" class="m-doc">cmdClearImage</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_image_view.html" class="m-doc">ImageView</a>&amp; dstImage,
+              <a href="structtp_1_1_clear_value.html" class="m-doc">ClearValue</a> value,
+              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const <a href="structtp_1_1_image_subresource_range.html" class="m-doc">ImageSubresourceRange</a>&gt; ranges)</span>
+            </dt>
+            <dd>Clears ranges of contents of the image to a fixed value.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a013f09d33bc1bd883c1fe64460d50e2c" class="m-doc">cmdCopyBuffer</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_buffer_view.html" class="m-doc">BufferView</a>&amp; srcBuffer,
+              const <a href="classtp_1_1_buffer_view.html" class="m-doc">BufferView</a>&amp; dstBuffer,
+              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const <a href="structtp_1_1_buffer_copy_region.html" class="m-doc">BufferCopyRegion</a>&gt; copyRegions)</span>
+            </dt>
+            <dd>Copies regions of one buffer&#x27;s contents to another.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#aba90522bc9701418d2615b9696e8f70b" class="m-doc">cmdCopyBufferToImage</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_buffer_view.html" class="m-doc">BufferView</a>&amp; srcBuffer,
+              const <a href="classtp_1_1_image_view.html" class="m-doc">ImageView</a>&amp; dstImage,
+              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const <a href="structtp_1_1_buffer_image_copy_region.html" class="m-doc">BufferImageCopyRegion</a>&gt; copyRegions)</span>
+            </dt>
+            <dd>Copies regions of a buffer&#x27;s contents to an image.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a697432214a7bd787fee2c303aa3ccd0d" class="m-doc">cmdCopyImage</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_image_view.html" class="m-doc">ImageView</a>&amp; srcImage,
+              const <a href="classtp_1_1_image_view.html" class="m-doc">ImageView</a>&amp; dstImage,
+              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const <a href="structtp_1_1_image_copy_region.html" class="m-doc">ImageCopyRegion</a>&gt; copyRegions)</span>
+            </dt>
+            <dd>Copies regions of one image&#x27;s contents to another.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a936867fb0b3bb0361db691b1d4732197" class="m-doc">cmdCopyImageToBuffer</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_image_view.html" class="m-doc">ImageView</a>&amp; srcImage,
+              const <a href="classtp_1_1_buffer_view.html" class="m-doc">BufferView</a>&amp; dstBuffer,
+              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const <a href="structtp_1_1_buffer_image_copy_region.html" class="m-doc">BufferImageCopyRegion</a>&gt; copyRegions)</span>
+            </dt>
+            <dd>Copies regions of an image&#x27;s contents to a buffer.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#aff9e156e1c971a4d2f43018a759202d0" class="m-doc">cmdDiscardContents</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_image_view.html" class="m-doc">ImageView</a>&amp; image)</span>
+            </dt>
+            <dd>Discards the contents of the image, making them undefined for future accesses. Doing this may potentially improve performance.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a395b7a2627f6569ede2df4a2c968152b" class="m-doc">cmdDiscardContents</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_image_view.html" class="m-doc">ImageView</a>&amp; image,
+              <a href="structtp_1_1_image_subresource_range.html" class="m-doc">ImageSubresourceRange</a> range)</span>
+            </dt>
+            <dd>Discards the contents of the image range, making them undefined for future accesses. Doing this may potentially improve performance.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a95656466061cff2de6c61a68e8d827f2" class="m-doc">cmdEndDebugLabel</a>(</span><span class="m-doc-wrap">)</span>
+            </dt>
+            <dd>Ends the last debug label. Must be preceded by <a href="classtp_1_1_job.html#a2f39a93b1597cde8e30a493daf444102" class="m-doc">tp::<wbr />Job::<wbr />cmdBeginDebugLabel</a>.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a3743dd4c6e7f8d56e153290543342afb" class="m-doc">cmdExecuteComputePass</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_compute_pass_setup.html" class="m-doc">ComputePassSetup</a>&amp; setup,
+              std::variant&lt;<a href="classtp_1_1_array_view.html" class="m-doc">ArrayView</a>&lt;<a href="classtp_1_1_compute_list.html" class="m-doc">ComputeList</a>&gt;, <a href="namespacetp.html#aa35536cf20aa7489b1e861514ec00ea4" class="m-doc">ComputeInlineCallback</a>&gt; commandRecording,
+              const char* debugName = nullptr)</span>
+            </dt>
+            <dd>Forms a compute pass that executes lists of compute commands.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#ab739735917361ff75d3b892339007815" class="m-doc">cmdExecuteRenderPass</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_render_pass_setup.html" class="m-doc">RenderPassSetup</a>&amp; setup,
+              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const std::variant&lt;<a href="classtp_1_1_array_view.html" class="m-doc">ArrayView</a>&lt;<a href="classtp_1_1_render_list.html" class="m-doc">RenderList</a>&gt;, <a href="namespacetp.html#abce3813304107869c695ab3e0bafa0fa" class="m-doc">RenderInlineCallback</a>&gt;&gt; subpassCommandRecording,
+              const char* debugName = nullptr)</span>
+            </dt>
+            <dd>Forms a render pass that executes lists of render commands in each of its subpasses.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a967f5a891d8e50cb73d0f6b7c6cec066" class="m-doc">cmdExportResource</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_buffer_view.html" class="m-doc">BufferView</a>&amp; buffer,
+              <a href="namespacetp.html#a35126e5e403003db788eb060b78e88bf" class="m-doc">ReadAccessMask</a> readAccessMask,
+              <a href="namespacetp.html#a8b32a8b4b40aee5fed67bc3c3d63ead7" class="m-doc">QueueType</a> targetQueueType = <a href="namespacetp.html#a8b32a8b4b40aee5fed67bc3c3d63ead7aec0fc0100c4fc1ce4eea230c3dc10360" class="m-doc">QueueType::<wbr />Undefined</a>)</span>
+            </dt>
+            <dd>Prepares a buffer for future read-only usages.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a87ba4f63e939f7d0366a605e1e03c5f0" class="m-doc">cmdExportResource</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_image_view.html" class="m-doc">ImageView</a>&amp; image,
+              const <a href="structtp_1_1_image_subresource_range.html" class="m-doc">ImageSubresourceRange</a>&amp; range,
+              <a href="namespacetp.html#a35126e5e403003db788eb060b78e88bf" class="m-doc">ReadAccessMask</a> readAccessMask,
+              <a href="namespacetp.html#a8b32a8b4b40aee5fed67bc3c3d63ead7" class="m-doc">QueueType</a> targetQueueType = <a href="namespacetp.html#a8b32a8b4b40aee5fed67bc3c3d63ead7aec0fc0100c4fc1ce4eea230c3dc10360" class="m-doc">QueueType::<wbr />Undefined</a>)</span>
+            </dt>
+            <dd>Prepares an image for future read-only usages.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#ad35589d87a8e8eafb7ad6900e665be71" class="m-doc">cmdExportResource</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_image_view.html" class="m-doc">ImageView</a>&amp; image,
+              <a href="namespacetp.html#a35126e5e403003db788eb060b78e88bf" class="m-doc">ReadAccessMask</a> readAccessMask,
+              <a href="namespacetp.html#a8b32a8b4b40aee5fed67bc3c3d63ead7" class="m-doc">QueueType</a> targetQueueType = <a href="namespacetp.html#a8b32a8b4b40aee5fed67bc3c3d63ead7aec0fc0100c4fc1ce4eea230c3dc10360" class="m-doc">QueueType::<wbr />Undefined</a>)</span>
+            </dt>
+            <dd>Prepares an image for future read-only usages.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a78f67cc52c918d52712ff22503bcdecf" class="m-doc">cmdFillBuffer</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_buffer_view.html" class="m-doc">BufferView</a>&amp; dstBuffer,
+              uint32_t value)</span>
+            </dt>
+            <dd>Fills the buffer with a fixed value.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a4acadcc8aab07803700471e28918713e" class="m-doc">cmdInsertDebugLabel</a>(</span><span class="m-doc-wrap">const char* name,
+              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;float&gt; color = {})</span>
+            </dt>
+            <dd>Inserts a debug label, marking the following commands with the given name and optional color for display in validation and debugging tools.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#ac74a3929dfcfb91e412f39a1539c09d5" class="m-doc">cmdResolveImage</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_image_view.html" class="m-doc">ImageView</a>&amp; srcImage,
+              const <a href="classtp_1_1_image_view.html" class="m-doc">ImageView</a>&amp; dstImage,
+              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const <a href="structtp_1_1_image_copy_region.html" class="m-doc">ImageCopyRegion</a>&gt; resolveRegions)</span>
+            </dt>
+            <dd>Resolves regions of a multisampled color image to a single sample color image.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a16b30333631c552bc5a69b4ba2b4a259" class="m-doc">cmdUpdateBuffer</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_buffer_view.html" class="m-doc">BufferView</a>&amp; dstBuffer,
+              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const std::byte&gt; data)</span>
+            </dt>
+            <dd>Updates a range of the buffer&#x27;s contents with the passed data.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a89daeb18ba2053291787120b8327e334" class="m-doc">createCommandPool</a>(</span><span class="m-doc-wrap">const char* debugName = nullptr) -&gt; <a href="classtp_1_1_command_pool.html" class="m-doc">CommandPool</a>*</span>
+            </dt>
+            <dd>Creates a command pool for use with <a href="classtp_1_1_compute_list.html" class="m-doc">tp::<wbr />ComputeList</a> and <a href="classtp_1_1_render_list.html" class="m-doc">tp::<wbr />RenderList</a> within this job.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#ab3732621f0046402f75589a27560ccd9" class="m-doc">vkCmdImportExternalResource</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_buffer_view.html" class="m-doc">BufferView</a>&amp; buffer,
+              VkPipelineStageFlags vkStageMask,
+              VkAccessFlags vkAccessMask)</span>
+            </dt>
+            <dd>Updates the internal synchronization state for the buffer view to the given external access.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a06bcc187fe3635a3634185767f0666c6" class="m-doc">vkCmdImportExternalResource</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_image_view.html" class="m-doc">ImageView</a>&amp; image,
+              const <a href="structtp_1_1_image_subresource_range.html" class="m-doc">ImageSubresourceRange</a>&amp; range,
+              VkImageLayout vkImageLayout,
+              VkPipelineStageFlags vkStageMask,
+              VkAccessFlags vkAccessMask)</span>
+            </dt>
+            <dd>Updates the internal synchronization state for the subresource range to the given external access.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a3336f5e38cdbd3830ef1c742a0a6ce3a" class="m-doc">vkCmdImportExternalResource</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_image_view.html" class="m-doc">ImageView</a>&amp; image,
+              VkImageLayout vkImageLayout,
+              VkPipelineStageFlags vkStageMask,
+              VkAccessFlags vkAccessMask)</span>
+            </dt>
+            <dd>Updates the internal synchronization state for the image view to the given external access.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a10e5565ef8b6c2553c9d4572ac223852"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="classtp_1_1_buffer_view.html" class="m-doc">BufferView</a> tp::<wbr />Job::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a10e5565ef8b6c2553c9d4572ac223852" class="m-doc-self">allocateLocalBuffer</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_buffer_setup.html" class="m-doc">BufferSetup</a>&amp; setup,
+              const char* debugName = nullptr)</span></span>
+            </h3>
+            <p>Allocates a job-local buffer for use within this job.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">setup</td>
+                  <td>The setup structure describing the object.</td>
+                </tr>
+                <tr>
+                  <td>debugName</td>
+                  <td>The debug name identifier for the object.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>Remark</h4><p>Job-local buffers can only exist in device-local memory and cannot be mapped for host access. Use <a href="classtp_1_1_job.html#ae59e1c14bc1cd1e7ecc2aa403d134a23" class="m-doc">tp::<wbr />Job::<wbr />allocatePreinitializedBuffer</a> for data uploads instead.</p><p>The buffer may only be used for commands within this job or in command lists that execute within it.</p><p>The buffer is not created until the job is enqueued. As a consequence it cannot be used as a <a href="classtp_1_1_descriptor.html" class="m-doc">tp::<wbr />Descriptor</a> while the job is in the recording state. <a href="classtp_1_1_future_descriptor.html" class="m-doc">tp::<wbr />FutureDescriptor</a> with <a href="classtp_1_1_job.html#ac6bb755680a758beacd00637176b8f9e" class="m-doc">tp::<wbr />Job::<wbr />allocateLocalDescriptorSet</a> does not have this limitation.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="ac6bb755680a758beacd00637176b8f9e"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="classtp_1_1_descriptor_set_view.html" class="m-doc">DescriptorSetView</a> tp::<wbr />Job::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac6bb755680a758beacd00637176b8f9e" class="m-doc-self">allocateLocalDescriptorSet</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_descriptor_set_layout.html" class="m-doc">DescriptorSetLayout</a>* descriptorSetLayout,
+              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const <a href="classtp_1_1_future_descriptor.html" class="m-doc">FutureDescriptor</a>&gt; descriptors,
+              const char* debugName = nullptr)</span></span>
+            </h3>
+            <p>Allocates a job-local descriptor set for use within this job.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">descriptorSetLayout</td>
+                  <td>The layout to be used for the descriptor set and also the layout of the provided descriptors.</td>
+                </tr>
+                <tr>
+                  <td>descriptors</td>
+                  <td>The array of descriptors following the given layout. See <a href="classtp_1_1_descriptor_set.html" class="m-doc">tp::<wbr />DescriptorSet</a> for details.</td>
+                </tr>
+                <tr>
+                  <td>debugName</td>
+                  <td>The debug name identifier for the object.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>Remark</h4><p>The descriptor set may only be used for commands within this job or in command lists that execute within it.</p><p>The descriptor set gets created when the job is enqueued, so its descriptors may reference other job-local resources that have not been created yet.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a65f36e2c51ae63531c0f0ada99ac4f58"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="classtp_1_1_image_view.html" class="m-doc">ImageView</a> tp::<wbr />Job::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a65f36e2c51ae63531c0f0ada99ac4f58" class="m-doc-self">allocateLocalImage</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_image_setup.html" class="m-doc">ImageSetup</a>&amp; setup,
+              const char* debugName = nullptr)</span></span>
+            </h3>
+            <p>Allocates a job-local image for use within this job.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">setup</td>
+                  <td>The setup structure describing the object.</td>
+                </tr>
+                <tr>
+                  <td>debugName</td>
+                  <td>The debug name identifier for the object.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>Remark</h4><p>The image may only be used for commands within this job or in command lists that execute within it.</p><p>The image is not created until the job is enqueued. As a consequence it cannot be used as a <a href="classtp_1_1_descriptor.html" class="m-doc">tp::<wbr />Descriptor</a> while the job is in the recording state. <a href="classtp_1_1_future_descriptor.html" class="m-doc">tp::<wbr />FutureDescriptor</a> with <a href="classtp_1_1_job.html#ac6bb755680a758beacd00637176b8f9e" class="m-doc">tp::<wbr />Job::<wbr />allocateLocalDescriptorSet</a> does not have this limitation.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="ae59e1c14bc1cd1e7ecc2aa403d134a23"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="classtp_1_1_buffer_view.html" class="m-doc">BufferView</a> tp::<wbr />Job::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae59e1c14bc1cd1e7ecc2aa403d134a23" class="m-doc-self">allocatePreinitializedBuffer</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_buffer_setup.html" class="m-doc">BufferSetup</a>&amp; setup,
+              const <a href="structtp_1_1_memory_preference.html" class="m-doc">MemoryPreference</a>&amp; memoryPreference,
+              const char* debugName = nullptr)</span></span>
+            </h3>
+            <p>Allocates a preinitialized buffer for use within this job, with initial contents provided outside of it.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">setup</td>
+                  <td>The setup structure describing the object.</td>
+                </tr>
+                <tr>
+                  <td>memoryPreference</td>
+                  <td>The memory preference progression that will be used for allocating memory for the object.</td>
+                </tr>
+                <tr>
+                  <td>debugName</td>
+                  <td>The debug name identifier for the object.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>Remark</h4><p>The buffer may only be used for commands within this job or in command lists that execute within it, unless such a use happens before the job gets submitted.</p><p>The intended use of preinitialized buffers is for uploading data to the device through <a href="classtp_1_1_host_mapped_memory.html" class="m-doc">tp::<wbr />HostMappedMemory</a>. Unlike job-local buffers, they are created immediately.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a2f39a93b1597cde8e30a493daf444102"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />Job::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2f39a93b1597cde8e30a493daf444102" class="m-doc-self">cmdBeginDebugLabel</a>(</span><span class="m-doc-wrap">const char* name,
+              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;float&gt; color = {})</span></span>
+            </h3>
+            <p>Begins a debug label, marking the following commands until the next <a href="classtp_1_1_job.html#a95656466061cff2de6c61a68e8d827f2" class="m-doc">tp::<wbr />Job::<wbr />cmdEndDebugLabel</a> with the given name and optional color for display in validation and debugging tools.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">name</td>
+                  <td>The name of the label.</td>
+                </tr>
+                <tr>
+                  <td>color</td>
+                  <td>The color of the label. Only used by external tools.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>Remark</h4><p>The call will have no effect when <a href="namespacetp_1_1_application_extension.html#a87720f5be2958c77e3766715f1e5c38e" class="m-doc">tp::<wbr />ApplicationExtension::<wbr />EXT_DebugUtils</a> is not enabled.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a24e3bb2bee2947f4312153b53f25fa35"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />Job::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a24e3bb2bee2947f4312153b53f25fa35" class="m-doc-self">cmdBlitImage</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_image_view.html" class="m-doc">ImageView</a>&amp; srcImage,
+              const <a href="classtp_1_1_image_view.html" class="m-doc">ImageView</a>&amp; dstImage,
+              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const <a href="structtp_1_1_image_blit_region.html" class="m-doc">ImageBlitRegion</a>&gt; blitRegions,
+              <a href="namespacetp.html#ae199b5e28f6985b81882e95edb9f4858" class="m-doc">Filter</a> filter = Filter::Linear)</span></span>
+            </h3>
+            <p>Copies regions of one image&#x27;s contents to another, potentially performing format conversion, arbitrary scaling and filtering.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">srcImage</td>
+                  <td>The source image.</td>
+                </tr>
+                <tr>
+                  <td>dstImage</td>
+                  <td>The destination image.</td>
+                </tr>
+                <tr>
+                  <td>blitRegions</td>
+                  <td>An array specifying the regions to copy.</td>
+                </tr>
+                <tr>
+                  <td>filter</td>
+                  <td>The filter to apply when scaling is involved.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>Remark</h4><p>The images must not be multisampled. Use <a href="classtp_1_1_job.html#ac74a3929dfcfb91e412f39a1539c09d5" class="m-doc">tp::<wbr />Job::<wbr />cmdResolveImage</a> for that purpose.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/vkCmdBlitImage.html" class="m-doc-external">vkCmdBlitImage</a></p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a4aed4f4ac99e3090785561c937170f5b"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />Job::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4aed4f4ac99e3090785561c937170f5b" class="m-doc-self">cmdClearImage</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_image_view.html" class="m-doc">ImageView</a>&amp; dstImage,
+              <a href="structtp_1_1_clear_value.html" class="m-doc">ClearValue</a> value)</span></span>
+            </h3>
+            <p>Clears contents of the image to a fixed value.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">dstImage</td>
+                  <td>The destination image.</td>
+                </tr>
+                <tr>
+                  <td>value</td>
+                  <td>The value that the image will be cleared to. It must be valid for the format of the image.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>Remark</h4><p>Clearing images through the use of a <a href="structtp_1_1_render_pass_attachment.html" class="m-doc">tp::<wbr />RenderPassAttachment</a> may be more efficient.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/vkCmdClearColorImage.html" class="m-doc-external">vkCmdClearColorImage</a></p><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/vkCmdClearDepthStencilImage.html" class="m-doc-external">vkCmdClearDepthStencilImage</a></p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a35673a68b54628a1dd79de5527a2c3c1"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />Job::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a35673a68b54628a1dd79de5527a2c3c1" class="m-doc-self">cmdClearImage</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_image_view.html" class="m-doc">ImageView</a>&amp; dstImage,
+              <a href="structtp_1_1_clear_value.html" class="m-doc">ClearValue</a> value,
+              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const <a href="structtp_1_1_image_subresource_range.html" class="m-doc">ImageSubresourceRange</a>&gt; ranges)</span></span>
+            </h3>
+            <p>Clears ranges of contents of the image to a fixed value.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">dstImage</td>
+                  <td>The destination image.</td>
+                </tr>
+                <tr>
+                  <td>value</td>
+                  <td>The value that the image will be cleared to. It must be valid for the format of the image.</td>
+                </tr>
+                <tr>
+                  <td>ranges</td>
+                  <td>An array specifying the ranges of the image to clear.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>Remark</h4><p>Clearing images through the use of a <a href="structtp_1_1_render_pass_attachment.html" class="m-doc">tp::<wbr />RenderPassAttachment</a> may be more efficient.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/vkCmdClearColorImage.html" class="m-doc-external">vkCmdClearColorImage</a></p><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/vkCmdClearDepthStencilImage.html" class="m-doc-external">vkCmdClearDepthStencilImage</a></p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a013f09d33bc1bd883c1fe64460d50e2c"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />Job::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a013f09d33bc1bd883c1fe64460d50e2c" class="m-doc-self">cmdCopyBuffer</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_buffer_view.html" class="m-doc">BufferView</a>&amp; srcBuffer,
+              const <a href="classtp_1_1_buffer_view.html" class="m-doc">BufferView</a>&amp; dstBuffer,
+              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const <a href="structtp_1_1_buffer_copy_region.html" class="m-doc">BufferCopyRegion</a>&gt; copyRegions)</span></span>
+            </h3>
+            <p>Copies regions of one buffer&#x27;s contents to another.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">srcBuffer</td>
+                  <td>The source buffer.</td>
+                </tr>
+                <tr>
+                  <td>dstBuffer</td>
+                  <td>The destination buffer.</td>
+                </tr>
+                <tr>
+                  <td>copyRegions</td>
+                  <td>An array specifying the regions to copy.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>Remark</h4><p>The result is undefined if the copy regions overlap in memory.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/vkCmdCopyBuffer.html" class="m-doc-external">vkCmdCopyBuffer</a></p></aside>
+          </div></section>
+          <section class="m-doc-details" id="aba90522bc9701418d2615b9696e8f70b"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />Job::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aba90522bc9701418d2615b9696e8f70b" class="m-doc-self">cmdCopyBufferToImage</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_buffer_view.html" class="m-doc">BufferView</a>&amp; srcBuffer,
+              const <a href="classtp_1_1_image_view.html" class="m-doc">ImageView</a>&amp; dstImage,
+              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const <a href="structtp_1_1_buffer_image_copy_region.html" class="m-doc">BufferImageCopyRegion</a>&gt; copyRegions)</span></span>
+            </h3>
+            <p>Copies regions of a buffer&#x27;s contents to an image.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">srcBuffer</td>
+                  <td>The source buffer.</td>
+                </tr>
+                <tr>
+                  <td>dstImage</td>
+                  <td>The destination image.</td>
+                </tr>
+                <tr>
+                  <td>copyRegions</td>
+                  <td>An array specifying the regions to copy.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/vkCmdCopyBufferToImage.html" class="m-doc-external">vkCmdCopyBufferToImage</a></p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a697432214a7bd787fee2c303aa3ccd0d"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />Job::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a697432214a7bd787fee2c303aa3ccd0d" class="m-doc-self">cmdCopyImage</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_image_view.html" class="m-doc">ImageView</a>&amp; srcImage,
+              const <a href="classtp_1_1_image_view.html" class="m-doc">ImageView</a>&amp; dstImage,
+              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const <a href="structtp_1_1_image_copy_region.html" class="m-doc">ImageCopyRegion</a>&gt; copyRegions)</span></span>
+            </h3>
+            <p>Copies regions of one image&#x27;s contents to another.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">srcImage</td>
+                  <td>The source image.</td>
+                </tr>
+                <tr>
+                  <td>dstImage</td>
+                  <td>The destination image.</td>
+                </tr>
+                <tr>
+                  <td>copyRegions</td>
+                  <td>An array specifying the regions to copy.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>Remark</h4><p>The result is undefined if the copy regions overlap in memory.</p><p>The formats of both images must share the same <a href="namespacetp.html#a8c768c8069720fcaef48f25d4c28dbd9" class="m-doc">tp::<wbr />FormatCompatibilityClass</a> and must have the same number of samples. If the formats are different, the data is reinterpreted without any format conversion.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/vkCmdCopyImage.html" class="m-doc-external">vkCmdCopyImage</a></p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a936867fb0b3bb0361db691b1d4732197"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />Job::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a936867fb0b3bb0361db691b1d4732197" class="m-doc-self">cmdCopyImageToBuffer</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_image_view.html" class="m-doc">ImageView</a>&amp; srcImage,
+              const <a href="classtp_1_1_buffer_view.html" class="m-doc">BufferView</a>&amp; dstBuffer,
+              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const <a href="structtp_1_1_buffer_image_copy_region.html" class="m-doc">BufferImageCopyRegion</a>&gt; copyRegions)</span></span>
+            </h3>
+            <p>Copies regions of an image&#x27;s contents to a buffer.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">srcImage</td>
+                  <td>The source image.</td>
+                </tr>
+                <tr>
+                  <td>dstBuffer</td>
+                  <td>The destination buffer.</td>
+                </tr>
+                <tr>
+                  <td>copyRegions</td>
+                  <td>An array specifying the regions to copy.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/vkCmdCopyImageToBuffer.html" class="m-doc-external">vkCmdCopyImageToBuffer</a></p></aside>
+          </div></section>
+          <section class="m-doc-details" id="aff9e156e1c971a4d2f43018a759202d0"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />Job::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aff9e156e1c971a4d2f43018a759202d0" class="m-doc-self">cmdDiscardContents</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_image_view.html" class="m-doc">ImageView</a>&amp; image)</span></span>
+            </h3>
+            <p>Discards the contents of the image, making them undefined for future accesses. Doing this may potentially improve performance.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">image</td>
+                  <td>The image with contents to be discarded.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a395b7a2627f6569ede2df4a2c968152b"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />Job::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a395b7a2627f6569ede2df4a2c968152b" class="m-doc-self">cmdDiscardContents</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_image_view.html" class="m-doc">ImageView</a>&amp; image,
+              <a href="structtp_1_1_image_subresource_range.html" class="m-doc">ImageSubresourceRange</a> range)</span></span>
+            </h3>
+            <p>Discards the contents of the image range, making them undefined for future accesses. Doing this may potentially improve performance.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">image</td>
+                  <td>The image with a range of contents to be discarded.</td>
+                </tr>
+                <tr>
+                  <td>range</td>
+                  <td>The range of contents to be discarded.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a95656466061cff2de6c61a68e8d827f2"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />Job::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a95656466061cff2de6c61a68e8d827f2" class="m-doc-self">cmdEndDebugLabel</a>(</span><span class="m-doc-wrap">)</span></span>
+            </h3>
+            <p>Ends the last debug label. Must be preceded by <a href="classtp_1_1_job.html#a2f39a93b1597cde8e30a493daf444102" class="m-doc">tp::<wbr />Job::<wbr />cmdBeginDebugLabel</a>.</p>
+<aside class="m-note m-default"><h4>Remark</h4><p>The call will have no effect when <a href="namespacetp_1_1_application_extension.html#a87720f5be2958c77e3766715f1e5c38e" class="m-doc">tp::<wbr />ApplicationExtension::<wbr />EXT_DebugUtils</a> is not enabled.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a3743dd4c6e7f8d56e153290543342afb"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />Job::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3743dd4c6e7f8d56e153290543342afb" class="m-doc-self">cmdExecuteComputePass</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_compute_pass_setup.html" class="m-doc">ComputePassSetup</a>&amp; setup,
+              std::variant&lt;<a href="classtp_1_1_array_view.html" class="m-doc">ArrayView</a>&lt;<a href="classtp_1_1_compute_list.html" class="m-doc">ComputeList</a>&gt;, <a href="namespacetp.html#aa35536cf20aa7489b1e861514ec00ea4" class="m-doc">ComputeInlineCallback</a>&gt; commandRecording,
+              const char* debugName = nullptr)</span></span>
+            </h3>
+            <p>Forms a compute pass that executes lists of compute commands.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">setup</td>
+                  <td>The setup structure describing the compute pass and its use of resources.</td>
+                </tr>
+                <tr>
+                  <td>commandRecording</td>
+                  <td><p>Describes how compute commands are to be recorded for the compute pass. The parameter can be either:</p><ul><li>A non-empty array view of null <a href="classtp_1_1_compute_list.html" class="m-doc">tp::<wbr />ComputeList</a> objects that will be initialized by the function call. Commands must be recorded to these lists while the job is in an enqueued state. The lists are executed in the order they are in this array.</li><li>A function callback to record commands to a <a href="classtp_1_1_compute_list.html" class="m-doc">tp::<wbr />ComputeList</a> that will be provided as its parameter. This function will be called as a part of the next <a href="classtp_1_1_device.html#a3d189d3b755453d419416c99cd279617" class="m-doc">tp::<wbr />Device::<wbr />submitQueuedJobs</a> call after the job has been enqueued to the same queue.</li></ul></td>
+                </tr>
+                <tr>
+                  <td>debugName</td>
+                  <td>The debug name identifier for the compute pass.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>Remark</h4><p>Any usage of resources inside the compute pass beyond what the resources were previously exported for must be specified inside the <code>setup</code> structure.</p><p>The dependencies between the compute pass and the rest of the <a href="classtp_1_1_job.html" class="m-doc">tp::<wbr />Job</a> are synchronized automatically. Dependencies between commands executed within the same compute pass are not, and must be synchronized manually with tp::RenderList::cmdPipelineBarrier.</p><p>Inline callbacks will be called during the call to <a href="classtp_1_1_device.html#a3d189d3b755453d419416c99cd279617" class="m-doc">tp::<wbr />Device::<wbr />submitQueuedJobs</a> in the provided order. <a href="classtp_1_1_device.html" class="m-doc">Device</a> queue thread safety rules apply: No operations on the target queue are permitted inside the callback.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/vkCmdExecuteCommands.html" class="m-doc-external">vkCmdExecuteCommands</a></p></aside>
+          </div></section>
+          <section class="m-doc-details" id="ab739735917361ff75d3b892339007815"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />Job::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab739735917361ff75d3b892339007815" class="m-doc-self">cmdExecuteRenderPass</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_render_pass_setup.html" class="m-doc">RenderPassSetup</a>&amp; setup,
+              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const std::variant&lt;<a href="classtp_1_1_array_view.html" class="m-doc">ArrayView</a>&lt;<a href="classtp_1_1_render_list.html" class="m-doc">RenderList</a>&gt;, <a href="namespacetp.html#abce3813304107869c695ab3e0bafa0fa" class="m-doc">RenderInlineCallback</a>&gt;&gt; subpassCommandRecording,
+              const char* debugName = nullptr)</span></span>
+            </h3>
+            <p>Forms a render pass that executes lists of render commands in each of its subpasses.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">setup</td>
+                  <td>The setup structure describing the render pass, its attachments and its non-attachment resource usage.</td>
+                </tr>
+                <tr>
+                  <td>subpassCommandRecording</td>
+                  <td><p>For each subpass in the render pass, describes how render commands are to be recorded to it. Each element can be either:</p><ul><li>A non-empty array view of null <a href="classtp_1_1_render_list.html" class="m-doc">tp::<wbr />RenderList</a> objects that will be initialized by the function call. Commands must be recorded to these lists while the job is in an enqueued state. The lists will be executed in the order they are written to this array.</li><li>A function callback to record commands to a <a href="classtp_1_1_render_list.html" class="m-doc">tp::<wbr />RenderList</a> that will be provided as its parameter. This function will be called as a part of the next <a href="classtp_1_1_device.html#a3d189d3b755453d419416c99cd279617" class="m-doc">tp::<wbr />Device::<wbr />submitQueuedJobs</a> call after the job has been enqueued to the same queue.</li></ul></td>
+                </tr>
+                <tr>
+                  <td>debugName</td>
+                  <td>The debug name identifier for the render pass.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>Remark</h4><p>The size of the <code>subpassCommandRecording</code> array must be the same as the number of subpasses used to create the <a href="classtp_1_1_render_pass_layout.html" class="m-doc">tp::<wbr />RenderPassLayout</a> provided in the given <code>setup</code> structure.</p><p>Any usage of non-attachment resources inside the render pass beyond what the resources were previously exported for must be specified inside the <code>setup</code> structure.</p><p>The dependencies between the render pass and the rest of the <a href="classtp_1_1_job.html" class="m-doc">tp::<wbr />Job</a>, as well as the dependencies between subpasses as declared during creation of the provided <a href="classtp_1_1_render_pass_layout.html" class="m-doc">tp::<wbr />RenderPassLayout</a> are synchronized automatically. Dependencies between commands executed within the same subpass are not - see <a href="structtp_1_1_subpass_dependency.html" class="m-doc">tp::<wbr />SubpassDependency</a>.</p><p>Inline callbacks will be called during the call to <a href="classtp_1_1_device.html#a3d189d3b755453d419416c99cd279617" class="m-doc">tp::<wbr />Device::<wbr />submitQueuedJobs</a> in the provided order. <a href="classtp_1_1_device.html" class="m-doc">Device</a> queue thread safety rules apply: No operations on the target queue are permitted inside the callback.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="classtp_1_1_render_pass_layout.html" class="m-doc">tp::<wbr />RenderPassLayout</a></p><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkRenderPass.html" class="m-doc-external">VkRenderPass</a></p><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkFramebuffer.html" class="m-doc-external">VkFramebuffer</a></p><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/vkCmdExecuteCommands.html" class="m-doc-external">vkCmdExecuteCommands</a></p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a967f5a891d8e50cb73d0f6b7c6cec066"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />Job::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a967f5a891d8e50cb73d0f6b7c6cec066" class="m-doc-self">cmdExportResource</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_buffer_view.html" class="m-doc">BufferView</a>&amp; buffer,
+              <a href="namespacetp.html#a35126e5e403003db788eb060b78e88bf" class="m-doc">ReadAccessMask</a> readAccessMask,
+              <a href="namespacetp.html#a8b32a8b4b40aee5fed67bc3c3d63ead7" class="m-doc">QueueType</a> targetQueueType = <a href="namespacetp.html#a8b32a8b4b40aee5fed67bc3c3d63ead7aec0fc0100c4fc1ce4eea230c3dc10360" class="m-doc">QueueType::<wbr />Undefined</a>)</span></span>
+            </h3>
+            <p>Prepares a buffer for future read-only usages.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">buffer</td>
+                  <td>The buffer to be exported.</td>
+                </tr>
+                <tr>
+                  <td>readAccessMask</td>
+                  <td>The mask of future read-only accesses.</td>
+                </tr>
+                <tr>
+                  <td>targetQueueType</td>
+                  <td>If not <a href="namespacetp.html#a8b32a8b4b40aee5fed67bc3c3d63ead7aec0fc0100c4fc1ce4eea230c3dc10360" class="m-doc">tp::<wbr />QueueType::<wbr />Undefined</a>, the resource is made accessible to all of the queues of the given type.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Makes the results of all previous accesses of the resource in this queue visible to the specified future read accesses in all queues of the target queue type. Any future access besides the one specified invalidates the export on the accessed range.</p><p>While synchronization and memory visibility is handled automatically between commands recorded to jobs in the same queue, exporting a resource is still useful for the following reasons:</p><ul><li>Render and compute passes have to explicitly declare any accesses of resources that weren&#x27;t previously exported.</li><li>If <code>targetQueueType</code> is not <a href="namespacetp.html#a8b32a8b4b40aee5fed67bc3c3d63ead7aec0fc0100c4fc1ce4eea230c3dc10360" class="m-doc">tp::<wbr />QueueType::<wbr />Undefined</a>, the export operation additionally makes the resource accessible to all of the queues of the given type.</li><li>To read back data from the device, the resource has to be exported with <code>readAccessMask</code> that contains <a href="namespacetp.html#a2a231ee79583b288a3be330f401bf174ac2ca16d048ec66e04bca283eab048ec2" class="m-doc">tp::<wbr />ReadAccess::<wbr />Host</a>.</li><li>It reveals the future intended usage to the library beyond the scope of this job, allowing for potentially more efficient placement of Vulkan pipeline barriers.</li></ul>
+          </div></section>
+          <section class="m-doc-details" id="a87ba4f63e939f7d0366a605e1e03c5f0"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />Job::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a87ba4f63e939f7d0366a605e1e03c5f0" class="m-doc-self">cmdExportResource</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_image_view.html" class="m-doc">ImageView</a>&amp; image,
+              const <a href="structtp_1_1_image_subresource_range.html" class="m-doc">ImageSubresourceRange</a>&amp; range,
+              <a href="namespacetp.html#a35126e5e403003db788eb060b78e88bf" class="m-doc">ReadAccessMask</a> readAccessMask,
+              <a href="namespacetp.html#a8b32a8b4b40aee5fed67bc3c3d63ead7" class="m-doc">QueueType</a> targetQueueType = <a href="namespacetp.html#a8b32a8b4b40aee5fed67bc3c3d63ead7aec0fc0100c4fc1ce4eea230c3dc10360" class="m-doc">QueueType::<wbr />Undefined</a>)</span></span>
+            </h3>
+            <p>Prepares an image for future read-only usages.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">image</td>
+                  <td>The image containing the range to be exported.</td>
+                </tr>
+                <tr>
+                  <td>range</td>
+                  <td>The image subresource range to be exported.</td>
+                </tr>
+                <tr>
+                  <td>readAccessMask</td>
+                  <td>The mask of future read-only accesses.</td>
+                </tr>
+                <tr>
+                  <td>targetQueueType</td>
+                  <td>If not <a href="namespacetp.html#a8b32a8b4b40aee5fed67bc3c3d63ead7aec0fc0100c4fc1ce4eea230c3dc10360" class="m-doc">tp::<wbr />QueueType::<wbr />Undefined</a>, the resource is made accessible to all of the queues of the given type.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>Remark</h4><p><code>readAccessMask</code> must map to exactly one Vulkan image layout. See above for table.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="ad35589d87a8e8eafb7ad6900e665be71"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />Job::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad35589d87a8e8eafb7ad6900e665be71" class="m-doc-self">cmdExportResource</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_image_view.html" class="m-doc">ImageView</a>&amp; image,
+              <a href="namespacetp.html#a35126e5e403003db788eb060b78e88bf" class="m-doc">ReadAccessMask</a> readAccessMask,
+              <a href="namespacetp.html#a8b32a8b4b40aee5fed67bc3c3d63ead7" class="m-doc">QueueType</a> targetQueueType = <a href="namespacetp.html#a8b32a8b4b40aee5fed67bc3c3d63ead7aec0fc0100c4fc1ce4eea230c3dc10360" class="m-doc">QueueType::<wbr />Undefined</a>)</span></span>
+            </h3>
+            <p>Prepares an image for future read-only usages.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">image</td>
+                  <td>The image to be exported.</td>
+                </tr>
+                <tr>
+                  <td>readAccessMask</td>
+                  <td>The mask of future read-only accesses.</td>
+                </tr>
+                <tr>
+                  <td>targetQueueType</td>
+                  <td>If not <a href="namespacetp.html#a8b32a8b4b40aee5fed67bc3c3d63ead7aec0fc0100c4fc1ce4eea230c3dc10360" class="m-doc">tp::<wbr />QueueType::<wbr />Undefined</a>, the resource is made accessible to all of the queues of the given type.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>Remark</h4><p><code>readAccessMask</code> must internally map to exactly one Vulkan image layout. See the following table for the sets of read accesses that are compatible with each other and what layout they map to:</p><ul><li><a href="namespacetp.html#a2a231ee79583b288a3be330f401bf174" class="m-doc">tp::<wbr />ReadAccess</a>::(...)ShaderSampled: <code>VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL</code></li><li><a href="namespacetp.html#a2a231ee79583b288a3be330f401bf174" class="m-doc">tp::<wbr />ReadAccess</a>::(...)ShaderStorage, <a href="namespacetp.html#a2a231ee79583b288a3be330f401bf174a88183b946cc5f0e8c96b2e66e1c74a7e" class="m-doc">tp::<wbr />ReadAccess::<wbr />Unknown</a>: <code>VK_IMAGE_LAYOUT_GENERAL</code></li><li><a href="namespacetp.html#a2a231ee79583b288a3be330f401bf174a6950810f0d2bba97a6f710c7b965b84e" class="m-doc">tp::<wbr />ReadAccess::<wbr />Transfer</a>: <code>VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL</code></li><li><a href="namespacetp.html#a2a231ee79583b288a3be330f401bf174a652fd1408b3de263e32147770a48931e" class="m-doc">tp::<wbr />ReadAccess::<wbr />DepthStencilAttachment</a>: <code>VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL</code></li><li><a href="namespacetp.html#a2a231ee79583b288a3be330f401bf174ae53d1b98a6b6b169a92a8cac08ac0534" class="m-doc">tp::<wbr />ReadAccess::<wbr />ImagePresentKHR</a>: <code>VK_IMAGE_LAYOUT_PRESENT_SRC_KHR</code></li></ul></aside>
+          </div></section>
+          <section class="m-doc-details" id="a78f67cc52c918d52712ff22503bcdecf"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />Job::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a78f67cc52c918d52712ff22503bcdecf" class="m-doc-self">cmdFillBuffer</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_buffer_view.html" class="m-doc">BufferView</a>&amp; dstBuffer,
+              uint32_t value)</span></span>
+            </h3>
+            <p>Fills the buffer with a fixed value.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">dstBuffer</td>
+                  <td>The buffer to be filled.</td>
+                </tr>
+                <tr>
+                  <td>value</td>
+                  <td>The 4-byte word written repeatedly to fill the given buffer.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/vkCmdFillBuffer.html" class="m-doc-external">vkCmdFillBuffer</a></p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a4acadcc8aab07803700471e28918713e"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />Job::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4acadcc8aab07803700471e28918713e" class="m-doc-self">cmdInsertDebugLabel</a>(</span><span class="m-doc-wrap">const char* name,
+              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;float&gt; color = {})</span></span>
+            </h3>
+            <p>Inserts a debug label, marking the following commands with the given name and optional color for display in validation and debugging tools.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">name</td>
+                  <td>The name of the label.</td>
+                </tr>
+                <tr>
+                  <td>color</td>
+                  <td>The color of the label. Only used by external tools.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>Remark</h4><p>The call will have no effect when <a href="namespacetp_1_1_application_extension.html#a87720f5be2958c77e3766715f1e5c38e" class="m-doc">tp::<wbr />ApplicationExtension::<wbr />EXT_DebugUtils</a> is not enabled.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="ac74a3929dfcfb91e412f39a1539c09d5"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />Job::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac74a3929dfcfb91e412f39a1539c09d5" class="m-doc-self">cmdResolveImage</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_image_view.html" class="m-doc">ImageView</a>&amp; srcImage,
+              const <a href="classtp_1_1_image_view.html" class="m-doc">ImageView</a>&amp; dstImage,
+              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const <a href="structtp_1_1_image_copy_region.html" class="m-doc">ImageCopyRegion</a>&gt; resolveRegions)</span></span>
+            </h3>
+            <p>Resolves regions of a multisampled color image to a single sample color image.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">srcImage</td>
+                  <td>The source multisampled image.</td>
+                </tr>
+                <tr>
+                  <td>dstImage</td>
+                  <td>The destination image.</td>
+                </tr>
+                <tr>
+                  <td>resolveRegions</td>
+                  <td>An array specifying the regions to resolve.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>Remark</h4><p>Resolving images through the use of a <a href="structtp_1_1_render_pass_attachment.html" class="m-doc">tp::<wbr />RenderPassAttachment</a> bound to a <a href="structtp_1_1_attachment_binding.html" class="m-doc">tp::<wbr />AttachmentBinding</a> with its bind point type set to <a href="namespacetp.html#a6991b358994d01dff68977e4a9cf9710a369b06d5985c13f7a81497ce840ad809" class="m-doc">tp::<wbr />AttachmentBindPointType::<wbr />ResolveFromColor</a> may be more efficient.</p><p>Only images with color formats are supported. For automatically resolving depth stencil images, consider   <a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VK_KHR_depth_stencil_resolve.html" class="m-doc-external">VK_<wbr />KHR_<wbr />depth_<wbr />stencil_<wbr />resolve</a></p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/vkCmdResolveImage.html" class="m-doc-external">vkCmdResolveImage</a></p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a16b30333631c552bc5a69b4ba2b4a259"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />Job::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a16b30333631c552bc5a69b4ba2b4a259" class="m-doc-self">cmdUpdateBuffer</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_buffer_view.html" class="m-doc">BufferView</a>&amp; dstBuffer,
+              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const std::byte&gt; data)</span></span>
+            </h3>
+            <p>Updates a range of the buffer&#x27;s contents with the passed data.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">dstBuffer</td>
+                  <td>The buffer with contents to be updated.</td>
+                </tr>
+                <tr>
+                  <td>data</td>
+                  <td>The data to update. The length of the array defines the size of the range to be updated.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>Remark</h4><p>The size of the data array must be less or equal to 65536 bytes. For larger updates, use <a href="classtp_1_1_host_mapped_memory.html" class="m-doc">tp::<wbr />HostMappedMemory</a>. A copy of the data is made upon this call, which is later copied again to a Vulkan command buffer. It should therefore only be used for very small amounts of data.</p><p>The size of the <code>data</code> array must be a multiple of 4 and smaller or equal to the size of <code>dstBuffer</code>.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/vkCmdUpdateBuffer.html" class="m-doc-external">vkCmdUpdateBuffer</a></p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a89daeb18ba2053291787120b8327e334"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="classtp_1_1_command_pool.html" class="m-doc">CommandPool</a>* tp::<wbr />Job::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a89daeb18ba2053291787120b8327e334" class="m-doc-self">createCommandPool</a>(</span><span class="m-doc-wrap">const char* debugName = nullptr)</span></span>
+            </h3>
+            <p>Creates a command pool for use with <a href="classtp_1_1_compute_list.html" class="m-doc">tp::<wbr />ComputeList</a> and <a href="classtp_1_1_render_list.html" class="m-doc">tp::<wbr />RenderList</a> within this job.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">debugName</td>
+                  <td>The debug name identifier for the object.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>Remark</h4><p>Only one thread may record commands with a single command pool at a time.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="classtp_1_1_compute_list.html#a2461b00f05368227d9fda369d70850fd" class="m-doc">tp::<wbr />ComputeList::<wbr />beginRecording</a></p><p><a href="classtp_1_1_render_list.html#aa26b965c672012ffb31856c9f7fa22b5" class="m-doc">tp::<wbr />RenderList::<wbr />beginRecording</a></p><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkCommandPool.html" class="m-doc-external">VkCommandPool</a></p></aside>
+          </div></section>
+          <section class="m-doc-details" id="ab3732621f0046402f75589a27560ccd9"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />Job::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab3732621f0046402f75589a27560ccd9" class="m-doc-self">vkCmdImportExternalResource</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_buffer_view.html" class="m-doc">BufferView</a>&amp; buffer,
+              VkPipelineStageFlags vkStageMask,
+              VkAccessFlags vkAccessMask)</span></span>
+            </h3>
+            <p>Updates the internal synchronization state for the buffer view to the given external access.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">buffer</td>
+                  <td>The buffer to be imported.</td>
+                </tr>
+                <tr>
+                  <td>vkStageMask</td>
+                  <td>The Vulkan pipeline stage mask of the external access.</td>
+                </tr>
+                <tr>
+                  <td>vkAccessMask</td>
+                  <td>The Vulkan access mask of the external access.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>This should be used after a resource has been accessed by an operation done outside of Tephra and before it is accessed by a Tephra command again. This command allows those future Tephra accesses to be synchronized against the external access properly.</p><aside class="m-note m-default"><h4>Remark</h4><p>If the last external access to the imported resource is already being synchronized with a <a href="structtp_1_1_external_semaphore.html" class="m-doc">tp::<wbr />ExternalSemaphore</a>, then <code>vkStageMask</code> may be <code>VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT</code> and <code>vkAccessMask</code> may be <code>VK_ACCESS_NONE</code>, signifying that no additional synchronization is required.</p><p>The Vulkan queue family that this job will execute on must have acquired ownership of the resource.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a06bcc187fe3635a3634185767f0666c6"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />Job::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a06bcc187fe3635a3634185767f0666c6" class="m-doc-self">vkCmdImportExternalResource</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_image_view.html" class="m-doc">ImageView</a>&amp; image,
+              const <a href="structtp_1_1_image_subresource_range.html" class="m-doc">ImageSubresourceRange</a>&amp; range,
+              VkImageLayout vkImageLayout,
+              VkPipelineStageFlags vkStageMask,
+              VkAccessFlags vkAccessMask)</span></span>
+            </h3>
+            <p>Updates the internal synchronization state for the subresource range to the given external access.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">image</td>
+                  <td>The image to be imported.</td>
+                </tr>
+                <tr>
+                  <td>range</td>
+                  <td>The affected subresource range.</td>
+                </tr>
+                <tr>
+                  <td>vkImageLayout</td>
+                  <td>The Vulkan image layout that the image subresource is transitioned to by the external access.</td>
+                </tr>
+                <tr>
+                  <td>vkStageMask</td>
+                  <td>The Vulkan pipeline stage mask of the external access.</td>
+                </tr>
+                <tr>
+                  <td>vkAccessMask</td>
+                  <td>The Vulkan access mask of the external access.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a3336f5e38cdbd3830ef1c742a0a6ce3a"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />Job::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3336f5e38cdbd3830ef1c742a0a6ce3a" class="m-doc-self">vkCmdImportExternalResource</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_image_view.html" class="m-doc">ImageView</a>&amp; image,
+              VkImageLayout vkImageLayout,
+              VkPipelineStageFlags vkStageMask,
+              VkAccessFlags vkAccessMask)</span></span>
+            </h3>
+            <p>Updates the internal synchronization state for the image view to the given external access.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">image</td>
+                  <td>The image to be imported.</td>
+                </tr>
+                <tr>
+                  <td>vkImageLayout</td>
+                  <td>The Vulkan image layout that the image subresource is transitioned to by the external access.</td>
+                </tr>
+                <tr>
+                  <td>vkStageMask</td>
+                  <td>The Vulkan pipeline stage mask of the external access.</td>
+                </tr>
+                <tr>
+                  <td>vkAccessMask</td>
+                  <td>The Vulkan access mask of the external access.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <p>Tephra Documentation. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.6 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

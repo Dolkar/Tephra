@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>tp::SurfaceCapabilities struct | Tephra Documentation</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="m-dark-tephra.css" />
+  <link rel="stylesheet" href="m-documentation.css" />
+  <link rel="stylesheet" href="m-theme-dark-tephra.css" />
+  <link rel="stylesheet" href="m-grid.css" />
+  <link rel="stylesheet" href="m-components.css" />
+  <link rel="stylesheet" href="m-layout.css" />
+  <link rel="stylesheet" href="pygments-dark.css" />
+  <link rel="stylesheet" href="pygments-console.css" />
+  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#2c1b15" />
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <span id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">
+        <a href="https://github.com/Dolkar/Tephra">Tephra</a> <span class="m-breadcrumb">|</span> <a href="index.html" class="m-thin">Documentation</a>
+      </span>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li><a href="user-guide.html">User Guide</a></li>
+            <li><a href="examples.html">Examples and Tests</a></li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="3">
+            <li><a href="changelog.html">Changelog</a></li>
+            <li><a href="https://github.com/Dolkar/Tephra/discussions">Discussions</a></li>
+            <li><a href="annotated.html">API</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          <span class="m-breadcrumb"><a href="namespacetp.html">tp</a>::<wbr/></span>SurfaceCapabilities <span class="m-thin">struct</span>
+        </h1>
+        <p>Describes the capabilities of a   <a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkSurfaceKHR.html" class="m-doc-external">VkSurfaceKHR</a> and the capabilities of a physical device to present to that surface.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#pub-methods">Public functions</a></li>
+                <li><a href="#pub-attribs">Public variables</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkSurfaceCapabilitiesKHR.html" class="m-doc-external">VkSurfaceCapabilitiesKHR</a></p></aside>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt id="aa6ec0b95e611783f69bf97e83c4c9adb">
+              <span class="m-doc-wrap-bumper">auto <a href="#aa6ec0b95e611783f69bf97e83c4c9adb" class="m-doc-self">isSupported</a>(</span><span class="m-doc-wrap">) const -&gt; bool</span>
+            </dt>
+            <dd>Returns <code>true</code> if the surface is supported and a swapchain can be created for it.</dd>
+          </dl>
+        </section>
+        <section id="pub-attribs">
+          <h2><a href="#pub-attribs">Public variables</a></h2>
+          <dl class="m-doc">
+            <dt id="a119bb4c0c0efddc9ede3e4640c2361ce">
+              <a href="structtp_1_1_extent2_d.html" class="m-doc">Extent2D</a> <a href="#a119bb4c0c0efddc9ede3e4640c2361ce" class="m-doc-self">currentExtent</a>
+            </dt>
+            <dd>The current extent of the surface, or (~0, ~0) if it will be determined by the swapchain.</dd>
+            <dt id="a4069641afb8a79f0358f97af17f38457">
+              <a href="namespacetp.html#a4b9ef31a79898b23c45cf42e1e2f875a" class="m-doc">SurfaceTransform</a> <a href="#a4069641afb8a79f0358f97af17f38457" class="m-doc-self">currentTransform</a>
+            </dt>
+            <dd>The current transform of the surface.</dd>
+            <dt id="ad7661b78e807d3583f5c5fa02e7e9d09">
+              uint32_t <a href="#ad7661b78e807d3583f5c5fa02e7e9d09" class="m-doc-self">maxImageArrayLayers</a>
+            </dt>
+            <dd>The maximum allowed number of image array layers.</dd>
+            <dt id="a70decffef9d807912f4386536d75f819">
+              uint32_t <a href="#a70decffef9d807912f4386536d75f819" class="m-doc-self">maxImageCount</a>
+            </dt>
+            <dd>The maximum allowed number of swapchain images, or 0 if there is no limit.</dd>
+            <dt id="aaf9005dc2ff5e11b4cc67a5a5be357f3">
+              <a href="structtp_1_1_extent2_d.html" class="m-doc">Extent2D</a> <a href="#aaf9005dc2ff5e11b4cc67a5a5be357f3" class="m-doc-self">maxImageExtent</a>
+            </dt>
+            <dd>The maximum allowed image extent.</dd>
+            <dt id="a8e023d79f85b9ba9b07a90c538cc9381">
+              uint32_t <a href="#a8e023d79f85b9ba9b07a90c538cc9381" class="m-doc-self">minImageCount</a>
+            </dt>
+            <dd>The minimum allowed number of swapchain images.</dd>
+            <dt id="aa50e61096f8e1a0c41d1f54725b956f6">
+              <a href="structtp_1_1_extent2_d.html" class="m-doc">Extent2D</a> <a href="#aa50e61096f8e1a0c41d1f54725b956f6" class="m-doc-self">minImageExtent</a>
+            </dt>
+            <dd>The minimum allowed image extent.</dd>
+            <dt id="a028207281bb733cdee26afa7f0b45925">
+              <a href="namespacetp.html#a1bda32baf9c48d4a06a39b22fad99f50" class="m-doc">CompositeAlphaMask</a> <a href="#a028207281bb733cdee26afa7f0b45925" class="m-doc-self">supportedCompositeAlphas</a>
+            </dt>
+            <dd>A mask of supported composite alpha modes.</dd>
+            <dt id="ad0bfe042a6fff86506455d96003439cc">
+              <a href="classtp_1_1_array_view.html" class="m-doc">ArrayView</a>&lt;<a href="namespacetp.html#a575466ff8f546f00468d04124cee38b5" class="m-doc">Format</a>&gt; <a href="#ad0bfe042a6fff86506455d96003439cc" class="m-doc-self">supportedFormatsSRGB</a>
+            </dt>
+            <dd>An array of formats supported by the surface for the sRGB color space.</dd>
+            <dt id="ae329ded5c40f69f28aafe12775990f84">
+              <a href="namespacetp.html#a30a831f16dcc9703a77ff823685825c1" class="m-doc">ImageUsageMask</a> <a href="#ae329ded5c40f69f28aafe12775990f84" class="m-doc-self">supportedImageUsages</a>
+            </dt>
+            <dd>A mask of supported image usages. ColorAttachment usage is always supported.</dd>
+            <dt id="a970eeab5828fc26052dabeb6f8c72053">
+              <a href="classtp_1_1_array_view.html" class="m-doc">ArrayView</a>&lt;<a href="namespacetp.html#ad7c69a8d8b81187a779224a594b4ed27" class="m-doc">PresentMode</a>&gt; <a href="#a970eeab5828fc26052dabeb6f8c72053" class="m-doc-self">supportedPresentModes</a>
+            </dt>
+            <dd>An array of supported present modes. The FIFO mode is required to be supported.</dd>
+            <dt id="aea3bcbded47902c6f299c6ed764d7983">
+              <a href="classtp_1_1_array_view.html" class="m-doc">ArrayView</a>&lt;<a href="namespacetp.html#a8b32a8b4b40aee5fed67bc3c3d63ead7" class="m-doc">QueueType</a>&gt; <a href="#aea3bcbded47902c6f299c6ed764d7983" class="m-doc-self">supportedQueueTypes</a>
+            </dt>
+            <dd>An array of queue types that support present operations for this surface.</dd>
+            <dt id="a71ffc4890c76cae52d0f32353801ef67">
+              <a href="namespacetp.html#a477017eabded4738f83f643dec301779" class="m-doc">SurfaceTransformMask</a> <a href="#a71ffc4890c76cae52d0f32353801ef67" class="m-doc-self">supportedTransforms</a>
+            </dt>
+            <dd>A mask of all supported transforms of the surface.</dd>
+          </dl>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <p>Tephra Documentation. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.6 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

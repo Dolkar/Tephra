@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>tp::utils::AutoRingBuffer class | Tephra Documentation</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="m-dark-tephra.css" />
+  <link rel="stylesheet" href="m-documentation.css" />
+  <link rel="stylesheet" href="m-theme-dark-tephra.css" />
+  <link rel="stylesheet" href="m-grid.css" />
+  <link rel="stylesheet" href="m-components.css" />
+  <link rel="stylesheet" href="m-layout.css" />
+  <link rel="stylesheet" href="pygments-dark.css" />
+  <link rel="stylesheet" href="pygments-console.css" />
+  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#2c1b15" />
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <span id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">
+        <a href="https://github.com/Dolkar/Tephra">Tephra</a> <span class="m-breadcrumb">|</span> <a href="index.html" class="m-thin">Documentation</a>
+      </span>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li><a href="user-guide.html">User Guide</a></li>
+            <li><a href="examples.html">Examples and Tests</a></li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="3">
+            <li><a href="changelog.html">Changelog</a></li>
+            <li><a href="https://github.com/Dolkar/Tephra/discussions">Discussions</a></li>
+            <li><a href="annotated.html">API</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          <span class="m-breadcrumb"><a href="namespacetp.html">tp</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespacetp_1_1utils.html">utils</a>::<wbr/></span>AutoRingBuffer <span class="m-thin">class</span>
+        </h1>
+        <p>A ring buffer implementation with automatic allocation of memory and timestamp-based garbage collection.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<p>An abstraction around the more involved <a href="classtp_1_1utils_1_1_growable_ring_buffer.html" class="m-doc">tp::<wbr />utils::<wbr />GrowableRingBuffer</a>. This one automatically allocates more buffers when running out of space.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="classtp_1_1utils_1_1_growable_ring_buffer.html" class="m-doc">tp::<wbr />utils::<wbr />GrowableRingBuffer</a></p></aside>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a2aa1afe73f1b01408337e53e28239862" class="m-doc">AutoRingBuffer</a>(</span><span class="m-doc-wrap"><a href="classtp_1_1_device.html" class="m-doc">tp::<wbr />Device</a>* device,
+              <a href="namespacetp.html#a9243d20f91ff4e6b0982f4eb736929f2" class="m-doc">tp::<wbr />BufferUsageMask</a> usage,
+              <a href="structtp_1_1_memory_preference.html" class="m-doc">tp::<wbr />MemoryPreference</a> memoryPreference,
+              <a href="structtp_1_1_overallocation_behavior.html" class="m-doc">tp::<wbr />OverallocationBehavior</a> overallocationBehavior = { 3.0f, 0.5f, 65536 },
+              const char* debugName = nullptr) <span class="m-label m-flat m-info">explicit</span> </span>
+            </dt>
+            <dd></dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt id="a96915b8b4aca3844173a820bd49fdcd3">
+              <span class="m-doc-wrap-bumper">auto <a href="#a96915b8b4aca3844173a820bd49fdcd3" class="m-doc-self">getAllocatedSize</a>(</span><span class="m-doc-wrap">) const -&gt; uint64_t</span>
+            </dt>
+            <dd>Returns the total size of all allocations in bytes.</dd>
+            <dt id="a08170bb3b7b580d0735bee737446fe77">
+              <span class="m-doc-wrap-bumper">auto <a href="#a08170bb3b7b580d0735bee737446fe77" class="m-doc-self">getAllocationCount</a>(</span><span class="m-doc-wrap">) const -&gt; uint64_t</span>
+            </dt>
+            <dd>Returns the number of active allocations.</dd>
+            <dt id="a13edae99de7a549108e071bbedc8ee52">
+              <span class="m-doc-wrap-bumper">auto <a href="#a13edae99de7a549108e071bbedc8ee52" class="m-doc-self">getRegionCount</a>(</span><span class="m-doc-wrap">) const -&gt; uint64_t</span>
+            </dt>
+            <dd>Returns the number of regions used so far.</dd>
+            <dt id="a0e1b021d9f668c49619743b19a7f8e7a">
+              <span class="m-doc-wrap-bumper">auto <a href="#a0e1b021d9f668c49619743b19a7f8e7a" class="m-doc-self">getTotalSize</a>(</span><span class="m-doc-wrap">) const -&gt; uint64_t</span>
+            </dt>
+            <dd>Returns the total size of all regions in bytes.</dd>
+            <dt id="a23a01c286ef05db9edc6f42336b9aaa9">
+              <span class="m-doc-wrap-bumper">void <a href="#a23a01c286ef05db9edc6f42336b9aaa9" class="m-doc-self">pop</a>(</span><span class="m-doc-wrap">uint64_t upToTimestamp)</span>
+            </dt>
+            <dd>Frees all of the allocations with a timestamp value less or equal to <code>upToTimestamp</code>, allowing their memory regions to be reused.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#afa46a07972a83e157a8b726d7ee6099d" class="m-doc">push</a>(</span><span class="m-doc-wrap">uint64_t allocationSize,
+              uint64_t timestamp) -&gt; <a href="classtp_1_1_buffer_view.html" class="m-doc">tp::<wbr />BufferView</a></span>
+            </dt>
+            <dd>Allocate a <a href="classtp_1_1_buffer_view.html" class="m-doc">tp::<wbr />BufferView</a> with the given size.</dd>
+            <dt id="ae6b44750a246baeea74bd9dc39422bbb">
+              <span class="m-doc-wrap-bumper">auto <a href="#ae6b44750a246baeea74bd9dc39422bbb" class="m-doc-self">trim</a>(</span><span class="m-doc-wrap">) -&gt; uint64_t</span>
+            </dt>
+            <dd>Attempts to free up unused memory regions. Returns the number of bytes freed.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a2aa1afe73f1b01408337e53e28239862"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> tp::<wbr />utils::<wbr />AutoRingBuffer::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2aa1afe73f1b01408337e53e28239862" class="m-doc-self">AutoRingBuffer</a>(</span><span class="m-doc-wrap"><a href="classtp_1_1_device.html" class="m-doc">tp::<wbr />Device</a>* device,
+              <a href="namespacetp.html#a9243d20f91ff4e6b0982f4eb736929f2" class="m-doc">tp::<wbr />BufferUsageMask</a> usage,
+              <a href="structtp_1_1_memory_preference.html" class="m-doc">tp::<wbr />MemoryPreference</a> memoryPreference,
+              <a href="structtp_1_1_overallocation_behavior.html" class="m-doc">tp::<wbr />OverallocationBehavior</a> overallocationBehavior = { 3.0f, 0.5f, 65536 },
+              const char* debugName = nullptr) <span class="m-label m-info">explicit</span> </span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">device</td>
+                  <td>The Tephra device that new buffers should be allocated from.</td>
+                </tr>
+                <tr>
+                  <td>usage</td>
+                  <td>The expected usage of the views allocated from this ring buffer.</td>
+                </tr>
+                <tr>
+                  <td>memoryPreference</td>
+                  <td>The memory preference of the underlying memory.</td>
+                </tr>
+                <tr>
+                  <td>overallocationBehavior</td>
+                  <td>The overallocation behavior to be applied when allocating new space.</td>
+                </tr>
+                <tr>
+                  <td>debugName</td>
+                  <td>The debug name to use as a basis for the backing buffers.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="afa46a07972a83e157a8b726d7ee6099d"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="classtp_1_1_buffer_view.html" class="m-doc">tp::<wbr />BufferView</a> tp::<wbr />utils::<wbr />AutoRingBuffer::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afa46a07972a83e157a8b726d7ee6099d" class="m-doc-self">push</a>(</span><span class="m-doc-wrap">uint64_t allocationSize,
+              uint64_t timestamp)</span></span>
+            </h3>
+            <p>Allocate a <a href="classtp_1_1_buffer_view.html" class="m-doc">tp::<wbr />BufferView</a> with the given size.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">allocationSize</td>
+                  <td>The size of the allocation to be made.</td>
+                </tr>
+                <tr>
+                  <td>timestamp</td>
+                  <td>The timestamp determining the allocation lifetime. See <a href="classtp_1_1utils_1_1_auto_ring_buffer.html#a23a01c286ef05db9edc6f42336b9aaa9" class="m-doc">tp::<wbr />utils::<wbr />AutoRingBuffer::<wbr />pop</a>.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>Remark</h4><p><code>timestamp</code> must be greater or equal to the last timestamp passed to this function. In other words, the timestamp values must be monotonically increasing.</p></aside>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <p>Tephra Documentation. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.6 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

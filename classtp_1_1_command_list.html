@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>tp::CommandList class | Tephra Documentation</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="m-dark-tephra.css" />
+  <link rel="stylesheet" href="m-documentation.css" />
+  <link rel="stylesheet" href="m-theme-dark-tephra.css" />
+  <link rel="stylesheet" href="m-grid.css" />
+  <link rel="stylesheet" href="m-components.css" />
+  <link rel="stylesheet" href="m-layout.css" />
+  <link rel="stylesheet" href="pygments-dark.css" />
+  <link rel="stylesheet" href="pygments-console.css" />
+  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#2c1b15" />
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <span id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">
+        <a href="https://github.com/Dolkar/Tephra">Tephra</a> <span class="m-breadcrumb">|</span> <a href="index.html" class="m-thin">Documentation</a>
+      </span>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li><a href="user-guide.html">User Guide</a></li>
+            <li><a href="examples.html">Examples and Tests</a></li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="3">
+            <li><a href="changelog.html">Changelog</a></li>
+            <li><a href="https://github.com/Dolkar/Tephra/discussions">Discussions</a></li>
+            <li><a href="annotated.html">API</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          <span class="m-breadcrumb"><a href="namespacetp.html">tp</a>::<wbr/></span>CommandList <span class="m-thin">class</span>
+        </h1>
+        <p>An abstract class that implements common functionality for recording commands inside either a compute or render pass. See <a href="classtp_1_1_compute_list.html" class="m-doc">tp::<wbr />ComputeList</a> and <a href="classtp_1_1_render_list.html" class="m-doc">tp::<wbr />RenderList</a> for further details.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#derived-classes">Derived classes</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkCommandBuffer.html" class="m-doc-external">VkCommandBuffer</a></p></aside>
+        <section id="derived-classes">
+          <h2><a href="#derived-classes">Derived classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              class <a href="classtp_1_1_compute_list.html" class="m-doc">ComputeList</a>
+            </dt>
+            <dd>Provides an interface to directly record compute commands into a Vulkan   <a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkCommandBuffer.html" class="m-doc-external">VkCommandBuffer</a> inside a compute pass.</dd>
+            <dt>
+              class <a href="classtp_1_1_render_list.html" class="m-doc">RenderList</a>
+            </dt>
+            <dd>Provides an interface to directly record graphics commands into a Vulkan   <a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkCommandBuffer.html" class="m-doc-external">VkCommandBuffer</a> inside a compute pass.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a7045fbaa2fd98bafb68133ee836fc366" class="m-doc">cmdBeginDebugLabel</a>(</span><span class="m-doc-wrap">const char* name,
+              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;float&gt; color = {})</span>
+            </dt>
+            <dd>Begins a debug label, marking the following commands until the next <a href="classtp_1_1_command_list.html#ab749605c5419f436de4a533b98a05913" class="m-doc">tp::<wbr />CommandList::<wbr />cmdEndDebugLabel</a> with the given name and optional color for display in validation and debugging tools.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a0636227ef981fbd2998c802dd73a8eb2" class="m-doc">cmdBindDescriptorSets</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_pipeline_layout.html" class="m-doc">PipelineLayout</a>&amp; pipelineLayout,
+              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const <a href="classtp_1_1_descriptor_set_view.html" class="m-doc">DescriptorSetView</a>&gt; descriptorSets,
+              uint32_t firstSet = 0,
+              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const uint32_t&gt; dynamicOffsets = {})</span>
+            </dt>
+            <dd>Binds descriptor sets for use in the subsequent commands.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#ab749605c5419f436de4a533b98a05913" class="m-doc">cmdEndDebugLabel</a>(</span><span class="m-doc-wrap">)</span>
+            </dt>
+            <dd>Ends the last debug label. Must be preceded by <a href="classtp_1_1_command_list.html#a7045fbaa2fd98bafb68133ee836fc366" class="m-doc">tp::<wbr />CommandList::<wbr />cmdBeginDebugLabel</a>.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#ab99033580d4632b35cc51d5e4c0fd977" class="m-doc">cmdInsertDebugLabel</a>(</span><span class="m-doc-wrap">const char* name,
+              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;float&gt; color = {})</span>
+            </dt>
+            <dd>Inserts a debug label, marking the following commands with the given name and optional color for display in validation and debugging tools.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename T&gt;</div>
+              <span class="m-doc-wrap-bumper">void <a href="#a94bd2a4fe4484aeb003695a6bab5ef15" class="m-doc">cmdPushConstants</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_pipeline_layout.html" class="m-doc">PipelineLayout</a>&amp; pipelineLayout,
+              <a href="namespacetp.html#a30a2cfebc7d6bf76df2d13f0cee84cc6" class="m-doc">ShaderStageMask</a> stageMask,
+              const T&amp; value,
+              uint32_t offsetBytes = 0)</span>
+            </dt>
+            <dd>Updates the push constant values using the given pipeline layout.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a700efa4defb59e3b12e97e9791faa627" class="m-doc">cmdPushConstants</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_pipeline_layout.html" class="m-doc">PipelineLayout</a>&amp; pipelineLayout,
+              <a href="namespacetp.html#a30a2cfebc7d6bf76df2d13f0cee84cc6" class="m-doc">ShaderStageMask</a> stageMask,
+              const void* data,
+              uint32_t sizeBytes,
+              uint32_t offsetBytes = 0)</span>
+            </dt>
+            <dd>Updates the push constant values using the given pipeline layout.</dd>
+            <dt id="a0497b2f022a3091e6575239fd42fee6b">
+              <span class="m-doc-wrap-bumper">auto <a href="#a0497b2f022a3091e6575239fd42fee6b" class="m-doc-self">isNull</a>(</span><span class="m-doc-wrap">) const -&gt; bool</span>
+            </dt>
+            <dd>Returns <code>true</code> if the command list is null and not valid for use.</dd>
+            <dt id="a81914d5675d536bb0af390a07bcf89c5">
+              <span class="m-doc-wrap-bumper">auto <a href="#a81914d5675d536bb0af390a07bcf89c5" class="m-doc-self">vkGetCommandBufferHandle</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="structtp_1_1_vk_object_handle.html" class="m-doc">VkCommandBufferHandle</a></span>
+            </dt>
+            <dd>Returns the associated   <a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkCommandBuffer.html" class="m-doc-external">VkCommandBuffer</a> handle if the command list is being recorded, VK_NULL_HANDLE otherwise.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a7045fbaa2fd98bafb68133ee836fc366"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />CommandList::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7045fbaa2fd98bafb68133ee836fc366" class="m-doc-self">cmdBeginDebugLabel</a>(</span><span class="m-doc-wrap">const char* name,
+              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;float&gt; color = {})</span></span>
+            </h3>
+            <p>Begins a debug label, marking the following commands until the next <a href="classtp_1_1_command_list.html#ab749605c5419f436de4a533b98a05913" class="m-doc">tp::<wbr />CommandList::<wbr />cmdEndDebugLabel</a> with the given name and optional color for display in validation and debugging tools.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">name</td>
+                  <td>The name of the label.</td>
+                </tr>
+                <tr>
+                  <td>color</td>
+                  <td>The color of the label. Only used by external tools.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>Remark</h4><p>The call will have no effect when <a href="namespacetp_1_1_application_extension.html#a87720f5be2958c77e3766715f1e5c38e" class="m-doc">tp::<wbr />ApplicationExtension::<wbr />EXT_DebugUtils</a> is not enabled.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a0636227ef981fbd2998c802dd73a8eb2"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />CommandList::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0636227ef981fbd2998c802dd73a8eb2" class="m-doc-self">cmdBindDescriptorSets</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_pipeline_layout.html" class="m-doc">PipelineLayout</a>&amp; pipelineLayout,
+              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const <a href="classtp_1_1_descriptor_set_view.html" class="m-doc">DescriptorSetView</a>&gt; descriptorSets,
+              uint32_t firstSet = 0,
+              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const uint32_t&gt; dynamicOffsets = {})</span></span>
+            </h3>
+            <p>Binds descriptor sets for use in the subsequent commands.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">pipelineLayout</td>
+                  <td>The <a href="classtp_1_1_pipeline_layout.html" class="m-doc">tp::<wbr />PipelineLayout</a> used to program the bindings.</td>
+                </tr>
+                <tr>
+                  <td>descriptorSets</td>
+                  <td>An array of pointers to <a href="classtp_1_1_descriptor_set.html" class="m-doc">tp::<wbr />DescriptorSet</a> to bind.</td>
+                </tr>
+                <tr>
+                  <td>firstSet</td>
+                  <td>The set number in the pipeline layout that the first provided descriptor set will be bound to.</td>
+                </tr>
+                <tr>
+                  <td>dynamicOffsets</td>
+                  <td>The dynamic offsets to be applied to the provided descriptors of types <a href="namespacetp.html#a3dccbef68c07e939a1f37825018d2c67a517b91f0588b3bf6c80ff3b19b2a7f57" class="m-doc">tp::<wbr />DescriptorType::<wbr />UniformBufferDynamic</a> or <a href="namespacetp.html#a3dccbef68c07e939a1f37825018d2c67ada8c94227ee0e3b5cd40da12d594ad55" class="m-doc">tp::<wbr />DescriptorType::<wbr />StorageBufferDynamic</a> in the order they appear in the descriptor sets. The size of the array must match the number of dynamic buffer descriptors to be bound. Each offset moves the entire range of its corresponding buffer view within its parent buffer. E.g. a buffer view offset by 64 bytes and a size of 32 bytes will expose bytes 128-159 of the viewed buffer when bound with a dynamic offset value of 64.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>The provided descriptor sets are bound consecutively, meaning the first descriptor set gets bound to set number <code>firstSet</code>, the second one to <code>firstSet + 1</code> and so on.</p><aside class="m-note m-default"><h4>Remark</h4><p>If the descriptor sets previously bound to numbers up to <code>firstSet - 1</code> were bound using a pipeline layout compatible up to the set number <code>firstSet - 1</code>, then the lower numbered bindings are not disturbed and may still be accessed.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/vkCmdBindDescriptorSets.html" class="m-doc-external">vkCmdBindDescriptorSets</a></p></aside>
+          </div></section>
+          <section class="m-doc-details" id="ab749605c5419f436de4a533b98a05913"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />CommandList::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab749605c5419f436de4a533b98a05913" class="m-doc-self">cmdEndDebugLabel</a>(</span><span class="m-doc-wrap">)</span></span>
+            </h3>
+            <p>Ends the last debug label. Must be preceded by <a href="classtp_1_1_command_list.html#a7045fbaa2fd98bafb68133ee836fc366" class="m-doc">tp::<wbr />CommandList::<wbr />cmdBeginDebugLabel</a>.</p>
+<aside class="m-note m-default"><h4>Remark</h4><p>The call will have no effect when <a href="namespacetp_1_1_application_extension.html#a87720f5be2958c77e3766715f1e5c38e" class="m-doc">tp::<wbr />ApplicationExtension::<wbr />EXT_DebugUtils</a> is not enabled.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="ab99033580d4632b35cc51d5e4c0fd977"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />CommandList::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab99033580d4632b35cc51d5e4c0fd977" class="m-doc-self">cmdInsertDebugLabel</a>(</span><span class="m-doc-wrap">const char* name,
+              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;float&gt; color = {})</span></span>
+            </h3>
+            <p>Inserts a debug label, marking the following commands with the given name and optional color for display in validation and debugging tools.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">name</td>
+                  <td>The name of the label.</td>
+                </tr>
+                <tr>
+                  <td>color</td>
+                  <td>The color of the label. Only used by external tools.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>Remark</h4><p>The call will have no effect when <a href="namespacetp_1_1_application_extension.html#a87720f5be2958c77e3766715f1e5c38e" class="m-doc">tp::<wbr />ApplicationExtension::<wbr />EXT_DebugUtils</a> is not enabled.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a94bd2a4fe4484aeb003695a6bab5ef15"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />CommandList::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a94bd2a4fe4484aeb003695a6bab5ef15" class="m-doc-self">cmdPushConstants</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_pipeline_layout.html" class="m-doc">PipelineLayout</a>&amp; pipelineLayout,
+              <a href="namespacetp.html#a30a2cfebc7d6bf76df2d13f0cee84cc6" class="m-doc">ShaderStageMask</a> stageMask,
+              const T&amp; value,
+              uint32_t offsetBytes = 0)</span></span>
+            </h3>
+            <p>Updates the push constant values using the given pipeline layout.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">pipelineLayout</td>
+                  <td>The <a href="classtp_1_1_pipeline_layout.html" class="m-doc">tp::<wbr />PipelineLayout</a> used to program the push constants.</td>
+                </tr>
+                <tr>
+                  <td>stageMask</td>
+                  <td>The stages that will use the push constants in the updated range.</td>
+                </tr>
+                <tr>
+                  <td>value</td>
+                  <td>The value that the push constants will be updated to. The size of the type determines the size of the updated range.</td>
+                </tr>
+                <tr>
+                  <td>offsetBytes</td>
+                  <td>The offset to the start of the updated range in bytes.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>Remark</h4><p>Values outside of the updated range are not disturbed.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/vkCmdPushConstants.html" class="m-doc-external">vkCmdPushConstants</a></p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a700efa4defb59e3b12e97e9791faa627"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />CommandList::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a700efa4defb59e3b12e97e9791faa627" class="m-doc-self">cmdPushConstants</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_pipeline_layout.html" class="m-doc">PipelineLayout</a>&amp; pipelineLayout,
+              <a href="namespacetp.html#a30a2cfebc7d6bf76df2d13f0cee84cc6" class="m-doc">ShaderStageMask</a> stageMask,
+              const void* data,
+              uint32_t sizeBytes,
+              uint32_t offsetBytes = 0)</span></span>
+            </h3>
+            <p>Updates the push constant values using the given pipeline layout.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">pipelineLayout</td>
+                  <td>The <a href="classtp_1_1_pipeline_layout.html" class="m-doc">tp::<wbr />PipelineLayout</a> used to program the push constants.</td>
+                </tr>
+                <tr>
+                  <td>stageMask</td>
+                  <td>The stages that will use the push constants in the updated range.</td>
+                </tr>
+                <tr>
+                  <td>data</td>
+                  <td>Pointer to the data that the push constants will be updated to.</td>
+                </tr>
+                <tr>
+                  <td>sizeBytes</td>
+                  <td>The size of the updated range in bytes.</td>
+                </tr>
+                <tr>
+                  <td>offsetBytes</td>
+                  <td>The offset to the start of the updated range in bytes.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>Remark</h4><p>Values outside of the updated range are not disturbed.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/vkCmdPushConstants.html" class="m-doc-external">vkCmdPushConstants</a></p></aside>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <p>Tephra Documentation. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.6 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

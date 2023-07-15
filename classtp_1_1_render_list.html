@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>tp::RenderList class | Tephra Documentation</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="m-dark-tephra.css" />
+  <link rel="stylesheet" href="m-documentation.css" />
+  <link rel="stylesheet" href="m-theme-dark-tephra.css" />
+  <link rel="stylesheet" href="m-grid.css" />
+  <link rel="stylesheet" href="m-components.css" />
+  <link rel="stylesheet" href="m-layout.css" />
+  <link rel="stylesheet" href="pygments-dark.css" />
+  <link rel="stylesheet" href="pygments-console.css" />
+  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#2c1b15" />
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <span id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">
+        <a href="https://github.com/Dolkar/Tephra">Tephra</a> <span class="m-breadcrumb">|</span> <a href="index.html" class="m-thin">Documentation</a>
+      </span>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li><a href="user-guide.html">User Guide</a></li>
+            <li><a href="examples.html">Examples and Tests</a></li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="3">
+            <li><a href="changelog.html">Changelog</a></li>
+            <li><a href="https://github.com/Dolkar/Tephra/discussions">Discussions</a></li>
+            <li><a href="annotated.html">API</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          <span class="m-breadcrumb"><a href="namespacetp.html">tp</a>::<wbr/></span>RenderList <span class="m-thin">class</span>
+        </h1>
+        <p>Provides an interface to directly record graphics commands into a Vulkan   <a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkCommandBuffer.html" class="m-doc-external">VkCommandBuffer</a> inside a compute pass.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<p>The behavior and expected usage differs depending on the variant of the <code>commandRecording</code> parameter passed to <a href="classtp_1_1_job.html#ab739735917361ff75d3b892339007815" class="m-doc">tp::<wbr />Job::<wbr />cmdExecuteRenderPass</a>.</p><p>If the list was provided through the tp::ArrayView&lt;tp::RenderList&gt; variant, then <a href="classtp_1_1_render_list.html#aa26b965c672012ffb31856c9f7fa22b5" class="m-doc">tp::<wbr />RenderList::<wbr />beginRecording</a> must be called before the first and <a href="classtp_1_1_render_list.html#aee74e317d7b1253ef04005ef34254d78" class="m-doc">tp::<wbr />RenderList::<wbr />endRecording</a> after the last recorded command.</p><p>If the list was provided as a parameter to <a href="namespacetp.html#abce3813304107869c695ab3e0bafa0fa" class="m-doc">tp::<wbr />RenderInlineCallback</a> using the function callback variant, <a href="classtp_1_1_render_list.html#aa26b965c672012ffb31856c9f7fa22b5" class="m-doc">tp::<wbr />RenderList::<wbr />beginRecording</a> and <a href="classtp_1_1_render_list.html#aee74e317d7b1253ef04005ef34254d78" class="m-doc">tp::<wbr />RenderList::<wbr />endRecording</a> must not be called. Any changed state (cmdBind..., cmdSet...) persists between all inline lists within the same <a href="classtp_1_1_job.html" class="m-doc">tp::<wbr />Job</a>.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="classtp_1_1_job.html#ab739735917361ff75d3b892339007815" class="m-doc">tp::<wbr />Job::<wbr />cmdExecuteRenderPass</a></p><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkCommandBuffer.html" class="m-doc-external">VkCommandBuffer</a></p></aside>
+        <section id="base-classes">
+          <h2><a href="#base-classes">Base classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              class <a href="classtp_1_1_command_list.html" class="m-doc">CommandList</a>
+            </dt>
+            <dd>An abstract class that implements common functionality for recording commands inside either a compute or render pass. See <a href="classtp_1_1_compute_list.html" class="m-doc">tp::<wbr />ComputeList</a> and <a href="classtp_1_1_render_list.html" class="m-doc">tp::<wbr />RenderList</a> for further details.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt id="afff8e36645a3bb7b9cff5bea4d1b36dd">
+              <span class="m-doc-wrap-bumper"><a href="#afff8e36645a3bb7b9cff5bea4d1b36dd" class="m-doc-self">RenderList</a>(</span><span class="m-doc-wrap">)</span>
+            </dt>
+            <dd>Constructs a null <a href="classtp_1_1_render_list.html" class="m-doc">tp::<wbr />RenderList</a>.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#aa26b965c672012ffb31856c9f7fa22b5" class="m-doc">beginRecording</a>(</span><span class="m-doc-wrap"><a href="classtp_1_1_command_pool.html" class="m-doc">CommandPool</a>* commandPool)</span>
+            </dt>
+            <dd>Begins recording commands to the list, using the given command pool.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#af702ae963f8802a146d24aed36532aad" class="m-doc">cmdBindGraphicsPipeline</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_pipeline.html" class="m-doc">Pipeline</a>&amp; pipeline)</span>
+            </dt>
+            <dd>Binds a graphics <a href="classtp_1_1_pipeline.html" class="m-doc">tp::<wbr />Pipeline</a> for use in subsequent draw commands.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a839cc051de1e92fb1d4be345f624dd6d" class="m-doc">cmdBindIndexBuffer</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_buffer_view.html" class="m-doc">BufferView</a>&amp; buffer,
+              <a href="namespacetp.html#afea3b5dc483f1a9ae7d17decbf3252a5" class="m-doc">IndexType</a> indexType)</span>
+            </dt>
+            <dd>Binds an index buffer for use in subsequent indexed draw commands.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a8dcdee63badb2314c9210efc23c0e0c7" class="m-doc">cmdBindVertexBuffers</a>(</span><span class="m-doc-wrap"><a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const <a href="classtp_1_1_buffer_view.html" class="m-doc">BufferView</a>&gt; buffers,
+              uint32_t firstBinding = 0)</span>
+            </dt>
+            <dd>Binds the given vertex buffers for use in subsequent draw commands.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a7d669f68b9d23c1785770b3095034474" class="m-doc">cmdDraw</a>(</span><span class="m-doc-wrap">uint32_t vertexCount,
+              uint32_t instanceCount = 1,
+              uint32_t firstVertex = 0,
+              uint32_t firstInstance = 0)</span>
+            </dt>
+            <dd>Records a non-indexed draw.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#ae3b0ea0c8bb587945d09b4c70d00b1c8" class="m-doc">cmdDrawIndexed</a>(</span><span class="m-doc-wrap">uint32_t indexCount,
+              uint32_t instanceCount = 1,
+              uint32_t firstIndex = 0,
+              int32_t vertexOffset = 0,
+              uint32_t firstInstance = 0)</span>
+            </dt>
+            <dd>Records an indexed draw.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#ab04627afbba1672ffbfa6d3d9c93f5bd" class="m-doc">cmdDrawIndexedIndirect</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_buffer_view.html" class="m-doc">BufferView</a>&amp; drawParamBuffer,
+              uint32_t drawCount = 1,
+              uint32_t stride = sizeof(VkDrawIndexedIndirectCommand))</span>
+            </dt>
+            <dd>Records indirect indexed draws with the parameters sourced from a buffer.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#aba657500f0f48a2ea4d2c3964c1a708e" class="m-doc">cmdDrawIndexedIndirectCount</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_buffer_view.html" class="m-doc">BufferView</a>&amp; drawParamBuffer,
+              const <a href="classtp_1_1_buffer_view.html" class="m-doc">BufferView</a>&amp; countBuffer,
+              uint32_t maxDrawCount,
+              uint32_t stride)</span>
+            </dt>
+            <dd>Records indirect indexed draws, with both the parameters and the draw count sourced from buffers.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a80a9d980c4d460879ba4966d5fedc3a7" class="m-doc">cmdDrawIndirect</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_buffer_view.html" class="m-doc">BufferView</a>&amp; drawParamBuffer,
+              uint32_t drawCount = 1,
+              uint32_t stride = sizeof(VkDrawIndirectCommand))</span>
+            </dt>
+            <dd>Records indirect draws with the parameters sourced from a buffer.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a37c194e3c6186cf533d47abbd7974402" class="m-doc">cmdDrawIndirectCount</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_buffer_view.html" class="m-doc">BufferView</a>&amp; drawParamBuffer,
+              const <a href="classtp_1_1_buffer_view.html" class="m-doc">BufferView</a>&amp; countBuffer,
+              uint32_t maxDrawCount,
+              uint32_t stride)</span>
+            </dt>
+            <dd>Records indirect draws, with both the parameters and the draw count sourced from buffers.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a24029020b57f6302641cbdc2a418b5ff" class="m-doc">cmdSetBlendConstants</a>(</span><span class="m-doc-wrap">float blendConstants[4])</span>
+            </dt>
+            <dd>Sets the blend constants pipeline dynamic state.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a8b382d7c81d62bb2b60fca6238a8c21b" class="m-doc">cmdSetDepthBias</a>(</span><span class="m-doc-wrap">float constantFactor = 0.0f,
+              float slopeFactor = 0.0f,
+              float biasClamp = 0.0f)</span>
+            </dt>
+            <dd>Sets the depth bias pipeline dynamic state.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a254d25831a8582d005498f100d43a54c" class="m-doc">cmdSetDepthBounds</a>(</span><span class="m-doc-wrap">float minDepthBounds = 0.0f,
+              float maxDepthBounds = 1.0f)</span>
+            </dt>
+            <dd>Sets the depth bounds pipeline dynamic state.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a2883001396ff7b575eea6677acc5a0b0" class="m-doc">cmdSetLineWidth</a>(</span><span class="m-doc-wrap">float width = 1.0f)</span>
+            </dt>
+            <dd>Sets the line width pipeline dynamic state.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#ae379788e99e14cf808b774928f84ab24" class="m-doc">cmdSetScissor</a>(</span><span class="m-doc-wrap"><a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const <a href="structtp_1_1_rect2_d.html" class="m-doc">Rect2D</a>&gt; scissors,
+              uint32_t firstScissor = 0)</span>
+            </dt>
+            <dd>Sets the scissor test rectangles.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#ae5867b99343daf5dfd928061cb823742" class="m-doc">cmdSetViewport</a>(</span><span class="m-doc-wrap"><a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const <a href="structtp_1_1_viewport.html" class="m-doc">Viewport</a>&gt; viewports,
+              uint32_t firstViewport = 0)</span>
+            </dt>
+            <dd>Sets the viewport(s) to render to.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#aee74e317d7b1253ef04005ef34254d78" class="m-doc">endRecording</a>(</span><span class="m-doc-wrap">)</span>
+            </dt>
+            <dd>Ends recording commands to the list. No other methods can be called after this point.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="aa26b965c672012ffb31856c9f7fa22b5"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />RenderList::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa26b965c672012ffb31856c9f7fa22b5" class="m-doc-self">beginRecording</a>(</span><span class="m-doc-wrap"><a href="classtp_1_1_command_pool.html" class="m-doc">CommandPool</a>* commandPool)</span></span>
+            </h3>
+            <p>Begins recording commands to the list, using the given command pool.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">commandPool</td>
+                  <td>The command pool to use for memory allocations for command recording. Cannot be nullptr.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>Remark</h4><p>The parent <a href="classtp_1_1_job.html" class="m-doc">tp::<wbr />Job</a> must be in an enqueued state.</p><p>The <a href="classtp_1_1_render_list.html" class="m-doc">tp::<wbr />RenderList</a> must not have been received as a parameter to <a href="namespacetp.html#abce3813304107869c695ab3e0bafa0fa" class="m-doc">tp::<wbr />RenderInlineCallback</a>.</p><p>The <a href="classtp_1_1_command_pool.html" class="m-doc">tp::<wbr />CommandPool</a> is not thread safe. Only one thread may be recording commands using the same pool at a time.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/vkBeginCommandBuffer.html" class="m-doc-external">vkBeginCommandBuffer</a></p></aside>
+          </div></section>
+          <section class="m-doc-details" id="af702ae963f8802a146d24aed36532aad"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />RenderList::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af702ae963f8802a146d24aed36532aad" class="m-doc-self">cmdBindGraphicsPipeline</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_pipeline.html" class="m-doc">Pipeline</a>&amp; pipeline)</span></span>
+            </h3>
+            <p>Binds a graphics <a href="classtp_1_1_pipeline.html" class="m-doc">tp::<wbr />Pipeline</a> for use in subsequent draw commands.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">pipeline</td>
+                  <td>The pipeline object to bind.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>Remark</h4><p>The pipeline must have been created with the same <a href="classtp_1_1_render_pass_layout.html" class="m-doc">tp::<wbr />RenderPassLayout</a> and subpass index as the render list is being executed in.</p><p>If the pipeline was created with a <a href="classtp_1_1_pipeline_layout.html" class="m-doc">tp::<wbr />PipelineLayout</a> whose descriptor set layouts are compatible with the pipeline layout of sets previously bound with <a href="classtp_1_1_command_list.html#a0636227ef981fbd2998c802dd73a8eb2" class="m-doc">tp::<wbr />RenderList::<wbr />cmdBindDescriptorSets</a>, then the descriptor sets are not disturbed and may still be accessed, up to the first incompatible set number.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/vkCmdBindPipeline.html" class="m-doc-external">vkCmdBindPipeline</a></p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a839cc051de1e92fb1d4be345f624dd6d"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />RenderList::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a839cc051de1e92fb1d4be345f624dd6d" class="m-doc-self">cmdBindIndexBuffer</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_buffer_view.html" class="m-doc">BufferView</a>&amp; buffer,
+              <a href="namespacetp.html#afea3b5dc483f1a9ae7d17decbf3252a5" class="m-doc">IndexType</a> indexType)</span></span>
+            </h3>
+            <p>Binds an index buffer for use in subsequent indexed draw commands.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">buffer</td>
+                  <td>The index buffer to bind.</td>
+                </tr>
+                <tr>
+                  <td>indexType</td>
+                  <td>The type of the index data inside the buffer.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/vkCmdBindIndexBuffer.html" class="m-doc-external">vkCmdBindIndexBuffer</a></p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a8dcdee63badb2314c9210efc23c0e0c7"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />RenderList::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8dcdee63badb2314c9210efc23c0e0c7" class="m-doc-self">cmdBindVertexBuffers</a>(</span><span class="m-doc-wrap"><a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const <a href="classtp_1_1_buffer_view.html" class="m-doc">BufferView</a>&gt; buffers,
+              uint32_t firstBinding = 0)</span></span>
+            </h3>
+            <p>Binds the given vertex buffers for use in subsequent draw commands.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">buffers</td>
+                  <td>The vertex buffers to bind.</td>
+                </tr>
+                <tr>
+                  <td>firstBinding</td>
+                  <td>The index of the first vertex buffer binding to update.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>Remark</h4><p>Each buffer corresponds to a binding defined with <a href="structtp_1_1_vertex_input_binding.html" class="m-doc">tp::<wbr />VertexInputBinding</a> for the currently bound pipeline, starting with <code>firstBinding</code>.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/vkCmdBindVertexBuffers.html" class="m-doc-external">vkCmdBindVertexBuffers</a></p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a7d669f68b9d23c1785770b3095034474"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />RenderList::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7d669f68b9d23c1785770b3095034474" class="m-doc-self">cmdDraw</a>(</span><span class="m-doc-wrap">uint32_t vertexCount,
+              uint32_t instanceCount = 1,
+              uint32_t firstVertex = 0,
+              uint32_t firstInstance = 0)</span></span>
+            </h3>
+            <p>Records a non-indexed draw.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">vertexCount</td>
+                  <td>The number of vertices to draw.</td>
+                </tr>
+                <tr>
+                  <td>instanceCount</td>
+                  <td>The number of instances to draw.</td>
+                </tr>
+                <tr>
+                  <td>firstVertex</td>
+                  <td>The index of the first vertex to draw.</td>
+                </tr>
+                <tr>
+                  <td>firstInstance</td>
+                  <td>The index of the first instance to draw.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/vkCmdDraw.html" class="m-doc-external">vkCmdDraw</a></p></aside>
+          </div></section>
+          <section class="m-doc-details" id="ae3b0ea0c8bb587945d09b4c70d00b1c8"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />RenderList::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae3b0ea0c8bb587945d09b4c70d00b1c8" class="m-doc-self">cmdDrawIndexed</a>(</span><span class="m-doc-wrap">uint32_t indexCount,
+              uint32_t instanceCount = 1,
+              uint32_t firstIndex = 0,
+              int32_t vertexOffset = 0,
+              uint32_t firstInstance = 0)</span></span>
+            </h3>
+            <p>Records an indexed draw.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">indexCount</td>
+                  <td>The number of indexed vertices to draw.</td>
+                </tr>
+                <tr>
+                  <td>instanceCount</td>
+                  <td>The number of instances to draw.</td>
+                </tr>
+                <tr>
+                  <td>firstIndex</td>
+                  <td>The index of the first value in the index buffer to draw.</td>
+                </tr>
+                <tr>
+                  <td>vertexOffset</td>
+                  <td>The value added to the vertex index before indexing into the vertex buffer.</td>
+                </tr>
+                <tr>
+                  <td>firstInstance</td>
+                  <td>The index of the first instance to draw.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ab04627afbba1672ffbfa6d3d9c93f5bd"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />RenderList::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab04627afbba1672ffbfa6d3d9c93f5bd" class="m-doc-self">cmdDrawIndexedIndirect</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_buffer_view.html" class="m-doc">BufferView</a>&amp; drawParamBuffer,
+              uint32_t drawCount = 1,
+              uint32_t stride = sizeof(VkDrawIndexedIndirectCommand))</span></span>
+            </h3>
+            <p>Records indirect indexed draws with the parameters sourced from a buffer.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">drawParamBuffer</td>
+                  <td>The buffer containing draw parameters in the form of   <a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkDrawIndexedIndirectCommand.html" class="m-doc-external">VkDrawIndexedIndirectCommand</a>.</td>
+                </tr>
+                <tr>
+                  <td>drawCount</td>
+                  <td>The number of draws to execute.</td>
+                </tr>
+                <tr>
+                  <td>stride</td>
+                  <td>The stride in bytes between successive sets of draw parameters.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/vkCmdDrawIndexedIndirect.html" class="m-doc-external">vkCmdDrawIndexedIndirect</a></p></aside>
+          </div></section>
+          <section class="m-doc-details" id="aba657500f0f48a2ea4d2c3964c1a708e"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />RenderList::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aba657500f0f48a2ea4d2c3964c1a708e" class="m-doc-self">cmdDrawIndexedIndirectCount</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_buffer_view.html" class="m-doc">BufferView</a>&amp; drawParamBuffer,
+              const <a href="classtp_1_1_buffer_view.html" class="m-doc">BufferView</a>&amp; countBuffer,
+              uint32_t maxDrawCount,
+              uint32_t stride)</span></span>
+            </h3>
+            <p>Records indirect indexed draws, with both the parameters and the draw count sourced from buffers.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">drawParamBuffer</td>
+                  <td>The buffer containing draw parameters in the form of   <a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkDrawIndexedIndirectCommand.html" class="m-doc-external">VkDrawIndexedIndirectCommand</a>.</td>
+                </tr>
+                <tr>
+                  <td>countBuffer</td>
+                  <td>The buffer containing the draw count in the form of a single unsigned 32-bit integer.</td>
+                </tr>
+                <tr>
+                  <td>maxDrawCount</td>
+                  <td>The maximum number of draws that can be executed.</td>
+                </tr>
+                <tr>
+                  <td>stride</td>
+                  <td>The stride in bytes between successive sets of draw parameters.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>Remark</h4><p>The   <a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkPhysicalDeviceVulkan12Features.html" class="m-doc-external">VkPhysicalDeviceVulkan12Features</a>::<code>drawIndirectCount</code> feature must be enabled.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/vkCmdDrawIndexedIndirectCount.html" class="m-doc-external">vkCmdDrawIndexedIndirectCount</a></p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a80a9d980c4d460879ba4966d5fedc3a7"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />RenderList::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a80a9d980c4d460879ba4966d5fedc3a7" class="m-doc-self">cmdDrawIndirect</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_buffer_view.html" class="m-doc">BufferView</a>&amp; drawParamBuffer,
+              uint32_t drawCount = 1,
+              uint32_t stride = sizeof(VkDrawIndirectCommand))</span></span>
+            </h3>
+            <p>Records indirect draws with the parameters sourced from a buffer.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">drawParamBuffer</td>
+                  <td>The buffer containing draw parameters in the form of   <a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkDrawIndirectCommand.html" class="m-doc-external">VkDrawIndirectCommand</a>.</td>
+                </tr>
+                <tr>
+                  <td>drawCount</td>
+                  <td>The number of draws to execute.</td>
+                </tr>
+                <tr>
+                  <td>stride</td>
+                  <td>The stride in bytes between successive sets of draw parameters.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/vkCmdDrawIndirect.html" class="m-doc-external">vkCmdDrawIndirect</a></p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a37c194e3c6186cf533d47abbd7974402"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />RenderList::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a37c194e3c6186cf533d47abbd7974402" class="m-doc-self">cmdDrawIndirectCount</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_buffer_view.html" class="m-doc">BufferView</a>&amp; drawParamBuffer,
+              const <a href="classtp_1_1_buffer_view.html" class="m-doc">BufferView</a>&amp; countBuffer,
+              uint32_t maxDrawCount,
+              uint32_t stride)</span></span>
+            </h3>
+            <p>Records indirect draws, with both the parameters and the draw count sourced from buffers.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">drawParamBuffer</td>
+                  <td>The buffer containing draw parameters in the form of   <a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkDrawIndirectCommand.html" class="m-doc-external">VkDrawIndirectCommand</a>.</td>
+                </tr>
+                <tr>
+                  <td>countBuffer</td>
+                  <td>The buffer containing the draw count in the form of a single unsigned 32-bit integer.</td>
+                </tr>
+                <tr>
+                  <td>maxDrawCount</td>
+                  <td>The maximum number of draws that can be executed.</td>
+                </tr>
+                <tr>
+                  <td>stride</td>
+                  <td>The stride in bytes between successive sets of draw parameters.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>Remark</h4><p>The   <a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkPhysicalDeviceVulkan12Features.html" class="m-doc-external">VkPhysicalDeviceVulkan12Features</a>::<code>drawIndirectCount</code> feature must be enabled.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/vkCmdDrawIndirectCount.html" class="m-doc-external">vkCmdDrawIndirectCount</a></p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a24029020b57f6302641cbdc2a418b5ff"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />RenderList::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a24029020b57f6302641cbdc2a418b5ff" class="m-doc-self">cmdSetBlendConstants</a>(</span><span class="m-doc-wrap">float blendConstants[4])</span></span>
+            </h3>
+            <p>Sets the blend constants pipeline dynamic state.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">blendConstants</td>
+                  <td>The constants used for certain blend factors during blending operations.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>Remark</h4><p>Only has an effect on bound pipelines with the <a href="namespacetp.html#a8d68684e76a2f3ad68b401360669a4d0ac3937e4504414ddd3e06b7a3728e67e0" class="m-doc">tp::<wbr />DynamicState::<wbr />BlendConstants</a> dynamic state enabled.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/vkCmdSetBlendConstants.html" class="m-doc-external">vkCmdSetBlendConstants</a></p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a8b382d7c81d62bb2b60fca6238a8c21b"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />RenderList::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8b382d7c81d62bb2b60fca6238a8c21b" class="m-doc-self">cmdSetDepthBias</a>(</span><span class="m-doc-wrap">float constantFactor = 0.0f,
+              float slopeFactor = 0.0f,
+              float biasClamp = 0.0f)</span></span>
+            </h3>
+            <p>Sets the depth bias pipeline dynamic state.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">constantFactor</td>
+                  <td>Controls the constant depth value added to each fragment.</td>
+                </tr>
+                <tr>
+                  <td>slopeFactor</td>
+                  <td>Controls the slope dependent depth value added to each fragment.</td>
+                </tr>
+                <tr>
+                  <td>biasClamp</td>
+                  <td>Sets the maximum depth bias of a fragment.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>Remark</h4><p>The   <a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkPhysicalDeviceFeatures.html" class="m-doc-external">VkPhysicalDeviceFeatures</a>::<code>depthBiasClamp</code> feature must be enabled for <code>biasClamp != 0.0f</code>.</p><p>Only has an effect on bound pipelines with the <a href="namespacetp.html#a8d68684e76a2f3ad68b401360669a4d0ae8b041bb8eab2347f0a0b9db894c8074" class="m-doc">tp::<wbr />DynamicState::<wbr />DepthBias</a> dynamic state enabled.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/vkCmdSetDepthBias.html" class="m-doc-external">vkCmdSetDepthBias</a></p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a254d25831a8582d005498f100d43a54c"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />RenderList::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a254d25831a8582d005498f100d43a54c" class="m-doc-self">cmdSetDepthBounds</a>(</span><span class="m-doc-wrap">float minDepthBounds = 0.0f,
+              float maxDepthBounds = 1.0f)</span></span>
+            </h3>
+            <p>Sets the depth bounds pipeline dynamic state.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">minDepthBounds</td>
+                  <td>The minimum depth value.</td>
+                </tr>
+                <tr>
+                  <td>maxDepthBounds</td>
+                  <td>The maximum depth value.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>Remark</h4><p>The values must be between 0.0 and 1.0 inclusive.</p><p>Only has an effect on bound pipelines with the <a href="namespacetp.html#a8d68684e76a2f3ad68b401360669a4d0a4f18053954494718885a3ae4515f7fb1" class="m-doc">tp::<wbr />DynamicState::<wbr />DepthBounds</a> dynamic state enabled.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/vkCmdSetDepthBounds.html" class="m-doc-external">vkCmdSetDepthBounds</a></p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a2883001396ff7b575eea6677acc5a0b0"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />RenderList::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2883001396ff7b575eea6677acc5a0b0" class="m-doc-self">cmdSetLineWidth</a>(</span><span class="m-doc-wrap">float width = 1.0f)</span></span>
+            </h3>
+            <p>Sets the line width pipeline dynamic state.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">width</td>
+                  <td>The width of the rasterized line segments in pixels.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>Remark</h4><p>The   <a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkPhysicalDeviceFeatures.html" class="m-doc-external">VkPhysicalDeviceFeatures</a>::<code>wideLines</code> feature must be enabled for <code>width != 1.0</code>.</p><p>Only has an effect on bound pipelines with the <a href="namespacetp.html#a8d68684e76a2f3ad68b401360669a4d0adcf84fe120b3e292deb67ad75eb63012" class="m-doc">tp::<wbr />DynamicState::<wbr />LineWidth</a> dynamic state enabled.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/vkCmdSetLineWidth.html" class="m-doc-external">vkCmdSetLineWidth</a></p></aside>
+          </div></section>
+          <section class="m-doc-details" id="ae379788e99e14cf808b774928f84ab24"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />RenderList::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae379788e99e14cf808b774928f84ab24" class="m-doc-self">cmdSetScissor</a>(</span><span class="m-doc-wrap"><a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const <a href="structtp_1_1_rect2_d.html" class="m-doc">Rect2D</a>&gt; scissors,
+              uint32_t firstScissor = 0)</span></span>
+            </h3>
+            <p>Sets the scissor test rectangles.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">scissors</td>
+                  <td>The scissors to set.</td>
+                </tr>
+                <tr>
+                  <td>firstScissor</td>
+                  <td>The index of the first scissor rectangle to update.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>Remark</h4><p>Each scissor rectangle corresponds to an active viewport. The number of scissors must match the count set for the currently bound pipeline.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/vkCmdSetScissor.html" class="m-doc-external">vkCmdSetScissor</a></p></aside>
+          </div></section>
+          <section class="m-doc-details" id="ae5867b99343daf5dfd928061cb823742"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />RenderList::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae5867b99343daf5dfd928061cb823742" class="m-doc-self">cmdSetViewport</a>(</span><span class="m-doc-wrap"><a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const <a href="structtp_1_1_viewport.html" class="m-doc">Viewport</a>&gt; viewports,
+              uint32_t firstViewport = 0)</span></span>
+            </h3>
+            <p>Sets the viewport(s) to render to.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">viewports</td>
+                  <td>The viewports to set.</td>
+                </tr>
+                <tr>
+                  <td>firstViewport</td>
+                  <td>The index of the first viewport to update.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>Remark</h4><p>The number of viewports must match the count set for the currently bound pipeline.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/vkCmdSetViewport.html" class="m-doc-external">vkCmdSetViewport</a></p></aside>
+          </div></section>
+          <section class="m-doc-details" id="aee74e317d7b1253ef04005ef34254d78"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />RenderList::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aee74e317d7b1253ef04005ef34254d78" class="m-doc-self">endRecording</a>(</span><span class="m-doc-wrap">)</span></span>
+            </h3>
+            <p>Ends recording commands to the list. No other methods can be called after this point.</p>
+<aside class="m-note m-default"><h4>Remark</h4><p>The parent <a href="classtp_1_1_job.html" class="m-doc">tp::<wbr />Job</a> must be in an enqueued state.</p><p>The <a href="classtp_1_1_render_list.html" class="m-doc">tp::<wbr />RenderList</a> must not have been received as a parameter to <a href="namespacetp.html#abce3813304107869c695ab3e0bafa0fa" class="m-doc">tp::<wbr />RenderInlineCallback</a>.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/vkEndCommandBuffer.html" class="m-doc-external">vkEndCommandBuffer</a></p></aside>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <p>Tephra Documentation. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.6 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

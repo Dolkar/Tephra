@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Examples and Tests | Tephra Documentation</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="m-dark-tephra.css" />
+  <link rel="stylesheet" href="m-documentation.css" />
+  <link rel="stylesheet" href="m-theme-dark-tephra.css" />
+  <link rel="stylesheet" href="m-grid.css" />
+  <link rel="stylesheet" href="m-components.css" />
+  <link rel="stylesheet" href="m-layout.css" />
+  <link rel="stylesheet" href="pygments-dark.css" />
+  <link rel="stylesheet" href="pygments-console.css" />
+  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#2c1b15" />
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <span id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">
+        <a href="https://github.com/Dolkar/Tephra">Tephra</a> <span class="m-breadcrumb">|</span> <a href="index.html" class="m-thin">Documentation</a>
+      </span>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li><a href="user-guide.html">User Guide</a></li>
+            <li><a href="examples.html" id="m-navbar-current">Examples and Tests</a></li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="3">
+            <li><a href="changelog.html">Changelog</a></li>
+            <li><a href="https://github.com/Dolkar/Tephra/discussions">Discussions</a></li>
+            <li><a href="annotated.html">API</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          Examples and Tests
+        </h1>
+        <p>A list of included examples and integration tests.</p>
+<section id="e-examples"><h2><a href="#e-examples">Examples</a></h2><p>Examples showcasing the use of the Tephra library are present in the <code>/examples</code> folder. So far there is just one - a reimplementation of the <a href="https://github.com/KhronosGroup/Vulkan-LoaderAndValidationLayers/blob/master/demos/cube.cpp">official Vulkan C++ cube demo</a>, which displays a textured rotating cube. The Tephra implementation follows its example and does not make use of any third party windowing library. In your own code, you should preferably use something like GLFW instead, see the <a href="https://www.glfw.org/docs/3.3/vulkan_guide.html">GLFW Vulkan guide</a> for details. All the platform-dependent code and the window event loop is contained in <code>/examples/window.hpp</code>. It has only been tested on Windows, so if you find it not working on other platforms, please let me know or submit a PR :).</p><p>The <code>/examples/examples_common.hpp</code> file contains an <code>Example</code> abstract class with a number of virtual methods used to update and render images. This allows the windowing class to run any example that implements that interface. <code>/examples/tephra-examples.cpp</code> then contains an entry point for the project that just dispatches one of the examples.</p><p><br /></p></section><section id="e-tests"><h2><a href="#e-tests">Integration Test Suite</a></h2><p>Tephra also contains tests of its basic functionality, located in <code>/tests</code>, using the <a href="https://learn.microsoft.com/en-us/visualstudio/test/how-to-use-microsoft-test-framework-for-cpp?view=vs-2022">Microsoft Unit Testing Framework for C++</a>. The <code>/tests/tests_common.hpp</code> file contains common setup for those tests - it creates a basic Tephra <a href="classtp_1_1_application.html" class="m-doc">tp::<wbr />Application</a> and <a href="classtp_1_1_device.html" class="m-doc">tp::<wbr />Device</a> and for each of the several queues used during testing, also a <a href="classtp_1_1_job_resource_pool.html" class="m-doc">tp::<wbr />JobResourcePool</a>. It also loads data shared between several tests, such as shader pipelines. Unlike the code in the examples, it does not create a window and functions fully headlessly. Rather than functioning as unit tests, they set up scenarios from the point of view of the user of the API and check for the correct result, sometimes by making use of Tephra&#x27;s reporting of statistics. As such, they currently work only in debug build configuration.</p><p>The tests are split up by category:</p><section id="e-tests-setup"><h3><a href="#e-tests-setup">Setup Tests</a></h3><p>Tests to verify the functionality of setting up a basic Tephra environment. That involves creating an <a href="classtp_1_1_application.html" class="m-doc">tp::<wbr />Application</a>, choosing a physical device, creating a logical device from it and creating <a href="classtp_1_1_job_resource_pool.html" class="m-doc">tp::<wbr />JobResourcePool</a> objects. These tests run prior to the common code in <code>/tests/tests_common.hpp</code> to ensure it is functional for further tests.</p></section><section id="e-tests-buffer"><h3><a href="#e-tests-buffer">Buffer Tests</a></h3><p>Tests to verify the creation, memory allocation and use of <a href="classtp_1_1_buffer.html" class="m-doc">tp::<wbr />Buffer</a> objects and their views. They are tested as persistent (created through <a href="classtp_1_1_device.html#ab1f7c9dd53018893e062d06b01719c97" class="m-doc">tp::<wbr />Device::<wbr />allocateBuffer</a>), as well as job-local and pre-initialized buffers when used inside a <a href="classtp_1_1_job.html" class="m-doc">tp::<wbr />Job</a>. In the latter case, Tephra must be able to correctly alias buffers with non-overlapping usages. A naive allocator would fail the tests. Host mapping and readback is checked here as well, so it can be used to verify results in further tests.</p></section><section id="e-tests-image"><h3><a href="#e-tests-image">Image Tests</a></h3><p>Similar tests as above, but with <a href="classtp_1_1_image.html" class="m-doc">tp::<wbr />Image</a> and <a href="classtp_1_1_image_view.html" class="m-doc">tp::<wbr />ImageView</a> objects. Images have some additional complexity to deal with, such as arrays, mipmaps and, for the purposes of automatic synchronization, layouts.</p></section><section id="e-tests-job"><h3><a href="#e-tests-job">General Job Tests</a></h3><p>These tests verify the basic functionality of jobs, like creation, submission and synchronization. The number of barriers is checked to match expectations</p></section><section id="e-tests-compute"><h3><a href="#e-tests-compute">Compute Tests</a></h3><p>Tests for compute passes, inline and deferred recording of <a href="classtp_1_1_compute_list.html" class="m-doc">tp::<wbr />ComputeList</a> objects, and their proper synchronization within a job. Properly functioning pipelines and descriptors are also required for this.</p></section></section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <p>Tephra Documentation. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.6 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

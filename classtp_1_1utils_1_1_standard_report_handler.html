@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>tp::utils::StandardReportHandler class | Tephra Documentation</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="m-dark-tephra.css" />
+  <link rel="stylesheet" href="m-documentation.css" />
+  <link rel="stylesheet" href="m-theme-dark-tephra.css" />
+  <link rel="stylesheet" href="m-grid.css" />
+  <link rel="stylesheet" href="m-components.css" />
+  <link rel="stylesheet" href="m-layout.css" />
+  <link rel="stylesheet" href="pygments-dark.css" />
+  <link rel="stylesheet" href="pygments-console.css" />
+  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#2c1b15" />
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <span id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">
+        <a href="https://github.com/Dolkar/Tephra">Tephra</a> <span class="m-breadcrumb">|</span> <a href="index.html" class="m-thin">Documentation</a>
+      </span>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li><a href="user-guide.html">User Guide</a></li>
+            <li><a href="examples.html">Examples and Tests</a></li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="3">
+            <li><a href="changelog.html">Changelog</a></li>
+            <li><a href="https://github.com/Dolkar/Tephra/discussions">Discussions</a></li>
+            <li><a href="annotated.html">API</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          <span class="m-breadcrumb"><a href="namespacetp.html">tp</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespacetp_1_1utils.html">utils</a>::<wbr/></span>StandardReportHandler <span class="m-thin">class</span>
+        </h1>
+        <p>A <a href="classtp_1_1_debug_report_handler.html" class="m-doc">tp::<wbr />DebugReportHandler</a> implementation with default message formatting, writing to a standard output stream.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#pub-static-methods">Public static functions</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+        <section id="base-classes">
+          <h2><a href="#base-classes">Base classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              class <a href="classtp_1_1_debug_report_handler.html" class="m-doc">tp::DebugReportHandler</a>
+            </dt>
+            <dd>A base class for debug report handlers, containing callbacks through which debug messages and runtime errors are reported.</dd>
+          </dl>
+        </section>
+        <section id="pub-static-methods">
+          <h2><a href="#pub-static-methods">Public static functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">static auto <a href="#a1eae13c02887cf12e0d38f3002ca39c7" class="m-doc">formatDebugMessage</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_debug_message.html" class="m-doc">tp::<wbr />DebugMessage</a>&amp; message) -&gt; std::string <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Formats the debug message as a string in the default way, without the severity prefix.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">static auto <a href="#aa4eb22a9f045753f97b86ff5095f1205" class="m-doc">formatRuntimeError</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_debug_message_context.html" class="m-doc">tp::<wbr />DebugMessageContext</a>&amp; context,
+              const <a href="classtp_1_1_runtime_error.html" class="m-doc">tp::<wbr />RuntimeError</a>&amp; error) -&gt; std::string <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Formats the error as a string in the default way, without the prefix.</dd>
+            <dt id="a82e4e8695b614b3a0043bbdb42bab526">
+              <span class="m-doc-wrap-bumper">static void <a href="#a82e4e8695b614b3a0043bbdb42bab526" class="m-doc-self">triggerDebugTrap</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Triggers a debug trap (breakpoint) in a multiplatform way if a debugger is attached.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a52e6d94303f119cd62bed3335fc502ca" class="m-doc">StandardReportHandler</a>(</span><span class="m-doc-wrap">std::ostream&amp; outStream = std::cerr,
+              <a href="namespacetp.html#ae35a5aad1d269910f3653eb06ab091b8" class="m-doc">tp::<wbr />DebugMessageSeverityMask</a> severityMask = tp::DebugMessageSeverity::Warning|tp::DebugMessageSeverity::Error,
+              <a href="namespacetp.html#a02b3bae54663942065da16ae43cac4f4" class="m-doc">tp::<wbr />DebugMessageTypeMask</a> typeMask = tp::DebugMessageType::General|tp::DebugMessageType::Validation|tp::DebugMessageType::Performance,
+              <a href="namespacetp.html#ae35a5aad1d269910f3653eb06ab091b8" class="m-doc">DebugMessageSeverityMask</a> trapSeverityMask = tp::DebugMessageSeverity::Error)</span>
+            </dt>
+            <dd></dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a626f0e56778bd99f1050638fff2606ae" class="m-doc">callbackMessage</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_debug_message.html" class="m-doc">tp::<wbr />DebugMessage</a>&amp; message) <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Will be called on a debug message.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a87a6bbd3c221afcd94466360e6f501c1" class="m-doc">callbackRuntimeError</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_debug_message_context.html" class="m-doc">tp::<wbr />DebugMessageContext</a>&amp; context,
+              const <a href="classtp_1_1_runtime_error.html" class="m-doc">tp::<wbr />RuntimeError</a>&amp; error) <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Will be called when a Tephra error is about to be thrown.</dd>
+            <dt id="a190d20d1c8276059bbf1ad44182f0ae4">
+              <span class="m-doc-wrap-bumper">void <a href="#a190d20d1c8276059bbf1ad44182f0ae4" class="m-doc-self">clearSeenSeverities</a>(</span><span class="m-doc-wrap">)</span>
+            </dt>
+            <dd>Clears the mask of seen severities.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a30cdf8d8032080a49182d153efc5dc9d" class="m-doc">getSeenSeverities</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespacetp.html#ae35a5aad1d269910f3653eb06ab091b8" class="m-doc">tp::<wbr />DebugMessageSeverityMask</a></span>
+            </dt>
+            <dd>Returns a mask of severities of all messages that have been logged so far.</dd>
+            <dt id="a62a8aae3c0c34bad8b47f6947d0c91c7">
+              <span class="m-doc-wrap-bumper">auto <a href="#a62a8aae3c0c34bad8b47f6947d0c91c7" class="m-doc-self">getSeverityMask</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespacetp.html#ae35a5aad1d269910f3653eb06ab091b8" class="m-doc">tp::<wbr />DebugMessageSeverityMask</a> <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the message severity mask. Only messages with these levels will be passed to <a href="classtp_1_1_debug_report_handler.html#ae92c014e41f3c9a4b3382d460d09d963" class="m-doc">tp::<wbr />DebugReportHandler::<wbr />callbackMessage</a>.</dd>
+            <dt id="aeffe247b0ae3d9a1c089985c1ae1fae9">
+              <span class="m-doc-wrap-bumper">auto <a href="#aeffe247b0ae3d9a1c089985c1ae1fae9" class="m-doc-self">getTypeMask</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespacetp.html#a02b3bae54663942065da16ae43cac4f4" class="m-doc">tp::<wbr />DebugMessageTypeMask</a> <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the message severity mask. Only messages of these types will be passed to <a href="classtp_1_1_debug_report_handler.html#ae92c014e41f3c9a4b3382d460d09d963" class="m-doc">tp::<wbr />DebugReportHandler::<wbr />callbackMessage</a>.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a1eae13c02887cf12e0d38f3002ca39c7"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">static std::string tp::<wbr />utils::<wbr />StandardReportHandler::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1eae13c02887cf12e0d38f3002ca39c7" class="m-doc-self">formatDebugMessage</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_debug_message.html" class="m-doc">tp::<wbr />DebugMessage</a>&amp; message) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Formats the debug message as a string in the default way, without the severity prefix.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">message</td>
+                  <td>The details of the message.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aa4eb22a9f045753f97b86ff5095f1205"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">static std::string tp::<wbr />utils::<wbr />StandardReportHandler::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa4eb22a9f045753f97b86ff5095f1205" class="m-doc-self">formatRuntimeError</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_debug_message_context.html" class="m-doc">tp::<wbr />DebugMessageContext</a>&amp; context,
+              const <a href="classtp_1_1_runtime_error.html" class="m-doc">tp::<wbr />RuntimeError</a>&amp; error) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Formats the error as a string in the default way, without the prefix.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">context</td>
+                  <td>The Tephra context of where the error was triggered.</td>
+                </tr>
+                <tr>
+                  <td>error</td>
+                  <td>The runtime error thrown.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a52e6d94303f119cd62bed3335fc502ca"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> tp::<wbr />utils::<wbr />StandardReportHandler::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a52e6d94303f119cd62bed3335fc502ca" class="m-doc-self">StandardReportHandler</a>(</span><span class="m-doc-wrap">std::ostream&amp; outStream = std::cerr,
+              <a href="namespacetp.html#ae35a5aad1d269910f3653eb06ab091b8" class="m-doc">tp::<wbr />DebugMessageSeverityMask</a> severityMask = tp::DebugMessageSeverity::Warning|tp::DebugMessageSeverity::Error,
+              <a href="namespacetp.html#a02b3bae54663942065da16ae43cac4f4" class="m-doc">tp::<wbr />DebugMessageTypeMask</a> typeMask = tp::DebugMessageType::General|tp::DebugMessageType::Validation|tp::DebugMessageType::Performance,
+              <a href="namespacetp.html#ae35a5aad1d269910f3653eb06ab091b8" class="m-doc">DebugMessageSeverityMask</a> trapSeverityMask = tp::DebugMessageSeverity::Error)</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">outStream</td>
+                  <td>The output stream that messages and errors will be reported to.</td>
+                </tr>
+                <tr>
+                  <td>severityMask</td>
+                  <td>The mask of severity levels to be reported.</td>
+                </tr>
+                <tr>
+                  <td>typeMask</td>
+                  <td>The mask of message types to be reported.</td>
+                </tr>
+                <tr>
+                  <td>trapSeverityMask</td>
+                  <td>The mask of severity levels that will attempt to trigger a debug trap (breakpoint) if a debugger is attached. The message must be reported to do so, therefore severityMask and typeMask also need to be satisfied. Does not work with all debuggers.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a626f0e56778bd99f1050638fff2606ae"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />utils::<wbr />StandardReportHandler::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a626f0e56778bd99f1050638fff2606ae" class="m-doc-self">callbackMessage</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_debug_message.html" class="m-doc">tp::<wbr />DebugMessage</a>&amp; message) <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Will be called on a debug message.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">message</td>
+                  <td>The details of the message.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a87a6bbd3c221afcd94466360e6f501c1"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />utils::<wbr />StandardReportHandler::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a87a6bbd3c221afcd94466360e6f501c1" class="m-doc-self">callbackRuntimeError</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_debug_message_context.html" class="m-doc">tp::<wbr />DebugMessageContext</a>&amp; context,
+              const <a href="classtp_1_1_runtime_error.html" class="m-doc">tp::<wbr />RuntimeError</a>&amp; error) <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Will be called when a Tephra error is about to be thrown.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">context</td>
+                  <td>The Tephra context of where the error was triggered.</td>
+                </tr>
+                <tr>
+                  <td>error</td>
+                  <td>The runtime error thrown.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a30cdf8d8032080a49182d153efc5dc9d"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="namespacetp.html#ae35a5aad1d269910f3653eb06ab091b8" class="m-doc">tp::<wbr />DebugMessageSeverityMask</a> tp::<wbr />utils::<wbr />StandardReportHandler::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a30cdf8d8032080a49182d153efc5dc9d" class="m-doc-self">getSeenSeverities</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Returns a mask of severities of all messages that have been logged so far.</p>
+<p>This can be useful to terminate an application after a validation error has been observed.</p>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <p>Tephra Documentation. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.6 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

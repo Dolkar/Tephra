@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>tp::PhysicalDevice class | Tephra Documentation</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="m-dark-tephra.css" />
+  <link rel="stylesheet" href="m-documentation.css" />
+  <link rel="stylesheet" href="m-theme-dark-tephra.css" />
+  <link rel="stylesheet" href="m-grid.css" />
+  <link rel="stylesheet" href="m-components.css" />
+  <link rel="stylesheet" href="m-layout.css" />
+  <link rel="stylesheet" href="pygments-dark.css" />
+  <link rel="stylesheet" href="pygments-console.css" />
+  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#2c1b15" />
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <span id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">
+        <a href="https://github.com/Dolkar/Tephra">Tephra</a> <span class="m-breadcrumb">|</span> <a href="index.html" class="m-thin">Documentation</a>
+      </span>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li><a href="user-guide.html">User Guide</a></li>
+            <li><a href="examples.html">Examples and Tests</a></li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="3">
+            <li><a href="changelog.html">Changelog</a></li>
+            <li><a href="https://github.com/Dolkar/Tephra/discussions">Discussions</a></li>
+            <li><a href="annotated.html">API</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          <span class="m-breadcrumb"><a href="namespacetp.html">tp</a>::<wbr/></span>PhysicalDevice <span class="m-thin">class</span>
+        </h1>
+        <p>Represents a read-only interface for the physical device for identification and querying its properties and capabilities.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#pub-methods">Public functions</a></li>
+                <li><a href="#pub-attribs">Public variables</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="classtp_1_1_application.html#a15499a3f51c72b60dbec182adbe52c80" class="m-doc">tp::<wbr />Application::<wbr />getPhysicalDevices</a></p><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkPhysicalDevice.html" class="m-doc-external">VkPhysicalDevice</a></p></aside>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt id="aaa1b24735e9d5042757ce745d08d2de4">
+              <span class="m-doc-wrap-bumper">auto <a href="#aaa1b24735e9d5042757ce745d08d2de4" class="m-doc-self">getMemoryLocationInfo</a>(</span><span class="m-doc-wrap"><a href="namespacetp.html#a0ae67108bd96881f5af690bbec57c181" class="m-doc">MemoryLocation</a> location) const -&gt; <a href="structtp_1_1_memory_location_info.html" class="m-doc">MemoryLocationInfo</a></span>
+            </dt>
+            <dd>Returns the details of the given memory location and what Vulkan memory types and heaps it maps to.</dd>
+            <dt id="a20f2a45a155a311e5846198bcc72a2bf">
+              <span class="m-doc-wrap-bumper">auto <a href="#a20f2a45a155a311e5846198bcc72a2bf" class="m-doc-self">getQueueTypeInfo</a>(</span><span class="m-doc-wrap"><a href="namespacetp.html#a8b32a8b4b40aee5fed67bc3c3d63ead7" class="m-doc">QueueType</a> type) const -&gt; <a href="structtp_1_1_queue_type_info.html" class="m-doc">QueueTypeInfo</a></span>
+            </dt>
+            <dd>Returns the details of a particular queue type and what Vulkan queue family it maps to.</dd>
+            <dt id="ac8fdd2ab3f86b4977a587e54b061c824">
+              <span class="m-doc-wrap-bumper">auto <a href="#ac8fdd2ab3f86b4977a587e54b061c824" class="m-doc-self">isExtensionAvailable</a>(</span><span class="m-doc-wrap">const char* extension) const -&gt; bool</span>
+            </dt>
+            <dd>Returns <code>true</code> when the device extension is available on the device and can be enabled.</dd>
+            <dt id="ad2772a8916447221d8280d9662ca427d">
+              <span class="m-doc-wrap-bumper">auto <a href="#ad2772a8916447221d8280d9662ca427d" class="m-doc-self">queryFormatCapabilities</a>(</span><span class="m-doc-wrap"><a href="namespacetp.html#a575466ff8f546f00468d04124cee38b5" class="m-doc">Format</a> format) const -&gt; <a href="structtp_1_1_format_capabilities.html" class="m-doc">FormatCapabilities</a></span>
+            </dt>
+            <dd>Returns the capabilities for the given <a href="namespacetp.html#a575466ff8f546f00468d04124cee38b5" class="m-doc">tp::<wbr />Format</a>.</dd>
+            <dt id="a47e886aaff9e5bf92e96899dfb64060f">
+              <span class="m-doc-wrap-bumper">auto <a href="#a47e886aaff9e5bf92e96899dfb64060f" class="m-doc-self">querySurfaceCapabilitiesKHR</a>(</span><span class="m-doc-wrap">VkSurfaceKHR vkSurface) const -&gt; <a href="structtp_1_1_surface_capabilities.html" class="m-doc">SurfaceCapabilities</a></span>
+            </dt>
+            <dd>Returns the capabilities of the device relating to the given   <a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkSurfaceKHR.html" class="m-doc-external">VkSurfaceKHR</a> Vulkan handle.</dd>
+            <dt id="a465112b1e4c65427292c39ad8e374658">
+              <span class="m-doc-wrap-bumper">auto <a href="#a465112b1e4c65427292c39ad8e374658" class="m-doc-self">vkGetPhysicalDeviceHandle</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="structtp_1_1_vk_object_handle.html" class="m-doc">VkPhysicalDeviceHandle</a></span>
+            </dt>
+            <dd>Returns the associated Vulkan   <a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkPhysicalDevice.html" class="m-doc-external">VkPhysicalDevice</a> handle.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename T&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4fda56ed3ec8434de6b7cdbcf10e6b04" class="m-doc">vkQueryFeatures</a>(</span><span class="m-doc-wrap">) const -&gt; const T&amp;</span>
+            </dt>
+            <dd>Queries the device for features defined in the Vulkan feature structure given as the template argument, for example <code>VkPhysicalDeviceFeatures</code>.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename T&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#adb42c7230b1e247a698a0d7425460a3a" class="m-doc">vkQueryProperties</a>(</span><span class="m-doc-wrap">) const -&gt; const T&amp;</span>
+            </dt>
+            <dd>Queries the device for properties defined in the Vulkan property structure given as the template argument, for example <code>VkPhysicalDeviceProperties</code>.</dd>
+          </dl>
+        </section>
+        <section id="pub-attribs">
+          <h2><a href="#pub-attribs">Public variables</a></h2>
+          <dl class="m-doc">
+            <dt id="a039c9098bbf8b615c13ff90ad5ef31b4">
+              <a href="structtp_1_1_version.html" class="m-doc">Version</a> <a href="#a039c9098bbf8b615c13ff90ad5ef31b4" class="m-doc-self">apiVersion</a>
+            </dt>
+            <dd>The highest Vulkan API version that the device implements.</dd>
+            <dt id="a9c95fbe71229ad67ed9781ea1f5e0a11">
+              <a href="structtp_1_1_version.html" class="m-doc">Version</a> <a href="#a9c95fbe71229ad67ed9781ea1f5e0a11" class="m-doc-self">driverVersion</a>
+            </dt>
+            <dd>The driver version number.</dd>
+            <dt id="aa51f5cb37954f77809f70545637fad11">
+              const char* <a href="#aa51f5cb37954f77809f70545637fad11" class="m-doc-self">name</a>
+            </dt>
+            <dd>The human readable name of the device.</dd>
+            <dt id="a9cc2dd0980b2f2c936d80ef8dc544372">
+              std::byte <a href="#a9cc2dd0980b2f2c936d80ef8dc544372" class="m-doc-self">pipelineCacheUUID</a>
+            </dt>
+            <dd>A universally unique identifier for the device. Can be used for identifying pipeline caches as they can only be used with a particular device.</dd>
+            <dt id="ad5c21ec9be26999ab74b9b0f7f5a1f9b">
+              <a href="namespacetp.html#ab139408aa3663ba76ee13852300d49ec" class="m-doc">DeviceType</a> <a href="#ad5c21ec9be26999ab74b9b0f7f5a1f9b" class="m-doc-self">type</a>
+            </dt>
+            <dd>The type of the device, hinting at its performance characteristics.</dd>
+            <dt id="ae17455f2d6ed98f32e94f89a9be4c3c5">
+              <a href="namespacetp.html#ae4dd1b074574221e0dc873b05d3ebfef" class="m-doc">DeviceVendor</a> <a href="#ae17455f2d6ed98f32e94f89a9be4c3c5" class="m-doc-self">vendor</a>
+            </dt>
+            <dd>The device vendor, if identified. Otherwise, see <code>vendorID</code>.</dd>
+            <dt id="af41fb745e3ffe4a4882077912a6746f2">
+              uint32_t <a href="#af41fb745e3ffe4a4882077912a6746f2" class="m-doc-self">vendorID</a>
+            </dt>
+            <dd>The device vendor ID.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a4fda56ed3ec8434de6b7cdbcf10e6b04"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const T&amp; tp::<wbr />PhysicalDevice::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4fda56ed3ec8434de6b7cdbcf10e6b04" class="m-doc-self">vkQueryFeatures</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Queries the device for features defined in the Vulkan feature structure given as the template argument, for example <code>VkPhysicalDeviceFeatures</code>.</p>
+<aside class="m-note m-default"><h4>Remark</h4><p>If the structure depends on some extension, it should first be confirmed that the extension is available with <a href="classtp_1_1_physical_device.html#ac8fdd2ab3f86b4977a587e54b061c824" class="m-doc">tp::<wbr />PhysicalDevice::<wbr />isExtensionAvailable</a>.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="adb42c7230b1e247a698a0d7425460a3a"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const T&amp; tp::<wbr />PhysicalDevice::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adb42c7230b1e247a698a0d7425460a3a" class="m-doc-self">vkQueryProperties</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Queries the device for properties defined in the Vulkan property structure given as the template argument, for example <code>VkPhysicalDeviceProperties</code>.</p>
+<aside class="m-note m-default"><h4>Remark</h4><p>If the structure depends on some extension, it should first be confirmed that the extension is available with <a href="classtp_1_1_physical_device.html#ac8fdd2ab3f86b4977a587e54b061c824" class="m-doc">tp::<wbr />PhysicalDevice::<wbr />isExtensionAvailable</a>.</p></aside>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <p>Tephra Documentation. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.6 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

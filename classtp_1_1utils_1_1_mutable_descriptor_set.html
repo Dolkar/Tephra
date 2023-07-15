@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>tp::utils::MutableDescriptorSet class | Tephra Documentation</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="m-dark-tephra.css" />
+  <link rel="stylesheet" href="m-documentation.css" />
+  <link rel="stylesheet" href="m-theme-dark-tephra.css" />
+  <link rel="stylesheet" href="m-grid.css" />
+  <link rel="stylesheet" href="m-components.css" />
+  <link rel="stylesheet" href="m-layout.css" />
+  <link rel="stylesheet" href="pygments-dark.css" />
+  <link rel="stylesheet" href="pygments-console.css" />
+  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#2c1b15" />
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <span id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">
+        <a href="https://github.com/Dolkar/Tephra">Tephra</a> <span class="m-breadcrumb">|</span> <a href="index.html" class="m-thin">Documentation</a>
+      </span>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li><a href="user-guide.html">User Guide</a></li>
+            <li><a href="examples.html">Examples and Tests</a></li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="3">
+            <li><a href="changelog.html">Changelog</a></li>
+            <li><a href="https://github.com/Dolkar/Tephra/discussions">Discussions</a></li>
+            <li><a href="annotated.html">API</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          <span class="m-breadcrumb"><a href="namespacetp.html">tp</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespacetp_1_1utils.html">utils</a>::<wbr/></span>MutableDescriptorSet <span class="m-thin">class</span>
+        </h1>
+        <p>A mutable variant of <a href="classtp_1_1_descriptor_set.html" class="m-doc">tp::<wbr />DescriptorSet</a>. Updating a Vulkan descriptor set after binding it is not allowed by default. This class maintains a state of all its descriptors so they can be set one at a time. By calling tp::utils::MutableDescriporSet::commit, a new descriptor set will be created based on the current state. Any following <code>set</code> calls won&#x27;t disturb the already created descriptor set.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a7338fb03213d1918c70b4be76971a0b7" class="m-doc">MutableDescriptorSet</a>(</span><span class="m-doc-wrap"><a href="classtp_1_1_device.html" class="m-doc">tp::<wbr />Device</a>* device,
+              const <a href="classtp_1_1_descriptor_set_layout.html" class="m-doc">tp::<wbr />DescriptorSetLayout</a>&amp; layout,
+              const char* debugName = nullptr)</span>
+            </dt>
+            <dd></dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a04af9043d97dcf3c2e0e3d4997e691ed" class="m-doc">commit</a>(</span><span class="m-doc-wrap"><a href="classtp_1_1_descriptor_pool.html" class="m-doc">tp::<wbr />DescriptorPool</a>&amp; pool) -&gt; <a href="classtp_1_1_descriptor_set_view.html" class="m-doc">tp::<wbr />DescriptorSetView</a></span>
+            </dt>
+            <dd>Processes the changes to the descriptors, resolving any <a href="classtp_1_1_future_descriptor.html" class="m-doc">tp::<wbr />FutureDescriptor</a>. Returns a view to a <a href="classtp_1_1_descriptor_set.html" class="m-doc">tp::<wbr />DescriptorSet</a> with the current state of the descriptors, allocating a new one from the given pool if needed.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#aba80272e465a9f70b4acc0ebbbaf1c7b" class="m-doc">copyDescriptors</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1utils_1_1_mutable_descriptor_set.html" class="m-doc">MutableDescriptorSet</a>&amp; other)</span>
+            </dt>
+            <dd>Transfers over the given mutable descriptor set&#x27;s current state of descriptors. Does not commit.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad2ff3ee531d8ea1cad7979d9fb90dff8" class="m-doc">get</a>(</span><span class="m-doc-wrap">uint32_t descriptorIndex) const -&gt; const <a href="classtp_1_1_descriptor.html" class="m-doc">tp::<wbr />Descriptor</a>&amp;</span>
+            </dt>
+            <dd>Returns the currently set (uncommitted) descriptor that was previously. Can be used to avoid spurious calls to <a href="classtp_1_1utils_1_1_mutable_descriptor_set.html#a235004cc78f5f47105199391bd4b3170" class="m-doc">tp::<wbr />utils::<wbr />MutableDescriptorSet::<wbr />set</a> or <a href="classtp_1_1utils_1_1_mutable_descriptor_set.html#aedbc219709beef89faafff3a5f8daea6" class="m-doc">tp::<wbr />utils::<wbr />MutableDescriptorSet::<wbr />setImmediate</a>.</dd>
+            <dt id="ac70f5b080ab601c48136a7be28ccd92c">
+              <span class="m-doc-wrap-bumper">auto <a href="#ac70f5b080ab601c48136a7be28ccd92c" class="m-doc-self">getLastCommittedView</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="classtp_1_1_descriptor_set_view.html" class="m-doc">tp::<wbr />DescriptorSetView</a></span>
+            </dt>
+            <dd>Returns the last allocated descriptor set from the last <a href="classtp_1_1utils_1_1_mutable_descriptor_set.html#a04af9043d97dcf3c2e0e3d4997e691ed" class="m-doc">tp::<wbr />utils::<wbr />MutableDescriptorSet::<wbr />commit</a> call.</dd>
+            <dt id="a01143ab2e06efa85fac37c7152e13d06">
+              <span class="m-doc-wrap-bumper">auto <a href="#a01143ab2e06efa85fac37c7152e13d06" class="m-doc-self">hasPendingChanges</a>(</span><span class="m-doc-wrap">) const -&gt; bool</span>
+            </dt>
+            <dd>Returns <code>true</code> if any descriptors have been set since the last <a href="classtp_1_1utils_1_1_mutable_descriptor_set.html#a04af9043d97dcf3c2e0e3d4997e691ed" class="m-doc">tp::<wbr />utils::<wbr />MutableDescriptorSet::<wbr />commit</a> call.</dd>
+            <dt id="a842154c37077515994333e16dcd9b6a2">
+              <span class="m-doc-wrap-bumper">void <a href="#a842154c37077515994333e16dcd9b6a2" class="m-doc-self">releaseAndReset</a>(</span><span class="m-doc-wrap">)</span>
+            </dt>
+            <dd>Releases all descriptor sets and resets the state of the descriptors.</dd>
+            <dt id="aca9da2c4d473eac411aa2e79ccd21240">
+              <span class="m-doc-wrap-bumper">void <a href="#aca9da2c4d473eac411aa2e79ccd21240" class="m-doc-self">reset</a>(</span><span class="m-doc-wrap">)</span>
+            </dt>
+            <dd>Resets the state of the descriptors without releasing any previously allocated descriptor sets.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a235004cc78f5f47105199391bd4b3170" class="m-doc">set</a>(</span><span class="m-doc-wrap">uint32_t descriptorIndex,
+              <a href="classtp_1_1_descriptor.html" class="m-doc">tp::<wbr />Descriptor</a> descriptor)</span>
+            </dt>
+            <dd>Sets a resource descriptor to the given index. The change will have no effect except for <a href="classtp_1_1utils_1_1_mutable_descriptor_set.html#ad2ff3ee531d8ea1cad7979d9fb90dff8" class="m-doc">tp::<wbr />utils::<wbr />MutableDescriptorSet::<wbr />get</a> calls until <a href="classtp_1_1utils_1_1_mutable_descriptor_set.html#a04af9043d97dcf3c2e0e3d4997e691ed" class="m-doc">tp::<wbr />utils::<wbr />MutableDescriptorSet::<wbr />commit</a> gets called.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a5f3b33a5b357c48211eed1954ee621cc" class="m-doc">set</a>(</span><span class="m-doc-wrap">uint32_t descriptorIndex,
+              <a href="classtp_1_1_future_descriptor.html" class="m-doc">tp::<wbr />FutureDescriptor</a> descriptor)</span>
+            </dt>
+            <dd>Sets a resource descriptor to the given index. The change will have no effect until <a href="classtp_1_1utils_1_1_mutable_descriptor_set.html#a04af9043d97dcf3c2e0e3d4997e691ed" class="m-doc">tp::<wbr />utils::<wbr />MutableDescriptorSet::<wbr />commit</a> gets called. This overload is used for binding job-local resources before the <a href="classtp_1_1_job.html" class="m-doc">tp::<wbr />Job</a> gets enqueued.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#aedbc219709beef89faafff3a5f8daea6" class="m-doc">setImmediate</a>(</span><span class="m-doc-wrap">uint32_t firstDescriptorIndex,
+              <a href="classtp_1_1_array_parameter.html" class="m-doc">tp::<wbr />ArrayParameter</a>&lt;const <a href="classtp_1_1_descriptor.html" class="m-doc">tp::<wbr />Descriptor</a>&gt; descriptors)</span>
+            </dt>
+            <dd>Sets resource descriptors starting at the given index, immediately and retroactively updating the last committed descriptor set. This function is intended to be used with a &quot;bindless&quot; descriptor setup.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a7338fb03213d1918c70b4be76971a0b7"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> tp::<wbr />utils::<wbr />MutableDescriptorSet::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7338fb03213d1918c70b4be76971a0b7" class="m-doc-self">MutableDescriptorSet</a>(</span><span class="m-doc-wrap"><a href="classtp_1_1_device.html" class="m-doc">tp::<wbr />Device</a>* device,
+              const <a href="classtp_1_1_descriptor_set_layout.html" class="m-doc">tp::<wbr />DescriptorSetLayout</a>&amp; layout,
+              const char* debugName = nullptr)</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">device</td>
+                  <td>The Tephra device used.</td>
+                </tr>
+                <tr>
+                  <td>layout</td>
+                  <td>The layout of this descriptor set.</td>
+                </tr>
+                <tr>
+                  <td>debugName</td>
+                  <td>The debug name of this descriptor set.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a04af9043d97dcf3c2e0e3d4997e691ed"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="classtp_1_1_descriptor_set_view.html" class="m-doc">tp::<wbr />DescriptorSetView</a> tp::<wbr />utils::<wbr />MutableDescriptorSet::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a04af9043d97dcf3c2e0e3d4997e691ed" class="m-doc-self">commit</a>(</span><span class="m-doc-wrap"><a href="classtp_1_1_descriptor_pool.html" class="m-doc">tp::<wbr />DescriptorPool</a>&amp; pool)</span></span>
+            </h3>
+            <p>Processes the changes to the descriptors, resolving any <a href="classtp_1_1_future_descriptor.html" class="m-doc">tp::<wbr />FutureDescriptor</a>. Returns a view to a <a href="classtp_1_1_descriptor_set.html" class="m-doc">tp::<wbr />DescriptorSet</a> with the current state of the descriptors, allocating a new one from the given pool if needed.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">pool</td>
+                  <td>The descriptor pool to allocate from.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>Remark</h4><p>All resources referenced by any of the previously set <a href="classtp_1_1_future_descriptor.html" class="m-doc">tp::<wbr />FutureDescriptor</a> must be ready. For job-local resources it means this can only be called after the <a href="classtp_1_1_job.html" class="m-doc">tp::<wbr />Job</a> has been enqueued.</p><p>If both a <a href="classtp_1_1_descriptor.html" class="m-doc">tp::<wbr />Descriptor</a> and a <a href="classtp_1_1_future_descriptor.html" class="m-doc">tp::<wbr />FutureDescriptor</a> were set to the same descriptorIndex since the last commit, the <a href="classtp_1_1_future_descriptor.html" class="m-doc">tp::<wbr />FutureDescriptor</a> will be prioritized.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="aba80272e465a9f70b4acc0ebbbaf1c7b"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />utils::<wbr />MutableDescriptorSet::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aba80272e465a9f70b4acc0ebbbaf1c7b" class="m-doc-self">copyDescriptors</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1utils_1_1_mutable_descriptor_set.html" class="m-doc">MutableDescriptorSet</a>&amp; other)</span></span>
+            </h3>
+            <p>Transfers over the given mutable descriptor set&#x27;s current state of descriptors. Does not commit.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>The mutable descriptor set to transfer the descriptor state from. This set must use the same layout.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ad2ff3ee531d8ea1cad7979d9fb90dff8"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">const <a href="classtp_1_1_descriptor.html" class="m-doc">tp::<wbr />Descriptor</a>&amp; tp::<wbr />utils::<wbr />MutableDescriptorSet::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad2ff3ee531d8ea1cad7979d9fb90dff8" class="m-doc-self">get</a>(</span><span class="m-doc-wrap">uint32_t descriptorIndex) const</span></span>
+            </h3>
+            <p>Returns the currently set (uncommitted) descriptor that was previously. Can be used to avoid spurious calls to <a href="classtp_1_1utils_1_1_mutable_descriptor_set.html#a235004cc78f5f47105199391bd4b3170" class="m-doc">tp::<wbr />utils::<wbr />MutableDescriptorSet::<wbr />set</a> or <a href="classtp_1_1utils_1_1_mutable_descriptor_set.html#aedbc219709beef89faafff3a5f8daea6" class="m-doc">tp::<wbr />utils::<wbr />MutableDescriptorSet::<wbr />setImmediate</a>.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">descriptorIndex</td>
+                  <td>The index of the descriptor in the descriptor set. This is the index it would have in the <code>descriptors</code> array of <a href="structtp_1_1_descriptor_set_setup.html" class="m-doc">tp::<wbr />DescriptorSetSetup</a>.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>Remark</h4><p>Any previously set <a href="classtp_1_1_future_descriptor.html" class="m-doc">tp::<wbr />FutureDescriptor</a> will only be resolved after <a href="classtp_1_1utils_1_1_mutable_descriptor_set.html#a04af9043d97dcf3c2e0e3d4997e691ed" class="m-doc">tp::<wbr />utils::<wbr />MutableDescriptorSet::<wbr />commit</a> gets called.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a235004cc78f5f47105199391bd4b3170"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />utils::<wbr />MutableDescriptorSet::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a235004cc78f5f47105199391bd4b3170" class="m-doc-self">set</a>(</span><span class="m-doc-wrap">uint32_t descriptorIndex,
+              <a href="classtp_1_1_descriptor.html" class="m-doc">tp::<wbr />Descriptor</a> descriptor)</span></span>
+            </h3>
+            <p>Sets a resource descriptor to the given index. The change will have no effect except for <a href="classtp_1_1utils_1_1_mutable_descriptor_set.html#ad2ff3ee531d8ea1cad7979d9fb90dff8" class="m-doc">tp::<wbr />utils::<wbr />MutableDescriptorSet::<wbr />get</a> calls until <a href="classtp_1_1utils_1_1_mutable_descriptor_set.html#a04af9043d97dcf3c2e0e3d4997e691ed" class="m-doc">tp::<wbr />utils::<wbr />MutableDescriptorSet::<wbr />commit</a> gets called.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">descriptorIndex</td>
+                  <td>The index of the descriptor in the descriptor set. This is the index it would have in the <code>descriptors</code> array of <a href="structtp_1_1_descriptor_set_setup.html" class="m-doc">tp::<wbr />DescriptorSetSetup</a>.</td>
+                </tr>
+                <tr>
+                  <td>descriptor</td>
+                  <td>The descriptor to be set to this index.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a5f3b33a5b357c48211eed1954ee621cc"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />utils::<wbr />MutableDescriptorSet::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5f3b33a5b357c48211eed1954ee621cc" class="m-doc-self">set</a>(</span><span class="m-doc-wrap">uint32_t descriptorIndex,
+              <a href="classtp_1_1_future_descriptor.html" class="m-doc">tp::<wbr />FutureDescriptor</a> descriptor)</span></span>
+            </h3>
+            <p>Sets a resource descriptor to the given index. The change will have no effect until <a href="classtp_1_1utils_1_1_mutable_descriptor_set.html#a04af9043d97dcf3c2e0e3d4997e691ed" class="m-doc">tp::<wbr />utils::<wbr />MutableDescriptorSet::<wbr />commit</a> gets called. This overload is used for binding job-local resources before the <a href="classtp_1_1_job.html" class="m-doc">tp::<wbr />Job</a> gets enqueued.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">descriptorIndex</td>
+                  <td>The index of the descriptor in the descriptor set. This is the index it would have in the <code>descriptors</code> array of <a href="structtp_1_1_descriptor_set_setup.html" class="m-doc">tp::<wbr />DescriptorSetSetup</a>.</td>
+                </tr>
+                <tr>
+                  <td>descriptor</td>
+                  <td>The future descriptor to be set to this index.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aedbc219709beef89faafff3a5f8daea6"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />utils::<wbr />MutableDescriptorSet::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aedbc219709beef89faafff3a5f8daea6" class="m-doc-self">setImmediate</a>(</span><span class="m-doc-wrap">uint32_t firstDescriptorIndex,
+              <a href="classtp_1_1_array_parameter.html" class="m-doc">tp::<wbr />ArrayParameter</a>&lt;const <a href="classtp_1_1_descriptor.html" class="m-doc">tp::<wbr />Descriptor</a>&gt; descriptors)</span></span>
+            </h3>
+            <p>Sets resource descriptors starting at the given index, immediately and retroactively updating the last committed descriptor set. This function is intended to be used with a &quot;bindless&quot; descriptor setup.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">firstDescriptorIndex</td>
+                  <td>The index of the first descriptor to update. This is the index it would have in the <code>descriptors</code> array of <a href="structtp_1_1_descriptor_set_setup.html" class="m-doc">tp::<wbr />DescriptorSetSetup</a>.</td>
+                </tr>
+                <tr>
+                  <td>descriptors</td>
+                  <td>The array of descriptors to be set.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>Remark</h4><p>Note that this will retroactively change the contents of the last committed descriptor set. If it has already been bound, the <a href="namespacetp.html#a68db4f071c78c4f26776f577588416bba4b8308424b6fb4b70803778cfc461015" class="m-doc">tp::<wbr />DescriptorBindingFlag::<wbr />UpdateAfterBind</a> flag must be set to the relevant bindings. If the affected range was used by a <a href="classtp_1_1_job.html" class="m-doc">tp::<wbr />Job</a> that has already been submitted, then that job must have already finished executing on the device.</p><p>The provided descriptors must <em>not</em> be null and they must all be set to the same binding as defined by this set&#x27;s <a href="classtp_1_1_descriptor_set_layout.html" class="m-doc">tp::<wbr />DescriptorSetLayout</a>.</p></aside>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <p>Tephra Documentation. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.6 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

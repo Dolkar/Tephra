@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Tephra Documentation</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="m-dark-tephra.css" />
+  <link rel="stylesheet" href="m-documentation.css" />
+  <link rel="stylesheet" href="m-theme-dark-tephra.css" />
+  <link rel="stylesheet" href="m-grid.css" />
+  <link rel="stylesheet" href="m-components.css" />
+  <link rel="stylesheet" href="m-layout.css" />
+  <link rel="stylesheet" href="pygments-dark.css" />
+  <link rel="stylesheet" href="pygments-console.css" />
+  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#2c1b15" />
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <span id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">
+        <a href="https://github.com/Dolkar/Tephra">Tephra</a> <span class="m-breadcrumb">|</span> <a href="index.html" class="m-thin">Documentation</a>
+      </span>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li><a href="user-guide.html">User Guide</a></li>
+            <li><a href="examples.html">Examples and Tests</a></li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="3">
+            <li><a href="changelog.html">Changelog</a></li>
+            <li><a href="https://github.com/Dolkar/Tephra/discussions">Discussions</a></li>
+            <li><a href="annotated.html" id="m-navbar-current">API</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>Classes</h1>
+        <ul class="m-doc">
+          <li class="m-doc-collapsible">
+            <a href="#" onclick="return toggle(this)">namespace</a> <a href="namespacetp.html" class="m-doc">tp</a> <span class="m-doc">Common Tephra namespace.</span>
+            <ul class="m-doc">
+              <li>namespace <a href="namespacetp_1_1_application_extension.html" class="m-doc">ApplicationExtension</a> <span class="m-doc">Collection of application extensions that are either specific to Tephra, or are Vulkan instance extensions with built-in support in Tephra. Vulkan extensions outside of the ones defined here may be used, but their support may be limited.</span></li>
+              <li>namespace <a href="namespacetp_1_1_device_extension.html" class="m-doc">DeviceExtension</a> <span class="m-doc">Collection of device extensions that are either specific to Tephra, or are Vulkan device extensions with built-in support in Tephra. Vulkan extensions outside of the ones defined here may be used, but their support may be limited.</span></li>
+              <li class="m-doc-collapsible collapsed">
+                <a href="#" onclick="return toggle(this)">namespace</a> <a href="namespacetp_1_1utils.html" class="m-doc">utils</a> <span class="m-doc">Convenience utilities that build upon the base Tephra interface.</span>
+                <ul class="m-doc">
+                  <li>class <a href="classtp_1_1utils_1_1_auto_ring_buffer.html" class="m-doc">AutoRingBuffer</a> <span class="m-doc">A ring buffer implementation with automatic allocation of memory and timestamp-based garbage collection.</span></li>
+                  <li>class <a href="classtp_1_1utils_1_1_growable_ring_buffer.html" class="m-doc">GrowableRingBuffer</a> <span class="m-doc">A ring buffer implementation that supports resizing. Useful for suballocating and reusing buffer memory.</span></li>
+                  <li>class <a href="classtp_1_1utils_1_1_mutable_descriptor_set.html" class="m-doc">MutableDescriptorSet</a> <span class="m-doc">A mutable variant of <a href="classtp_1_1_descriptor_set.html" class="m-doc">tp::<wbr />DescriptorSet</a>. Updating a Vulkan descriptor set after binding it is not allowed by default. This class maintains a state of all its descriptors so they can be set one at a time. By calling tp::utils::MutableDescriporSet::commit, a new descriptor set will be created based on the current state. Any following <code>set</code> calls won&#x27;t disturb the already created descriptor set.</span></li>
+                  <li>class <a href="classtp_1_1utils_1_1_standard_report_handler.html" class="m-doc">StandardReportHandler</a> <span class="m-doc">A <a href="classtp_1_1_debug_report_handler.html" class="m-doc">tp::<wbr />DebugReportHandler</a> implementation with default message formatting, writing to a standard output stream.</span></li>
+                </ul>
+              </li>
+              <li>struct <a href="structtp_1_1_acquired_image_info.html" class="m-doc">AcquiredImageInfo</a> <span class="m-doc">Describes the details of an image acquired from a <a href="classtp_1_1_swapchain.html" class="m-doc">tp::<wbr />Swapchain</a> and its required synchronization semaphores with the acquire and present operations.</span></li>
+              <li>class <a href="classtp_1_1_application.html" class="m-doc">Application</a> <span class="m-doc">Represents the application using this library, storing all per-application state.</span></li>
+              <li>struct <a href="structtp_1_1_application_identifier.html" class="m-doc">ApplicationIdentifier</a> <span class="m-doc">Describes the application and engine, allowing the Vulkan driver to use this information for identification purposes.</span></li>
+              <li>struct <a href="structtp_1_1_application_setup.html" class="m-doc">ApplicationSetup</a> <span class="m-doc">Used as configuration for creating a new <a href="classtp_1_1_application.html" class="m-doc">tp::<wbr />Application</a> object.</span></li>
+              <li>class <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a> <span class="m-doc">Similar to <a href="classtp_1_1_array_view.html" class="m-doc">tp::<wbr />ArrayView</a>, it provides read/write view of a contiguous array. It is used to view arrays that may have a temporary lifetime, such as <code>std::initializer_list</code>.</span></li>
+              <li>class <a href="classtp_1_1_array_view.html" class="m-doc">ArrayView</a> <span class="m-doc">Provides a read/write view into any contiguous array with a combination of a pointer and size. The <a href="classtp_1_1_array_view.html" class="m-doc">ArrayView</a> does not own the referenced array and cannot add or remove elements from it. It can be used to pass arbitrary arrays as parameters to functions and as a way to integrate C style and C++ style arrays. See the <a href="namespacetp.html#ac25c30fd113465e9cb1a1d9a6cfcbe4d" class="m-doc">tp::<wbr />view</a>, <a href="namespacetp.html#acd4aaf6caffa7325f71fbaca0dfabcef" class="m-doc">tp::<wbr />viewOne</a> and <a href="namespacetp.html#a168b9d57866c11105d3d1a78a104fc22" class="m-doc">tp::<wbr />viewRange</a> functions for convenient ways of conversion to array view.</span></li>
+              <li>class <a href="classtp_1_1_array_view_base.html" class="m-doc">ArrayViewBase</a> <span class="m-doc">Shared base implementation of array views.</span></li>
+              <li>class <a href="classtp_1_1_assertion_error.html" class="m-doc">AssertionError</a> <span class="m-doc">Internal Tephra error violating an assertion. May be caused by a previous invalid usage.</span></li>
+              <li>struct <a href="structtp_1_1_attachment_binding.html" class="m-doc">AttachmentBinding</a> <span class="m-doc">Serves to bind an attachment to the given bind point for a subpass.</span></li>
+              <li>struct <a href="structtp_1_1_attachment_bind_point.html" class="m-doc">AttachmentBindPoint</a> <span class="m-doc">Identifies a bind point for an attachment and determines how the graphics pipeline will access the attachment.</span></li>
+              <li>struct <a href="structtp_1_1_attachment_blend_state.html" class="m-doc">AttachmentBlendState</a> <span class="m-doc">Specifies the output blending state of a render pass attachment.</span></li>
+              <li>struct <a href="structtp_1_1_attachment_description.html" class="m-doc">AttachmentDescription</a> <span class="m-doc">Describes the format and sample count of images that can be used as attachments within the render pass.</span></li>
+              <li>struct <a href="structtp_1_1_blend_state.html" class="m-doc">BlendState</a> <span class="m-doc">Describes the blending operation with its factors for a single component of a render pass attachment.</span></li>
+              <li>class <a href="classtp_1_1_buffer.html" class="m-doc">Buffer</a> <span class="m-doc">Represents a linear array of data visible to the device.</span></li>
+              <li>struct <a href="structtp_1_1_buffer_compute_access.html" class="m-doc">BufferComputeAccess</a> <span class="m-doc">Represents an access to a range of <a href="classtp_1_1_buffer_view.html" class="m-doc">tp::<wbr />BufferView</a> from a compute pipeline.</span></li>
+              <li>struct <a href="structtp_1_1_buffer_copy_region.html" class="m-doc">BufferCopyRegion</a> <span class="m-doc">Describes a region of a buffer copy operation.</span></li>
+              <li>struct <a href="structtp_1_1_buffer_image_copy_region.html" class="m-doc">BufferImageCopyRegion</a> <span class="m-doc">Describes a region of copy operation between an image and a buffer.</span></li>
+              <li>struct <a href="structtp_1_1_buffer_render_access.html" class="m-doc">BufferRenderAccess</a> <span class="m-doc">Represents an access to a range of <a href="classtp_1_1_buffer_view.html" class="m-doc">tp::<wbr />BufferView</a> from a graphics pipeline.</span></li>
+              <li>struct <a href="structtp_1_1_buffer_setup.html" class="m-doc">BufferSetup</a> <span class="m-doc">Used as configuration for creating a new <a href="classtp_1_1_buffer.html" class="m-doc">tp::<wbr />Buffer</a> object.</span></li>
+              <li>class <a href="classtp_1_1_buffer_view.html" class="m-doc">BufferView</a> <span class="m-doc">Represents the view of a contiguous range of <a href="classtp_1_1_buffer.html" class="m-doc">tp::<wbr />Buffer</a> memory.</span></li>
+              <li>struct <a href="structtp_1_1_clear_value.html" class="m-doc">ClearValue</a> <span class="m-doc">Specifies a constant clear value.</span></li>
+              <li>class <a href="classtp_1_1_command_list.html" class="m-doc">CommandList</a> <span class="m-doc">An abstract class that implements common functionality for recording commands inside either a compute or render pass. See <a href="classtp_1_1_compute_list.html" class="m-doc">tp::<wbr />ComputeList</a> and <a href="classtp_1_1_render_list.html" class="m-doc">tp::<wbr />RenderList</a> for further details.</span></li>
+              <li>struct <a href="structtp_1_1_component_mapping.html" class="m-doc">ComponentMapping</a> <span class="m-doc">Specifies the values placed in each component of the output color vector.</span></li>
+              <li>class <a href="classtp_1_1_compute_list.html" class="m-doc">ComputeList</a> <span class="m-doc">Provides an interface to directly record compute commands into a Vulkan   <a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkCommandBuffer.html" class="m-doc-external">VkCommandBuffer</a> inside a compute pass.</span></li>
+              <li>struct <a href="structtp_1_1_compute_pass_setup.html" class="m-doc">ComputePassSetup</a> <span class="m-doc">Used as configuration for executing a compute pass.</span></li>
+              <li>class <a href="classtp_1_1_compute_pipeline_setup.html" class="m-doc">ComputePipelineSetup</a> <span class="m-doc">Used as configuration for creating a new compute <a href="classtp_1_1_pipeline.html" class="m-doc">tp::<wbr />Pipeline</a> object for use inside compute passes.</span></li>
+              <li>class <a href="classtp_1_1_contiguous_enum_iterator.html" class="m-doc">ContiguousEnumIterator</a> <span class="m-doc">An iterator over a <a href="classtp_1_1_contiguous_enum_view.html" class="m-doc">tp::<wbr />ContiguousEnumView</a>.</span></li>
+              <li>class <a href="classtp_1_1_contiguous_enum_view.html" class="m-doc">ContiguousEnumView</a> <span class="m-doc">Represents an array view of all the values of a contiguous enum type. The values of the enum need to be consecutive and the largest value needs to be known.</span></li>
+              <li>struct <a href="structtp_1_1_debug_message.html" class="m-doc">DebugMessage</a> <span class="m-doc">Describes the details of a single debug message.</span></li>
+              <li>struct <a href="structtp_1_1_debug_message_context.html" class="m-doc">DebugMessageContext</a> <span class="m-doc">Describes the context of where a debug message was triggered. This is useful because Tephra calls do not always correspond 1:1 to Vulkan calls. Vulkan validation messages refer to only the Vulkan function that triggered the message, but this structure provides information about the involved Tephra function as well.</span></li>
+              <li>class <a href="classtp_1_1_debug_report_handler.html" class="m-doc">DebugReportHandler</a> <span class="m-doc">A base class for debug report handlers, containing callbacks through which debug messages and runtime errors are reported.</span></li>
+              <li>class <a href="classtp_1_1_descriptor.html" class="m-doc">Descriptor</a> <span class="m-doc">Binds an existing resource or sampler inside a <a href="classtp_1_1_descriptor_set.html" class="m-doc">tp::<wbr />DescriptorSet</a>, according to the <a href="structtp_1_1_descriptor_binding.html" class="m-doc">tp::<wbr />DescriptorBinding</a> defined inside a <a href="classtp_1_1_descriptor_set_layout.html" class="m-doc">tp::<wbr />DescriptorSetLayout</a>.</span></li>
+              <li>struct <a href="structtp_1_1_descriptor_binding.html" class="m-doc">DescriptorBinding</a> <span class="m-doc">Describes the type of <a href="classtp_1_1_descriptor.html" class="m-doc">tp::<wbr />Descriptor</a> or descriptor array to be bound to a particular binding number.</span></li>
+              <li>class <a href="classtp_1_1_descriptor_pool.html" class="m-doc">DescriptorPool</a> <span class="m-doc">Enables efficient creation, storage and reuse of <a href="classtp_1_1_descriptor_set.html" class="m-doc">tp::<wbr />DescriptorSet</a> objects.</span></li>
+              <li>struct <a href="structtp_1_1_descriptor_pool_setup.html" class="m-doc">DescriptorPoolSetup</a> <span class="m-doc">Used as configuration for creating a new <a href="classtp_1_1_descriptor_pool.html" class="m-doc">tp::<wbr />DescriptorPool</a> object.</span></li>
+              <li>class <a href="classtp_1_1_descriptor_set.html" class="m-doc">DescriptorSet</a> <span class="m-doc">Describes the set of resources that can be bound at once to allow access to them from pipelines.</span></li>
+              <li>class <a href="classtp_1_1_descriptor_set_layout.html" class="m-doc">DescriptorSetLayout</a> <span class="m-doc">Describes the layout of descriptor bindings that pipelines can use to access resources. Serves as a template for creating <a href="classtp_1_1_descriptor_set.html" class="m-doc">tp::<wbr />DescriptorSet</a> objects out of resources to be bound.</span></li>
+              <li>struct <a href="structtp_1_1_descriptor_set_setup.html" class="m-doc">DescriptorSetSetup</a> <span class="m-doc">Used as configuration for creating a new <a href="classtp_1_1_descriptor_set.html" class="m-doc">tp::<wbr />DescriptorSet</a> object.</span></li>
+              <li>class <a href="classtp_1_1_descriptor_set_view.html" class="m-doc">DescriptorSetView</a> <span class="m-doc">Represents the non-owning view of a <a href="classtp_1_1_descriptor_set.html" class="m-doc">tp::<wbr />DescriptorSet</a>.</span></li>
+              <li>class <a href="classtp_1_1_device.html" class="m-doc">Device</a> <span class="m-doc">Represents a connection to a <a href="classtp_1_1_physical_device.html" class="m-doc">tp::<wbr />PhysicalDevice</a>, through which its functionality can be accessed.</span></li>
+              <li>class <a href="classtp_1_1_device_lost_error.html" class="m-doc">DeviceLostError</a> <span class="m-doc">Operation failed because the device was lost. Subsequent device operations will fail, too.</span></li>
+              <li>struct <a href="structtp_1_1_device_queue.html" class="m-doc">DeviceQueue</a> <span class="m-doc">Refers to a device queue to which jobs can be submitted for execution. Multiple different queues may map to the same Vulkan queue.</span></li>
+              <li>struct <a href="structtp_1_1_device_setup.html" class="m-doc">DeviceSetup</a> <span class="m-doc">Used as configuration for creating a new <a href="classtp_1_1_device.html" class="m-doc">tp::<wbr />Device</a> object.</span></li>
+              <li>class <a href="classtp_1_1_enum_bit_mask.html" class="m-doc">EnumBitMask</a> <span class="m-doc">A strongly typed mask for a set of enum flags. Requires that the underlying enum values are powers of two.</span></li>
+              <li>struct <a href="structtp_1_1_extent2_d.html" class="m-doc">Extent2D</a> <span class="m-doc">A two-dimensional integer extent structure.</span></li>
+              <li>struct <a href="structtp_1_1_extent3_d.html" class="m-doc">Extent3D</a> <span class="m-doc">A three-dimensional integer extent structure.</span></li>
+              <li>struct <a href="structtp_1_1_external_semaphore.html" class="m-doc">ExternalSemaphore</a> <span class="m-doc">A primitive for synchronizing against workloads other than jobs. It can be either a binary semaphore in which case the timestamp is ignored, or a timeline semaphore that is treated as signalled when the provided timestamp is reached.</span></li>
+              <li>struct <a href="structtp_1_1_format_capabilities.html" class="m-doc">FormatCapabilities</a> <span class="m-doc">Represents the set of capabilities supported by a device for a particular format.</span></li>
+              <li>struct <a href="structtp_1_1_format_class_properties.html" class="m-doc">FormatClassProperties</a> <span class="m-doc">Describes the properties and memory layout of a <a href="namespacetp.html#a8c768c8069720fcaef48f25d4c28dbd9" class="m-doc">tp::<wbr />FormatCompatibilityClass</a>.</span></li>
+              <li>class <a href="classtp_1_1_future_descriptor.html" class="m-doc">FutureDescriptor</a> <span class="m-doc">Binds a resource or sampler inside a <a href="classtp_1_1_descriptor_set.html" class="m-doc">tp::<wbr />DescriptorSet</a>, according to the <a href="structtp_1_1_descriptor_binding.html" class="m-doc">tp::<wbr />DescriptorBinding</a> defined inside a <a href="classtp_1_1_descriptor_set_layout.html" class="m-doc">tp::<wbr />DescriptorSetLayout</a>. This variant can be used with job-local resources of a job that hasn&#x27;t been enqueued yet.</span></li>
+              <li>class <a href="classtp_1_1_graphics_pipeline_setup.html" class="m-doc">GraphicsPipelineSetup</a> <span class="m-doc">Used as configuration for creating a new graphics <a href="classtp_1_1_pipeline.html" class="m-doc">tp::<wbr />Pipeline</a> object for use inside render passes.</span></li>
+              <li>class <a href="classtp_1_1_host_mapped_memory.html" class="m-doc">HostMappedMemory</a> <span class="m-doc">Represents <a href="classtp_1_1_buffer.html" class="m-doc">tp::<wbr />Buffer</a> memory mapped for host access by the application. Automatically handles cache management for incoherent memory types and unmaps the memory when destroyed, if the memory is not mapped persistently.</span></li>
+              <li>class <a href="classtp_1_1_image.html" class="m-doc">Image</a> <span class="m-doc">Represents a multidimensional array of data interpreted as textures or attachments.</span></li>
+              <li>struct <a href="structtp_1_1_image_blit_region.html" class="m-doc">ImageBlitRegion</a> <span class="m-doc">Describes a region of an image blit operation.</span></li>
+              <li>struct <a href="structtp_1_1_image_compute_access.html" class="m-doc">ImageComputeAccess</a> <span class="m-doc">Represents an access to a range of <a href="classtp_1_1_image_view.html" class="m-doc">tp::<wbr />ImageView</a> from a compute pipeline.</span></li>
+              <li>struct <a href="structtp_1_1_image_copy_region.html" class="m-doc">ImageCopyRegion</a> <span class="m-doc">Describes a region of an image copy operation.</span></li>
+              <li>struct <a href="structtp_1_1_image_render_access.html" class="m-doc">ImageRenderAccess</a> <span class="m-doc">Represents an access to a range of <a href="classtp_1_1_image_view.html" class="m-doc">tp::<wbr />ImageView</a> from a graphics pipeline.</span></li>
+              <li>struct <a href="structtp_1_1_image_setup.html" class="m-doc">ImageSetup</a> <span class="m-doc">Used as configuration for creating a new <a href="classtp_1_1_image.html" class="m-doc">tp::<wbr />Image</a> object object.</span></li>
+              <li>struct <a href="structtp_1_1_image_subresource.html" class="m-doc">ImageSubresource</a> <span class="m-doc">Describes a subresource of an image containing a single array layer and mip level.</span></li>
+              <li>struct <a href="structtp_1_1_image_subresource_layers.html" class="m-doc">ImageSubresourceLayers</a> <span class="m-doc">Describes a subresource of an image containing any number of array layers and a single mip level.</span></li>
+              <li>struct <a href="structtp_1_1_image_subresource_range.html" class="m-doc">ImageSubresourceRange</a> <span class="m-doc">Describes a subresource of an image containing any number of array layers and mip levels.</span></li>
+              <li>class <a href="classtp_1_1_image_view.html" class="m-doc">ImageView</a> <span class="m-doc">Represents the view of a subresource range of <a href="classtp_1_1_image.html" class="m-doc">tp::<wbr />Image</a>.</span></li>
+              <li>struct <a href="structtp_1_1_image_view_setup.html" class="m-doc">ImageViewSetup</a> <span class="m-doc">Used as configuration for creating a new <a href="classtp_1_1_image_view.html" class="m-doc">tp::<wbr />ImageView</a> object.</span></li>
+              <li>class <a href="classtp_1_1_job.html" class="m-doc">Job</a> <span class="m-doc">A job represents a single instance of work to be done on the device.</span></li>
+              <li>class <a href="classtp_1_1_job_resource_pool.html" class="m-doc">JobResourcePool</a> <span class="m-doc">Manages the job-local resources used by <a href="classtp_1_1_job.html" class="m-doc">tp::<wbr />Job</a> objects created from it. Enables efficient allocation and reuse of these resources between consecutive jobs. Jobs created from a <a href="classtp_1_1_job_resource_pool.html" class="m-doc">tp::<wbr />JobResourcePool</a> can only be enqueued to the same device queue that the pool was created for, allowing the allocator to better reuse resources. Similar jobs that are submitted periodically therefore benefit from being allocated from the same <a href="classtp_1_1_job_resource_pool.html" class="m-doc">tp::<wbr />JobResourcePool</a>.</span></li>
+              <li>struct <a href="structtp_1_1_job_resource_pool_setup.html" class="m-doc">JobResourcePoolSetup</a> <span class="m-doc">Used as configuration for creating a new <a href="classtp_1_1_job_resource_pool.html" class="m-doc">tp::<wbr />JobResourcePool</a> object.</span></li>
+              <li>struct <a href="structtp_1_1_job_resource_pool_statistics.html" class="m-doc">JobResourcePoolStatistics</a> <span class="m-doc">Contains statistics about the current allocations of a <a href="classtp_1_1_job_resource_pool.html" class="m-doc">tp::<wbr />JobResourcePool</a>.</span></li>
+              <li>struct <a href="structtp_1_1_job_semaphore.html" class="m-doc">JobSemaphore</a> <span class="m-doc">A synchronization primitive created after enqueueing a <a href="classtp_1_1_job.html" class="m-doc">tp::<wbr />Job</a> through <a href="classtp_1_1_device.html#a1fb94f90c9cd0968b70750ec5be5a41b" class="m-doc">tp::<wbr />Device::<wbr />enqueueJob</a>.</span></li>
+              <li>class <a href="classtp_1_1_lifeguard.html" class="m-doc">Lifeguard</a> <span class="m-label m-flat m-warning">final</span> <span class="m-doc">A lifeguard for a Vulkan handle implementing RAII by invoking specialized deleters according to the type of the handle when the lifeguard is destroyed. Can be created from an existing Vulkan handle with <a href="classtp_1_1_device.html#a1100041005d269717f7489e9037d6b1f" class="m-doc">tp::<wbr />Device::<wbr />vkMakeHandleLifeguard</a>.</span></li>
+              <li>struct <a href="structtp_1_1_memory_allocator_setup.html" class="m-doc">MemoryAllocatorSetup</a> <span class="m-doc">Used to configure the device-wide Vulkan Memory Allocator.</span></li>
+              <li>struct <a href="structtp_1_1_memory_heap_statistics.html" class="m-doc">MemoryHeapStatistics</a> <span class="m-doc">Returns statistics associated with a Vulkan memory heap.</span></li>
+              <li>struct <a href="structtp_1_1_memory_location_info.html" class="m-doc">MemoryLocationInfo</a> <span class="m-doc">Information about the physical device memory location.</span></li>
+              <li>struct <a href="structtp_1_1_memory_preference.html" class="m-doc">MemoryPreference</a> <span class="m-doc">Represents the progression of <a href="namespacetp.html#a0ae67108bd96881f5af690bbec57c181" class="m-doc">tp::<wbr />MemoryLocation</a> that the device will attempt to allocate resources from, in the given order of preference.</span></li>
+              <li>struct <a href="structtp_1_1_offset2_d.html" class="m-doc">Offset2D</a> <span class="m-doc">A two-dimensional integer offset structure.</span></li>
+              <li>struct <a href="structtp_1_1_offset3_d.html" class="m-doc">Offset3D</a> <span class="m-doc">A three-dimensional integer offset structure.</span></li>
+              <li>class <a href="classtp_1_1_out_of_date_error.html" class="m-doc">OutOfDateError</a> <span class="m-doc">A surface has changed in such a way that it is no longer compatible with the swapchain, and further presentation requests using the swapchain will fail.</span></li>
+              <li>class <a href="classtp_1_1_out_of_memory_error.html" class="m-doc">OutOfMemoryError</a> <span class="m-doc">Allocation failed due to overcommitting of memory.</span></li>
+              <li>struct <a href="structtp_1_1_overallocation_behavior.html" class="m-doc">OverallocationBehavior</a> <span class="m-doc">Specifies the overallocation behavior of a pool. This can be useful for reducing the frequency of allocations at the cost of potentially higher memory usage.</span></li>
+              <li>class <a href="classtp_1_1_ownable.html" class="m-doc">Ownable</a> <span class="m-doc">A customizable base class that is used for objects returned by the API in an OwningPtr.</span></li>
+              <li>class <a href="classtp_1_1_physical_device.html" class="m-doc">PhysicalDevice</a> <span class="m-doc">Represents a read-only interface for the physical device for identification and querying its properties and capabilities.</span></li>
+              <li>class <a href="classtp_1_1_pipeline.html" class="m-doc">Pipeline</a> <span class="m-doc">Represents a full compiled state of a compute or graphics pipeline, composed of multiple shader stages and the state of the configurable fixed-function stages.</span></li>
+              <li>class <a href="classtp_1_1_pipeline_cache.html" class="m-doc">PipelineCache</a> <span class="m-doc">Speeds up the compilation of pipelines by allowing the result of pipeline compilation to be reused between pipelines and between application runs.</span></li>
+              <li>class <a href="classtp_1_1_pipeline_layout.html" class="m-doc">PipelineLayout</a> <span class="m-doc">Describes the layout of resources accessed by a compute or graphics pipeline.</span></li>
+              <li>struct <a href="structtp_1_1_push_constant_range.html" class="m-doc">PushConstantRange</a> <span class="m-doc">Describes a range of push constants.</span></li>
+              <li>struct <a href="structtp_1_1_queue_type_info.html" class="m-doc">QueueTypeInfo</a> <span class="m-doc">Information about the physical device queues for a particular queue type.</span></li>
+              <li>struct <a href="structtp_1_1_rect2_d.html" class="m-doc">Rect2D</a> <span class="m-doc">A two-dimensional integer range.</span></li>
+              <li>class <a href="classtp_1_1_render_list.html" class="m-doc">RenderList</a> <span class="m-doc">Provides an interface to directly record graphics commands into a Vulkan   <a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkCommandBuffer.html" class="m-doc-external">VkCommandBuffer</a> inside a compute pass.</span></li>
+              <li>struct <a href="structtp_1_1_render_pass_attachment.html" class="m-doc">RenderPassAttachment</a> <span class="m-doc">Represents an <a href="classtp_1_1_image_view.html" class="m-doc">tp::<wbr />ImageView</a> as a render pass attachment, allowing it to be bound as a render target inside of its subpasses. Also specifies any operations that are to be done at the beginning or end of the render pass. Clearing an image through an attachment load operation tends to be more efficient than with an explicit command.</span></li>
+              <li>class <a href="classtp_1_1_render_pass_layout.html" class="m-doc">RenderPassLayout</a> <span class="m-doc">Describes ahead of time the layout and characteritics of a render pass.</span></li>
+              <li>struct <a href="structtp_1_1_render_pass_setup.html" class="m-doc">RenderPassSetup</a> <span class="m-doc">Used as configuration for executing a render pass.</span></li>
+              <li>class <a href="classtp_1_1_runtime_error.html" class="m-doc">RuntimeError</a> <span class="m-doc">A generic Tephra runtime error.</span></li>
+              <li>class <a href="classtp_1_1_sampler.html" class="m-doc">Sampler</a> <span class="m-doc"><a href="classtp_1_1_sampler.html" class="m-doc">Sampler</a> objects are used to apply filtering and other transformations to image data when accessed from shaders.</span></li>
+              <li>struct <a href="structtp_1_1_sampler_addressing.html" class="m-doc">SamplerAddressing</a> <span class="m-doc">Describes the addressing mode to be used by the sampler.</span></li>
+              <li>struct <a href="structtp_1_1_sampler_filtering.html" class="m-doc">SamplerFiltering</a> <span class="m-doc">Describes the texture filtering to be used by the sampler.</span></li>
+              <li>struct <a href="structtp_1_1_sampler_setup.html" class="m-doc">SamplerSetup</a> <span class="m-doc"></span></li>
+              <li>class <a href="classtp_1_1_shader_module.html" class="m-doc">ShaderModule</a> <span class="m-doc">Represents a single shader module as loaded from SPIR-V bytecode.</span></li>
+              <li>struct <a href="structtp_1_1_shader_stage_setup.html" class="m-doc">ShaderStageSetup</a> <span class="m-doc">Describes an individual shader stage of a pipeline, referencing a <a href="classtp_1_1_shader_module.html" class="m-doc">tp::<wbr />ShaderModule</a> and its entry point.</span></li>
+              <li>struct <a href="structtp_1_1_specialization_constant.html" class="m-doc">SpecializationConstant</a> <span class="m-doc">Describes the value of a particular specialization constant of any scalar boolean, integer or floating point type.</span></li>
+              <li>struct <a href="structtp_1_1_statistic_event_info.html" class="m-doc">StatisticEventInfo</a> <span class="m-doc">Information about the report of a statistic event.</span></li>
+              <li>struct <a href="structtp_1_1_stencil_state.html" class="m-doc">StencilState</a> <span class="m-doc">Specifies the full state of a stencil operation.</span></li>
+              <li>struct <a href="structtp_1_1_subpass_dependency.html" class="m-doc">SubpassDependency</a> <span class="m-doc">Specifies a dependency on another subpass from the current subpass.</span></li>
+              <li>struct <a href="structtp_1_1_subpass_layout.html" class="m-doc">SubpassLayout</a> <span class="m-doc">Describes a single subpass of a render pass, the attachments bindings and the subpass&#x27; dependencies.</span></li>
+              <li>struct <a href="structtp_1_1_surface_capabilities.html" class="m-doc">SurfaceCapabilities</a> <span class="m-doc">Describes the capabilities of a   <a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkSurfaceKHR.html" class="m-doc-external">VkSurfaceKHR</a> and the capabilities of a physical device to present to that surface.</span></li>
+              <li>class <a href="classtp_1_1_surface_lost_error.html" class="m-doc">SurfaceLostError</a> <span class="m-doc">Operation failed because the surface was lost. Subsequent surface operations will fail, too.</span></li>
+              <li>class <a href="classtp_1_1_swapchain.html" class="m-doc">Swapchain</a> <span class="m-doc">Manages presenting the rendering results to a surface.</span></li>
+              <li>struct <a href="structtp_1_1_swapchain_setup.html" class="m-doc">SwapchainSetup</a> <span class="m-doc">Used as configuration for creating a new <a href="classtp_1_1_swapchain.html" class="m-doc">tp::<wbr />Swapchain</a> object.</span></li>
+              <li>struct <a href="structtp_1_1_timeout.html" class="m-doc">Timeout</a> <span class="m-doc">Specifies a timeout duration for wait operations.</span></li>
+              <li>class <a href="classtp_1_1_too_many_objects_error.html" class="m-doc">TooManyObjectsError</a> <span class="m-doc">Too many objects of the same type have already been created.</span></li>
+              <li>class <a href="classtp_1_1_unsupported_operation_error.html" class="m-doc">UnsupportedOperationError</a> <span class="m-doc">The operation could not be completed because it is not supported by the platform or device.</span></li>
+              <li>struct <a href="structtp_1_1_version.html" class="m-doc">Version</a> <span class="m-doc">Represents and stores a version number.</span></li>
+              <li>struct <a href="structtp_1_1_vertex_input_attribute.html" class="m-doc">VertexInputAttribute</a> <span class="m-doc">Identifies a specific vertex input attribute such as position, normal, etc.</span></li>
+              <li>struct <a href="structtp_1_1_vertex_input_binding.html" class="m-doc">VertexInputBinding</a> <span class="m-doc">Describes the shader binding for vertex input buffer and the layout of its attributes.</span></li>
+              <li>struct <a href="structtp_1_1_viewport.html" class="m-doc">Viewport</a> <span class="m-doc">The viewport describing a region of render operations.</span></li>
+              <li>struct <a href="structtp_1_1_vk_feature_structure_map_trait.html" class="m-doc">VkFeatureStructureMapTrait</a> <span class="m-doc">Trait wrapper for <a href="namespacetp.html#a8afebc445ea6f34a84cd0a9fe043bb4a" class="m-doc">tp::<wbr />getVkFeatureStructureType</a>.</span></li>
+              <li>struct <a href="structtp_1_1_vk_object_handle.html" class="m-doc">VkObjectHandle</a> <span class="m-doc">A strongly typed Vulkan object handle wrapper.</span></li>
+              <li>struct <a href="structtp_1_1_vk_property_structure_map_trait.html" class="m-doc">VkPropertyStructureMapTrait</a> <span class="m-doc">Trait wrapper for <a href="namespacetp.html#a819b3bc00fc5132bda91f6ccc850cb46" class="m-doc">tp::<wbr />getVkPropertyStructureType</a>.</span></li>
+              <li>class <a href="classtp_1_1_vk_structure_map.html" class="m-doc">VkStructureMap</a> <span class="m-doc">A heterogenous container of unique Vulkan structure types. The structures get zero initialized with <code>sType</code> filled out appropriately and <code>pNext</code> used to chain them in the order they were added.</span></li>
+              <li>struct <a href="structtp_1_1_vulkan_validation_setup.html" class="m-doc">VulkanValidationSetup</a> <span class="m-doc">Describes whether Vulkan validation should be enabled, optionally with control over its specific features.</span></li>
+            </ul>
+          </li>
+        </ul>
+        <script>
+        function toggle(e) {
+            e.parentElement.className = e.parentElement.className == 'm-doc-collapsible' ?
+                'm-doc-expansible' : 'm-doc-collapsible';
+            return false;
+        }
+        /* Collapse all nodes marked as such. Doing it via JS instead of
+           directly in markup so disabling it doesn't harm usability. The list
+           is somehow regenerated on every iteration and shrinks as I change
+           the classes. It's not documented anywhere and I'm not sure if this
+           is the same across browsers, so I am going backwards in that list to
+           be sure. */
+        var collapsed = document.getElementsByClassName("collapsed");
+        for(var i = collapsed.length - 1; i >= 0; --i)
+            collapsed[i].className = 'm-doc-expansible';
+        </script>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <p>Tephra Documentation. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.6 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>
