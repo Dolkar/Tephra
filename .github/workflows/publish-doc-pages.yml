@@ -10,7 +10,7 @@ permissions:
 jobs:
   build-and-deploy:
     concurrency: ci-${{ github.ref }} # Recommended if you intend to make multiple deployments in quick succession.
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     
     steps:
     - uses: actions/checkout@v3
@@ -23,7 +23,7 @@ jobs:
 
     - name: Build Documentation
       working-directory: ./build
-      run: ./build_documentation.bat
+      run: python "./mcss/documentation/doxygen.py" "mcssconf.py"
 
     - name: Deploy
       uses: JamesIves/github-pages-deploy-action@v4
