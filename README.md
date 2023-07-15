@@ -23,8 +23,8 @@ and relevance. To that end, Tephra provides:
   graphs, the bindless resource model, recording callbacks, or the concept of frames)
 - The ability to use bleeding-edge features of graphics hardware through direct interoperability with the Vulkan API
 - An introductory [user guide](https://dolkar.github.io/Tephra/user-guide.html), extensive
-  [documentation](https://dolkar.github.io/Tephra/annotated.html) and examples for getting started with using the
-  library without prior knowledge of Vulkan
+  [documentation](https://dolkar.github.io/Tephra/annotated.html) and [examples](https://dolkar.github.io/Tephra/examples.html)
+  for getting started with using the library without prior knowledge of Vulkan
 - Debugging features, usage validation and testing suite (WIP)
 
 _Tephra is being used and partially developed by [Bohemia Interactive Simulations](https://bisimulations.com/)._
