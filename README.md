@@ -3,9 +3,10 @@
 
 **License**: [MIT](https://github.com/Dolkar/Tephra/blob/main/LICENSE)
 
-**Current version**: v0.1 [LINK]
+**Current version**: [v0.1](https://dolkar.github.io/Tephra/changelog.html)
 
-**Links**: User guide | Documentation | Discussions | Contributing
+**Links**: [User guide](https://dolkar.github.io/Tephra/user-guide.html) | [API Documentation](https://dolkar.github.io/Tephra/annotated.html) |
+           [Discussions](https://github.com/Dolkar/Tephra/discussions)
 
 **Build status**: ![build status](https://github.com/Dolkar/Tephra/actions/workflows/build.yml/badge.svg)
 
@@ -21,8 +22,9 @@ and relevance. To that end, Tephra provides:
 - A simple, general-purpose interface that tries not to force architectural decisions upon the user (such as render
   graphs, the bindless resource model, recording callbacks, or the concept of frames)
 - The ability to use bleeding-edge features of graphics hardware through direct interoperability with the Vulkan API
-- An introductory user guide [LINK], extensive documentation [LINK] and examples for getting started with using
-  the library without requiring prior knowledge of Vulkan
+- An introductory [user guide](https://dolkar.github.io/Tephra/user-guide.html), extensive
+  [documentation](https://dolkar.github.io/Tephra/annotated.html) and examples for getting started with using the
+  library without prior knowledge of Vulkan
 - Debugging features, usage validation and testing suite (WIP)
 
 _Tephra is being used and partially developed by [Bohemia Interactive Simulations](https://bisimulations.com/)._
@@ -136,6 +138,7 @@ Building the documentation
 ## Contributing
 
 Feel free to create issues, submit pull requests for non-trivial changes and participate in
-[Discussions](https://github.com/Dolkar/Tephra/discussions). 
+[Discussions](https://github.com/Dolkar/Tephra/discussions). Submitting examples, validation and tests is also very
+appreciated.
 
 
