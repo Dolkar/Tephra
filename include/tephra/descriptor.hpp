@@ -73,7 +73,6 @@ enum class ReadAccess : uint64_t {
     /// @remarks
     ///     If you don't wish to specify any access, use tp::ReadAccessMask::None() instead.
     Unknown = 1ull << 63
-
 };
 TEPHRA_MAKE_ENUM_BIT_MASK(ReadAccessMask, ReadAccess);
 

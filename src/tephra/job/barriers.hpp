@@ -129,13 +129,20 @@ public:
         return barriers[barrierIndex];
     }
 
+    // Marks all previous barriers as non-reusable for export accesses. This is done after compute / render passes
+    // that may use previously exported resources
+    void markExportedResourceUsage() {
+        exportReusableBarrierIndex = getBarrierCount();
+    }
+
     // Synchronize a dependency with a barrier, attempting to reuse any with index greater than
-    // firstReusableBarrierIndex
+    // firstReusableBarrierIndex, with some special handling for exports
     template <typename TResourceDependency>
     BarrierReference synchronizeDependency(
         const TResourceDependency& dependency,
         uint32_t commandIndex,
-        uint32_t firstReusableBarrierIndex);
+        uint32_t firstReusableBarrierIndex,
+        bool wasExported);
 
     // Synchronize a dependency with a barrier, reusing a specific barrier
     template <typename TResourceDependency>
@@ -143,6 +150,7 @@ public:
 
 private:
     uint64_t jobId = 0;
+    uint32_t exportReusableBarrierIndex = 0;
     ScratchDeque<Barrier> barriers;
 };
 

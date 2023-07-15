@@ -261,7 +261,11 @@ template <typename TResourceDependency>
 BarrierReference BarrierList::synchronizeDependency(
     const TResourceDependency& dependency,
     uint32_t commandIndex,
-    uint32_t firstReusableBarrierIndex) {
+    uint32_t firstReusableBarrierIndex,
+    bool wasExported) {
+    if (wasExported)
+        firstReusableBarrierIndex = tp::max(firstReusableBarrierIndex, exportReusableBarrierIndex);
+
     // Find an existing barrier with an already matching execution dependency
     for (uint32_t barrierIndex = getBarrierCount(); barrierIndex-- > firstReusableBarrierIndex;) {
         Barrier& barrier = barriers[barrierIndex];
@@ -304,11 +308,13 @@ BarrierReference BarrierList::synchronizeDependency(
 template BarrierReference BarrierList::synchronizeDependency<BufferDependency>(
     const BufferDependency&,
     uint32_t,
-    uint32_t);
+    uint32_t,
+    bool);
 template BarrierReference BarrierList::synchronizeDependency<ImageDependency>(
     const ImageDependency&,
     uint32_t,
-    uint32_t);
+    uint32_t,
+    bool);
 
 template BarrierReference BarrierList::synchronizeDependency<BufferDependency>(
     const BufferDependency&,

@@ -219,7 +219,11 @@ public:
     void synchronizeNewAccess(const NewBufferAccess& newAccess, uint32_t commandIndex, BarrierList& barriers);
 
     // Updates the access map by inserting the new access, to be synchronized against others in the future
-    void insertNewAccess(const NewBufferAccess& newAccess, uint32_t nextBarrierIndex, bool forceOverwrite = false);
+    void insertNewAccess(
+        const NewBufferAccess& newAccess,
+        uint32_t nextBarrierIndex,
+        bool forceOverwrite = false,
+        bool isExport = false);
 
     // Clears all previous accesses and barriers
     void clear();
@@ -239,15 +243,19 @@ private:
         // Captures when the read accesses happened and the barriers that can be reused
         uint32_t barrierIndexAfterReadAccesses;
 
+        // Tracks if one of the last accesses was an export operation
+        bool wasExported;
+
         // The barrier that was used to synchronize read accesses with the preceding write access
         BarrierReference barrierAfterWriteAccess;
 
-        // Constructs a new entry, initialized to some write access
-        BufferRangeEntry(ResourceAccess writeAccess, uint32_t barrierIndexAfterWriteAccess)
-            : lastWriteAccess(std::move(writeAccess)),
-              barrierIndexAfterWriteAccess(barrierIndexAfterWriteAccess),
+        // Constructs a new entry, initialized to some access - it is treated like write access
+        BufferRangeEntry(ResourceAccess access, uint32_t barrierIndexAfterAccess, bool isExport)
+            : lastWriteAccess(std::move(access)),
+              barrierIndexAfterWriteAccess(barrierIndexAfterAccess),
               lastReadAccesses(0, 0),
               barrierIndexAfterReadAccesses(0),
+              wasExported(isExport),
               barrierAfterWriteAccess() {}
     };
 
@@ -282,7 +290,11 @@ public:
     void synchronizeNewAccess(const NewImageAccess& newAccess, uint32_t commandIndex, BarrierList& barriers);
 
     // Updates the access map by inserting the new access, to be synchronized against others in the future
-    void insertNewAccess(const NewImageAccess& newAccess, uint32_t nextBarrierIndex, bool forceOverwrite = false);
+    void insertNewAccess(
+        const NewImageAccess& newAccess,
+        uint32_t nextBarrierIndex,
+        bool forceOverwrite = false,
+        bool isExport = false);
 
     // Marks the range as not needing to preserve contents for future accesses
     void discardContents(const ImageAccessRange& range);
@@ -305,18 +317,22 @@ private:
         // Captures when the read accesses happened and the barriers that can be reused
         uint32_t barrierIndexAfterReadAccesses;
 
+        // Tracks if one of the last accesses was an export operation
+        bool wasExported;
+
         // The barrier that was used to synchronize read accesses with the preceding write access
         BarrierReference barrierAfterWriteAccess;
 
         // The current layout the image subresource range is in
         VkImageLayout layout;
 
-        // Constructs a new entry, initialized to some write access
-        ImageRangeEntry(ResourceAccess writeAccess, uint32_t barrierIndexAfterWriteAccess, VkImageLayout layout)
-            : lastWriteAccess(std::move(writeAccess)),
-              barrierIndexAfterWriteAccess(barrierIndexAfterWriteAccess),
+        // Constructs a new entry, initialized to some access - it is treated like write access
+        ImageRangeEntry(ResourceAccess access, uint32_t barrierIndexAfterAccess, VkImageLayout layout, bool isExport)
+            : lastWriteAccess(std::move(access)),
+              barrierIndexAfterWriteAccess(barrierIndexAfterAccess),
               lastReadAccesses(0, 0),
               barrierIndexAfterReadAccesses(0),
+              wasExported(isExport),
               barrierAfterWriteAccess(),
               layout(layout) {}
     };
