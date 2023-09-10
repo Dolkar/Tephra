@@ -476,50 +476,42 @@ public:
     /// @remarks
     ///     The dependencies between the compute pass and the rest of the tp::Job are synchronized automatically.
     ///     Dependencies between commands executed within the same compute pass are not, and must be synchronized
-    ///     manually with tp::RenderList::cmdPipelineBarrier.
+    ///     manually with tp::ComputeList::cmdPipelineBarrier.
     /// @remarks
     ///     Inline callbacks will be called during the call to tp::Device::submitQueuedJobs in the provided order.
     ///     Device queue thread safety rules apply: No operations on the target queue are permitted inside the callback.
-    /// @see @vksymbol{vkCmdExecuteCommands}
     void cmdExecuteComputePass(
         const ComputePassSetup& setup,
         std::variant<ArrayView<ComputeList>, ComputeInlineCallback> commandRecording,
         const char* debugName = nullptr);
 
-    /// Forms a render pass that executes lists of render commands in each of its subpasses.
+    /// Forms a render pass that executes lists of render commands.
     /// @param setup
     ///     The setup structure describing the render pass, its attachments and its non-attachment resource usage.
-    /// @param subpassCommandRecording
-    ///     For each subpass in the render pass, describes how render commands are to be recorded to it. Each element
-    ///     can be either:
+    /// @param commandRecording
+    ///     Describes how render commands are to be recorded for the render pass. The parameter can be either:
     ///     - A non-empty array view of null tp::RenderList objects that will be initialized by the function call.
-    ///       Commands must be recorded to these lists while the job is in an enqueued state. The lists will be
-    ///       executed in the order they are written to this array.
+    ///       Commands must be recorded to these lists while the job is in an enqueued state. The lists are executed
+    ///       in the order they are in this array.
     ///     - A function callback to record commands to a tp::RenderList that will be provided as its parameter. This
     ///       function will be called as a part of the next tp::Device::submitQueuedJobs call after the job has been
     ///       enqueued to the same queue.
     /// @param debugName
     ///     The debug name identifier for the render pass.
     /// @remarks
-    ///     The size of the `subpassCommandRecording` array must be the same as the number of subpasses used to
-    ///     create the tp::RenderPassLayout provided in the given `setup` structure.
-    /// @remarks
     ///     Any usage of non-attachment resources inside the render pass beyond what the resources were previously
     ///     exported for must be specified inside the `setup` structure.
     /// @remarks
-    ///     The dependencies between the render pass and the rest of the tp::Job, as well as the dependencies between
-    ///     subpasses as declared during creation of the provided tp::RenderPassLayout are synchronized automatically.
-    ///     Dependencies between commands executed within the same subpass are not - see tp::SubpassDependency.
+    ///     The dependencies between the render pass and the rest of the tp::Job are synchronized automatically.
+    ///     Dependencies between commands executed within the same render pass are not, except for guarantees
+    ///     provided by the rasterization order.
     /// @remarks
     ///     Inline callbacks will be called during the call to tp::Device::submitQueuedJobs in the provided order.
     ///     Device queue thread safety rules apply: No operations on the target queue are permitted inside the callback.
-    /// @see tp::RenderPassLayout
-    /// @see @vksymbol{VkRenderPass}
-    /// @see @vksymbol{VkFramebuffer}
-    /// @see @vksymbol{vkCmdExecuteCommands}
+    /// @see @vksymbol{VkCmdBeginRendering}
     void cmdExecuteRenderPass(
         const RenderPassSetup& setup,
-        ArrayParameter<const std::variant<ArrayView<RenderList>, RenderInlineCallback>> subpassCommandRecording,
+        std::variant<ArrayView<RenderList>, RenderInlineCallback> commandRecording,
         const char* debugName = nullptr);
 
     /// Begins a debug label, marking the following commands until the next tp::Job::cmdEndDebugLabel with the

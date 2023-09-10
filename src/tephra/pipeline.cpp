@@ -52,28 +52,13 @@ ComputePipelineSetup& ComputePipelineSetup::vkSetCreateInfoExtPtr(void* pNext) {
 
 GraphicsPipelineSetup::GraphicsPipelineSetup(
     const PipelineLayout* pipelineLayout,
-    const RenderPassLayout* renderPassLayout,
-    uint32_t subpassIndex,
     ShaderStageSetup vertexStageSetup,
     ShaderStageSetup fragmentStageSetup,
     const char* debugName)
     : pipelineLayout(pipelineLayout),
-      renderPassLayout(renderPassLayout),
-      subpassIndex(subpassIndex),
       vertexStageSetup(std::move(vertexStageSetup)),
       fragmentStageSetup(std::move(fragmentStageSetup)),
-      debugName(debugName ? debugName : std::string()) {
-    TEPHRA_ASSERT(renderPassLayout != nullptr);
-}
-
-GraphicsPipelineSetup& GraphicsPipelineSetup::setRenderPassLayout(
-    const RenderPassLayout* renderPassLayout,
-    uint32_t subpassIndex) {
-    TEPHRA_ASSERT(renderPassLayout != nullptr);
-    this->renderPassLayout = renderPassLayout;
-    this->subpassIndex = subpassIndex;
-    return *this;
-}
+      debugName(debugName ? debugName : std::string()) {}
 
 GraphicsPipelineSetup& GraphicsPipelineSetup::setVertexInputBindings(
     ArrayParameter<const VertexInputBinding> vertexInputBindings) {
@@ -114,8 +99,26 @@ GraphicsPipelineSetup& GraphicsPipelineSetup::setTopology(PrimitiveTopology topo
     return *this;
 }
 
+GraphicsPipelineSetup& GraphicsPipelineSetup::setDepthStencilAttachment(
+    Format depthStencilAttachmentFormat,
+    ImageAspectMask depthStencilAspects) {
+    this->depthStencilAttachmentFormat = depthStencilAttachmentFormat;
+    return *this;
+}
+
+GraphicsPipelineSetup& GraphicsPipelineSetup::setColorAttachments(ArrayParameter<Format> colorAttachmentFormats) {
+    this->colorAttachmentFormats.insert(
+        this->colorAttachmentFormats.begin(), colorAttachmentFormats.begin(), colorAttachmentFormats.end());
+    return *this;
+}
+
 GraphicsPipelineSetup& GraphicsPipelineSetup::setViewportCount(uint32_t viewportCount) {
     this->viewportCount = viewportCount;
+    return *this;
+}
+
+GraphicsPipelineSetup& GraphicsPipelineSetup::setMultiViewMask(uint32_t viewMask) {
+    this->viewMask = viewMask;
     return *this;
 }
 

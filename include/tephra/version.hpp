@@ -44,12 +44,12 @@ struct Version {
 
     /// Returns the lowest version of the Vulkan device-level API that Tephra supports.
     static constexpr Version getMinSupportedVulkanDeviceVersion() {
-        return Version(1, 2, 0);
+        return Version(1, 3, 0);
     }
 
     /// Returns the highest Vulkan API version that Tephra will make use of.
     static constexpr Version getMaxUsedVulkanAPIVersion() {
-        return Version(1, 2, 0);
+        return Version(1, 3, 0);
     }
 };
 

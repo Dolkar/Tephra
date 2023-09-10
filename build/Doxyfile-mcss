@@ -14,5 +14,5 @@ ALIASES = \
     "m_keywords{1}=@xmlonly<mcss:search xmlns:mcss=\"http://mcss.mosra.cz/doxygen/\" mcss:keywords=\"\1\" />@endxmlonly" \
     "m_keyword{3}=@xmlonly<mcss:search xmlns:mcss=\"http://mcss.mosra.cz/doxygen/\" mcss:keyword=\"\1\" mcss:title=\"\2\" mcss:suffix-length=\"\3\" />@endxmlonly" \
     "m_enum_values_as_keywords=@xmlonly<mcss:search xmlns:mcss=\"http://mcss.mosra.cz/doxygen/\" mcss:enum-values-as-keywords=\"true\" />@endxmlonly" \
-	"vksymbol{1}=@m_class{m-doc-external} <a href=\"https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/\1.html\">\1</a>" \
+	"vksymbol{1}=@m_class{m-doc-external} <a href=\"https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/\1.html\">\1</a>" \
 	"vmasymbol{2}=@m_class{m-doc-external} <a href='https://gpuopen-librariesandsdks.github.io/VulkanMemoryAllocator/html/\2.html\">\1</a>"

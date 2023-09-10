@@ -62,6 +62,7 @@ private:
     ScratchDeque<VkPipelineMultisampleStateCreateInfo> multisampleCreateInfos;
     ScratchDeque<VkPipelineDepthStencilStateCreateInfo> depthStencilCreateInfos;
     ScratchDeque<VkPipelineColorBlendStateCreateInfo> colorBlendCreateInfos;
+    ScratchDeque<VkPipelineRenderingCreateInfo> renderingCreateInfos;
 
     void preallocatePipelineSetups(ArrayParameter<const GraphicsPipelineSetup* const> pipelineSetups);
     void makePipelineSetup(const GraphicsPipelineSetup* pipelineSetup);
@@ -81,6 +82,7 @@ private:
     VkPipelineRasterizationStateCreateInfo* makeRasterizationState(const GraphicsPipelineSetup* pipelineSetup);
     VkPipelineMultisampleStateCreateInfo* makeMultisampleState(const GraphicsPipelineSetup* pipelineSetup);
     VkPipelineDepthStencilStateCreateInfo* makeDepthStencilState(const GraphicsPipelineSetup* pipelineSetup);
+    VkPipelineRenderingCreateInfo* makeRenderingState(const GraphicsPipelineSetup* pipelineSetup, const void* pNext);
 };
 
 }

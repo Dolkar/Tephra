@@ -13,9 +13,11 @@ LogicalDevice::LogicalDevice(Instance* instance, QueueMap* queueMap, const Devic
     if (setup.vkFeatureMap != nullptr)
         vkFeatureMap = *setup.vkFeatureMap;
 
-    // Add own required features
+    // Add own required features - these are guaranteed to be supported
     auto& vk12Features = vkFeatureMap.get<VkPhysicalDeviceVulkan12Features>();
     vk12Features.timelineSemaphore = VK_TRUE;
+    auto& vk13Features = vkFeatureMap.get<VkPhysicalDeviceVulkan13Features>();
+    vk13Features.dynamicRendering = VK_TRUE;
 
     // Chain feature structures to extended structure pointer
     void* vkCreateInfoExtPtr = setup.vkCreateInfoExtPtr;
@@ -84,56 +86,6 @@ VkShaderModuleHandle LogicalDevice::createShaderModule(ArrayParameter<const uint
 
 void LogicalDevice::destroyShaderModule(VkShaderModuleHandle vkShaderModuleHandle) noexcept {
     vkiDevice.destroyShaderModule(vkDeviceHandle, vkShaderModuleHandle, nullptr);
-}
-
-VkRenderPassHandle LogicalDevice::createRenderPass(
-    ArrayParameter<const VkAttachmentDescription> attachments,
-    ArrayParameter<const VkSubpassDescription> subpasses,
-    ArrayParameter<const VkSubpassDependency> dependencies) {
-    VkRenderPassCreateInfo createInfo;
-    createInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-    createInfo.pNext = nullptr;
-    createInfo.flags = 0;
-    createInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
-    createInfo.pAttachments = attachments.data();
-    createInfo.subpassCount = static_cast<uint32_t>(subpasses.size());
-    createInfo.pSubpasses = subpasses.data();
-    createInfo.dependencyCount = static_cast<uint32_t>(dependencies.size());
-    createInfo.pDependencies = dependencies.data();
-
-    VkRenderPass vkRenderPassHandle;
-    throwRetcodeErrors(vkiDevice.createRenderPass(vkDeviceHandle, &createInfo, nullptr, &vkRenderPassHandle));
-    return VkRenderPassHandle(vkRenderPassHandle);
-}
-
-void LogicalDevice::destroyRenderPass(VkRenderPassHandle vkRenderPassHandle) noexcept {
-    vkiDevice.destroyRenderPass(vkDeviceHandle, vkRenderPassHandle, nullptr);
-}
-
-VkFramebufferHandle LogicalDevice::createFramebuffer(
-    VkRenderPassHandle vkRenderPassHandle,
-    ArrayParameter<const VkImageViewHandle> attachments,
-    uint32_t width,
-    uint32_t height,
-    uint32_t layerCount) {
-    VkFramebufferCreateInfo createInfo;
-    createInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-    createInfo.pNext = nullptr;
-    createInfo.flags = 0;
-    createInfo.renderPass = vkRenderPassHandle;
-    createInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
-    createInfo.pAttachments = vkCastTypedHandlePtr(attachments.data());
-    createInfo.width = width;
-    createInfo.height = height;
-    createInfo.layers = layerCount;
-
-    VkFramebuffer vkFramebufferHandle;
-    throwRetcodeErrors(vkiDevice.createFramebuffer(vkDeviceHandle, &createInfo, nullptr, &vkFramebufferHandle));
-    return VkFramebufferHandle(vkFramebufferHandle);
-}
-
-void LogicalDevice::destroyFramebuffer(VkFramebufferHandle vkFramebufferHandle) noexcept {
-    vkiDevice.destroyFramebuffer(vkDeviceHandle, vkFramebufferHandle, nullptr);
 }
 
 VkDescriptorSetLayoutHandle LogicalDevice::createDescriptorSetLayout(

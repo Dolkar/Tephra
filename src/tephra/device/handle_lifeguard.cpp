@@ -18,8 +18,6 @@ template class Lifeguard<VkObjectHandle<VkImageView, VK_OBJECT_TYPE_IMAGE_VIEW>>
 template class Lifeguard<VkObjectHandle<VkSampler, VK_OBJECT_TYPE_SAMPLER>>;
 template class Lifeguard<VkObjectHandle<VkDescriptorPool, VK_OBJECT_TYPE_DESCRIPTOR_POOL>>;
 template class Lifeguard<VkObjectHandle<VkPipeline, VK_OBJECT_TYPE_PIPELINE>>;
-template class Lifeguard<VkObjectHandle<VkRenderPass, VK_OBJECT_TYPE_RENDER_PASS>>;
-template class Lifeguard<VkObjectHandle<VkFramebuffer, VK_OBJECT_TYPE_FRAMEBUFFER>>;
 template class Lifeguard<VkObjectHandle<VkSwapchainKHR, VK_OBJECT_TYPE_SWAPCHAIN_KHR>>;
 template class Lifeguard<VkObjectHandle<VkSemaphore, VK_OBJECT_TYPE_SEMAPHORE>>;
 

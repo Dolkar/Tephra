@@ -396,28 +396,18 @@ void Job::cmdExecuteComputePass(
     ComputePass& computePass = jobData->record.computePassStorage[jobData->record.computePassCount];
     jobData->record.computePassCount++;
 
+    DebugTarget listDebugTarget = DebugTarget(debugTarget.get(), ComputeListTypeName, debugName);
     if (std::holds_alternative<ComputeInlineCallback>(commandRecording)) {
-        DebugTarget inlineListDebugTarget = DebugTarget(debugTarget.get(), ComputeListTypeName, debugName);
         computePass.assignInline(
-            setup, std::move(std::get<ComputeInlineCallback>(commandRecording)), std::move(inlineListDebugTarget));
+            setup, std::move(std::get<ComputeInlineCallback>(commandRecording)), std::move(listDebugTarget));
     } else {
         ArrayView<ComputeList>& computeListsToAssign = std::get<ArrayView<ComputeList>>(commandRecording);
-        std::vector<VkCommandBufferHandle>& futureCommandBuffers = computePass.assignDeferred(
-            setup, computeListsToAssign.size());
-
-        for (std::size_t i = 0; i < computeListsToAssign.size(); i++) {
-            auto listDebugTarget = DebugTarget(debugTarget.get(), ComputeListTypeName, debugName);
-            computeListsToAssign[i] = ComputeList(
-                &deviceImpl->getCommandPoolPool()->getVkiCommands(),
-                &futureCommandBuffers[i],
-                std::move(listDebugTarget));
-        }
+        computePass.assignDeferred(setup, listDebugTarget, computeListsToAssign);
     }
 
     for (const BufferComputeAccess& entry : computePass.getBufferAccesses()) {
         markResourceUsage(jobData, entry.buffer);
     }
-
     for (const ImageComputeAccess& entry : computePass.getImageAccesses()) {
         markResourceUsage(jobData, entry.image);
     }
@@ -428,7 +418,7 @@ void Job::cmdExecuteComputePass(
 
 void Job::cmdExecuteRenderPass(
     const RenderPassSetup& setup,
-    ArrayParameter<const std::variant<ArrayView<RenderList>, RenderInlineCallback>> subpassCommandRecording,
+    std::variant<ArrayView<RenderList>, RenderInlineCallback> commandRecording,
     const char* debugName) {
     TEPHRA_DEBUG_SET_CONTEXT(debugTarget.get(), "cmdExecuteRenderPass", debugName);
     const DeviceContainer* deviceImpl = jobData->resourcePoolImpl->getParentDeviceImpl();
@@ -440,39 +430,19 @@ void Job::cmdExecuteRenderPass(
     RenderPass& renderPass = jobData->record.renderPassStorage[jobData->record.renderPassCount];
     jobData->record.renderPassCount++;
 
-    renderPass.assignSetup(setup, debugName);
-
-    for (uint32_t subpassIndex = 0; subpassIndex < subpassCommandRecording.size(); subpassIndex++) {
-        auto& commandRecording = subpassCommandRecording[subpassIndex];
-
-        if (std::holds_alternative<RenderInlineCallback>(commandRecording)) {
-            DebugTarget inlineListDebugTarget = DebugTarget(debugTarget.get(), RenderListTypeName, debugName);
-            renderPass.assignInlineSubpass(
-                subpassIndex, std::get<RenderInlineCallback>(commandRecording), std::move(inlineListDebugTarget));
-        } else {
-            const ArrayView<RenderList>& renderListsToAssign = std::get<ArrayView<RenderList>>(commandRecording);
-            std::vector<VkCommandBufferHandle>& futureCommandBuffers = renderPass.assignDeferredSubpass(
-                subpassIndex, renderListsToAssign.size());
-
-            for (std::size_t i = 0; i < renderListsToAssign.size(); i++) {
-                auto listDebugTarget = DebugTarget(debugTarget.get(), RenderListTypeName, debugName);
-                renderListsToAssign[i] = RenderList(
-                    &deviceImpl->getCommandPoolPool()->getVkiCommands(),
-                    &futureCommandBuffers[i],
-                    &renderPass,
-                    subpassIndex,
-                    std::move(listDebugTarget));
-            }
-        }
+    DebugTarget listDebugTarget = DebugTarget(debugTarget.get(), RenderListTypeName, debugName);
+    if (std::holds_alternative<RenderInlineCallback>(commandRecording)) {
+        renderPass.assignInline(
+            setup, std::move(std::get<RenderInlineCallback>(commandRecording)), std::move(listDebugTarget));
+    } else {
+        ArrayView<RenderList>& computeListsToAssign = std::get<ArrayView<RenderList>>(commandRecording);
+        renderPass.assignDeferred(setup, listDebugTarget, computeListsToAssign);
     }
 
     for (const BufferRenderAccess& entry : renderPass.getBufferAccesses()) {
         markResourceUsage(jobData, entry.buffer);
     }
     for (const ImageRenderAccess& entry : renderPass.getImageAccesses()) {
-        markResourceUsage(jobData, entry.image);
-    }
-    for (const AttachmentAccess& entry : renderPass.getAttachmentAccesses()) {
         markResourceUsage(jobData, entry.image);
     }
 

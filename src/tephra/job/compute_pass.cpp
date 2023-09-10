@@ -4,29 +4,38 @@
 
 namespace tp {
 
-std::vector<VkCommandBufferHandle>& ComputePass::assignDeferred(const ComputePassSetup& setup, std::size_t bufferCount) {
-    reassign(setup);
+void ComputePass::assignDeferred(
+    const ComputePassSetup& setup,
+    const DebugTarget& listDebugTarget,
+    ArrayView<ComputeList>& listsToAssign) {
+    prepareAccesses(setup);
 
     isInline = false;
     inlineRecordingCallback = {};
     inlineListDebugTarget = DebugTarget::makeSilent();
-    // Create space for bufferCount empty command buffers. They will be assigned once recorded
-    TEPHRA_ASSERT(bufferCount > 0);
-    vkPreparedCommandBuffers.clear();
-    vkPreparedCommandBuffers.resize(bufferCount);
 
-    return vkPreparedCommandBuffers;
+    // Create space for empty command buffers and pass pointers to them to each list.
+    // They will be filled out once recorded
+    TEPHRA_ASSERT(listsToAssign.size() > 0);
+    vkDeferredCommandBuffers.clear();
+    vkDeferredCommandBuffers.resize(listsToAssign.size());
+
+    for (std::size_t i = 0; i < listsToAssign.size(); i++) {
+        listsToAssign[i] = ComputeList(
+            &deviceImpl->getCommandPoolPool()->getVkiCommands(), &vkDeferredCommandBuffers[i], listDebugTarget);
+    }
 }
 
 void ComputePass::assignInline(
     const ComputePassSetup& setup,
     ComputeInlineCallback recordingCallback,
-    DebugTarget computeListDebugTarget) {
-    reassign(setup);
+    DebugTarget listDebugTarget) {
+    prepareAccesses(setup);
+
     isInline = true;
     inlineRecordingCallback = std::move(recordingCallback);
-    inlineListDebugTarget = std::move(computeListDebugTarget);
-    vkPreparedCommandBuffers.clear();
+    inlineListDebugTarget = std::move(listDebugTarget);
+    vkDeferredCommandBuffers.clear();
 }
 
 void ComputePass::recordPass(PrimaryBufferRecorder& recorder) {
@@ -36,14 +45,14 @@ void ComputePass::recordPass(PrimaryBufferRecorder& recorder) {
             &recorder.getVkiCommands(), recorder.requestBuffer(), std::move(inlineListDebugTarget));
         inlineRecordingCallback(inlineList);
     } else {
-        for (VkCommandBufferHandle vkCommandBuffer : vkPreparedCommandBuffers) {
+        for (VkCommandBufferHandle vkCommandBuffer : vkDeferredCommandBuffers) {
             if (!vkCommandBuffer.isNull())
                 recorder.appendBuffer(vkCommandBuffer);
         }
     }
 }
 
-void ComputePass::reassign(const ComputePassSetup& setup) {
+void ComputePass::prepareAccesses(const ComputePassSetup& setup) {
     bufferAccesses.clear();
     bufferAccesses.insert(bufferAccesses.begin(), setup.bufferAccesses.begin(), setup.bufferAccesses.end());
     imageAccesses.clear();

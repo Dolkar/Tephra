@@ -15,21 +15,12 @@ void ComputeList::beginRecording(CommandPool* commandPool) {
 
     vkCommandBufferHandle = commandPool->acquirePrimaryCommandBuffer(debugTarget->getObjectName());
 
-    VkCommandBufferInheritanceInfo inheritanceInfo;
-    inheritanceInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_INFO;
-    inheritanceInfo.pNext = nullptr;
-    inheritanceInfo.renderPass = VK_NULL_HANDLE;
-    inheritanceInfo.subpass = 0;
-    inheritanceInfo.framebuffer = VK_NULL_HANDLE;
-    inheritanceInfo.occlusionQueryEnable = false;
-    inheritanceInfo.queryFlags = 0; // TODO
-    inheritanceInfo.pipelineStatistics = 0; // TODO
-
-    VkCommandBufferBeginInfo beginInfo; // Setup of a secondary one time use command buffer
+    // Record to a fresh primary command buffer
+    VkCommandBufferBeginInfo beginInfo;
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
     beginInfo.pNext = nullptr;
     beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-    beginInfo.pInheritanceInfo = &inheritanceInfo;
+    beginInfo.pInheritanceInfo = nullptr;
 
     throwRetcodeErrors(vkiCommands->beginCommandBuffer(vkCommandBufferHandle, &beginInfo));
 }

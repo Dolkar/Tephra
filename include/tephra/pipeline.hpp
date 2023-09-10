@@ -323,8 +323,6 @@ private:
     void* pNext = nullptr;
 };
 
-class RenderPassLayout;
-
 /// Used as configuration for creating a new graphics tp::Pipeline object for use inside render passes.
 /// @see tp::Device::compileGraphicsPipelines
 /// @see @vksymbol{VkGraphicsPipelineCreateInfo}
@@ -332,10 +330,6 @@ class GraphicsPipelineSetup {
 public:
     /// @param pipelineLayout
     ///     The pipeline layout to use.
-    /// @param renderPassLayout
-    ///     The render pass layout the pipeline will be compatible with.
-    /// @param subpassIndex
-    ///     The specific index of the subpass the pipeline will be compatible with.
     /// @param vertexStageSetup
     ///     The setup of the vertex shader stage.
     /// @param fragmentStageSetup
@@ -344,14 +338,10 @@ public:
     ///     The debug name identifier for the object.
     GraphicsPipelineSetup(
         const PipelineLayout* pipelineLayout,
-        const RenderPassLayout* renderPassLayout,
-        uint32_t subpassIndex,
         ShaderStageSetup vertexStageSetup,
         ShaderStageSetup fragmentStageSetup = {},
         const char* debugName = nullptr);
 
-    /// Sets the render pass layout the pipeline will be compatible with and the subpass index.
-    GraphicsPipelineSetup& setRenderPassLayout(const RenderPassLayout* renderPassLayout, uint32_t subpassIndex);
     /// Sets the bindings for the vertex input buffers to the given array.
     GraphicsPipelineSetup& setVertexInputBindings(ArrayParameter<const VertexInputBinding> vertexInputBindings = {});
     /// Sets the vertex shader stage.
@@ -383,10 +373,32 @@ public:
     GraphicsPipelineSetup& setTopology(
         PrimitiveTopology topology = PrimitiveTopology::TriangleList,
         bool primitiveRestartEnable = false);
+    /// Sets the format of the depth stencil attachment that will be bound along with this pipeline.
+    /// @param depthStencilAttachmentFormat
+    ///     The format of the depth stencil attachment.
+    /// @param depthStencilAspects
+    ///     The used aspects of the depth stencil attachment.
+    /// @remarks
+    ///     The format and aspects must match the image view assigned to the corresponding attachment in
+    ///     tp::RenderPassSetup of the active render pass when this pipeline is bound. If the attachment will be
+    ///     unbound, the format must be set to tp::Format::Undefined and the aspects are ignored.
+    GraphicsPipelineSetup& setDepthStencilAttachment(
+        Format depthStencilAttachmentFormat = Format::Undefined,
+        ImageAspectMask depthStencilAspects = ImageAspect::Depth | ImageAspect::Stencil);
+    /// Sets the number and format of color attachments that will be bound along with this pipeline.
+    /// @remarks
+    ///     The formats must match the image views assigned to the corresponding attachments in tp::RenderPassSetup
+    ///     of the active render pass when this pipeline is bound. If an attachment will be unbound,
+    ///     the corresponding format must be set to tp::Format::Undefined.
+    GraphicsPipelineSetup& setColorAttachments(ArrayParameter<Format> colorAttachmentFormats = {});
     /// Sets the number of viewports.
     /// @remarks
     ///     The @vksymbol{VkPhysicalDeviceFeatures}::`multiViewport` feature must be enabled for `viewportCount != 1`.
     GraphicsPipelineSetup& setViewportCount(uint32_t viewportCount = 1);
+    /// Sets the view mask indicating the indices of attachment layers that will be rendered into when it is not 0.
+    /// @remarks
+    ///     The @vksymbol{VkPhysicalDeviceVulkan11Features}::`multiview` feature must be enabled for `viewMask != 0`.
+    GraphicsPipelineSetup& setMultiViewMask(uint32_t viewMask = 0);
     /// Sets the rasterization mode.
     /// @remarks
     ///     The @vksymbol{VkPhysicalDeviceFeatures}::`fillModeNonSolid` feature must be enabled for
@@ -422,13 +434,10 @@ public:
     /// @param minSampleShading
     ///     If `sampleShadingEnable` is true, specifies the minimum of samples to be shaded separately as a fraction.
     /// @remarks
-    ///     If `level` is tp::MultisampleLevel::Undefined, the multisample level of the subpass attachments is used.
-    ///     If there are no attachments, x1 is assumed.
-    /// @remarks
     ///     The @vksymbol{VkPhysicalDeviceFeatures}::`sampleRateShading` feature must be enabled for
     ///     `sampleShadingEnable == true`.
     GraphicsPipelineSetup& setMultisampling(
-        MultisampleLevel level = MultisampleLevel::Undefined,
+        MultisampleLevel level = MultisampleLevel::x1,
         uint64_t sampleMask = ~0,
         bool sampleShadingEnable = false,
         float minSampleShading = 1.0f);
@@ -547,8 +556,6 @@ private:
     friend class GraphicsPipelineInfoBuilder;
 
     const PipelineLayout* pipelineLayout;
-    const RenderPassLayout* renderPassLayout;
-    uint32_t subpassIndex;
     std::vector<VertexInputBinding> vertexInputBindings;
 
     ShaderStageSetup vertexStageSetup;
@@ -558,9 +565,13 @@ private:
     ShaderStageSetup tessellationEvaluationStageSetup;
     uint32_t patchControlPoints = 0;
 
+    Format depthStencilAttachmentFormat = Format::Undefined;
+    ImageAspectMask depthStencilAspects = ImageAspect::Depth | ImageAspect::Stencil;
+    std::vector<Format> colorAttachmentFormats = {};
     PrimitiveTopology topology = PrimitiveTopology::TriangleList;
     bool primitiveRestartEnable = false;
     uint32_t viewportCount = 1;
+    uint32_t viewMask = 0;
     RasterizationMode rasterizationMode = RasterizationMode::Fill;
     bool frontFaceIsClockwise = false;
     bool depthClampEnable = false;
@@ -577,7 +588,7 @@ private:
     std::vector<AttachmentBlendState> blendStates;
     float blendConstants[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
 
-    MultisampleLevel multisampleLevel = MultisampleLevel::Undefined;
+    MultisampleLevel multisampleLevel = MultisampleLevel::x1;
     uint64_t sampleMask = ~0;
     bool sampleShadingEnable = false;
     float minSampleShading = 1.0f;
