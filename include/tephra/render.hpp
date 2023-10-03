@@ -77,18 +77,6 @@ enum class RenderAccess : uint64_t {
 };
 TEPHRA_MAKE_ENUM_BIT_MASK(RenderAccessMask, RenderAccess);
 
-/// Describes how a bound attachment will be interpreted.
-enum class AttachmentBindPointType {
-    /// A color attachment for storing rasterization outputs.
-    Color,
-    /// An input attachment for loading pixel-local data from previous subpasses.
-    Input,
-    /// A depth and/or stencil attachment used during rasterization.
-    DepthStencil,
-    /// An attachment that will be a target of a multisample resolve operation from a Color attachment.
-    ResolveFromColor
-};
-
 class CommandPool;
 class VulkanCommandInterface;
 
@@ -346,19 +334,19 @@ private:
         DebugTarget debugTarget);
 };
 
-/// Represents an tp::ImageView as a render pass attachment, allowing it to be bound as a render target inside of its
-/// subpasses. Also specifies any operations that are to be done at the beginning or end of the render pass. Clearing an
-/// image through an attachment load operation tends to be more efficient than with an explicit command.
+/// Represents an tp::ImageView as a render pass color attachment, allowing it to be bound as a render target inside of
+/// a render pass. Also specifies any operations on it that are to be done at the beginning or end of the render pass.
 /// @see tp::RenderPassSetup
-struct RenderPassAttachment {
+struct ColorAttachment {
     ImageView image;
     AttachmentLoadOp loadOp;
     AttachmentStoreOp storeOp;
-    AttachmentLoadOp stencilLoadOp;
-    AttachmentStoreOp stencilStoreOp;
     ClearValue clearValue;
     ImageView resolveImage;
     ResolveMode resolveMode;
+
+    /// Describes an empty attachment
+    ColorAttachment() : ColorAttachment({}, AttachmentLoadOp::DontCare, AttachmentStoreOp::DontCare) {}
 
     /// @param image
     ///     The image view used as an attachment.
@@ -372,17 +360,68 @@ struct RenderPassAttachment {
     ///     The image view that resolved multisample data will be written to at the end of the render pass.
     /// @param resolveMode
     ///     The resolve mode that will be used if `resolveImage` is defined.
-    RenderPassAttachment(
+    ColorAttachment(
         ImageView image,
         AttachmentLoadOp loadOp,
         AttachmentStoreOp storeOp,
         ClearValue clearValue = {},
         ImageView resolveImage = {},
         ResolveMode resolveMode = ResolveMode::Average)
-        : RenderPassAttachment(
+        : image(std::move(image)),
+          loadOp(loadOp),
+          storeOp(storeOp),
+          clearValue(clearValue),
+          resolveImage(resolveImage),
+          resolveMode(resolveMode) {}
+};
+
+/// Represents an tp::ImageView as a render pass depth & stencil attachment, allowing it to be bound inside of a render
+/// pass. Also specifies any operations that are to be done on it at the beginning or end of the render pass.
+/// @see tp::RenderPassSetup
+struct DepthStencilAttachment {
+    ImageView image;
+    bool depthReadOnly;
+    AttachmentLoadOp depthLoadOp;
+    AttachmentStoreOp depthStoreOp;
+    bool stencilReadOnly;
+    AttachmentLoadOp stencilLoadOp;
+    AttachmentStoreOp stencilStoreOp;
+    ClearValue clearValue;
+    ImageView resolveImage;
+    ResolveMode resolveMode;
+
+    /// Describes an empty attachment
+    DepthStencilAttachment()
+        : DepthStencilAttachment({}, false, AttachmentLoadOp::DontCare, AttachmentStoreOp::DontCare) {}
+
+    /// @param image
+    ///     The image view used as an attachment.
+    /// @param readOnly
+    ///     If `true`, specifies that the attachment will not be written to inside the render pass.
+    /// @param loadOp
+    ///     The load operation done at the start of the render pass.
+    /// @param storeOp
+    ///     The store operation done at the end of the render pass.
+    /// @param clearValue
+    ///     If load operation is tp::AttachmentLoadOp::Clear, specifies the clear value.
+    /// @param resolveImage
+    ///     The image view that resolved multisample data will be written to at the end of the render pass.
+    /// @param resolveMode
+    ///     The resolve mode that will be used if `resolveImage` is defined.
+    DepthStencilAttachment(
+        ImageView image,
+        bool readOnly,
+        AttachmentLoadOp loadOp,
+        AttachmentStoreOp storeOp,
+        ClearValue clearValue = {},
+        ImageView resolveImage = {},
+        ResolveMode resolveMode = ResolveMode::Average)
+        : DepthStencilAttachment(
               std::move(image),
+              readOnly,
               loadOp,
               storeOp,
+              readOnly,
               loadOp,
               storeOp,
               clearValue,
@@ -391,10 +430,14 @@ struct RenderPassAttachment {
 
     /// @param image
     ///     The image view used as an attachment.
-    /// @param loadOp
-    ///     The load operation for the color / depth aspect done at the start of the render pass.
-    /// @param storeOp
-    ///     The store operation for the color / depth aspect done at the end of the render pass.
+    /// @param depthReadOnly
+    ///     If `true`, specifies that the depth aspect will not be written to inside the render pass.
+    /// @param depthLoadOp
+    ///     The load operation for the depth aspect done at the start of the render pass.
+    /// @param depthStoreOp
+    ///     The store operation for the depth aspect done at the end of the render pass.
+    /// @param stencilReadOnly
+    ///     If `true`, specifies that the stenncil aspect will not be written to inside the render pass.
     /// @param stencilLoadOp
     ///     The load operation for the stencil aspect done at the start of the render pass.
     /// @param stencilStoreOp
@@ -405,18 +448,22 @@ struct RenderPassAttachment {
     ///     The image view that resolved multisample data will be written to at the end of the render pass.
     /// @param resolveMode
     ///     The resolve mode that will be used if `resolveImage` is defined.
-    RenderPassAttachment(
+    DepthStencilAttachment(
         ImageView image,
-        AttachmentLoadOp loadOp,
-        AttachmentStoreOp storeOp,
+        bool depthReadOnly,
+        AttachmentLoadOp depthLoadOp,
+        AttachmentStoreOp depthStoreOp,
+        bool stencilReadOnly,
         AttachmentLoadOp stencilLoadOp,
         AttachmentStoreOp stencilStoreOp,
         ClearValue clearValue = {},
         ImageView resolveImage = {},
         ResolveMode resolveMode = ResolveMode::Average)
         : image(std::move(image)),
-          loadOp(loadOp),
-          storeOp(storeOp),
+          depthReadOnly(depthReadOnly),
+          depthLoadOp(depthLoadOp),
+          depthStoreOp(depthStoreOp),
+          stencilReadOnly(stencilReadOnly),
           stencilLoadOp(stencilLoadOp),
           stencilStoreOp(stencilStoreOp),
           clearValue(clearValue),
@@ -466,14 +513,13 @@ struct ImageRenderAccess {
 /// @see tp::Job::cmdExecuteRenderPass
 /// @see @vksymbol{VkRenderingInfo}
 struct RenderPassSetup {
-    RenderPassAttachment depthStencilAttachment;
-    ArrayView<const RenderPassAttachment> colorAttachments;
+    DepthStencilAttachment depthStencilAttachment;
+    ArrayView<const ColorAttachment> colorAttachments;
     ArrayView<const BufferRenderAccess> bufferAccesses;
     ArrayView<const ImageRenderAccess> imageAccesses;
     Rect2D renderArea;
     uint32_t layerCount;
     uint32_t viewMask;
-    void* vkRenderingInfoExtPtr = nullptr;
 
     /// Constructs the tp::RenderPassSetup with a default render area that covers the minimum of all attachment sizes.
     /// @param depthStencilAttachment
@@ -496,13 +542,12 @@ struct RenderPassSetup {
     /// @remarks
     ///     The @vksymbol{VkPhysicalDeviceVulkan11Features}::`multiview` feature must be enabled for `viewMask != 0`.
     RenderPassSetup(
-        RenderPassAttachment depthStencilAttachment,
-        ArrayView<const RenderPassAttachment> colorAttachments,
+        DepthStencilAttachment depthStencilAttachment,
+        ArrayView<const ColorAttachment> colorAttachments,
         ArrayView<const BufferRenderAccess> bufferAccesses,
         ArrayView<const ImageRenderAccess> imageAccesses,
         uint32_t layerCount = 1,
-        uint32_t viewMask = 0,
-        void* vkRenderingInfoExtPtr = nullptr);
+        uint32_t viewMask = 0);
 
     /// @param layout
     ///     The layout of this render pass.
@@ -528,22 +573,20 @@ struct RenderPassSetup {
     /// @remarks
     ///     The @vksymbol{VkPhysicalDeviceVulkan11Features}::`multiview` feature must be enabled for `viewMask != 0`.
     RenderPassSetup(
-        RenderPassAttachment depthStencilAttachment,
-        ArrayView<const RenderPassAttachment> colorAttachments,
+        DepthStencilAttachment depthStencilAttachment,
+        ArrayView<const ColorAttachment> colorAttachments,
         ArrayView<const BufferRenderAccess> bufferAccesses,
         ArrayView<const ImageRenderAccess> imageAccesses,
         Rect2D renderArea,
         uint32_t layerCount = 1,
-        uint32_t viewMask = 0,
-        void* vkRenderingInfoExtPtr = nullptr)
+        uint32_t viewMask = 0)
         : depthStencilAttachment(std::move(depthStencilAttachment)),
           colorAttachments(colorAttachments),
           bufferAccesses(bufferAccesses),
           imageAccesses(imageAccesses),
           renderArea(renderArea),
           layerCount(layerCount),
-          viewMask(viewMask),
-          vkRenderingInfoExtPtr(vkRenderingInfoExtPtr) {}
+          viewMask(viewMask) {}
 };
 
 /// The type of the user-provided function callback for recording commands to a render pass inline.

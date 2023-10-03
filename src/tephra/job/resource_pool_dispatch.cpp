@@ -117,6 +117,11 @@ void JobResourcePoolContainer::allocateJobResources(Job& job) {
     resourcePool->localImagePool.allocateJobImages(&jobData->resources.localImages, jobTimestamp, jobName);
     resourcePool->preinitBufferPool.finalizeJobAllocations(jobData->jobIdInPool, jobName);
     jobData->resources.localDescriptorSets.allocatePreparedDescriptorSets();
+
+    // After allocations, resolve attachments of render passes
+    for (std::size_t i = 0; i < jobData->record.renderPassCount; i++) {
+        jobData->record.renderPassStorage[i].resolveAttachmentViews();
+    }
 }
 
 void JobResourcePoolContainer::queueReleaseSubmittedJob(Job job) {

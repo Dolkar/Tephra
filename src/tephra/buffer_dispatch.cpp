@@ -141,7 +141,7 @@ VkDeviceAddress BufferView::getDeviceAddress() const {
 
 VkBufferViewHandle BufferView::vkGetBufferViewHandle() const {
     if (viewsJobLocalBuffer()) {
-        if (jobLocalBuffer->hasUnderlyingBuffer()) {
+        if (jobLocalBuffer != nullptr && jobLocalBuffer->hasUnderlyingBuffer()) {
             return BufferImpl::vkGetBufferViewHandle(JobLocalBufferImpl::getViewToUnderlyingBuffer(*this));
         } else {
             return {};
@@ -167,7 +167,7 @@ bool operator==(const BufferView& lhs, const BufferView& rhs) {
 
 VkBufferHandle BufferView::vkResolveBufferHandle(uint64_t* viewOffset) const {
     if (viewsJobLocalBuffer()) {
-        if (jobLocalBuffer->hasUnderlyingBuffer()) {
+        if (jobLocalBuffer != nullptr && jobLocalBuffer->hasUnderlyingBuffer()) {
             BufferView underlyingView = JobLocalBufferImpl::getViewToUnderlyingBuffer(*this);
             TEPHRA_ASSERT(!underlyingView.viewsJobLocalBuffer());
             return underlyingView.vkResolveBufferHandle(viewOffset);

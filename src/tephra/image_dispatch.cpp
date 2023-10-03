@@ -97,8 +97,12 @@ ImageView ImageView::createView(ImageViewSetup subviewSetup) {
 VkImageViewHandle ImageView::vkGetImageViewHandle() const {
     // Vulkan image views are accessed frequently, so cache them
     if (vkCachedImageViewHandle.isNull()) {
-        if (viewsJobLocalImage() && jobLocalImage->hasUnderlyingImage()) {
-            vkCachedImageViewHandle = JobLocalImageImpl::vkGetImageViewHandle(*this);
+        if (viewsJobLocalImage()) {
+            if (jobLocalImage != nullptr && jobLocalImage->hasUnderlyingImage()) {
+                vkCachedImageViewHandle = JobLocalImageImpl::vkGetImageViewHandle(*this);
+            } else {
+                return {};
+            }
         } else {
             vkCachedImageViewHandle = ImageImpl::vkGetImageViewHandle(*this);
         }
@@ -123,9 +127,8 @@ bool operator==(const ImageView& lhs, const ImageView& rhs) {
 
 VkImageHandle ImageView::vkResolveImageHandle(uint32_t* baseMipLevel, uint32_t* baseArrayLevel) const {
     if (viewsJobLocalImage()) {
-        if (jobLocalImage->hasUnderlyingImage()) {
+        if (jobLocalImage != nullptr && jobLocalImage->hasUnderlyingImage()) {
             ImageView underlyingView = JobLocalImageImpl::getViewToUnderlyingImage(*this);
-
             TEPHRA_ASSERT(!underlyingView.viewsJobLocalImage());
             return underlyingView.vkResolveImageHandle(baseMipLevel, baseArrayLevel);
         } else {

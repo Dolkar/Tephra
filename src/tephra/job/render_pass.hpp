@@ -9,6 +9,14 @@ namespace tp {
 
 class PrimaryBufferRecorder;
 
+// Represents access of a render attachment and stores unresolved image view
+struct AttachmentAccess {
+    ImageView imageView;
+    VkImageLayout layout;
+
+    void convertToVkAccess(ImageAccessRange* rangePtr, ResourceAccess* accessPtr, VkImageLayout* layoutPtr) const;
+};
+
 class RenderPass {
 public:
     explicit RenderPass(DeviceContainer* deviceImpl)
@@ -26,12 +34,21 @@ public:
         return view(imageAccesses);
     }
 
+    ArrayView<const AttachmentAccess> getAttachmentAccesses() const {
+        return view(attachmentAccesses);
+    }
+
     void assignDeferred(
         const RenderPassSetup& setup,
         const DebugTarget& listDebugTarget,
         ArrayView<RenderList>& listsToAssign);
 
     void assignInline(const RenderPassSetup& setup, RenderInlineCallback recordingCallback, DebugTarget listDebugTarget);
+
+    // Resolves attachments to finish the rendering info for command recording.
+    // We can only resolve attachments when starting the record, after enqueue. Until then, we store them in
+    // attachmentAccesses.
+    void resolveAttachmentViews();
 
     void recordPass(PrimaryBufferRecorder& recorder);
 
@@ -44,17 +61,23 @@ private:
 
     std::vector<BufferRenderAccess> bufferAccesses;
     std::vector<ImageRenderAccess> imageAccesses;
+    // Every two entries here correspond to one entry in vkRenderingAttachments (imageView and resolveImageView)
+    // Entries can be null
+    std::vector<AttachmentAccess> attachmentAccesses;
 
     bool isInline = false;
     RenderInlineCallback inlineRecordingCallback;
     DebugTarget inlineListDebugTarget;
-    VkRenderingInfo vkInlineRenderingInfo;
+    VkRenderingInfo vkInlineRenderingInfo = {};
+
     std::vector<VkCommandBufferHandle> vkDeferredCommandBuffers;
     std::vector<VkRenderingAttachmentInfo> vkRenderingAttachments;
 
-    void prepareAccesses(const RenderPassSetup& setup);
+    void prepareNonAttachmentAccesses(const RenderPassSetup& setup);
 
-    VkRenderingInfo prepareRenderingInfo(const RenderPassSetup& setup);
+    // Fills out vkRenderingAttachments and attachmentsToResolve, then prepares VkRenderingInfo that points
+    // to entries in vkRenderingAttachments.
+    VkRenderingInfo prepareRendering(const RenderPassSetup& setup);
 };
 
 }

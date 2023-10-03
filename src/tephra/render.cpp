@@ -201,20 +201,18 @@ RenderList::RenderList(
       vkRenderingInfo(vkRenderingInfo) {}
 
 RenderPassSetup::RenderPassSetup(
-    RenderPassAttachment depthStencilAttachment,
-    ArrayView<const RenderPassAttachment> colorAttachments,
+    DepthStencilAttachment depthStencilAttachment,
+    ArrayView<const ColorAttachment> colorAttachments,
     ArrayView<const BufferRenderAccess> bufferAccesses,
     ArrayView<const ImageRenderAccess> imageAccesses,
     uint32_t layerCount,
-    uint32_t viewMask,
-    void* vkRenderingInfoExtPtr)
+    uint32_t viewMask)
     : depthStencilAttachment(std::move(depthStencilAttachment)),
       colorAttachments(colorAttachments),
       bufferAccesses(bufferAccesses),
       imageAccesses(imageAccesses),
       layerCount(layerCount),
-      viewMask(viewMask),
-      vkRenderingInfoExtPtr(vkRenderingInfoExtPtr) {
+      viewMask(viewMask) {
     // Set default render area
     Extent3D minExtent;
     if (!depthStencilAttachment.image.isNull())
@@ -223,7 +221,7 @@ RenderPassSetup::RenderPassSetup(
         minExtent = colorAttachments[0].image.getExtent();
 
     if (!colorAttachments.empty()) {
-        for (const RenderPassAttachment& attachment : viewRange(colorAttachments, 1, colorAttachments.size() - 1)) {
+        for (const ColorAttachment& attachment : viewRange(colorAttachments, 1, colorAttachments.size() - 1)) {
             Extent3D extent = attachment.image.getExtent();
             minExtent.width = min(minExtent.width, extent.width);
             minExtent.height = min(minExtent.height, extent.height);

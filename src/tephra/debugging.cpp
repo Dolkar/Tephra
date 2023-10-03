@@ -77,6 +77,7 @@ DebugTarget& DebugTarget::operator=(const DebugTarget& other) noexcept {
     // Disallow copying only during destruction
     TEPHRA_ASSERT(destructorContext == nullptr);
     TEPHRA_ASSERT(other.destructorContext == nullptr);
+    return *this;
 }
 #endif
 

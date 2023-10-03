@@ -6,11 +6,51 @@
 
 namespace tp {
 
+void AttachmentAccess::convertToVkAccess(
+    ImageAccessRange* rangePtr,
+    ResourceAccess* accessPtr,
+    VkImageLayout* layoutPtr) const {
+    TEPHRA_ASSERT(!imageView.isNull());
+    *rangePtr = imageView.getWholeRange();
+    *layoutPtr = layout;
+
+    // Deduce Vulkan access from just the layout chosen in prepareRendering:
+    // TODO: Sync2
+    switch (layout) {
+    case VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL:
+        accessPtr->accessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+        accessPtr->stageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+        break;
+    case VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_OPTIMAL:
+        accessPtr->stageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+        accessPtr->accessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
+        rangePtr->aspectMask = ImageAspect::Depth;
+        break;
+    case VK_IMAGE_LAYOUT_STENCIL_READ_ONLY_OPTIMAL:
+        accessPtr->stageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+        accessPtr->accessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
+        rangePtr->aspectMask = ImageAspect::Stencil;
+        break;
+    case VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL:
+        accessPtr->stageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+        accessPtr->accessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+        rangePtr->aspectMask = ImageAspect::Depth;
+        break;
+    case VK_IMAGE_LAYOUT_STENCIL_ATTACHMENT_OPTIMAL:
+        accessPtr->stageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+        accessPtr->accessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+        rangePtr->aspectMask = ImageAspect::Stencil;
+        break;
+    default:
+        TEPHRA_ASSERTD(false, "Unexpected layout");
+    }
+}
+
 void RenderPass::assignDeferred(
     const RenderPassSetup& setup,
     const DebugTarget& listDebugTarget,
     ArrayView<RenderList>& listsToAssign) {
-    prepareAccesses(setup);
+    prepareNonAttachmentAccesses(setup);
 
     isInline = false;
     inlineRecordingCallback = {};
@@ -24,7 +64,7 @@ void RenderPass::assignDeferred(
 
     // Create render lists. We want them all to be a part of the same render pass, so we add
     // suspend and resume flags as necessary
-    VkRenderingInfo vkRenderingInfo = prepareRenderingInfo(setup);
+    VkRenderingInfo vkRenderingInfo = prepareRendering(setup);
     VkRenderingFlags baseRenderingFlags = vkRenderingInfo.flags;
 
     for (std::size_t i = 0; i < listsToAssign.size(); i++) {
@@ -46,13 +86,28 @@ void RenderPass::assignInline(
     const RenderPassSetup& setup,
     RenderInlineCallback recordingCallback,
     DebugTarget listDebugTarget) {
-    prepareAccesses(setup);
+    prepareNonAttachmentAccesses(setup);
 
     isInline = true;
     inlineRecordingCallback = std::move(recordingCallback);
     inlineListDebugTarget = std::move(listDebugTarget);
-    vkInlineRenderingInfo = prepareRenderingInfo(setup);
+    vkInlineRenderingInfo = prepareRendering(setup);
     vkDeferredCommandBuffers.clear();
+}
+
+void RenderPass::resolveAttachmentViews() {
+    TEPHRA_ASSERT(vkRenderingAttachments.size() * 2 == attachmentAccesses.size());
+
+    // Map attachment accesses to rendering attachments and resolve the images now that it's safe to do so
+    for (std::size_t i = 0; i < vkRenderingAttachments.size(); i++) {
+        VkRenderingAttachmentInfo& vkAttachment = vkRenderingAttachments[i];
+
+        vkAttachment.imageView = attachmentAccesses[i * 2].imageView.vkGetImageViewHandle();
+        TEPHRA_ASSERT(vkAttachment.imageLayout == attachmentAccesses[i * 2].layout);
+
+        vkAttachment.resolveImageView = attachmentAccesses[i * 2 + 1].imageView.vkGetImageViewHandle();
+        TEPHRA_ASSERT(vkAttachment.resolveImageLayout == attachmentAccesses[i * 2 + 1].layout);
+    }
 }
 
 void RenderPass::recordPass(PrimaryBufferRecorder& recorder) {
@@ -75,8 +130,111 @@ void RenderPass::recordPass(PrimaryBufferRecorder& recorder) {
     }
 }
 
-void RenderPass::prepareAccesses(const RenderPassSetup& setup) {}
+void RenderPass::prepareNonAttachmentAccesses(const RenderPassSetup& setup) {
+    bufferAccesses.clear();
+    bufferAccesses.insert(bufferAccesses.begin(), setup.bufferAccesses.begin(), setup.bufferAccesses.end());
+    imageAccesses.clear();
+    imageAccesses.insert(imageAccesses.begin(), setup.imageAccesses.begin(), setup.imageAccesses.end());
+}
 
-VkRenderingInfo RenderPass::prepareRenderingInfo(const RenderPassSetup& setup) {}
+VkRenderingInfo RenderPass::prepareRendering(const RenderPassSetup& setup) {
+    VkRenderingInfo renderingInfo;
+    renderingInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO_KHR;
+    renderingInfo.pNext = nullptr;
+    // We add resuming / suspending flags later depending on the method
+    renderingInfo.flags = 0;
+    renderingInfo.renderArea = setup.renderArea;
+    renderingInfo.layerCount = setup.layerCount;
+    renderingInfo.viewMask = setup.viewMask;
+
+    // Prepare attachments, but we can't resolve the images yet
+    vkRenderingAttachments.clear();
+    attachmentAccesses.clear();
+    auto addAttachmentRef = [this](const ImageView& imageView, VkImageLayout layout) {
+        this->attachmentAccesses.push_back({ imageView, layout });
+        return VK_NULL_HANDLE;
+    };
+
+    // Depth and stencil attachments
+    {
+        // Prepare common fields
+        VkRenderingAttachmentInfo vkAttachment;
+        vkAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+        vkAttachment.pNext = nullptr;
+
+        vkAttachment.resolveMode = vkCastConvertibleEnum(setup.depthStencilAttachment.resolveMode);
+        vkAttachment.clearValue = setup.depthStencilAttachment.clearValue.vkValue;
+
+        bool hasImage = !setup.depthStencilAttachment.image.isNull();
+        bool hasDepth = hasImage &&
+            setup.depthStencilAttachment.image.getWholeRange().aspectMask.contains(ImageAspect::Depth);
+        bool hasStencil = hasImage &&
+            setup.depthStencilAttachment.image.getWholeRange().aspectMask.contains(ImageAspect::Stencil);
+        TEPHRA_ASSERT(hasDepth || hasStencil);
+
+        { // Depth attachment
+            VkRenderingAttachmentInfo vkDepthAttachment = vkAttachment;
+            vkDepthAttachment.loadOp = vkCastConvertibleEnum(setup.depthStencilAttachment.depthLoadOp);
+            vkDepthAttachment.storeOp = vkCastConvertibleEnum(setup.depthStencilAttachment.depthStoreOp);
+
+            if (setup.depthStencilAttachment.depthReadOnly)
+                vkAttachment.imageLayout = VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_OPTIMAL;
+            else
+                vkAttachment.imageLayout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;
+            vkDepthAttachment.imageView = addAttachmentRef(
+                hasDepth ? setup.depthStencilAttachment.image : ImageView(), vkAttachment.imageLayout);
+
+            vkAttachment.resolveImageLayout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;
+            vkDepthAttachment.resolveImageView = addAttachmentRef(
+                hasDepth ? setup.depthStencilAttachment.resolveImage : ImageView(), vkAttachment.resolveImageLayout);
+
+            vkRenderingAttachments.push_back(vkDepthAttachment);
+        }
+
+        { // Stencil attachment
+            VkRenderingAttachmentInfo vkStencilAttachment = vkAttachment;
+            vkStencilAttachment.loadOp = vkCastConvertibleEnum(setup.depthStencilAttachment.stencilLoadOp);
+            vkStencilAttachment.storeOp = vkCastConvertibleEnum(setup.depthStencilAttachment.stencilStoreOp);
+
+            if (setup.depthStencilAttachment.stencilReadOnly)
+                vkAttachment.imageLayout = VK_IMAGE_LAYOUT_STENCIL_READ_ONLY_OPTIMAL;
+            else
+                vkAttachment.imageLayout = VK_IMAGE_LAYOUT_STENCIL_ATTACHMENT_OPTIMAL;
+            vkStencilAttachment.imageView = addAttachmentRef(
+                hasStencil ? setup.depthStencilAttachment.image : ImageView(), vkAttachment.imageLayout);
+
+            vkAttachment.resolveImageLayout = VK_IMAGE_LAYOUT_STENCIL_ATTACHMENT_OPTIMAL;
+            vkStencilAttachment.resolveImageView = addAttachmentRef(
+                hasStencil ? setup.depthStencilAttachment.resolveImage : ImageView(), vkAttachment.resolveImageLayout);
+
+            vkRenderingAttachments.push_back(vkStencilAttachment);
+        }
+    }
+
+    // Color attachments
+    for (const ColorAttachment& attachment : setup.colorAttachments) {
+        VkRenderingAttachmentInfo& vkAttachment = vkRenderingAttachments.emplace_back();
+        vkAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+        vkAttachment.pNext = nullptr;
+        vkAttachment.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        vkAttachment.imageView = addAttachmentRef(attachment.image, vkAttachment.imageLayout);
+
+        vkAttachment.resolveMode = vkCastConvertibleEnum(attachment.resolveMode);
+        vkAttachment.resolveImageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        vkAttachment.resolveImageView = addAttachmentRef(attachment.resolveImage, vkAttachment.resolveImageLayout);
+
+        vkAttachment.clearValue = attachment.clearValue.vkValue;
+        vkAttachment.loadOp = vkCastConvertibleEnum(attachment.loadOp);
+        vkAttachment.storeOp = vkCastConvertibleEnum(attachment.storeOp);
+    }
+
+    // Assign pointers now that vkRenderingAttachments is final
+    renderingInfo.pDepthAttachment = &vkRenderingAttachments[0];
+    renderingInfo.pStencilAttachment = &vkRenderingAttachments[1];
+    renderingInfo.colorAttachmentCount = static_cast<uint32_t>(vkRenderingAttachments.size() - 2);
+    renderingInfo.pColorAttachments = &vkRenderingAttachments[2];
+
+    return renderingInfo;
+}
 
 }
