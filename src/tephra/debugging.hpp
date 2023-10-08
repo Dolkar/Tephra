@@ -136,8 +136,8 @@ public:
     DebugContext* setDestructorContext();
 
     TEPHRA_MAKE_MOVABLE_DEFAULT(DebugTarget);
-    DebugTarget(const DebugTarget& other) noexcept;
-    DebugTarget& operator=(const DebugTarget& other) noexcept;
+    DebugTarget(const DebugTarget& other);
+    DebugTarget& operator=(const DebugTarget& other);
 
     // Silent DebugTarget won't invoke contexts. Used for internal use of interface classes
     static DebugTarget makeSilent() {

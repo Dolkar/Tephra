@@ -195,7 +195,7 @@ RenderList::RenderList(
 RenderList::RenderList(
     const VulkanCommandInterface* vkiCommands,
     VkCommandBufferHandle* vkFutureCommandBuffer,
-    VkRenderingInfo vkRenderingInfo,
+    const VkRenderingInfo& vkRenderingInfo,
     DebugTarget debugTarget)
     : CommandList(vkiCommands, VK_PIPELINE_BIND_POINT_GRAPHICS, vkFutureCommandBuffer, std::move(debugTarget)),
       vkRenderingInfo(vkRenderingInfo) {}

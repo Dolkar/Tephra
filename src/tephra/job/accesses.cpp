@@ -7,7 +7,6 @@ VkImageLayout vkGetImageLayoutForDescriptor(DescriptorType descriptorType, bool 
     switch (descriptorType) {
     case DescriptorType::CombinedImageSampler:
     case DescriptorType::SampledImage:
-    case DescriptorType::InputAttachment:
         return aliasStorageImage ? VK_IMAGE_LAYOUT_GENERAL : VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
     case DescriptorType::StorageImage:
         return VK_IMAGE_LAYOUT_GENERAL;

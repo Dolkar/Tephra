@@ -420,7 +420,7 @@ public:
     /// @param value
     ///     The value that the image will be cleared to. It must be valid for the format of the image.
     /// @remarks
-    ///     Clearing images through the use of a tp::RenderPassAttachment may be more efficient.
+    ///     Clearing images as part of a render pass may be more efficient.
     /// @see @vksymbol{vkCmdClearColorImage}
     /// @see @vksymbol{vkCmdClearDepthStencilImage}
     void cmdClearImage(const ImageView& dstImage, ClearValue value);
@@ -433,7 +433,7 @@ public:
     /// @param ranges
     ///     An array specifying the ranges of the image to clear.
     /// @remarks
-    ///     Clearing images through the use of a tp::RenderPassAttachment may be more efficient.
+    ///     Clearing images as part of a render pass may be more efficient.
     /// @see @vksymbol{vkCmdClearColorImage}
     /// @see @vksymbol{vkCmdClearDepthStencilImage}
     void cmdClearImage(const ImageView& dstImage, ClearValue value, ArrayParameter<const ImageSubresourceRange> ranges);
@@ -446,8 +446,7 @@ public:
     /// @param resolveRegions
     ///     An array specifying the regions to resolve.
     /// @remarks
-    ///     Resolving images through the use of a tp::RenderPassAttachment bound to a tp::AttachmentBinding with its
-    ///     bind point type set to tp::AttachmentBindPointType::ResolveFromColor may be more efficient.
+    ///     Resolving images as part of a render pass may be more efficient.
     /// @remarks
     ///     Only images with color formats are supported. For automatically resolving depth stencil images, consider
     ///     @vksymbol{VK_KHR_depth_stencil_resolve}
@@ -471,8 +470,8 @@ public:
     /// @param debugName
     ///     The debug name identifier for the compute pass.
     /// @remarks
-    ///     Any usage of resources inside the compute pass beyond what the resources were previously exported for must
-    ///     be specified inside the `setup` structure.
+    ///     Any usage of resources inside the compute pass beyond accesses that the resources were previously exported
+    ///     for must be specified inside the `setup` structure.
     /// @remarks
     ///     The dependencies between the compute pass and the rest of the tp::Job are synchronized automatically.
     ///     Dependencies between commands executed within the same compute pass are not, and must be synchronized
@@ -499,8 +498,8 @@ public:
     /// @param debugName
     ///     The debug name identifier for the render pass.
     /// @remarks
-    ///     Any usage of non-attachment resources inside the render pass beyond what the resources were previously
-    ///     exported for must be specified inside the `setup` structure.
+    ///     Any usage of non-attachment resources inside the render pass beyond accesses that the resources were
+    ///     previously exported for must be specified inside the `setup` structure.
     /// @remarks
     ///     The dependencies between the render pass and the rest of the tp::Job are synchronized automatically.
     ///     Dependencies between commands executed within the same render pass are not, except for guarantees

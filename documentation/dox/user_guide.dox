@@ -207,7 +207,6 @@ the symbols next to their names in [] and explained below.
         - tp::Pipeline
         - tp::PipelineCache
         - tp::PipelineLayout
-        - tp::RenderPassLayout [E]
         - tp::Sampler
         - tp::ShaderModule
         - tp::Swapchain [E]

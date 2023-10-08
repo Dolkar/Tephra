@@ -131,9 +131,7 @@ enum class DescriptorType : uint32_t {
     /// A descriptor for a tp::BufferView object as a read-only uniform (constant) buffer with a dynamic offset.
     UniformBufferDynamic = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
     /// A descriptor for a tp::BufferView object as a read/write buffer with a dynamic offset.
-    StorageBufferDynamic = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC,
-    /// A descriptor for a tp::ImageView object that is bound as an input attachment in a subpass of a render pass.
-    InputAttachment = VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT
+    StorageBufferDynamic = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC
 };
 TEPHRA_VULKAN_COMPATIBLE_ENUM(DescriptorType, VkDescriptorType);
 

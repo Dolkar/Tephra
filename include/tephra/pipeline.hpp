@@ -528,7 +528,7 @@ public:
     /// @param blendStates
     ///     The blend states used for each color attachment.
     /// @remarks
-    ///     Must match the number of color attachments in the render pass layout's subpass.
+    ///     The size of the array must match the number of color attachments provided in `setColorAttachments`.
     /// @remarks
     ///     The @vksymbol{VkPhysicalDeviceFeatures}::`independentBlend` feature must be enabled.
     GraphicsPipelineSetup& setIndependentBlending(

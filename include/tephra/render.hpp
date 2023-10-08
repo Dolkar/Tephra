@@ -126,9 +126,6 @@ public:
     /// @param pipeline
     ///     The pipeline object to bind.
     /// @remarks
-    ///     The pipeline must have been created with the same tp::RenderPassLayout and subpass index
-    ///     as the render list is being executed in.
-    /// @remarks
     ///     If the pipeline was created with a tp::PipelineLayout whose descriptor set
     ///     layouts are compatible with the pipeline layout of sets previously bound with
     ///     tp::RenderList::cmdBindDescriptorSets, then the descriptor sets are not disturbed
@@ -330,7 +327,7 @@ private:
     RenderList(
         const VulkanCommandInterface* vkiCommands,
         VkCommandBufferHandle* vkFutureCommandBuffer,
-        VkRenderingInfo vkRenderingInfo,
+        const VkRenderingInfo& vkRenderingInfo,
         DebugTarget debugTarget);
 };
 
@@ -371,7 +368,7 @@ struct ColorAttachment {
           loadOp(loadOp),
           storeOp(storeOp),
           clearValue(clearValue),
-          resolveImage(resolveImage),
+          resolveImage(std::move(resolveImage)),
           resolveMode(resolveMode) {}
 };
 
@@ -425,7 +422,7 @@ struct DepthStencilAttachment {
               loadOp,
               storeOp,
               clearValue,
-              resolveImage,
+              std::move(resolveImage),
               resolveMode) {}
 
     /// @param image
@@ -467,7 +464,7 @@ struct DepthStencilAttachment {
           stencilLoadOp(stencilLoadOp),
           stencilStoreOp(stencilStoreOp),
           clearValue(clearValue),
-          resolveImage(resolveImage),
+          resolveImage(std::move(resolveImage)),
           resolveMode(resolveMode) {}
 };
 
@@ -534,8 +531,6 @@ struct RenderPassSetup {
     ///     The number of layers that may be rendered to when `viewMask` is 0.
     /// @param viewMask
     ///     The indices of attachment layers that will be rendered into when it is not 0.
-    /// @param vkRenderingInfoExtPtr
-    ///     The pointer to additional Vulkan setup structure to be passed in `pNext` of @vksymbol{VkRenderingInfo}.
     /// @remarks
     ///     There must be no overlap between image views in `depthStencilAttachment`, `colorAttachments` and
     ///     `imageAccesses`.
@@ -549,8 +544,6 @@ struct RenderPassSetup {
         uint32_t layerCount = 1,
         uint32_t viewMask = 0);
 
-    /// @param layout
-    ///     The layout of this render pass.
     /// @param depthStencilAttachment
     ///     The attachment for depth and / or stencil image.
     /// @param colorAttachments
@@ -565,8 +558,6 @@ struct RenderPassSetup {
     ///     The number of layers that may be rendered to when `viewMask` is 0.
     /// @param viewMask
     ///     The indices of attachment layers that will be rendered into when it is not 0.
-    /// @param vkRenderingInfoExtPtr
-    ///     The pointer to additional Vulkan setup structure to be passed in `pNext` of @vksymbol{VkRenderingInfo}.
     /// @remarks
     ///     There must be no overlap between image views in `depthStencilAttachment`, `colorAttachments` and
     ///     `imageAccesses`.

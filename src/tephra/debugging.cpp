@@ -59,7 +59,7 @@ DebugContext* DebugTarget::setDestructorContext() {
     }
 }
 
-DebugTarget::DebugTarget(const DebugTarget& other) noexcept
+DebugTarget::DebugTarget(const DebugTarget& other)
     : parentTarget(other.parentTarget),
       typeName(other.typeName),
       objectName(other.objectName),
@@ -68,7 +68,7 @@ DebugTarget::DebugTarget(const DebugTarget& other) noexcept
     TEPHRA_ASSERT(other.destructorContext == nullptr);
 }
 
-DebugTarget& DebugTarget::operator=(const DebugTarget& other) noexcept {
+DebugTarget& DebugTarget::operator=(const DebugTarget& other) {
     parentTarget = other.parentTarget;
     typeName = other.typeName;
     objectName = other.objectName;
