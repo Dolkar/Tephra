@@ -118,20 +118,20 @@ void CubeExample::drawFrame() {
         &descriptorSetLayout, { uniformBuffer, tp::FutureDescriptor(*cubeTexture, &sampler) });
 
     // Set up the render pass
-    tp::ClearValue clearColor = tp::ClearValue::ColorFloat(0.3f, 0.075f, 0.075f, 0.0f);
-    tp::ClearValue clearDepth = tp::ClearValue::DepthStencil(1.0f, 0);
-    tp::RenderPassAttachment attachments[] = {
-        tp::RenderPassAttachment(
-            *acquiredImage.image, tp::AttachmentLoadOp::Clear, tp::AttachmentStoreOp::Store, clearColor),
-        tp::RenderPassAttachment(depthImage, tp::AttachmentLoadOp::Clear, tp::AttachmentStoreOp::DontCare, clearDepth)
-    };
+    auto clearColor = tp::ClearValue::ColorFloat(0.3f, 0.075f, 0.075f, 0.0f);
+    auto clearDepth = tp::ClearValue::DepthStencil(1.0f, 0);
+    auto depthAttachment = tp::DepthStencilAttachment(
+        depthImage, /*readOnly*/ false, tp::AttachmentLoadOp::Clear, tp::AttachmentStoreOp::DontCare, clearDepth);
+    auto colorAttachment = tp::ColorAttachment(
+        *acquiredImage.image, tp::AttachmentLoadOp::Clear, tp::AttachmentStoreOp::Store, clearColor);
 
-    // Tephra needs to be told how unexported resources will be used inside a render pass
+    // Tephra needs to be told how resources will be used inside a render pass - either through cmdExportResource or
+    // explicitly like this:
     auto uniformBufferAccess = tp::BufferRenderAccess(
         uniformBuffer, tp::RenderAccess::VertexShaderUniformRead | tp::RenderAccess::FragmentShaderUniformRead);
 
     auto renderPassSetup = tp::RenderPassSetup(
-        &renderPassLayout, tp::view(attachments), tp::viewOne(uniformBufferAccess), {});
+        depthAttachment, tp::viewOne(colorAttachment), tp::viewOne(uniformBufferAccess), {});
 
     // Record the commands now
 
@@ -278,17 +278,6 @@ void CubeExample::preparePipeline() {
           tp::DescriptorBinding(1, tp::DescriptorType::CombinedImageSampler, tp::ShaderStage::Fragment) });
     pipelineLayout = device->createPipelineLayout({ &descriptorSetLayout });
 
-    // Define a RenderPass layout with a single subpass with a color and depth attachment
-    tp::AttachmentDescription attachments[2] = { tp::AttachmentDescription(colorFormat),
-                                                 tp::AttachmentDescription(depthFormat) };
-
-    tp::AttachmentBinding bindings[2] = { tp::AttachmentBinding(tp::AttachmentBindPoint::Color(0), 0),
-                                          tp::AttachmentBinding(tp::AttachmentBindPoint::DepthStencil(), 1) };
-
-    // Only a single subpass, so no subpass dependencies
-    auto subpassLayout = tp::SubpassLayout(tp::view(bindings), {});
-    renderPassLayout = device->createRenderPassLayout(tp::view(attachments), { subpassLayout });
-
     // Now setup stuff for the actual pipeline
     tp::ShaderModule vertShader = device->createShaderModule(
         tp::view(vertShaderCode, sizeof(vertShaderCode) / sizeof(vertShaderCode[0])));
@@ -299,7 +288,11 @@ void CubeExample::preparePipeline() {
     auto fragShaderSetup = tp::ShaderStageSetup(&fragShader, "main");
 
     auto pipelineSetup = tp::GraphicsPipelineSetup(
-        &pipelineLayout, &renderPassLayout, 0, vertShaderSetup, fragShaderSetup, "Cube Pipeline");
+        &pipelineLayout, vertShaderSetup, fragShaderSetup, "Cube Pipeline");
+
+    // Describe what it will render into
+    pipelineSetup.setDepthStencilAttachment(depthFormat);
+    pipelineSetup.setColorAttachments({ colorFormat });
 
     // Back face culling with depth test & write
     pipelineSetup.setCullMode(tp::CullModeFlag::BackFace);

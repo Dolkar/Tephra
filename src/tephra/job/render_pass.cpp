@@ -157,55 +157,57 @@ VkRenderingInfo RenderPass::prepareRendering(const RenderPassSetup& setup) {
 
     // Depth and stencil attachments
     {
+        const DepthStencilAttachment& attachment = setup.depthStencilAttachment;
+
         // Prepare common fields
-        VkRenderingAttachmentInfo vkAttachment;
-        vkAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
-        vkAttachment.pNext = nullptr;
+        VkRenderingAttachmentInfo vkAttachmentCommon;
+        vkAttachmentCommon.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+        vkAttachmentCommon.pNext = nullptr;
 
-        vkAttachment.resolveMode = vkCastConvertibleEnum(setup.depthStencilAttachment.resolveMode);
-        vkAttachment.clearValue = setup.depthStencilAttachment.clearValue.vkValue;
+        vkAttachmentCommon.clearValue = attachment.clearValue.vkValue;
+        bool hasResolve = !attachment.resolveImage.isNull();
+        vkAttachmentCommon.resolveMode = hasResolve ? vkCastConvertibleEnum(attachment.resolveMode) :
+                                                      VK_RESOLVE_MODE_NONE;
 
-        bool hasImage = !setup.depthStencilAttachment.image.isNull();
-        bool hasDepth = hasImage &&
-            setup.depthStencilAttachment.image.getWholeRange().aspectMask.contains(ImageAspect::Depth);
-        bool hasStencil = hasImage &&
-            setup.depthStencilAttachment.image.getWholeRange().aspectMask.contains(ImageAspect::Stencil);
+        bool hasImage = !attachment.image.isNull();
+        bool hasDepth = hasImage && attachment.image.getWholeRange().aspectMask.contains(ImageAspect::Depth);
+        bool hasStencil = hasImage && attachment.image.getWholeRange().aspectMask.contains(ImageAspect::Stencil);
         TEPHRA_ASSERT(hasDepth || hasStencil);
 
         { // Depth attachment
-            VkRenderingAttachmentInfo vkDepthAttachment = vkAttachment;
-            vkDepthAttachment.loadOp = vkCastConvertibleEnum(setup.depthStencilAttachment.depthLoadOp);
-            vkDepthAttachment.storeOp = vkCastConvertibleEnum(setup.depthStencilAttachment.depthStoreOp);
+            VkRenderingAttachmentInfo vkDepthAttachment = vkAttachmentCommon;
+            vkDepthAttachment.loadOp = vkCastConvertibleEnum(attachment.depthLoadOp);
+            vkDepthAttachment.storeOp = vkCastConvertibleEnum(attachment.depthStoreOp);
 
-            if (setup.depthStencilAttachment.depthReadOnly)
-                vkAttachment.imageLayout = VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_OPTIMAL;
+            if (attachment.depthReadOnly)
+                vkDepthAttachment.imageLayout = VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_OPTIMAL;
             else
-                vkAttachment.imageLayout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;
+                vkDepthAttachment.imageLayout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;
             vkDepthAttachment.imageView = addAttachmentRef(
-                hasDepth ? setup.depthStencilAttachment.image : ImageView(), vkAttachment.imageLayout);
+                hasDepth ? attachment.image : ImageView(), vkDepthAttachment.imageLayout);
 
-            vkAttachment.resolveImageLayout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;
+            vkDepthAttachment.resolveImageLayout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;
             vkDepthAttachment.resolveImageView = addAttachmentRef(
-                hasDepth ? setup.depthStencilAttachment.resolveImage : ImageView(), vkAttachment.resolveImageLayout);
+                hasDepth ? attachment.resolveImage : ImageView(), vkDepthAttachment.resolveImageLayout);
 
             vkRenderingAttachments.push_back(vkDepthAttachment);
         }
 
         { // Stencil attachment
-            VkRenderingAttachmentInfo vkStencilAttachment = vkAttachment;
-            vkStencilAttachment.loadOp = vkCastConvertibleEnum(setup.depthStencilAttachment.stencilLoadOp);
-            vkStencilAttachment.storeOp = vkCastConvertibleEnum(setup.depthStencilAttachment.stencilStoreOp);
+            VkRenderingAttachmentInfo vkStencilAttachment = vkAttachmentCommon;
+            vkStencilAttachment.loadOp = vkCastConvertibleEnum(attachment.stencilLoadOp);
+            vkStencilAttachment.storeOp = vkCastConvertibleEnum(attachment.stencilStoreOp);
 
-            if (setup.depthStencilAttachment.stencilReadOnly)
-                vkAttachment.imageLayout = VK_IMAGE_LAYOUT_STENCIL_READ_ONLY_OPTIMAL;
+            if (attachment.stencilReadOnly)
+                vkStencilAttachment.imageLayout = VK_IMAGE_LAYOUT_STENCIL_READ_ONLY_OPTIMAL;
             else
-                vkAttachment.imageLayout = VK_IMAGE_LAYOUT_STENCIL_ATTACHMENT_OPTIMAL;
+                vkStencilAttachment.imageLayout = VK_IMAGE_LAYOUT_STENCIL_ATTACHMENT_OPTIMAL;
             vkStencilAttachment.imageView = addAttachmentRef(
-                hasStencil ? setup.depthStencilAttachment.image : ImageView(), vkAttachment.imageLayout);
+                hasStencil ? attachment.image : ImageView(), vkStencilAttachment.imageLayout);
 
-            vkAttachment.resolveImageLayout = VK_IMAGE_LAYOUT_STENCIL_ATTACHMENT_OPTIMAL;
+            vkStencilAttachment.resolveImageLayout = VK_IMAGE_LAYOUT_STENCIL_ATTACHMENT_OPTIMAL;
             vkStencilAttachment.resolveImageView = addAttachmentRef(
-                hasStencil ? setup.depthStencilAttachment.resolveImage : ImageView(), vkAttachment.resolveImageLayout);
+                hasStencil ? attachment.resolveImage : ImageView(), vkStencilAttachment.resolveImageLayout);
 
             vkRenderingAttachments.push_back(vkStencilAttachment);
         }
@@ -219,7 +221,8 @@ VkRenderingInfo RenderPass::prepareRendering(const RenderPassSetup& setup) {
         vkAttachment.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
         vkAttachment.imageView = addAttachmentRef(attachment.image, vkAttachment.imageLayout);
 
-        vkAttachment.resolveMode = vkCastConvertibleEnum(attachment.resolveMode);
+        bool hasResolve = !attachment.resolveImage.isNull();
+        vkAttachment.resolveMode = hasResolve ? vkCastConvertibleEnum(attachment.resolveMode) : VK_RESOLVE_MODE_NONE;
         vkAttachment.resolveImageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
         vkAttachment.resolveImageView = addAttachmentRef(attachment.resolveImage, vkAttachment.resolveImageLayout);
 

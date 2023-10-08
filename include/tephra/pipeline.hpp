@@ -390,7 +390,7 @@ public:
     ///     The formats must match the image views assigned to the corresponding attachments in tp::RenderPassSetup
     ///     of the active render pass when this pipeline is bound. If an attachment will be unbound,
     ///     the corresponding format must be set to tp::Format::Undefined.
-    GraphicsPipelineSetup& setColorAttachments(ArrayParameter<Format> colorAttachmentFormats = {});
+    GraphicsPipelineSetup& setColorAttachments(ArrayParameter<const Format> colorAttachmentFormats = {});
     /// Sets the number of viewports.
     /// @remarks
     ///     The @vksymbol{VkPhysicalDeviceFeatures}::`multiViewport` feature must be enabled for `viewportCount != 1`.

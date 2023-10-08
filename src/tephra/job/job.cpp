@@ -450,7 +450,7 @@ void Job::cmdExecuteRenderPass(
         jobData->record, JobCommandTypes::ExecuteRenderPass, &renderPass);
 }
 
-void Job::cmdBeginDebugLabel(const char* name, ArrayParameter<float> color) {
+void Job::cmdBeginDebugLabel(const char* name, ArrayParameter<const float> color) {
     TEPHRA_DEBUG_SET_CONTEXT(debugTarget.get(), "cmdBeginDebugLabel", name);
     const DeviceContainer* deviceImpl = jobData->resourcePoolImpl->getParentDeviceImpl();
     if (deviceImpl->getLogicalDevice()->isFunctionalityAvailable(Functionality::DebugUtilsEXT)) {
@@ -458,7 +458,7 @@ void Job::cmdBeginDebugLabel(const char* name, ArrayParameter<float> color) {
     }
 }
 
-void Job::cmdInsertDebugLabel(const char* name, ArrayParameter<float> color) {
+void Job::cmdInsertDebugLabel(const char* name, ArrayParameter<const float> color) {
     TEPHRA_DEBUG_SET_CONTEXT(debugTarget.get(), "cmdInsertDebugLabel", name);
     const DeviceContainer* deviceImpl = jobData->resourcePoolImpl->getParentDeviceImpl();
     if (deviceImpl->getLogicalDevice()->isFunctionalityAvailable(Functionality::DebugUtilsEXT))

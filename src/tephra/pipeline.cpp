@@ -103,10 +103,11 @@ GraphicsPipelineSetup& GraphicsPipelineSetup::setDepthStencilAttachment(
     Format depthStencilAttachmentFormat,
     ImageAspectMask depthStencilAspects) {
     this->depthStencilAttachmentFormat = depthStencilAttachmentFormat;
+    this->depthStencilAspects = depthStencilAspects & getFormatClassProperties(depthStencilAttachmentFormat).aspectMask;
     return *this;
 }
 
-GraphicsPipelineSetup& GraphicsPipelineSetup::setColorAttachments(ArrayParameter<Format> colorAttachmentFormats) {
+GraphicsPipelineSetup& GraphicsPipelineSetup::setColorAttachments(ArrayParameter<const Format> colorAttachmentFormats) {
     this->colorAttachmentFormats.insert(
         this->colorAttachmentFormats.begin(), colorAttachmentFormats.begin(), colorAttachmentFormats.end());
     return *this;
