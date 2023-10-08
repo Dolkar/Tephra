@@ -550,6 +550,51 @@ enum class PresentMode : uint32_t {
 };
 TEPHRA_VULKAN_COMPATIBLE_ENUM(PresentMode, VkPresentModeKHR);
 
+enum class AccelerationStructureType : uint32_t {
+    TopLevel = VK_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL_KHR,
+    BottomLevel = VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_KHR,
+};
+TEPHRA_VULKAN_COMPATIBLE_ENUM(AccelerationStructureType, VkAccelerationStructureTypeKHR);
+
+enum class AccelerationStructureBuildFlag : uint32_t {
+    AllowUpdate = VK_BUILD_ACCELERATION_STRUCTURE_ALLOW_UPDATE_BIT_KHR,
+    AllowCompaction = VK_BUILD_ACCELERATION_STRUCTURE_ALLOW_COMPACTION_BIT_KHR,
+    PreferFastTrace = VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_KHR,
+    PreferFastBuild = VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_BUILD_BIT_KHR,
+    LowMemory = VK_BUILD_ACCELERATION_STRUCTURE_LOW_MEMORY_BIT_KHR,
+};
+TEPHRA_VULKAN_COMPATIBLE_ENUM(AccelerationStructureBuildFlag, VkBuildAccelerationStructureFlagBitsKHR);
+TEPHRA_MAKE_ENUM_BIT_MASK(AccelerationStructureBuildFlagMask, AccelerationStructureBuildFlag);
+
+enum class AccelerationStructureBuildMode : uint32_t {
+    Build = VK_BUILD_ACCELERATION_STRUCTURE_MODE_BUILD_KHR,
+    Update = VK_BUILD_ACCELERATION_STRUCTURE_MODE_UPDATE_KHR,
+};
+TEPHRA_VULKAN_COMPATIBLE_ENUM(AccelerationStructureBuildMode, VkBuildAccelerationStructureModeKHR);
+
+enum class GeometryType : uint32_t {
+    Triangles = VK_GEOMETRY_TYPE_TRIANGLES_KHR,
+    AABBs = VK_GEOMETRY_TYPE_AABBS_KHR,
+    Instances = VK_GEOMETRY_TYPE_INSTANCES_KHR,
+};
+TEPHRA_VULKAN_COMPATIBLE_ENUM(GeometryType, VkGeometryTypeKHR);
+
+enum class GeometryFlag : uint32_t {
+    Opaque = VK_GEOMETRY_OPAQUE_BIT_KHR,
+    NoDuplicateAnyHitInvocation = VK_GEOMETRY_NO_DUPLICATE_ANY_HIT_INVOCATION_BIT_KHR,
+};
+TEPHRA_VULKAN_COMPATIBLE_ENUM(GeometryFlag, VkGeometryFlagBitsKHR);
+TEPHRA_MAKE_ENUM_BIT_MASK(GeometryFlagMask, GeometryFlag);
+
+enum class GeometryInstanceFlag : uint32_t {
+    DisableTriangleFacingCull = VK_GEOMETRY_INSTANCE_TRIANGLE_FACING_CULL_DISABLE_BIT_KHR,
+    FlipTriangleFacing = VK_GEOMETRY_INSTANCE_TRIANGLE_FLIP_FACING_BIT_KHR,
+    ForceOpaque = VK_GEOMETRY_OPAQUE_BIT_KHR,
+    ForceNoOpaque = VK_GEOMETRY_INSTANCE_FORCE_NO_OPAQUE_BIT_KHR,
+};
+TEPHRA_VULKAN_COMPATIBLE_ENUM(GeometryInstanceFlag, VkGeometryInstanceFlagBitsKHR);
+TEPHRA_MAKE_ENUM_BIT_MASK(GeometryInstanceFlagMask, GeometryInstanceFlag);
+
 /// The formats that data can be stored in inside buffers and images.
 /// @see @vksymbol{VkFormat}
 enum class Format : uint32_t {

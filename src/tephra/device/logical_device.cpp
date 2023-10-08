@@ -6,16 +6,45 @@
 
 namespace tp {
 
+// Translates user-supplied extensions and features to ones that will actually be used to create the device
+inline FunctionalityMask processExtensions(
+    Instance* instance,
+    VkFeatureMap& vkFeatureMap,
+    ScratchVector<const char* const>& vkExtensions) {
+    // Add own required features
+    auto& vk12Features = vkFeatureMap.get<VkPhysicalDeviceVulkan12Features>();
+    vk12Features.timelineSemaphore = VK_TRUE;
+
+    // Add implied features and extensions
+    if (containsString(view(vkExtensions), DeviceExtension::KHR_AccelerationStructure)) {
+        vkFeatureMap.get<VkPhysicalDeviceAccelerationStructureFeaturesKHR>().accelerationStructure = true;
+    }
+
+    if (containsString(view(vkExtensions), DeviceExtension::KHR_RayTracingPipeline) &&
+        !containsString(view(vkExtensions), VK_KHR_PIPELINE_LIBRARY_EXTENSION_NAME))
+        vkExtensions.push_back(VK_KHR_PIPELINE_LIBRARY_EXTENSION_NAME);
+
+    // Store functionality availability for easy access
+    FunctionalityMask functionalityMask = {};
+    if (instance->isFunctionalityAvailable(InstanceFunctionality::DebugUtilsEXT))
+        functionalityMask |= Functionality::DebugUtilsEXT;
+    if (containsString(view(vkExtensions), DeviceExtension::EXT_MemoryBudget))
+        functionalityMask |= Functionality::MemoryBudgetEXT;
+    if (vkFeatureMap.get<VkPhysicalDeviceVulkan12Features>().bufferDeviceAddress)
+        functionalityMask |= Functionality::BufferDeviceAddress;
+}
+
 LogicalDevice::LogicalDevice(Instance* instance, QueueMap* queueMap, const DeviceSetup& setup)
     : instance(instance), physicalDevice(setup.physicalDevice), queueMap(queueMap) {
-    // Make a copy of feature map so we can make changes to it
+    // Make a copy of feature map and extensiosn so we can make changes to them
     VkFeatureMap vkFeatureMap;
     if (setup.vkFeatureMap != nullptr)
         vkFeatureMap = *setup.vkFeatureMap;
 
-    // Add own required features
-    auto& vk12Features = vkFeatureMap.get<VkPhysicalDeviceVulkan12Features>();
-    vk12Features.timelineSemaphore = VK_TRUE;
+    ScratchVector<const char* const> vkExtensions;
+    vkExtensions.insert(vkExtensions.begin(), setup.extensions.begin(), setup.extensions.end());
+
+    functionalityMask = processExtensions(instance, vkFeatureMap, vkExtensions);
 
     // Chain feature structures to extended structure pointer
     void* vkCreateInfoExtPtr = setup.vkCreateInfoExtPtr;
@@ -26,7 +55,7 @@ LogicalDevice::LogicalDevice(Instance* instance, QueueMap* queueMap, const Devic
 
     // Create the logical device
     VulkanDeviceCreateInfo createInfo;
-    createInfo.extensions = setup.extensions;
+    createInfo.extensions = view(vkExtensions);
     createInfo.queueFamilyCounts = queueMap->getQueueFamilyCounts();
     createInfo.vkCreateInfoExtPtr = vkCreateInfoExtPtr;
     vkDeviceHandle = instance->createVulkanDevice(physicalDevice->vkGetPhysicalDeviceHandle(), createInfo);
@@ -34,14 +63,6 @@ LogicalDevice::LogicalDevice(Instance* instance, QueueMap* queueMap, const Devic
     // Load device interfaces
     vkiDevice = instance->loadDeviceInterface<VulkanDeviceInterface>(vkDeviceHandle);
     vkiSwapchainKHR = instance->loadDeviceInterface<VulkanSwapchainInterfaceKHR>(vkDeviceHandle);
-
-    // Store functionality availability for easy access
-    if (instance->isFunctionalityAvailable(InstanceFunctionality::DebugUtilsEXT))
-        functionalityMask |= Functionality::DebugUtilsEXT;
-    if (containsString(setup.extensions, DeviceExtension::EXT_MemoryBudget))
-        functionalityMask |= Functionality::MemoryBudgetEXT;
-    if (vkFeatureMap.get<VkPhysicalDeviceVulkan12Features>().bufferDeviceAddress)
-        functionalityMask |= Functionality::BufferDeviceAddress;
 
     // Assign Vulkan queue handles
     ScratchVector<VkQueueHandle> vkQueueHandles;
@@ -448,7 +469,7 @@ void LogicalDevice::destroyBufferView(VkBufferViewHandle vkBufferViewHandle) noe
     vkiDevice.destroyBufferView(vkDeviceHandle, vkBufferViewHandle, nullptr);
 }
 
-VkDeviceAddress LogicalDevice::getBufferDeviceAddress(VkBufferHandle vkBufferHandle) noexcept {
+DeviceAddress LogicalDevice::getBufferDeviceAddress(VkBufferHandle vkBufferHandle) noexcept {
     VkBufferDeviceAddressInfo addressInfo;
     addressInfo.sType = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO;
     addressInfo.pNext = nullptr;

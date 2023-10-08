@@ -579,4 +579,6 @@ struct StencilState {
 };
 TEPHRA_VULKAN_CONVERTIBLE_TO_VK_STRUCT(StencilState, VkStencilOpState);
 
+using DeviceAddress = VkDeviceAddress;
+
 }

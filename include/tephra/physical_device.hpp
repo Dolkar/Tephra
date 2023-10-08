@@ -22,6 +22,9 @@ namespace DeviceExtension {
     /// object whose images can be viewed with different formats than what they were created as.
     /// @see @vksymbol{VK_KHR_swapchain_mutable_format}
     const char* const KHR_SwapchainMutableFormat = VK_KHR_SWAPCHAIN_MUTABLE_FORMAT_EXTENSION_NAME;
+    const char* const KHR_AccelerationStructure = VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME;
+    const char* const KHR_RayQuery = VK_KHR_RAY_QUERY_EXTENSION_NAME;
+    const char* const KHR_RayTracingPipeline = VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME;
     /// Adds support for querying the actual amount of memory used by the process as well as the estimated budget of
     /// how much total memory the current process can use at any given time.
     /// @see tp::MemoryHeapStatistics.

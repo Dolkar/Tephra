@@ -124,8 +124,8 @@ BufferView BufferView::createTexelView(uint64_t viewOffset, uint64_t viewSize, F
     }
 }
 
-VkDeviceAddress BufferView::getDeviceAddress() const {
-    VkDeviceAddress parentAddress;
+DeviceAddress BufferView::getDeviceAddress() const {
+    DeviceAddress parentAddress;
     if (viewsJobLocalBuffer()) {
         parentAddress = jobLocalBuffer->getDeviceAddress();
     } else {
@@ -223,7 +223,7 @@ BufferView Buffer::createTexelView(uint64_t offset, uint64_t size, Format format
     return bufferImpl->getDefaultView_().createTexelView(offset, size, format);
 }
 
-VkDeviceAddress Buffer::getDeviceAddress() const {
+DeviceAddress Buffer::getDeviceAddress() const {
     auto bufferImpl = static_cast<const BufferImpl*>(this);
     return bufferImpl->getDeviceAddress_();
 }

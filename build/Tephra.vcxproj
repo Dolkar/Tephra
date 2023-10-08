@@ -65,6 +65,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\debug-trap.h" />
+    <ClInclude Include="..\include\tephra\acceleration_structure.hpp" />
     <ClInclude Include="..\include\tephra\command_list.hpp" />
     <ClInclude Include="..\include\tephra\tools\array.hpp" />
     <ClInclude Include="..\include\tephra\tools\enum_tools.hpp" />

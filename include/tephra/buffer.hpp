@@ -107,7 +107,7 @@ public:
     /// @remarks
     ///     If the viewed buffer is a job-local buffer, a valid address will only be returned after the tp::Job has
     ///     been enqueued.
-    VkDeviceAddress getDeviceAddress() const;
+    DeviceAddress getDeviceAddress() const;
 
     /// Returns the associated Vulkan @vksymbol{VkBufferView} handle of a texel buffer view, `VK_NULL_HANDLE` otherwise.
     /// @remarks
@@ -265,7 +265,7 @@ public:
     /// @remarks
     ///     The buffer must have been created with tp::BufferUsage::DeviceAddress buffer usage.
     /// @see @vksymbol{vkGetBufferDeviceAddress}
-    VkDeviceAddress getDeviceAddress() const;
+    DeviceAddress getDeviceAddress() const;
 
     /// Returns the associated @vmasymbol{VmaAllocation,struct_vma_allocation} handle.
     VmaAllocationHandle vmaGetMemoryAllocationHandle() const;

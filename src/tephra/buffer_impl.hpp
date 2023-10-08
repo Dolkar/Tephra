@@ -42,7 +42,7 @@ public:
     DebugTarget* getDebugTarget() {
         return &debugTarget;
     }
-    
+
     const BufferSetup& getBufferSetup() const {
         return bufferSetup;
     }
@@ -71,7 +71,7 @@ public:
 
     BufferView createTexelView_(uint64_t offset, uint64_t size, Format format);
 
-    VkDeviceAddress getDeviceAddress_() const;
+    DeviceAddress getDeviceAddress_() const;
 
     VmaAllocationHandle vmaGetMemoryAllocationHandle_() const {
         return memoryAllocationHandle.vkGetHandle();

@@ -30,7 +30,7 @@ BufferView JobLocalBufferImpl::createTexelView(uint64_t offset, uint64_t size, F
     }
 }
 
-VkDeviceAddress JobLocalBufferImpl::getDeviceAddress() const {
+DeviceAddress JobLocalBufferImpl::getDeviceAddress() const {
     if (hasUnderlyingBuffer()) {
         return underlyingBuffer->getDeviceAddress() + underlyingBufferOffset;
     } else {

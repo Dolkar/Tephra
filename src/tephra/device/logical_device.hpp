@@ -140,7 +140,7 @@ public:
 
     void destroyBufferView(VkBufferViewHandle vkBufferViewHandle) noexcept;
 
-    VkDeviceAddress getBufferDeviceAddress(VkBufferHandle vkBufferHandle) noexcept;
+    DeviceAddress getBufferDeviceAddress(VkBufferHandle vkBufferHandle) noexcept;
 
     // Memory allocator is responsible for creating images, use that instead
     VkImageHandle createImage(const VkImageCreateInfo& vkCreateInfo);

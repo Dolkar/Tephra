@@ -69,7 +69,7 @@ BufferView BufferImpl::createTexelView_(uint64_t offset, uint64_t size, Format f
     return BufferView(this, offset, size, format);
 }
 
-VkDeviceAddress BufferImpl::getDeviceAddress_() const {
+DeviceAddress BufferImpl::getDeviceAddress_() const {
     return deviceImpl->getLogicalDevice()->getBufferDeviceAddress(bufferHandle.vkGetHandle());
 }
 

@@ -390,6 +390,9 @@
     <ClInclude Include="..\src\tephra\utils\scratch_allocator.hpp">
       <Filter>Source Files\Utils</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\tephra\acceleration_structure.hpp">
+      <Filter>Interface Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Interface Files">

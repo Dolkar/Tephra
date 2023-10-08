@@ -52,7 +52,7 @@ public:
 
     BufferView createTexelView(uint64_t offset, uint64_t size, Format format);
 
-    VkDeviceAddress getDeviceAddress() const;
+    DeviceAddress getDeviceAddress() const;
 
     uint64_t getRequiredViewAlignment() const;
 
