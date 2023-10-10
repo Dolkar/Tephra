@@ -45,8 +45,12 @@ uint64_t JobLocalBufferImpl::getRequiredViewAlignment() const {
 void JobLocalBufferImpl::createPendingBufferViews(std::deque<BufferView>& jobPendingBufferViews) {
     for (BufferView& bufferView : jobPendingBufferViews) {
         JobLocalBufferImpl* localBuffer = bufferView.jobLocalBuffer;
+        // It not have been assigned an underlying buffer if it's never used
+        if (!localBuffer->hasUnderlyingBuffer())
+            continue;
 
         uint64_t finalOffset = localBuffer->underlyingBufferOffset + bufferView.offset;
+        TEPHRA_ASSERT(localBuffer->underlyingBuffer != nullptr);
         static_cast<BufferImpl*>(localBuffer->underlyingBuffer)
             ->createTexelView_(finalOffset, bufferView.size, bufferView.format);
     }

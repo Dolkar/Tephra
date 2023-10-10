@@ -56,6 +56,9 @@ ImageView JobLocalImageImpl::createView(ImageViewSetup viewSetup) {
 void JobLocalImageImpl::createPendingImageViews(std::deque<ImageView>& jobPendingImageViews) {
     for (ImageView& imageView : jobPendingImageViews) {
         JobLocalImageImpl* localImage = imageView.jobLocalImage;
+        // It not have been assigned an underlying image if it's never used
+        if (!localImage->hasUnderlyingImage())
+            continue;
 
         ImageViewSetup underlyingViewSetup = imageView.setup;
         underlyingViewSetup.subresourceRange.baseArrayLayer += localImage->underlyingImageLayerOffset;
