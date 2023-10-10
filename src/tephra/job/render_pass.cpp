@@ -208,6 +208,9 @@ RenderPassTemplate::RenderPassTemplate(
 
         for (uint32_t i = firstAttachment; i < lastAttachment; i++) {
             const VkAttachmentReference& attachmentReference = attachmentReferences[i];
+            if (attachmentReference.attachment == VK_ATTACHMENT_UNUSED)
+                continue;
+
             AttachmentAccess& attachmentAccess = attachmentAccesses[attachmentReference.attachment];
             const std::pair<uint32_t, uint32_t>& attachmentFirstLastUse =
                 attachmentFirstLastUses[attachmentReference.attachment];
