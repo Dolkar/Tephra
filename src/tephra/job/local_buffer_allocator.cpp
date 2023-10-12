@@ -27,7 +27,7 @@ void JobLocalBufferAllocator::allocateJobBuffers(
         bufferBytesRequested += bufferSetup.size;
 
         const ResourceUsageRange& bufLocalUsage = bufferResources->usageRanges[i];
-        if (bufLocalUsage.firstUsage == ~0) {
+        if (bufLocalUsage.isEmpty()) {
             // Buffer is never used so ignore it
             continue;
         }
@@ -41,15 +41,14 @@ void JobLocalBufferAllocator::allocateJobBuffers(
         assignInfos.push_back(assignInfo);
     }
 
-    if (assignInfos.empty())
-        return;
-
     // Allocate and assign the job buffers
-    uint64_t bufferBytesCommitted;
-    if (!poolFlags.contains(JobResourcePoolFlag::DisableSuballocation))
-        bufferBytesCommitted = allocateJobBufferGroup(view(assignInfos), currentTimestamp);
-    else
-        bufferBytesCommitted = allocateJobBufferGroupNoAlias(view(assignInfos), currentTimestamp);
+    uint64_t bufferBytesCommitted = 0;
+    if (!assignInfos.empty()) {
+        if (!poolFlags.contains(JobResourcePoolFlag::DisableSuballocation))
+            bufferBytesCommitted = allocateJobBufferGroup(view(assignInfos), currentTimestamp);
+        else
+            bufferBytesCommitted = allocateJobBufferGroupNoAlias(view(assignInfos), currentTimestamp);
+    }
 
     if constexpr (StatisticEventsEnabled) {
         reportStatisticEvent(StatisticEventType::JobLocalBufferRequestedBytes, bufferBytesRequested, jobName);

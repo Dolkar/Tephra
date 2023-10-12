@@ -109,21 +109,28 @@ void JobLocalImageAllocator::allocateJobImages(
         // Gather all image requests of this class
         do {
             int imageIndex = assignList[i].second;
-
-            AssignInfo assignInfo;
-            assignInfo.firstUsage = imageResources->usageRanges[imageIndex].firstUsage;
-            assignInfo.lastUsage = imageResources->usageRanges[imageIndex].lastUsage;
-            assignInfo.arrayLayerCount = imageResources->images[imageIndex].getImageSetup().arrayLayerCount;
-            assignInfo.resourcePtr = &imageResources->images[imageIndex];
-            assignInfos.push_back(assignInfo);
+            const JobLocalImageImpl& localImage = imageResources->images[imageIndex];
 
             if constexpr (StatisticEventsEnabled) {
-                const ImageSetup& setup = imageResources->images[imageIndex].getImageSetup();
+                const ImageSetup& setup = localImage.getImageSetup();
                 imageBytesRequested += deviceImpl->getMemoryAllocator()->getImageMemoryRequirements(setup).size;
+            }
+
+            const ResourceUsageRange& localUsage = imageResources->usageRanges[imageIndex]; 
+            if (!localUsage.isEmpty()) {
+                AssignInfo assignInfo;
+                assignInfo.firstUsage = localUsage.firstUsage;
+                assignInfo.lastUsage = localUsage.lastUsage;
+                assignInfo.arrayLayerCount = localImage.getImageSetup().arrayLayerCount;
+                assignInfo.resourcePtr = &imageResources->images[imageIndex];
+                assignInfos.push_back(assignInfo);
             }
 
             i++;
         } while (i < assignList.size() && !(imageClass < assignList[i].first));
+
+        if (assignInfos.empty())
+            continue;
 
         std::vector<BackingImage>& backingImages = backingImageMap[imageClass];
 
@@ -146,7 +153,7 @@ void JobLocalImageAllocator::allocateJobImages(
             imageBytesCommitted += usedLayers * layerSize;
         }
 
-        i++;
+        assignInfos.clear();
     }
 
     if constexpr (StatisticEventsEnabled) {

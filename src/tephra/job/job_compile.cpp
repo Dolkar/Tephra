@@ -418,6 +418,9 @@ void compileJob(
 
     // Discard contents of local images
     for (const auto& localImage : jobData->resources.localImages.getImages()) {
+        if (!localImage.hasUnderlyingImage())
+            continue;
+
         const Image* underlyingImage = localImage.getUnderlyingImage();
         auto mapHit = context.queueSyncState->imageResourceMap.find(underlyingImage->vkGetImageHandle());
         if (mapHit != context.queueSyncState->imageResourceMap.end()) {
