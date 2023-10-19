@@ -42,6 +42,7 @@ T* recordCommand(JobRecordStorage& storage, JobCommandTypes type, TArgs&&... arg
 }
 
 void markResourceUsage(JobData* jobData, const BufferView& buffer, bool isExport = false) {
+    TEPHRA_ASSERT(!buffer.isNull());
     if (buffer.viewsJobLocalBuffer()) {
         jobData->resources.localBuffers.markBufferUsage(buffer, jobData->record.commandCount);
         if (isExport) {
@@ -51,6 +52,7 @@ void markResourceUsage(JobData* jobData, const BufferView& buffer, bool isExport
 }
 
 void markResourceUsage(JobData* jobData, const ImageView& image, bool isExport = false) {
+    TEPHRA_ASSERT(!image.isNull());
     if (image.viewsJobLocalImage()) {
         jobData->resources.localImages.markImageUsage(image, jobData->record.commandCount);
         if (isExport) {
@@ -435,8 +437,8 @@ void Job::cmdExecuteRenderPass(
         renderPass.assignInline(
             setup, std::move(std::get<RenderInlineCallback>(commandRecording)), std::move(listDebugTarget));
     } else {
-        ArrayView<RenderList>& computeListsToAssign = std::get<ArrayView<RenderList>>(commandRecording);
-        renderPass.assignDeferred(setup, listDebugTarget, computeListsToAssign);
+        ArrayView<RenderList>& renderListsToAssign = std::get<ArrayView<RenderList>>(commandRecording);
+        renderPass.assignDeferred(setup, listDebugTarget, renderListsToAssign);
     }
 
     for (const BufferRenderAccess& entry : renderPass.getBufferAccesses()) {
@@ -444,6 +446,10 @@ void Job::cmdExecuteRenderPass(
     }
     for (const ImageRenderAccess& entry : renderPass.getImageAccesses()) {
         markResourceUsage(jobData, entry.image);
+    }
+    for (const AttachmentAccess& entry : renderPass.getAttachmentAccesses()) {
+        if (!entry.imageView.isNull())
+            markResourceUsage(jobData, entry.imageView);
     }
 
     recordCommand<JobRecordStorage::ExecuteRenderPassData>(

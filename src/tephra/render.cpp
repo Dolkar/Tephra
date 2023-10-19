@@ -217,18 +217,18 @@ RenderPassSetup::RenderPassSetup(
     Extent3D minExtent;
     if (!depthStencilAttachment.image.isNull())
         minExtent = depthStencilAttachment.image.getExtent();
-    else if (!colorAttachments.empty())
-        minExtent = colorAttachments[0].image.getExtent();
 
-    if (!colorAttachments.empty()) {
-        for (const ColorAttachment& attachment : viewRange(colorAttachments, 1, colorAttachments.size() - 1)) {
+    for (const ColorAttachment& attachment : colorAttachments) {
+        if (!attachment.image.isNull()) {
             Extent3D extent = attachment.image.getExtent();
-            minExtent.width = min(minExtent.width, extent.width);
-            minExtent.height = min(minExtent.height, extent.height);
+            minExtent.width = minExtent.width == 0 ? extent.width : min(minExtent.width, extent.width);
+            minExtent.height = minExtent.height == 0 ? extent.height : min(minExtent.height, extent.height);
         }
-        renderArea.extent = Extent2D(minExtent.width, minExtent.height);
-        renderArea.offset = Offset2D(0, 0);
     }
+
+    TEPHRA_ASSERTD(minExtent.width != 0, "Implicit render area constructor used without any valid attachments!");
+    renderArea.extent = Extent2D(minExtent.width, minExtent.height);
+    renderArea.offset = Offset2D(0, 0);
 }
 
 }

@@ -172,7 +172,6 @@ VkRenderingInfo RenderPass::prepareRendering(const RenderPassSetup& setup) {
         bool hasImage = !attachment.image.isNull();
         bool hasDepth = hasImage && attachment.image.getWholeRange().aspectMask.contains(ImageAspect::Depth);
         bool hasStencil = hasImage && attachment.image.getWholeRange().aspectMask.contains(ImageAspect::Stencil);
-        TEPHRA_ASSERT(hasDepth || hasStencil);
 
         { // Depth attachment
             VkRenderingAttachmentInfo vkDepthAttachment = vkAttachmentCommon;
@@ -235,7 +234,7 @@ VkRenderingInfo RenderPass::prepareRendering(const RenderPassSetup& setup) {
     renderingInfo.pDepthAttachment = &vkRenderingAttachments[0];
     renderingInfo.pStencilAttachment = &vkRenderingAttachments[1];
     renderingInfo.colorAttachmentCount = static_cast<uint32_t>(vkRenderingAttachments.size() - 2);
-    renderingInfo.pColorAttachments = &vkRenderingAttachments[2];
+    renderingInfo.pColorAttachments = vkRenderingAttachments.data() + 2;
 
     return renderingInfo;
 }
