@@ -140,6 +140,11 @@ VulkanDeviceInterface::VulkanDeviceInterface(const VulkanInstanceInterface& vkiI
     signalSemaphore = LOAD_DEVICE_PROCEDURE(vkSignalSemaphore);
     getBufferDeviceAddress = LOAD_DEVICE_PROCEDURE(vkGetBufferDeviceAddress);
 
+    createAccelerationStructureKHR = LOAD_DEVICE_EXT_PROCEDURE(vkCreateAccelerationStructureKHR);
+    destroyAccelerationStructureKHR = LOAD_DEVICE_EXT_PROCEDURE(vkDestroyAccelerationStructureKHR);
+    getAccelerationStructureBuildSizesKHR = LOAD_DEVICE_EXT_PROCEDURE(vkGetAccelerationStructureBuildSizesKHR);
+    getAccelerationStructureDeviceAddressKHR = LOAD_DEVICE_EXT_PROCEDURE(vkGetAccelerationStructureDeviceAddressKHR);
+
     setDebugUtilsObjectNameEXT = LOAD_DEVICE_EXT_PROCEDURE(vkSetDebugUtilsObjectNameEXT);
     setDebugUtilsObjectTagEXT = LOAD_DEVICE_EXT_PROCEDURE(vkSetDebugUtilsObjectTagEXT);
 }
@@ -220,6 +225,12 @@ VulkanCommandInterface::VulkanCommandInterface(
     cmdNextSubpass = LOAD_DEVICE_PROCEDURE(vkCmdNextSubpass);
     cmdEndRenderPass = LOAD_DEVICE_PROCEDURE(vkCmdEndRenderPass);
     cmdExecuteCommands = LOAD_DEVICE_PROCEDURE(vkCmdExecuteCommands);
+
+    cmdBuildAccelerationStructuresKHR = LOAD_DEVICE_EXT_PROCEDURE(vkCmdBuildAccelerationStructuresKHR);
+    cmdBuildAccelerationStructuresIndirectKHR = LOAD_DEVICE_EXT_PROCEDURE(vkCmdBuildAccelerationStructuresIndirectKHR);
+    cmdCopyAccelerationStructureKHR = LOAD_DEVICE_EXT_PROCEDURE(vkCmdCopyAccelerationStructureKHR);
+    cmdWriteAccelerationStructuresPropertiesKHR = LOAD_DEVICE_EXT_PROCEDURE(
+        vkCmdWriteAccelerationStructuresPropertiesKHR);
 
     cmdBeginDebugUtilsLabelEXT = LOAD_DEVICE_EXT_PROCEDURE(vkCmdBeginDebugUtilsLabelEXT);
     cmdInsertDebugUtilsLabelEXT = LOAD_DEVICE_EXT_PROCEDURE(vkCmdInsertDebugUtilsLabelEXT);

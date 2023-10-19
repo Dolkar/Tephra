@@ -132,6 +132,11 @@ public:
     PFN_vkSignalSemaphore signalSemaphore = nullptr;
     PFN_vkGetBufferDeviceAddress getBufferDeviceAddress = nullptr;
 
+    PFN_vkCreateAccelerationStructureKHR createAccelerationStructureKHR = nullptr;
+    PFN_vkDestroyAccelerationStructureKHR destroyAccelerationStructureKHR = nullptr;
+    PFN_vkGetAccelerationStructureBuildSizesKHR getAccelerationStructureBuildSizesKHR = nullptr;
+    PFN_vkGetAccelerationStructureDeviceAddressKHR getAccelerationStructureDeviceAddressKHR = nullptr;
+
     PFN_vkSetDebugUtilsObjectNameEXT setDebugUtilsObjectNameEXT = nullptr;
     PFN_vkSetDebugUtilsObjectTagEXT setDebugUtilsObjectTagEXT = nullptr;
 };
@@ -217,6 +222,11 @@ public:
     PFN_vkCmdNextSubpass cmdNextSubpass = nullptr;
     PFN_vkCmdEndRenderPass cmdEndRenderPass = nullptr;
     PFN_vkCmdExecuteCommands cmdExecuteCommands = nullptr;
+
+    PFN_vkCmdBuildAccelerationStructuresKHR cmdBuildAccelerationStructuresKHR = nullptr;
+    PFN_vkCmdBuildAccelerationStructuresIndirectKHR cmdBuildAccelerationStructuresIndirectKHR = nullptr;
+    PFN_vkCmdCopyAccelerationStructureKHR cmdCopyAccelerationStructureKHR = nullptr;
+    PFN_vkCmdWriteAccelerationStructuresPropertiesKHR cmdWriteAccelerationStructuresPropertiesKHR = nullptr;
 
     PFN_vkCmdBeginDebugUtilsLabelEXT cmdBeginDebugUtilsLabelEXT = nullptr;
     PFN_vkCmdInsertDebugUtilsLabelEXT cmdInsertDebugUtilsLabelEXT = nullptr;

@@ -2,7 +2,7 @@
 #include "buffer_impl.hpp"
 #include "job/local_buffers.hpp"
 #include "device/device_container.hpp"
-#include "..\..\include\tephra\buffer.hpp"
+#include <tephra/buffer.hpp>
 
 namespace tp {
 

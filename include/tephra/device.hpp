@@ -6,6 +6,7 @@
 #include <tephra/descriptor.hpp>
 #include <tephra/buffer.hpp>
 #include <tephra/image.hpp>
+#include <tephra/acceleration_structure.hpp>
 #include <tephra/render.hpp>
 #include <tephra/memory.hpp>
 #include <tephra/debug_handler.hpp>
@@ -268,6 +269,10 @@ public:
     /// @param debugName
     ///     The debug name identifier for the object.
     OwningPtr<Image> allocateImage(const ImageSetup& setup, const char* debugName = nullptr);
+
+    OwningPtr<AccelerationStructure> allocateAccelerationStructure(
+        const AccelerationStructureSetup& setup,
+        const char* debugName = nullptr);
 
     /// Enqueues the given tp::Job to the specified queue, creating and initializing its local resources.
     ///

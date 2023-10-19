@@ -154,6 +154,12 @@
     <ClCompile Include="..\src\tephra\job\aliasing_suballocator.cpp">
       <Filter>Source Files\Job</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\tephra\acceleration_structure_dispatch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\tephra\acceleration_structure_impl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\tephra\application.hpp">
@@ -392,6 +398,9 @@
     </ClInclude>
     <ClInclude Include="..\include\tephra\acceleration_structure.hpp">
       <Filter>Interface Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\tephra\acceleration_structure_impl.hpp">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

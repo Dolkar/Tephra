@@ -372,6 +372,13 @@ OwningPtr<Image> Device::allocateImage(const ImageSetup& setup, const char* debu
     return image;
 }
 
+OwningPtr<AccelerationStructure> Device::allocateAccelerationStructure(
+    const AccelerationStructureSetup& setup,
+    const char* debugName) {
+    auto deviceImpl = static_cast<DeviceContainer*>(this);
+    TEPHRA_DEBUG_SET_CONTEXT(deviceImpl->getDebugTarget(), "allocateAccelerationStructure", debugName);
+}
+
 JobSemaphore Device::enqueueJob(
     const DeviceQueue& queue,
     Job job,

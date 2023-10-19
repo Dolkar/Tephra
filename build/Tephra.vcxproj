@@ -11,6 +11,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\src\tephra\acceleration_structure_dispatch.cpp" />
+    <ClCompile Include="..\src\tephra\acceleration_structure_impl.cpp" />
     <ClCompile Include="..\src\tephra\application\application_dispatch.cpp" />
     <ClCompile Include="..\src\tephra\application\instance.cpp" />
     <ClCompile Include="..\src\tephra\application\vulkan_globals.cpp" />
@@ -73,6 +75,7 @@
     <ClInclude Include="..\include\tephra\utils\mutable_descriptor_set.hpp" />
     <ClInclude Include="..\include\tephra\utils\growable_ring_buffer.hpp" />
     <ClInclude Include="..\include\tephra\utils\standard_report_handler.hpp" />
+    <ClInclude Include="..\src\tephra\acceleration_structure_impl.hpp" />
     <ClInclude Include="..\src\tephra\application\application_container.hpp" />
     <ClInclude Include="..\src\tephra\application\instance.hpp" />
     <ClInclude Include="..\src\tephra\application\vulkan_globals.hpp" />

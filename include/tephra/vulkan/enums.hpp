@@ -572,13 +572,6 @@ enum class AccelerationStructureBuildMode : uint32_t {
 };
 TEPHRA_VULKAN_COMPATIBLE_ENUM(AccelerationStructureBuildMode, VkBuildAccelerationStructureModeKHR);
 
-enum class GeometryType : uint32_t {
-    Triangles = VK_GEOMETRY_TYPE_TRIANGLES_KHR,
-    AABBs = VK_GEOMETRY_TYPE_AABBS_KHR,
-    Instances = VK_GEOMETRY_TYPE_INSTANCES_KHR,
-};
-TEPHRA_VULKAN_COMPATIBLE_ENUM(GeometryType, VkGeometryTypeKHR);
-
 enum class GeometryFlag : uint32_t {
     Opaque = VK_GEOMETRY_OPAQUE_BIT_KHR,
     NoDuplicateAnyHitInvocation = VK_GEOMETRY_NO_DUPLICATE_ANY_HIT_INVOCATION_BIT_KHR,
