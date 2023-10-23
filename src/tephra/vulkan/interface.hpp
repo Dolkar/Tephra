@@ -132,6 +132,12 @@ public:
     PFN_vkSignalSemaphore signalSemaphore = nullptr;
     PFN_vkGetBufferDeviceAddress getBufferDeviceAddress = nullptr;
 
+    PFN_vkCreateSwapchainKHR createSwapchainKHR = nullptr;
+    PFN_vkDestroySwapchainKHR destroySwapchainKHR = nullptr;
+    PFN_vkGetSwapchainImagesKHR getSwapchainImagesKHR = nullptr;
+    PFN_vkAcquireNextImageKHR acquireNextImageKHR = nullptr;
+    PFN_vkQueuePresentKHR queuePresentKHR = nullptr;
+
     PFN_vkCreateAccelerationStructureKHR createAccelerationStructureKHR = nullptr;
     PFN_vkDestroyAccelerationStructureKHR destroyAccelerationStructureKHR = nullptr;
     PFN_vkGetAccelerationStructureBuildSizesKHR getAccelerationStructureBuildSizesKHR = nullptr;
@@ -231,20 +237,6 @@ public:
     PFN_vkCmdBeginDebugUtilsLabelEXT cmdBeginDebugUtilsLabelEXT = nullptr;
     PFN_vkCmdInsertDebugUtilsLabelEXT cmdInsertDebugUtilsLabelEXT = nullptr;
     PFN_vkCmdEndDebugUtilsLabelEXT cmdEndDebugUtilsLabelEXT = nullptr;
-};
-
-class VulkanSwapchainInterfaceKHR {
-public:
-    VulkanSwapchainInterfaceKHR() {}
-    VulkanSwapchainInterfaceKHR(const VulkanInstanceInterface& vkiInstance, VkDeviceHandle vkDeviceHandle);
-
-    PFN_vkCreateSwapchainKHR createSwapchainKHR = nullptr;
-    PFN_vkDestroySwapchainKHR destroySwapchainKHR = nullptr;
-    PFN_vkGetSwapchainImagesKHR getSwapchainImagesKHR = nullptr;
-    PFN_vkAcquireNextImageKHR acquireNextImageKHR = nullptr;
-    PFN_vkQueuePresentKHR queuePresentKHR = nullptr;
-
-    bool isLoaded() const;
 };
 
 }

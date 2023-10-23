@@ -62,7 +62,6 @@ LogicalDevice::LogicalDevice(Instance* instance, QueueMap* queueMap, const Devic
 
     // Load device interfaces
     vkiDevice = instance->loadDeviceInterface<VulkanDeviceInterface>(vkDeviceHandle);
-    vkiSwapchainKHR = instance->loadDeviceInterface<VulkanSwapchainInterfaceKHR>(vkDeviceHandle);
 
     // Assign Vulkan queue handles
     ScratchVector<VkQueueHandle> vkQueueHandles;
@@ -659,7 +658,7 @@ VkSwapchainHandleKHR LogicalDevice::createSwapchainKHR(
     const SwapchainSetup& setup,
     VkSwapchainHandleKHR vkOldSwapchainHandle,
     ScratchVector<VkImageHandle>* vkSwapchainImageHandles) {
-    if (!vkiSwapchainKHR.isLoaded()) {
+    if (vkiDevice.createSwapchainKHR == nullptr) {
         throw UnsupportedOperationError(
             "Functionality of the KHR_Swapchain extension is being used, but its interface could not be loaded. Has it "
             "been enabled?");
@@ -724,13 +723,13 @@ VkSwapchainHandleKHR LogicalDevice::createSwapchainKHR(
     }
 
     VkSwapchainKHR vkSwapchainHandle;
-    throwRetcodeErrors(vkiSwapchainKHR.createSwapchainKHR(vkDeviceHandle, &createInfo, nullptr, &vkSwapchainHandle));
+    throwRetcodeErrors(vkiDevice.createSwapchainKHR(vkDeviceHandle, &createInfo, nullptr, &vkSwapchainHandle));
 
     // Get swapchain image handles
     uint32_t count;
-    throwRetcodeErrors(vkiSwapchainKHR.getSwapchainImagesKHR(vkDeviceHandle, vkSwapchainHandle, &count, nullptr));
+    throwRetcodeErrors(vkiDevice.getSwapchainImagesKHR(vkDeviceHandle, vkSwapchainHandle, &count, nullptr));
     vkSwapchainImageHandles->resize(count);
-    throwRetcodeErrors(vkiSwapchainKHR.getSwapchainImagesKHR(
+    throwRetcodeErrors(vkiDevice.getSwapchainImagesKHR(
         vkDeviceHandle, vkSwapchainHandle, &count, vkCastTypedHandlePtr(vkSwapchainImageHandles->data())));
     vkSwapchainImageHandles->resize(count);
 
@@ -742,7 +741,7 @@ void LogicalDevice::waitForDeviceIdle() const {
 }
 
 void LogicalDevice::destroySwapchainKHR(VkSwapchainHandleKHR vkSwapchainHandle) noexcept {
-    vkiSwapchainKHR.destroySwapchainKHR(vkDeviceHandle, vkSwapchainHandle, nullptr);
+    vkiDevice.destroySwapchainKHR(vkDeviceHandle, vkSwapchainHandle, nullptr);
 }
 
 VkResult LogicalDevice::acquireNextImageKHR(
@@ -750,7 +749,7 @@ VkResult LogicalDevice::acquireNextImageKHR(
     Timeout timeout,
     VkSemaphoreHandle vkSemaphoreHandle,
     uint32_t* imageIndex) {
-    return throwRetcodeErrors(vkiSwapchainKHR.acquireNextImageKHR(
+    return throwRetcodeErrors(vkiDevice.acquireNextImageKHR(
         vkDeviceHandle, vkSwapchainHandle, timeout.nanoseconds, vkSemaphoreHandle, VK_NULL_HANDLE, imageIndex));
 }
 
@@ -780,7 +779,50 @@ void LogicalDevice::queuePresentKHR(
     if (queueInfo.queueHandleMutex != nullptr)
         lock = std::unique_lock<Mutex>(*queueInfo.queueHandleMutex);
 
-    throwRetcodeErrors(vkiSwapchainKHR.queuePresentKHR(queueInfo.vkQueueHandle, &presentInfo));
+    throwRetcodeErrors(vkiDevice.queuePresentKHR(queueInfo.vkQueueHandle, &presentInfo));
+}
+
+VkAccelerationStructureKHR LogicalDevice::createAccelerationStructureKHR(
+    const BufferView& buffer,
+    AccelerationStructureType type) {
+    if (vkiDevice.createAccelerationStructureKHR == nullptr) {
+        throw UnsupportedOperationError(
+            "Functionality of the KHR_AccelerationStructure extension is being used, but its interface could not be "
+            "loaded. Has it been enabled?");
+    }
+
+    VkAccelerationStructureCreateInfoKHR createInfo;
+    createInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_CREATE_INFO_KHR;
+    createInfo.pNext = nullptr;
+    createInfo.createFlags = 0;
+    createInfo.buffer = buffer.vkResolveBufferHandle(&createInfo.offset);
+    createInfo.size = buffer.getSize();
+    createInfo.type = vkCastConvertibleEnum(type);
+    createInfo.deviceAddress = 0;
+
+    VkAccelerationStructureKHR vkAccelerationHandle;
+    throwRetcodeErrors(
+        vkiDevice.createAccelerationStructureKHR(vkDeviceHandle, &createInfo, nullptr, &vkAccelerationHandle));
+    return vkAccelerationHandle;
+}
+
+void LogicalDevice::destroyAccelerationStructureKHR(VkAccelerationStructureKHR vkAccelerationStructureHandle) noexcept {
+    vkiDevice.destroyAccelerationStructureKHR(vkDeviceHandle, vkAccelerationStructureHandle, nullptr);
+}
+
+VkAccelerationStructureBuildSizesInfoKHR LogicalDevice::getAccelerationStructureBuildSizes(
+    const VkAccelerationStructureBuildGeometryInfoKHR& vkBuildInfo,
+    const uint32_t* pMaxPrimitiveCounts) {
+    // Unlike other functions, it is more convenient to create the structure elsewhere, so here we just wrap
+    VkAccelerationStructureBuildSizesInfoKHR sizes;
+
+    // Our AS are always device-only
+    VkAccelerationStructureBuildTypeKHR buildType = VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR;
+
+    VkAccelerationStructureBuildSizesInfoKHR sizeInfo;
+    vkiDevice.getAccelerationStructureBuildSizesKHR(
+        vkDeviceHandle, buildType, &vkBuildInfo, pMaxPrimitiveCounts, &sizeInfo);
+    return sizeInfo;
 }
 
 LogicalDevice::~LogicalDevice() {
