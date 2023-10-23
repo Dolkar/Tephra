@@ -465,7 +465,7 @@ JobSemaphore Device::enqueueJob(
     return signalSemaphore;
 }
 
-void Device::submitQueuedJobs(const DeviceQueue& queue) {
+void Device::submitQueuedJobs(const DeviceQueue& queue, const JobSemaphore& lastJobToSubmit) {
     auto deviceImpl = static_cast<DeviceContainer*>(this);
     TEPHRA_DEBUG_SET_CONTEXT(
         deviceImpl->getDebugTarget(), "submitQueuedJobs", deviceImpl->getQueueMap()->getQueueInfo(queue).name.c_str());
@@ -477,9 +477,17 @@ void Device::submitQueuedJobs(const DeviceQueue& queue) {
             reportDebugMessage(
                 DebugMessageSeverity::Error, DebugMessageType::Validation, "'queue' is an invalid DeviceQueue handle.");
         }
+
+        if (!lastJobToSubmit.isNull() && lastJobToSubmit.queue != queue) {
+            reportDebugMessage(
+                DebugMessageSeverity::Error,
+                DebugMessageType::Validation,
+                "The 'lastJobToSubmit' semaphore belongs to a job that was enqueued to a different queue than the one "
+                "identified by the 'queue' parameter.");
+        }
     }
 
-    deviceImpl->getQueueState(queueIndex)->submitQueuedJobs();
+    deviceImpl->getQueueState(queueIndex)->submitQueuedJobs(lastJobToSubmit);
 }
 
 void Device::submitPresentImagesKHR(

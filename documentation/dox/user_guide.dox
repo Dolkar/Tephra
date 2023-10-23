@@ -255,10 +255,11 @@ be accessed by multiple threads if both of those acceses are read-only, such as 
 as a const reference. Recording a command like tp::Job::cmdClearImage still counts as a read-only access for the image,
 since the write operation takes place later on the gpu, not in the thread itself.
 
-For the sake of convenience, tp::Device is made thread-safe, too. The exception are device methods that operate on
-tp::DeviceQueue. Only one thread may enqueue or submit to a single queue at a time. Further, tp::PipelineCache is also
-thread-safe by extension of the Vulkan @vksymbol{VkPipelineCache} being thread-safe, to simplify multithreaded pipeline
-compilation.
+For the sake of convenience, the methods of tp::Device are designed to be thread-safe as well, but beware that objects
+passed to the methods as parameters, such as tp::DeviceQueue or tp::Swapchain, in general aren't safe to be used like
+that from multiple threads simultaneously.
+Further, tp::PipelineCache is also thread-safe by extension of the Vulkan @vksymbol{VkPipelineCache} being thread-safe,
+to simplify multithreaded pipeline compilation.
 
 Generally, pool objects like tp::JobResourcePool, tp::DescriptorPool and tp::CommandPool not only aren't thread-safe by
 themselves, but also objects allocated from them must collectively only be modified by a single thread at a time. The
