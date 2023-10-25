@@ -44,7 +44,7 @@ void CommandList::cmdPushConstants(
         data);
 }
 
-VkDebugUtilsLabelEXT makeDebugLabel(const char* name, ArrayParameter<float> color) {
+VkDebugUtilsLabelEXT makeDebugLabel(const char* name, ArrayParameter<const float> color) {
     VkDebugUtilsLabelEXT label;
     label.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT;
     label.pNext = nullptr;
@@ -56,7 +56,7 @@ VkDebugUtilsLabelEXT makeDebugLabel(const char* name, ArrayParameter<float> colo
     return label;
 }
 
-void CommandList::cmdBeginDebugLabel(const char* name, ArrayParameter<float> color) {
+void CommandList::cmdBeginDebugLabel(const char* name, ArrayParameter<const float> color) {
     TEPHRA_DEBUG_SET_CONTEXT(debugTarget.get(), "cmdBeginDebugLabel", nullptr);
     if (vkiCommands->cmdBeginDebugUtilsLabelEXT != nullptr) {
         VkDebugUtilsLabelEXT label = makeDebugLabel(name, color);
@@ -64,7 +64,7 @@ void CommandList::cmdBeginDebugLabel(const char* name, ArrayParameter<float> col
     }
 }
 
-void CommandList::cmdInsertDebugLabel(const char* name, ArrayParameter<float> color) {
+void CommandList::cmdInsertDebugLabel(const char* name, ArrayParameter<const float> color) {
     TEPHRA_DEBUG_SET_CONTEXT(debugTarget.get(), "cmdInsertDebugLabel", nullptr);
     if (vkiCommands->cmdBeginDebugUtilsLabelEXT != nullptr) {
         VkDebugUtilsLabelEXT label = makeDebugLabel(name, color);

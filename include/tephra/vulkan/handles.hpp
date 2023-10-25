@@ -63,7 +63,6 @@ using VkDescriptorSetLayoutHandle = VkObjectHandle<VkDescriptorSetLayout, VK_OBJ
 using VkDescriptorUpdateTemplateHandle =
     VkObjectHandle<VkDescriptorUpdateTemplate, VK_OBJECT_TYPE_DESCRIPTOR_UPDATE_TEMPLATE>;
 using VkDeviceHandle = VkObjectHandle<VkDevice, VK_OBJECT_TYPE_DEVICE>;
-using VkFramebufferHandle = VkObjectHandle<VkFramebuffer, VK_OBJECT_TYPE_FRAMEBUFFER>;
 using VkImageHandle = VkObjectHandle<VkImage, VK_OBJECT_TYPE_IMAGE>;
 using VkImageViewHandle = VkObjectHandle<VkImageView, VK_OBJECT_TYPE_IMAGE_VIEW>;
 using VkInstanceHandle = VkObjectHandle<VkInstance, VK_OBJECT_TYPE_INSTANCE>;
@@ -72,7 +71,6 @@ using VkPipelineCacheHandle = VkObjectHandle<VkPipelineCache, VK_OBJECT_TYPE_PIP
 using VkPipelineHandle = VkObjectHandle<VkPipeline, VK_OBJECT_TYPE_PIPELINE>;
 using VkPipelineLayoutHandle = VkObjectHandle<VkPipelineLayout, VK_OBJECT_TYPE_PIPELINE_LAYOUT>;
 using VkQueueHandle = VkObjectHandle<VkQueue, VK_OBJECT_TYPE_QUEUE>;
-using VkRenderPassHandle = VkObjectHandle<VkRenderPass, VK_OBJECT_TYPE_RENDER_PASS>;
 using VkSamplerHandle = VkObjectHandle<VkSampler, VK_OBJECT_TYPE_SAMPLER>;
 using VkSemaphoreHandle = VkObjectHandle<VkSemaphore, VK_OBJECT_TYPE_SEMAPHORE>;
 using VkShaderModuleHandle = VkObjectHandle<VkShaderModule, VK_OBJECT_TYPE_SHADER_MODULE>;

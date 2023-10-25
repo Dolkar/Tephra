@@ -263,10 +263,13 @@ void identifyCommandResourceAccesses(
             addImageAccess(imageAccesses, entry.image, entry.range, { stageMask, accessMask }, layout);
         }
         for (const AttachmentAccess& entry : data->pass->getAttachmentAccesses()) {
-            // Add the first access, the last access will then be handled like an external import, since
-            // the renderpass manages its own synchronization.
-            addImageAccess(
-                imageAccesses, entry.image, entry.image.getWholeRange(), entry.firstAccess, entry.firstLayout);
+            ImageAccessRange range;
+            ResourceAccess access;
+            VkImageLayout layout;
+            if (!entry.imageView.isNull()) {
+                entry.convertToVkAccess(&range, &access, &layout);
+                addImageAccess(imageAccesses, entry.imageView, range, access, layout);
+            }
         }
         break;
     }

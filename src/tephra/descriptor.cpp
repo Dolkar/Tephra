@@ -105,7 +105,6 @@ ReadAccessMask DescriptorBinding::getReadAccessMask() const {
         accessTypeIndex = uniformAccessIndex;
         break;
     case DescriptorType::Sampler:
-    case DescriptorType::InputAttachment:
         return ReadAccessMask::None();
     default:
         TEPHRA_ASSERT(false);
@@ -459,8 +458,6 @@ Descriptor::ResourceType getExpectedResourceType(DescriptorType descriptorType) 
         return Descriptor::ResourceType::Buffer;
     case DescriptorType::StorageBufferDynamic:
         return Descriptor::ResourceType::Buffer;
-    case DescriptorType::InputAttachment:
-        return Descriptor::ResourceType::Image;
     default:
         TEPHRA_ASSERT(descriptorType == IgnoredDescriptorType);
         return Descriptor::ResourceType::None;

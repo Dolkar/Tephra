@@ -100,7 +100,7 @@ public:
     ///     The color of the label. Only used by external tools.
     /// @remarks
     ///     The call will have no effect when tp::ApplicationExtension::EXT_DebugUtils is not enabled.
-    void cmdBeginDebugLabel(const char* name, ArrayParameter<float> color = {});
+    void cmdBeginDebugLabel(const char* name, ArrayParameter<const float> color = {});
 
     /// Inserts a debug label, marking the following commands with the given name and optional color for display in
     /// validation and debugging tools.
@@ -110,7 +110,7 @@ public:
     ///     The color of the label. Only used by external tools.
     /// @remarks
     ///     The call will have no effect when tp::ApplicationExtension::EXT_DebugUtils is not enabled.
-    void cmdInsertDebugLabel(const char* name, ArrayParameter<float> color = {});
+    void cmdInsertDebugLabel(const char* name, ArrayParameter<const float> color = {});
 
     /// Ends the last debug label. Must be preceded by tp::CommandList::cmdBeginDebugLabel.
     /// @remarks

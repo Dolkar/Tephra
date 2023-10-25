@@ -161,19 +161,6 @@ public:
         ArrayParameter<const PushConstantRange> pushConstantRanges = {},
         const char* debugName = nullptr);
 
-    /// Creates a tp::RenderPassLayout object from the given attachment descriptions and subpass layouts.
-    /// @param attachmentDescriptions
-    ///     Describes the layout and properties of attachments that will be used during a render pass
-    ///     executed with this layout.
-    /// @param subpassLayouts
-    ///     Describes the layout and properties of the subpasses inside the render pass created with this layout.
-    /// @param debugName
-    ///     The debug name identifier for the object.
-    RenderPassLayout createRenderPassLayout(
-        ArrayParameter<const AttachmentDescription> attachmentDescriptions,
-        ArrayParameter<const SubpassLayout> subpassLayouts,
-        const char* debugName = nullptr);
-
     /// Creates a tp::DescriptorPool object according to the given setup structure.
     /// @param setup
     ///     The setup structure describing the object.

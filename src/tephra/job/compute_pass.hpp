@@ -25,12 +25,15 @@ public:
         return view(imageAccesses);
     }
 
-    std::vector<VkCommandBufferHandle>& assignDeferred(const ComputePassSetup& setup, std::size_t bufferCount);
+    void assignDeferred(
+        const ComputePassSetup& setup,
+        const DebugTarget& listDebugTarget,
+        ArrayView<ComputeList>& listsToAssign);
 
     void assignInline(
         const ComputePassSetup& setup,
         ComputeInlineCallback recordingCallback,
-        DebugTarget computeListDebugTarget);
+        DebugTarget listDebugTarget);
 
     void recordPass(PrimaryBufferRecorder& recorder);
 
@@ -47,9 +50,9 @@ private:
     bool isInline = false;
     ComputeInlineCallback inlineRecordingCallback;
     DebugTarget inlineListDebugTarget;
-    std::vector<VkCommandBufferHandle> vkPreparedCommandBuffers;
+    std::vector<VkCommandBufferHandle> vkDeferredCommandBuffers;
 
-    void reassign(const ComputePassSetup& setup);
+    void prepareAccesses(const ComputePassSetup& setup);
 };
 
 }

@@ -183,7 +183,7 @@ struct JobRecordStorage {
         std::string name;
         float color[4];
 
-        DebugLabelData(const char* labelName, ArrayParameter<float> labelColor = {})
+        DebugLabelData(const char* labelName, ArrayParameter<const float> labelColor = {})
             : name(labelName ? labelName : std::string()) {
             if (labelColor.size() >= 4)
                 memcpy(color, labelColor.data(), sizeof(float) * 4);

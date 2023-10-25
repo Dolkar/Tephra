@@ -151,9 +151,12 @@ void GraphicsPipelineInfoBuilder::makePipelineSetup(const GraphicsPipelineSetup*
     pipelineInfo.pColorBlendState = makeColorBlendState(pipelineSetup);
     pipelineInfo.pDynamicState = makeDynamicState(pipelineSetup);
 
+    // setup dynamic rendering state
+    pipelineInfo.pNext = makeRenderingState(pipelineSetup, pipelineInfo.pNext);
+
     pipelineInfo.layout = pipelineSetup->pipelineLayout->vkGetPipelineLayoutHandle();
-    pipelineInfo.renderPass = pipelineSetup->renderPassLayout->vkGetTemplateRenderPassHandle();
-    pipelineInfo.subpass = pipelineSetup->subpassIndex;
+    pipelineInfo.renderPass = VK_NULL_HANDLE;
+    pipelineInfo.subpass = 0;
     pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
     pipelineInfo.basePipelineIndex = 0;
 }
@@ -304,10 +307,7 @@ void GraphicsPipelineInfoBuilder::preallocateBlendStates(
 
     std::size_t attachmentStateCount = 0;
     for (const GraphicsPipelineSetup* pipelineSetup : pipelineSetups) {
-        TEPHRA_ASSERT(pipelineSetup->renderPassLayout != nullptr);
-        const RenderPassTemplate* renderPassTemplate = RenderPass::getRenderPassTemplate(
-            *pipelineSetup->renderPassLayout);
-        attachmentStateCount += renderPassTemplate->subpassInfos[pipelineSetup->subpassIndex].colorAttachmentCount;
+        attachmentStateCount += pipelineSetup->colorAttachmentFormats.size();
     }
     blendAttachmentStates.reserve(attachmentStateCount);
 }
@@ -326,8 +326,7 @@ VkPipelineColorBlendStateCreateInfo* GraphicsPipelineInfoBuilder::makeColorBlend
         vkBlendState->colorWriteMask = vkCastConvertibleEnumMask(blendState.writeMask);
     };
 
-    const RenderPassTemplate* renderPassTemplate = RenderPass::getRenderPassTemplate(*pipelineSetup->renderPassLayout);
-    uint32_t colorAttachmentCount = renderPassTemplate->subpassInfos[pipelineSetup->subpassIndex].colorAttachmentCount;
+    uint32_t colorAttachmentCount = static_cast<uint32_t>(pipelineSetup->colorAttachmentFormats.size());
 
     VkPipelineColorBlendStateCreateInfo& createInfo = colorBlendCreateInfos.emplace_back();
     createInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
@@ -444,12 +443,6 @@ VkPipelineRasterizationStateCreateInfo* GraphicsPipelineInfoBuilder::makeRasteri
 VkPipelineMultisampleStateCreateInfo* GraphicsPipelineInfoBuilder::makeMultisampleState(
     const GraphicsPipelineSetup* pipelineSetup) {
     MultisampleLevel multisampleLevel = pipelineSetup->multisampleLevel;
-    if (multisampleLevel == MultisampleLevel::Undefined) {
-        // Set multisample level from render pass
-        const RenderPassTemplate* renderPassTemplate = RenderPass::getRenderPassTemplate(
-            *pipelineSetup->renderPassLayout);
-        multisampleLevel = renderPassTemplate->subpassDefaultMultisampleLevels[pipelineSetup->subpassIndex];
-    }
 
     VkPipelineMultisampleStateCreateInfo& createInfo = multisampleCreateInfos.emplace_back();
     createInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
@@ -483,6 +476,29 @@ VkPipelineDepthStencilStateCreateInfo* GraphicsPipelineInfoBuilder::makeDepthSte
     createInfo.back = vkCastConvertibleStruct(pipelineSetup->backFaceStencilState);
     createInfo.minDepthBounds = pipelineSetup->minDepthBounds;
     createInfo.maxDepthBounds = pipelineSetup->maxDepthBounds;
+    return &createInfo;
+}
+
+VkPipelineRenderingCreateInfo* GraphicsPipelineInfoBuilder::makeRenderingState(
+    const GraphicsPipelineSetup* pipelineSetup,
+    const void* pNext) {
+    VkPipelineRenderingCreateInfo& createInfo = renderingCreateInfos.emplace_back();
+    createInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
+    createInfo.pNext = pNext;
+    createInfo.viewMask = pipelineSetup->viewMask;
+    createInfo.colorAttachmentCount = static_cast<uint32_t>(pipelineSetup->colorAttachmentFormats.size());
+    createInfo.pColorAttachmentFormats = vkCastConvertibleEnumPtr(pipelineSetup->colorAttachmentFormats.data());
+
+    if (pipelineSetup->depthStencilAspects.contains(ImageAspect::Depth))
+        createInfo.depthAttachmentFormat = vkCastConvertibleEnum(pipelineSetup->depthStencilAttachmentFormat);
+    else
+        createInfo.depthAttachmentFormat = VK_FORMAT_UNDEFINED;
+
+    if (pipelineSetup->depthStencilAspects.contains(ImageAspect::Stencil))
+        createInfo.stencilAttachmentFormat = vkCastConvertibleEnum(pipelineSetup->depthStencilAttachmentFormat);
+    else
+        createInfo.stencilAttachmentFormat = VK_FORMAT_UNDEFINED;
+
     return &createInfo;
 }
 

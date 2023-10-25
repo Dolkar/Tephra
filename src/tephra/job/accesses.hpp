@@ -43,13 +43,6 @@ void convertRenderAccessToVkAccess(
 // same optimal image layout.
 VkImageLayout vkGetImageLayoutFromRenderAccess(RenderAccessMask renderMask);
 
-// Converts the Tephra attachment bind point type into useable vulkan synchronization flags
-void convertAttachmentAccessToVkAccess(
-    AttachmentBindPointType bindPointType,
-    bool isReadOnly,
-    VkPipelineStageFlags* stageMask,
-    VkAccessFlags* accessMask);
-
 // Describes the Vulkan properties of a resource access
 struct ResourceAccess {
     VkPipelineStageFlags stageMask;

@@ -7,63 +7,32 @@
 
 namespace tp {
 
-RenderPassLayout::RenderPassLayout() {}
-
-RenderPassLayout::RenderPassLayout(
-    Lifeguard<VkRenderPassHandle>&& templateRenderPassHandle,
-    std::unique_ptr<RenderPassTemplate> renderPassTemplate)
-    : templateRenderPassHandle(std::move(templateRenderPassHandle)),
-      renderPassTemplate(std::move(renderPassTemplate)) {}
-
-RenderPassLayout::RenderPassLayout(RenderPassLayout&&) noexcept = default;
-
-RenderPassLayout& RenderPassLayout::operator=(RenderPassLayout&&) noexcept = default;
-
-RenderPassLayout::~RenderPassLayout() noexcept = default;
-
 void RenderList::beginRecording(CommandPool* commandPool) {
     TEPHRA_DEBUG_SET_CONTEXT(debugTarget.get(), "beginRecording", nullptr);
 
-    TEPHRA_ASSERT(renderPass != nullptr);
     TEPHRA_ASSERT(vkCommandBufferHandle.isNull());
     TEPHRA_ASSERTD(vkFutureCommandBuffer != nullptr, "beginRecording() of inline RenderList");
+    TEPHRA_ASSERTD(vkRenderingInfo.sType == VK_STRUCTURE_TYPE_RENDERING_INFO, "invalid vkRenderingInfo was provided");
 
-    VkCommandBufferBeginInfo beginInfo; // Setup of a one time use command buffer
+    vkCommandBufferHandle = commandPool->acquirePrimaryCommandBuffer(debugTarget->getObjectName());
+
+    // Record to a fresh primary command buffer
+    VkCommandBufferBeginInfo beginInfo;
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
     beginInfo.pNext = nullptr;
     beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
     beginInfo.pInheritanceInfo = nullptr;
 
-    if (renderPass->getExecutionMethod() == RenderPass::ExecutionMethod::PrerecordedRenderPass) {
-        // In this case we record to a standalone primary command buffer that we later append to the batch
-        vkCommandBufferHandle = commandPool->acquirePrimaryCommandBuffer(debugTarget->getObjectName());
-        throwRetcodeErrors(vkiCommands->beginCommandBuffer(vkCommandBufferHandle, &beginInfo));
-        renderPass->recordBeginRenderPass(vkCommandBufferHandle);
-    } else {
-        vkCommandBufferHandle = commandPool->acquireSecondaryCommandBuffer(debugTarget->getObjectName());
+    throwRetcodeErrors(vkiCommands->beginCommandBuffer(vkCommandBufferHandle, &beginInfo));
 
-        VkCommandBufferInheritanceInfo inheritanceInfo;
-        inheritanceInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_INFO;
-        inheritanceInfo.pNext = nullptr;
-        inheritanceInfo.renderPass = renderPass->renderPassHandle.vkGetHandle();
-        inheritanceInfo.subpass = subpassIndex;
-        inheritanceInfo.framebuffer = renderPass->framebufferHandle.vkGetHandle();
-        inheritanceInfo.occlusionQueryEnable = false;
-        inheritanceInfo.queryFlags = 0; // TODO
-        inheritanceInfo.pipelineStatistics = 0; // TODO
-
-        beginInfo.pInheritanceInfo = &inheritanceInfo;
-        beginInfo.flags |= VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT;
-        throwRetcodeErrors(vkiCommands->beginCommandBuffer(vkCommandBufferHandle, &beginInfo));
-    }
+    // Start rendering using the info we were given
+    vkiCommands->cmdBeginRendering(vkCommandBufferHandle, &vkRenderingInfo);
 }
 
 void RenderList::endRecording() {
     TEPHRA_DEBUG_SET_CONTEXT(debugTarget.get(), "endRecording", nullptr);
 
-    if (renderPass->getExecutionMethod() == RenderPass::ExecutionMethod::PrerecordedRenderPass) {
-        vkiCommands->cmdEndRenderPass(vkCommandBufferHandle);
-    }
+    vkiCommands->cmdEndRendering(vkCommandBufferHandle);
     throwRetcodeErrors(vkiCommands->endCommandBuffer(vkCommandBufferHandle));
 
     // The command buffer is ready to be used now
@@ -219,45 +188,47 @@ RenderList::~RenderList() = default;
 RenderList::RenderList(
     const VulkanCommandInterface* vkiCommands,
     VkCommandBufferHandle vkInlineCommandBuffer,
-    const RenderPass* renderPass,
-    uint32_t subpassIndex,
     DebugTarget debugTarget)
     : CommandList(vkiCommands, VK_PIPELINE_BIND_POINT_GRAPHICS, vkInlineCommandBuffer, std::move(debugTarget)),
-      renderPass(renderPass),
-      subpassIndex(subpassIndex) {}
+      vkRenderingInfo() {}
 
 RenderList::RenderList(
     const VulkanCommandInterface* vkiCommands,
     VkCommandBufferHandle* vkFutureCommandBuffer,
-    const RenderPass* renderPass,
-    uint32_t subpassIndex,
+    const VkRenderingInfo& vkRenderingInfo,
     DebugTarget debugTarget)
     : CommandList(vkiCommands, VK_PIPELINE_BIND_POINT_GRAPHICS, vkFutureCommandBuffer, std::move(debugTarget)),
-      renderPass(renderPass),
-      subpassIndex(subpassIndex) {}
+      vkRenderingInfo(vkRenderingInfo) {}
 
 RenderPassSetup::RenderPassSetup(
-    const RenderPassLayout* layout,
-    ArrayView<const RenderPassAttachment> attachments,
+    DepthStencilAttachment depthStencilAttachment,
+    ArrayView<const ColorAttachment> colorAttachments,
     ArrayView<const BufferRenderAccess> bufferAccesses,
     ArrayView<const ImageRenderAccess> imageAccesses,
-    uint32_t layerCount)
-    : layout(layout),
-      attachments(attachments),
+    uint32_t layerCount,
+    uint32_t viewMask)
+    : depthStencilAttachment(std::move(depthStencilAttachment)),
+      colorAttachments(colorAttachments),
       bufferAccesses(bufferAccesses),
       imageAccesses(imageAccesses),
-      layerCount(layerCount) {
+      layerCount(layerCount),
+      viewMask(viewMask) {
     // Set default render area
-    if (!attachments.empty()) {
-        Extent3D minExtent = attachments[0].image.getExtent();
-        for (const RenderPassAttachment& attachment : viewRange(attachments, 1, attachments.size() - 1)) {
+    Extent3D minExtent;
+    if (!depthStencilAttachment.image.isNull())
+        minExtent = depthStencilAttachment.image.getExtent();
+
+    for (const ColorAttachment& attachment : colorAttachments) {
+        if (!attachment.image.isNull()) {
             Extent3D extent = attachment.image.getExtent();
-            minExtent.width = min(minExtent.width, extent.width);
-            minExtent.height = min(minExtent.height, extent.height);
+            minExtent.width = minExtent.width == 0 ? extent.width : min(minExtent.width, extent.width);
+            minExtent.height = minExtent.height == 0 ? extent.height : min(minExtent.height, extent.height);
         }
-        renderArea.extent = Extent2D(minExtent.width, minExtent.height);
-        renderArea.offset = Offset2D(0, 0);
     }
+
+    TEPHRA_ASSERTD(minExtent.width != 0, "Implicit render area constructor used without any valid attachments!");
+    renderArea.extent = Extent2D(minExtent.width, minExtent.height);
+    renderArea.offset = Offset2D(0, 0);
 }
 
 }

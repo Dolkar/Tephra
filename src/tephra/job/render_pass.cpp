@@ -6,579 +6,237 @@
 
 namespace tp {
 
-bool AttachmentAccess::isSplitAccess() const {
-    return firstAccess.stageMask != lastAccess.stageMask || firstAccess.accessMask != lastAccess.accessMask ||
-        firstLayout != lastLayout;
-}
+void AttachmentAccess::convertToVkAccess(
+    ImageAccessRange* rangePtr,
+    ResourceAccess* accessPtr,
+    VkImageLayout* layoutPtr) const {
+    TEPHRA_ASSERT(!imageView.isNull());
+    *rangePtr = imageView.getWholeRange();
+    *layoutPtr = layout;
 
-void countAttachmentReferences(
-    ArrayView<const AttachmentBinding> attachmentBindings,
-    uint32_t* inputAttachmentCount,
-    uint32_t* colorAttachmentCount,
-    bool* hasResolveAttachments,
-    bool* hasDepthStencilAttachment) {
-    *inputAttachmentCount = 0;
-    *colorAttachmentCount = 0;
-    *hasResolveAttachments = false;
-    *hasDepthStencilAttachment = false;
-
-    for (const AttachmentBinding& binding : attachmentBindings) {
-        switch (binding.bindPoint.type) {
-        case AttachmentBindPointType::Input:
-            *inputAttachmentCount = tp::max(*inputAttachmentCount, binding.bindPoint.number + 1);
-            break;
-        case AttachmentBindPointType::Color:
-            *colorAttachmentCount = tp::max(*colorAttachmentCount, binding.bindPoint.number + 1);
-            break;
-        case AttachmentBindPointType::ResolveFromColor:
-            *colorAttachmentCount = tp::max(*colorAttachmentCount, binding.bindPoint.number + 1);
-            *hasResolveAttachments = true;
-            break;
-        case AttachmentBindPointType::DepthStencil:
-            *hasDepthStencilAttachment = true;
-            break;
-        default:
-            break;
-        }
+    // Deduce Vulkan access from just the layout chosen in prepareRendering:
+    // TODO: Sync2
+    switch (layout) {
+    case VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL:
+        accessPtr->accessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+        accessPtr->stageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+        break;
+    case VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_OPTIMAL:
+        accessPtr->stageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+        accessPtr->accessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
+        rangePtr->aspectMask = ImageAspect::Depth;
+        break;
+    case VK_IMAGE_LAYOUT_STENCIL_READ_ONLY_OPTIMAL:
+        accessPtr->stageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+        accessPtr->accessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
+        rangePtr->aspectMask = ImageAspect::Stencil;
+        break;
+    case VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL:
+        accessPtr->stageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+        accessPtr->accessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+        rangePtr->aspectMask = ImageAspect::Depth;
+        break;
+    case VK_IMAGE_LAYOUT_STENCIL_ATTACHMENT_OPTIMAL:
+        accessPtr->stageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+        accessPtr->accessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+        rangePtr->aspectMask = ImageAspect::Stencil;
+        break;
+    default:
+        TEPHRA_ASSERTD(false, "Unexpected layout");
     }
 }
 
-// Fills Vulkan attachment references for the subpass description from the given bindings
-void fillAttachmentReferences(
-    ArrayView<const AttachmentBinding> attachmentBindings,
-    ArrayView<VkAttachmentReference> attachmentReferences,
-    uint32_t* attachmentReferenceOffset,
-    VkSubpassDescription* subpassInfo) {
-    // TODO: Handle using the same attachment in multiple bindings, can use depth stencil readonly layouts for input,
-    // too
+void RenderPass::assignDeferred(
+    const RenderPassSetup& setup,
+    const DebugTarget& listDebugTarget,
+    ArrayView<RenderList>& listsToAssign) {
+    prepareNonAttachmentAccesses(setup);
 
-    bool hasResolveAttachments;
-    bool hasDepthStencilAttachment;
-    countAttachmentReferences(
-        attachmentBindings,
-        &subpassInfo->inputAttachmentCount,
-        &subpassInfo->colorAttachmentCount,
-        &hasResolveAttachments,
-        &hasDepthStencilAttachment);
+    isInline = false;
+    inlineRecordingCallback = {};
+    inlineListDebugTarget = DebugTarget::makeSilent();
 
-    VkAttachmentReference* pInputAttachments = attachmentReferences.data() + *attachmentReferenceOffset;
-    (*attachmentReferenceOffset) += subpassInfo->inputAttachmentCount;
-    VkAttachmentReference* pColorAttachments = attachmentReferences.data() + *attachmentReferenceOffset;
-    (*attachmentReferenceOffset) += subpassInfo->colorAttachmentCount;
-    VkAttachmentReference* pResolveAttachments = nullptr;
-    if (hasResolveAttachments) {
-        pResolveAttachments = attachmentReferences.data() + *attachmentReferenceOffset;
-        (*attachmentReferenceOffset) += subpassInfo->colorAttachmentCount;
-    }
-    VkAttachmentReference* pDepthStencilAttachment = nullptr;
-    if (hasDepthStencilAttachment) {
-        pDepthStencilAttachment = attachmentReferences.data() + *attachmentReferenceOffset;
-        (*attachmentReferenceOffset)++;
-    }
+    // Create space for empty command buffers and pass pointers to them to each list.
+    // They will be filled out once recorded
+    TEPHRA_ASSERT(listsToAssign.size() > 0);
+    vkDeferredCommandBuffers.clear();
+    vkDeferredCommandBuffers.resize(listsToAssign.size());
 
-    subpassInfo->pInputAttachments = pInputAttachments;
-    subpassInfo->pColorAttachments = pColorAttachments;
-    subpassInfo->pResolveAttachments = pResolveAttachments;
-    subpassInfo->pDepthStencilAttachment = pDepthStencilAttachment;
+    // Create render lists. We want them all to be a part of the same render pass, so we add
+    // suspend and resume flags as necessary
+    VkRenderingInfo vkRenderingInfo = prepareRendering(setup);
+    VkRenderingFlags baseRenderingFlags = vkRenderingInfo.flags;
 
-    for (const AttachmentBinding& binding : attachmentBindings) {
-        switch (binding.bindPoint.type) {
-        case AttachmentBindPointType::Input: {
-            VkAttachmentReference& attachmentReference = *(pInputAttachments + binding.bindPoint.number);
-            attachmentReference.attachment = binding.attachmentIndex;
-            attachmentReference.layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-            break;
-        }
-        case AttachmentBindPointType::Color: {
-            VkAttachmentReference& attachmentReference = *(pColorAttachments + binding.bindPoint.number);
-            attachmentReference.attachment = binding.attachmentIndex;
-            attachmentReference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-            break;
-        }
-        case AttachmentBindPointType::ResolveFromColor: {
-            TEPHRA_ASSERT(pResolveAttachments != nullptr);
-            VkAttachmentReference& attachmentReference = *(pResolveAttachments + binding.bindPoint.number);
-            attachmentReference.attachment = binding.attachmentIndex;
-            attachmentReference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-            break;
-        }
-        case AttachmentBindPointType::DepthStencil: {
-            TEPHRA_ASSERT(pDepthStencilAttachment != nullptr);
-            VkAttachmentReference& attachmentReference = *pDepthStencilAttachment;
-            attachmentReference.attachment = binding.attachmentIndex;
-            if (binding.bindPoint.isReadOnly)
-                attachmentReference.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
-            else
-                attachmentReference.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-            break;
-        }
-        default:
-            break;
-        }
-    }
+    for (std::size_t i = 0; i < listsToAssign.size(); i++) {
+        vkRenderingInfo.flags = baseRenderingFlags;
+        if (i != 0) // not first
+            vkRenderingInfo.flags |= VK_RENDERING_RESUMING_BIT;
+        if (i + 1 != listsToAssign.size()) // not last
+            vkRenderingInfo.flags |= VK_RENDERING_SUSPENDING_BIT;
 
-    // Preserve attachments get filled elsewhere as that requires knowledge of other subpasses
-}
-
-RenderPassTemplate::RenderPassTemplate(
-    DeviceContainer* deviceImpl,
-    ArrayParameter<const AttachmentDescription> attachmentDescriptions,
-    ArrayParameter<const SubpassLayout> subpassLayouts)
-    : deviceImpl(deviceImpl) {
-    // Count attachment references
-    std::size_t attachmentReferenceCount = 0;
-    for (const SubpassLayout& subpassLayout : subpassLayouts) {
-        uint32_t inputAttachmentCount;
-        uint32_t colorAttachmentCount;
-        bool hasResolveAttachments;
-        bool hasDepthStencilAttachment;
-        countAttachmentReferences(
-            subpassLayout.bindings,
-            &inputAttachmentCount,
-            &colorAttachmentCount,
-            &hasResolveAttachments,
-            &hasDepthStencilAttachment);
-
-        uint32_t totalAttachmentCount = inputAttachmentCount + colorAttachmentCount +
-            (hasDepthStencilAttachment ? 1 : 0) + (hasResolveAttachments ? colorAttachmentCount : 0);
-
-        // Sanity check
-        TEPHRA_ASSERT(totalAttachmentCount < 32);
-
-        attachmentReferenceCount += totalAttachmentCount;
-    }
-
-    attachmentReferences.resize(attachmentReferenceCount);
-    for (std::size_t i = 0; i < attachmentReferenceCount; i++) {
-        attachmentReferences[i].attachment = VK_ATTACHMENT_UNUSED;
-        attachmentReferences[i].layout = VK_IMAGE_LAYOUT_UNDEFINED;
-    }
-
-    // Fill subpass descriptions and attachment references
-    // Also gather the details of the first and last use of each attachment
-    // This is needed to deduce what attachments need to be preserved and for later synchronization
-    // against the renderpass
-    ScratchVector<std::pair<uint32_t, uint32_t>> attachmentFirstLastUses;
-    attachmentFirstLastUses.resize(attachmentDescriptions.size(), { ~0, 0 });
-    attachmentAccesses.resize(attachmentDescriptions.size());
-
-    subpassInfos.reserve(subpassLayouts.size());
-    uint32_t attachmentReferenceOffset = 0;
-    for (uint32_t subpassIndex = 0; subpassIndex < subpassLayouts.size(); subpassIndex++) {
-        const SubpassLayout& subpassLayout = subpassLayouts[subpassIndex];
-        VkSubpassDescription subpassInfo;
-        subpassInfo.flags = 0;
-        subpassInfo.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-
-        uint32_t firstAttachment = attachmentReferenceOffset;
-        fillAttachmentReferences(
-            subpassLayout.bindings, view(attachmentReferences), &attachmentReferenceOffset, &subpassInfo);
-        uint32_t lastAttachment = attachmentReferenceOffset;
-
-        subpassInfos.push_back(subpassInfo);
-
-        for (const AttachmentBinding& binding : subpassLayout.bindings) {
-            AttachmentAccess& attachmentAccess = attachmentAccesses[binding.attachmentIndex];
-            std::pair<uint32_t, uint32_t>& attachmentFirstLastUse = attachmentFirstLastUses[binding.attachmentIndex];
-            uint32_t& firstAttachmentUse = attachmentFirstLastUse.first;
-            uint32_t& lastAttachmentUse = attachmentFirstLastUse.second;
-
-            if (subpassIndex < firstAttachmentUse) {
-                firstAttachmentUse = subpassIndex;
-                attachmentAccess.firstAccess = {};
-            }
-            if (subpassIndex == firstAttachmentUse) {
-                ResourceAccess newAccess;
-                convertAttachmentAccessToVkAccess(
-                    binding.bindPoint.type, binding.bindPoint.isReadOnly, &newAccess.stageMask, &newAccess.accessMask);
-                attachmentAccess.firstAccess = attachmentAccess.firstAccess | newAccess;
-            }
-
-            if (subpassIndex > lastAttachmentUse) {
-                lastAttachmentUse = subpassIndex;
-                attachmentAccess.lastAccess = {};
-            }
-            if (subpassIndex == lastAttachmentUse) {
-                ResourceAccess newAccess;
-                convertAttachmentAccessToVkAccess(
-                    binding.bindPoint.type, binding.bindPoint.isReadOnly, &newAccess.stageMask, &newAccess.accessMask);
-                attachmentAccess.lastAccess = attachmentAccess.lastAccess | newAccess;
-            }
-        }
-
-        for (uint32_t i = firstAttachment; i < lastAttachment; i++) {
-            const VkAttachmentReference& attachmentReference = attachmentReferences[i];
-            if (attachmentReference.attachment == VK_ATTACHMENT_UNUSED)
-                continue;
-
-            AttachmentAccess& attachmentAccess = attachmentAccesses[attachmentReference.attachment];
-            const std::pair<uint32_t, uint32_t>& attachmentFirstLastUse =
-                attachmentFirstLastUses[attachmentReference.attachment];
-            uint32_t firstAttachmentUse = attachmentFirstLastUse.first;
-            uint32_t lastAttachmentUse = attachmentFirstLastUse.second;
-
-            // First and last attachment uses were already set in the previous loop
-            if (subpassIndex == firstAttachmentUse) {
-                attachmentAccess.firstLayout = attachmentReference.layout;
-            }
-            if (subpassIndex == lastAttachmentUse) {
-                attachmentAccess.lastLayout = attachmentReference.layout;
-            }
-        }
-    }
-
-    attachmentInfos.reserve(attachmentDescriptions.size());
-    // Fill what we can for attachment descriptions
-    for (uint32_t attachmentIndex = 0; attachmentIndex < attachmentDescriptions.size(); attachmentIndex++) {
-        const AttachmentDescription& attachment = attachmentDescriptions[attachmentIndex];
-        const AttachmentAccess& attachmentAccess = attachmentAccesses[attachmentIndex];
-
-        VkAttachmentDescription attachmentInfo;
-        attachmentInfo.flags = 0; // Should never alias?
-        attachmentInfo.format = vkCastConvertibleEnum(attachment.format);
-        attachmentInfo.samples = vkCastConvertibleEnum(attachment.sampleCount);
-        // Specialized in individual derivatives, covered by Renderpass compatibility
-        attachmentInfo.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-        attachmentInfo.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-        attachmentInfo.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-        attachmentInfo.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-        attachmentInfo.initialLayout = attachmentAccess.firstLayout;
-        VkImageLayout finalLayout = attachmentAccess.lastLayout;
-        if (finalLayout == VK_IMAGE_LAYOUT_UNDEFINED) {
-            // finalLayout cannot be undefined, but attachment is unused
-            finalLayout = VK_IMAGE_LAYOUT_GENERAL;
-        }
-        attachmentInfo.finalLayout = finalLayout;
-        attachmentInfos.push_back(attachmentInfo);
-    }
-
-    // Allocate preserve attachments for the worst case
-    preserveAttachmentReferences.resize(subpassLayouts.size() * attachmentDescriptions.size());
-
-    // Deduce preserve attachments
-    uint32_t preserveAttachmentOffset = 0;
-    for (uint32_t subpassIndex = 0; subpassIndex < subpassLayouts.size(); subpassIndex++) {
-        const SubpassLayout& subpassLayout = subpassLayouts[subpassIndex];
-        VkSubpassDescription& subpassDescription = subpassInfos[subpassIndex];
-
-        subpassDescription.preserveAttachmentCount = 0;
-        subpassDescription.pPreserveAttachments = preserveAttachmentReferences.data() + preserveAttachmentOffset;
-
-        for (uint32_t attachmentIndex = 0; attachmentIndex < attachmentDescriptions.size(); attachmentIndex++) {
-            auto [attachmentFirstUse, attachmentLastUse] = attachmentFirstLastUses[attachmentIndex];
-            bool shouldPreserve = subpassIndex >= attachmentFirstUse && subpassIndex <= attachmentLastUse;
-
-            bool usesAttachment = false;
-            for (const AttachmentBinding& binding : subpassLayout.bindings) {
-                if (binding.attachmentIndex == attachmentIndex) {
-                    usesAttachment = true;
-                    break;
-                }
-            }
-
-            if (shouldPreserve && !usesAttachment) { // Need to add a preserve attachment reference
-                preserveAttachmentReferences[preserveAttachmentOffset++] = attachmentIndex;
-                subpassDescription.preserveAttachmentCount++;
-            }
-        }
-    }
-
-    // Handle subpass dependenciess
-    std::size_t subpassDependencyCount = 0;
-    for (const SubpassLayout& subpassLayout : subpassLayouts) {
-        subpassDependencyCount += subpassLayout.dependencies.size();
-    }
-    dependencyInfos.reserve(subpassDependencyCount);
-
-    for (uint32_t subpassIndex = 0; subpassIndex < subpassLayouts.size(); subpassIndex++) {
-        const SubpassLayout& subpassLayout = subpassLayouts[subpassIndex];
-        for (const SubpassDependency& dependency : subpassLayout.dependencies) {
-            VkSubpassDependency dependencyInfo;
-            dependencyInfo.srcSubpass = dependency.sourceSubpassIndex;
-            dependencyInfo.dstSubpass = subpassIndex;
-
-            bool isAtomic;
-            convertRenderAccessToVkAccess(
-                dependency.additionalSourceAccessMask,
-                &dependencyInfo.srcStageMask,
-                &dependencyInfo.srcAccessMask,
-                &isAtomic);
-            convertRenderAccessToVkAccess(
-                dependency.additionalDestinationAccessMask,
-                &dependencyInfo.dstStageMask,
-                &dependencyInfo.dstAccessMask,
-                &isAtomic);
-
-            dependencyInfo.dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
-
-            // Deduce dependencies between render pass attachments
-            for (const AttachmentBinding& srcBinding : subpassLayouts[dependency.sourceSubpassIndex].bindings) {
-                for (const AttachmentBinding& dstBinding : subpassLayout.bindings) {
-                    if (srcBinding.attachmentIndex == dstBinding.attachmentIndex &&
-                        (!srcBinding.bindPoint.isReadOnly || !dstBinding.bindPoint.isReadOnly)) {
-                        // Update source dependency
-                        VkPipelineStageFlags stageMask;
-                        VkAccessFlags accessMask;
-                        convertAttachmentAccessToVkAccess(
-                            srcBinding.bindPoint.type, srcBinding.bindPoint.isReadOnly, &stageMask, &accessMask);
-                        dependencyInfo.srcStageMask |= stageMask;
-                        dependencyInfo.srcAccessMask |= accessMask;
-
-                        // Update destination dependency
-                        convertAttachmentAccessToVkAccess(
-                            dstBinding.bindPoint.type, dstBinding.bindPoint.isReadOnly, &stageMask, &accessMask);
-                        dependencyInfo.dstStageMask |= stageMask;
-                        dependencyInfo.dstAccessMask |= accessMask;
-                    }
-                }
-            }
-
-            dependencyInfos.push_back(dependencyInfo);
-        }
-    }
-
-    // Finally, find a good multisample level default. Using the attachments from the layout will work 99% of the time.
-    subpassDefaultMultisampleLevels.reserve(subpassLayouts.size());
-    for (uint32_t subpassIndex = 0; subpassIndex < subpassLayouts.size(); subpassIndex++) {
-        const SubpassLayout& subpassLayout = subpassLayouts[subpassIndex];
-        uint32_t multisampleLevel = static_cast<uint32_t>(MultisampleLevel::x1);
-
-        for (const AttachmentBinding& binding : subpassLayout.bindings) {
-            uint32_t bindingLevel = static_cast<uint32_t>(attachmentDescriptions[binding.attachmentIndex].sampleCount);
-            multisampleLevel = tp::max(multisampleLevel, bindingLevel);
-        }
-
-        subpassDefaultMultisampleLevels.push_back(static_cast<MultisampleLevel>(multisampleLevel));
+        listsToAssign[i] = RenderList(
+            &deviceImpl->getCommandPoolPool()->getVkiCommands(),
+            &vkDeferredCommandBuffers[i],
+            vkRenderingInfo,
+            listDebugTarget);
     }
 }
 
-void RenderPass::assignSetup(const RenderPassSetup& setup, const char* debugName) {
-    // Cleanup and reuse existing resources
+void RenderPass::assignInline(
+    const RenderPassSetup& setup,
+    RenderInlineCallback recordingCallback,
+    DebugTarget listDebugTarget) {
+    prepareNonAttachmentAccesses(setup);
+
+    isInline = true;
+    inlineRecordingCallback = std::move(recordingCallback);
+    inlineListDebugTarget = std::move(listDebugTarget);
+    vkInlineRenderingInfo = prepareRendering(setup);
+    vkDeferredCommandBuffers.clear();
+}
+
+void RenderPass::resolveAttachmentViews() {
+    TEPHRA_ASSERT(vkRenderingAttachments.size() * 2 == attachmentAccesses.size());
+
+    // Map attachment accesses to rendering attachments and resolve the images now that it's safe to do so
+    for (std::size_t i = 0; i < vkRenderingAttachments.size(); i++) {
+        VkRenderingAttachmentInfo& vkAttachment = vkRenderingAttachments[i];
+
+        vkAttachment.imageView = attachmentAccesses[i * 2].imageView.vkGetImageViewHandle();
+        TEPHRA_ASSERT(vkAttachment.imageLayout == attachmentAccesses[i * 2].layout);
+
+        vkAttachment.resolveImageView = attachmentAccesses[i * 2 + 1].imageView.vkGetImageViewHandle();
+        TEPHRA_ASSERT(vkAttachment.resolveImageLayout == attachmentAccesses[i * 2 + 1].layout);
+    }
+}
+
+void RenderPass::recordPass(PrimaryBufferRecorder& recorder) {
+    if (isInline) {
+        // Begin and end rendering here
+        VkCommandBufferHandle vkCommandBufferHandle = recorder.requestBuffer();
+        recorder.getVkiCommands().cmdBeginRendering(vkCommandBufferHandle, &vkInlineRenderingInfo);
+
+        // Call the inline command recorder callback
+        RenderList inlineList = RenderList(
+            &recorder.getVkiCommands(), vkCommandBufferHandle, std::move(inlineListDebugTarget));
+        inlineRecordingCallback(inlineList);
+
+        recorder.getVkiCommands().cmdEndRendering(vkCommandBufferHandle);
+    } else {
+        for (VkCommandBufferHandle vkCommandBuffer : vkDeferredCommandBuffers) {
+            if (!vkCommandBuffer.isNull())
+                recorder.appendBuffer(vkCommandBuffer);
+        }
+    }
+}
+
+void RenderPass::prepareNonAttachmentAccesses(const RenderPassSetup& setup) {
     bufferAccesses.clear();
     bufferAccesses.insert(bufferAccesses.begin(), setup.bufferAccesses.begin(), setup.bufferAccesses.end());
     imageAccesses.clear();
     imageAccesses.insert(imageAccesses.begin(), setup.imageAccesses.begin(), setup.imageAccesses.end());
+}
 
-    const RenderPassTemplate* renderPassTemplate = setup.layout->renderPassTemplate.get();
+VkRenderingInfo RenderPass::prepareRendering(const RenderPassSetup& setup) {
+    VkRenderingInfo renderingInfo;
+    renderingInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO_KHR;
+    renderingInfo.pNext = nullptr;
+    // We add resuming / suspending flags later depending on the method
+    renderingInfo.flags = 0;
+    renderingInfo.renderArea = setup.renderArea;
+    renderingInfo.layerCount = setup.layerCount;
+    renderingInfo.viewMask = setup.viewMask;
 
-    TEPHRA_ASSERT(setup.attachments.size() == renderPassTemplate->attachmentInfos.size());
+    // Prepare attachments, but we can't resolve the images yet
+    vkRenderingAttachments.clear();
     attachmentAccesses.clear();
-    attachmentAccesses.reserve(setup.attachments.size());
-    attachmentClearValues.clear();
-    attachmentClearValues.reserve(setup.attachments.size());
+    auto addAttachmentRef = [this](const ImageView& imageView, VkImageLayout layout) {
+        this->attachmentAccesses.push_back({ imageView, layout });
+        return VK_NULL_HANDLE;
+    };
 
-    for (uint32_t attachmentIndex = 0; attachmentIndex < setup.attachments.size(); attachmentIndex++) {
-        const RenderPassAttachment& renderPassAttachment = setup.attachments[attachmentIndex];
-        AttachmentAccess templateAccess = renderPassTemplate->attachmentAccesses[attachmentIndex];
-        templateAccess.image = renderPassAttachment.image;
-        attachmentAccesses.emplace_back(std::move(templateAccess));
-        attachmentClearValues.push_back(renderPassAttachment.clearValue);
-    }
+    // Depth and stencil attachments
+    {
+        const DepthStencilAttachment& attachment = setup.depthStencilAttachment;
 
-    subpasses.resize(renderPassTemplate->subpassInfos.size());
-    renderArea = setup.renderArea;
-    layerCount = setup.layerCount;
+        // Prepare common fields
+        VkRenderingAttachmentInfo vkAttachmentCommon;
+        vkAttachmentCommon.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+        vkAttachmentCommon.pNext = nullptr;
 
-    // Modify render pass attachments and accesses to fit the specific usage of this render pass
-    ScratchVector<VkAttachmentDescription> attachmentInfos;
-    attachmentInfos.insert(
-        attachmentInfos.begin(),
-        renderPassTemplate->attachmentInfos.begin(),
-        renderPassTemplate->attachmentInfos.end());
+        vkAttachmentCommon.clearValue = attachment.clearValue.vkValue;
+        bool hasResolve = !attachment.resolveImage.isNull();
+        vkAttachmentCommon.resolveMode = hasResolve ? vkCastConvertibleEnum(attachment.resolveMode) :
+                                                      VK_RESOLVE_MODE_NONE;
 
-    for (uint32_t attachmentIndex = 0; attachmentIndex < setup.attachments.size(); attachmentIndex++) {
-        const RenderPassAttachment& renderPassAttachment = setup.attachments[attachmentIndex];
-        VkAttachmentDescription& attachmentInfo = attachmentInfos[attachmentIndex];
-        FormatClassProperties attachmentFormatProperties = getFormatClassProperties(
-            renderPassAttachment.image.getFormat());
-        bool hasDepthAspect = attachmentFormatProperties.aspectMask.contains(ImageAspect::Depth);
-        bool hasStencilAspect = attachmentFormatProperties.aspectMask.contains(ImageAspect::Stencil);
-        bool hasColorAspect = attachmentFormatProperties.aspectMask.contains(ImageAspect::Color);
+        bool hasImage = !attachment.image.isNull();
+        bool hasDepth = hasImage && attachment.image.getWholeRange().aspectMask.contains(ImageAspect::Depth);
+        bool hasStencil = hasImage && attachment.image.getWholeRange().aspectMask.contains(ImageAspect::Stencil);
 
-        // Update first and last accesses according to load and store ops
-        AttachmentAccess& attachmentAccess = attachmentAccesses[attachmentIndex];
+        { // Depth attachment
+            VkRenderingAttachmentInfo vkDepthAttachment = vkAttachmentCommon;
+            vkDepthAttachment.loadOp = vkCastConvertibleEnum(attachment.depthLoadOp);
+            vkDepthAttachment.storeOp = vkCastConvertibleEnum(attachment.depthStoreOp);
 
-        ResourceAccess loadAccess;
-        if (hasColorAspect) {
-            loadAccess.stageMask |= VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-            if (renderPassAttachment.loadOp == AttachmentLoadOp::Load)
-                loadAccess.accessMask |= VK_ACCESS_COLOR_ATTACHMENT_READ_BIT;
+            if (attachment.depthReadOnly)
+                vkDepthAttachment.imageLayout = VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_OPTIMAL;
             else
-                loadAccess.accessMask |= VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+                vkDepthAttachment.imageLayout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;
+            vkDepthAttachment.imageView = addAttachmentRef(
+                hasDepth ? attachment.image : ImageView(), vkDepthAttachment.imageLayout);
+
+            vkDepthAttachment.resolveImageLayout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;
+            vkDepthAttachment.resolveImageView = addAttachmentRef(
+                hasDepth ? attachment.resolveImage : ImageView(), vkDepthAttachment.resolveImageLayout);
+
+            vkRenderingAttachments.push_back(vkDepthAttachment);
         }
-        if (hasDepthAspect) {
-            loadAccess.stageMask |= VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-            if (renderPassAttachment.loadOp == AttachmentLoadOp::Load)
-                loadAccess.accessMask |= VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
+
+        { // Stencil attachment
+            VkRenderingAttachmentInfo vkStencilAttachment = vkAttachmentCommon;
+            vkStencilAttachment.loadOp = vkCastConvertibleEnum(attachment.stencilLoadOp);
+            vkStencilAttachment.storeOp = vkCastConvertibleEnum(attachment.stencilStoreOp);
+
+            if (attachment.stencilReadOnly)
+                vkStencilAttachment.imageLayout = VK_IMAGE_LAYOUT_STENCIL_READ_ONLY_OPTIMAL;
             else
-                loadAccess.accessMask |= VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-        }
-        if (hasStencilAspect) {
-            loadAccess.stageMask |= VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-            if (renderPassAttachment.stencilLoadOp == AttachmentLoadOp::Load)
-                loadAccess.accessMask |= VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
-            else
-                loadAccess.accessMask |= VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-        }
+                vkStencilAttachment.imageLayout = VK_IMAGE_LAYOUT_STENCIL_ATTACHMENT_OPTIMAL;
+            vkStencilAttachment.imageView = addAttachmentRef(
+                hasStencil ? attachment.image : ImageView(), vkStencilAttachment.imageLayout);
 
-        ResourceAccess storeAccess;
-        if (hasColorAspect) {
-            storeAccess = ResourceAccess(
-                VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT);
-        } else { // Depth or stencil aspect
-            storeAccess = ResourceAccess(
-                VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT, VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT);
+            vkStencilAttachment.resolveImageLayout = VK_IMAGE_LAYOUT_STENCIL_ATTACHMENT_OPTIMAL;
+            vkStencilAttachment.resolveImageView = addAttachmentRef(
+                hasStencil ? attachment.resolveImage : ImageView(), vkStencilAttachment.resolveImageLayout);
+
+            vkRenderingAttachments.push_back(vkStencilAttachment);
         }
-
-        // TODO: Not entirely sure about this, but we might need to synchronize against both the load/store ops
-        // and the first / last accesses. Do so just to be on the safe side.
-        attachmentAccess.firstAccess |= loadAccess;
-        attachmentAccess.lastAccess |= storeAccess;
-        // TODO: Cannot use VK_IMAGE_LAYOUT_UNDEFINED together with synchronizing through pipeline barriers
-        // Undefined -> Undefined transition isn't valid
-        // attachmentAccess.firstLayout = attachmentLoaded ? attachmentAccess.firstLayout : VK_IMAGE_LAYOUT_UNDEFINED;
-
-        attachmentInfo.loadOp = vkCastConvertibleEnum(renderPassAttachment.loadOp);
-        attachmentInfo.storeOp = vkCastConvertibleEnum(renderPassAttachment.storeOp);
-        attachmentInfo.stencilLoadOp = vkCastConvertibleEnum(renderPassAttachment.stencilLoadOp);
-        attachmentInfo.stencilStoreOp = vkCastConvertibleEnum(renderPassAttachment.stencilStoreOp);
-        attachmentInfo.initialLayout = attachmentAccess.firstLayout;
-        attachmentInfo.finalLayout = attachmentAccess.lastLayout;
     }
 
-    VkRenderPassHandle vkRenderPassHandle = deviceImpl->getLogicalDevice()->createRenderPass(
-        view(attachmentInfos), view(renderPassTemplate->subpassInfos), view(renderPassTemplate->dependencyInfos));
+    // Color attachments
+    for (const ColorAttachment& attachment : setup.colorAttachments) {
+        VkRenderingAttachmentInfo& vkAttachment = vkRenderingAttachments.emplace_back();
+        vkAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+        vkAttachment.pNext = nullptr;
+        vkAttachment.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        vkAttachment.imageView = addAttachmentRef(attachment.image, vkAttachment.imageLayout);
 
-    deviceImpl->getLogicalDevice()->setObjectDebugName(vkRenderPassHandle, debugName);
+        bool hasResolve = !attachment.resolveImage.isNull();
+        vkAttachment.resolveMode = hasResolve ? vkCastConvertibleEnum(attachment.resolveMode) : VK_RESOLVE_MODE_NONE;
+        vkAttachment.resolveImageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        vkAttachment.resolveImageView = addAttachmentRef(attachment.resolveImage, vkAttachment.resolveImageLayout);
 
-    renderPassHandle = deviceImpl->vkMakeHandleLifeguard(vkRenderPassHandle);
-
-    framebufferHandle.destroyHandle();
-}
-
-std::vector<VkCommandBufferHandle>& RenderPass::assignDeferredSubpass(uint32_t subpassIndex, std::size_t bufferCount) {
-    TEPHRA_ASSERT(subpassIndex < subpasses.size());
-    return subpasses[subpassIndex].assignDeferred(bufferCount);
-}
-
-void RenderPass::assignInlineSubpass(
-    uint32_t subpassIndex,
-    RenderInlineCallback recordingCallback,
-    DebugTarget renderListDebugTarget) {
-    TEPHRA_ASSERT(subpassIndex < subpasses.size());
-    subpasses[subpassIndex].assignInline(std::move(recordingCallback), std::move(renderListDebugTarget));
-}
-
-void RenderPass::createFramebuffer() {
-    ScratchVector<VkImageViewHandle> attachmentImages;
-    attachmentImages.reserve(attachmentAccesses.size());
-
-    for (uint32_t attachmentIndex = 0; attachmentIndex < attachmentAccesses.size(); attachmentIndex++) {
-        const ImageView& attachmentImage = attachmentAccesses[attachmentIndex].image;
-        attachmentImages.push_back(attachmentImage.vkGetImageViewHandle());
+        vkAttachment.clearValue = attachment.clearValue.vkValue;
+        vkAttachment.loadOp = vkCastConvertibleEnum(attachment.loadOp);
+        vkAttachment.storeOp = vkCastConvertibleEnum(attachment.storeOp);
     }
 
-    VkFramebufferHandle vkFramebufferHandle = deviceImpl->getLogicalDevice()->createFramebuffer(
-        renderPassHandle.vkGetHandle(),
-        view(attachmentImages),
-        renderArea.offset.x + renderArea.extent.width,
-        renderArea.offset.y + renderArea.extent.height,
-        layerCount);
+    // Assign pointers now that vkRenderingAttachments is final
+    renderingInfo.pDepthAttachment = &vkRenderingAttachments[0];
+    renderingInfo.pStencilAttachment = &vkRenderingAttachments[1];
+    renderingInfo.colorAttachmentCount = static_cast<uint32_t>(vkRenderingAttachments.size() - 2);
+    renderingInfo.pColorAttachments = vkRenderingAttachments.data() + 2;
 
-    framebufferHandle = deviceImpl->vkMakeHandleLifeguard(vkFramebufferHandle);
-}
-
-RenderPass::ExecutionMethod RenderPass::getExecutionMethod() const {
-    TEPHRA_ASSERT(!subpasses.empty());
-
-    if (subpasses.size() == 1 && subpasses[0].vkPreparedCommandBuffers.size() == 1)
-        return ExecutionMethod::PrerecordedRenderPass;
-    else
-        return ExecutionMethod::General;
-}
-
-void RenderPass::recordPass(PrimaryBufferRecorder& recorder) {
-    const VulkanCommandInterface* vkiCommands = &deviceImpl->getCommandPoolPool()->getVkiCommands();
-    TEPHRA_ASSERT(!subpasses.empty());
-
-    ExecutionMethod executionMethod = getExecutionMethod();
-    if (executionMethod == ExecutionMethod::PrerecordedRenderPass) {
-        if (!subpasses[0].vkPreparedCommandBuffers[0].isNull())
-            recorder.appendBuffer(subpasses[0].vkPreparedCommandBuffers[0]);
-    } else {
-        TEPHRA_ASSERT(executionMethod == ExecutionMethod::General);
-        recordBeginRenderPass(recorder.requestBuffer());
-
-        for (uint32_t subpassIndex = 0; subpassIndex < subpasses.size(); subpassIndex++) {
-            Subpass& subpass = subpasses[subpassIndex];
-            if (subpass.isInline) {
-                auto inlineList = RenderList(
-                    vkiCommands, recorder.requestBuffer(), this, ~0u, std::move(subpass.inlineListDebugTarget));
-                subpass.inlineRecordingCallback(inlineList);
-            } else if (!subpass.vkPreparedCommandBuffers.empty()) {
-                vkiCommands->cmdExecuteCommands(
-                    recorder.requestBuffer(),
-                    static_cast<uint32_t>(subpass.vkPreparedCommandBuffers.size()),
-                    vkCastTypedHandlePtr(subpass.vkPreparedCommandBuffers.data()));
-            }
-
-            if (subpassIndex + 1 < subpasses.size()) {
-                recordNextSubpass(recorder.requestBuffer(), subpassIndex + 1);
-            }
-        }
-
-        vkiCommands->cmdEndRenderPass(recorder.requestBuffer());
-    }
-}
-
-void RenderPass::recordBeginRenderPass(VkCommandBufferHandle vkCommandBuffer) const {
-    const VulkanCommandInterface* vkiCommands = &deviceImpl->getCommandPoolPool()->getVkiCommands();
-    TEPHRA_ASSERT(!subpasses.empty());
-
-    VkRenderPassBeginInfo beginInfo;
-    beginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-    beginInfo.pNext = nullptr;
-    beginInfo.renderPass = renderPassHandle.vkGetHandle();
-    beginInfo.framebuffer = framebufferHandle.vkGetHandle();
-    beginInfo.renderArea = renderArea;
-    beginInfo.clearValueCount = static_cast<uint32_t>(attachmentClearValues.size());
-    beginInfo.pClearValues = vkCastConvertibleStructPtr(attachmentClearValues.data());
-
-    bool recordSecondary = getExecutionMethod() == ExecutionMethod::General && !subpasses[0].isInline;
-    vkiCommands->cmdBeginRenderPass(
-        vkCommandBuffer,
-        &beginInfo,
-        recordSecondary ? VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS : VK_SUBPASS_CONTENTS_INLINE);
-}
-
-void RenderPass::recordNextSubpass(VkCommandBufferHandle vkCommandBuffer, uint32_t subpassIndex) const {
-    const VulkanCommandInterface* vkiCommands = &deviceImpl->getCommandPoolPool()->getVkiCommands();
-    TEPHRA_ASSERT(subpassIndex < subpasses.size());
-    TEPHRA_ASSERT(subpassIndex > 0);
-    TEPHRA_ASSERT(getExecutionMethod() == ExecutionMethod::General);
-
-    bool recordSecondary = !subpasses[0].isInline;
-    vkiCommands->cmdNextSubpass(
-        vkCommandBuffer, recordSecondary ? VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS : VK_SUBPASS_CONTENTS_INLINE);
-}
-
-std::vector<VkCommandBufferHandle>& RenderPass::Subpass::assignDeferred(std::size_t bufferCount) {
-    isInline = false;
-    inlineRecordingCallback = {};
-    inlineListDebugTarget = DebugTarget::makeSilent();
-    // Create space for bufferCount empty command buffers. They will be assigned once recorded
-    TEPHRA_ASSERT(bufferCount > 0);
-    vkPreparedCommandBuffers.clear();
-    vkPreparedCommandBuffers.resize(bufferCount);
-
-    return vkPreparedCommandBuffers;
-}
-
-void RenderPass::Subpass::assignInline(RenderInlineCallback recordingCallback, DebugTarget renderListDebugTarget) {
-    isInline = true;
-    inlineRecordingCallback = std::move(recordingCallback);
-    inlineListDebugTarget = std::move(renderListDebugTarget);
-    vkPreparedCommandBuffers.clear();
+    return renderingInfo;
 }
 
 }

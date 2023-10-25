@@ -167,25 +167,6 @@ PipelineLayout Device::createPipelineLayout(
     return pipelineLayout;
 }
 
-RenderPassLayout Device::createRenderPassLayout(
-    ArrayParameter<const AttachmentDescription> attachmentDescriptions,
-    ArrayParameter<const SubpassLayout> subpassLayouts,
-    const char* debugName) {
-    auto deviceImpl = static_cast<DeviceContainer*>(this);
-    TEPHRA_DEBUG_SET_CONTEXT(deviceImpl->getDebugTarget(), "createRenderPassLayout", debugName);
-
-    auto info = RenderPassTemplate(deviceImpl, attachmentDescriptions, subpassLayouts);
-    VkRenderPassHandle vkHandle = deviceImpl->getLogicalDevice()->createRenderPass(
-        view(info.attachmentInfos), view(info.subpassInfos), view(info.dependencyInfos));
-
-    auto renderPassLayout = RenderPassLayout(
-        vkMakeHandleLifeguard(vkHandle), std::make_unique<RenderPassTemplate>(std::move(info)));
-
-    deviceImpl->getLogicalDevice()->setObjectDebugName(renderPassLayout.vkGetTemplateRenderPassHandle(), debugName);
-
-    return std::move(renderPassLayout);
-}
-
 OwningPtr<DescriptorPool> Device::createDescriptorPool(const DescriptorPoolSetup& setup, const char* debugName) {
     auto deviceImpl = static_cast<DeviceContainer*>(this);
     TEPHRA_DEBUG_SET_CONTEXT(deviceImpl->getDebugTarget(), "createDescriptorPool", debugName);
@@ -732,8 +713,6 @@ template Lifeguard<VkImageViewHandle> Device::vkMakeHandleLifeguard(VkImageViewH
 template Lifeguard<VkSamplerHandle> Device::vkMakeHandleLifeguard(VkSamplerHandle vkHandle);
 template Lifeguard<VkDescriptorPoolHandle> Device::vkMakeHandleLifeguard(VkDescriptorPoolHandle vkHandle);
 template Lifeguard<VkPipelineHandle> Device::vkMakeHandleLifeguard(VkPipelineHandle vkHandle);
-template Lifeguard<VkRenderPassHandle> Device::vkMakeHandleLifeguard(VkRenderPassHandle vkHandle);
-template Lifeguard<VkFramebufferHandle> Device::vkMakeHandleLifeguard(VkFramebufferHandle vkHandle);
 template Lifeguard<VkSwapchainHandleKHR> Device::vkMakeHandleLifeguard(VkSwapchainHandleKHR vkHandle);
 template Lifeguard<VkSemaphoreHandle> Device::vkMakeHandleLifeguard(VkSemaphoreHandle vkHandle);
 
