@@ -63,10 +63,10 @@ descriptor set that you then index into inside your shaders. Tephra streamlines 
 
 Starting from the initialization stage, Tephra already provides amenities for interacting with the varied world of
 Vulkan devices. Arbitrary number of queues can be used from each supported queue family, irrespective of the actual
-number exposed by Vulkan. Feature maps and format utilities further help handle hardware differences. Tephra can also
-make use of multi-subpass render passes, which are important for mobile platforms, at least until
-[similar functionality](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VK_EXT_shader_tile_image.html)
-becomes prevalent.
+number exposed by Vulkan. Feature maps and format utilities further help handle hardware differences. Vulkan profile
+support is planned, making the process of choosing and relying upon a specific set of hardware features even easier.
+Overall, the initialization process is greatly simplified compared to raw Vulkan, akin to using the
+[vk-bootstrap](https://github.com/charles-lunarg/vk-bootstrap) library.
 
 Tephra leverages [VMA](https://gpuopen.com/vulkan-memory-allocator/) for all of its resource allocations. On top of that,
 it allows efficient use of temporary resources within each job. Requested job-local resources can be aliased to the same
@@ -109,7 +109,6 @@ The following features are already present:
 - Automatic synchronization and resource state tracking inside and across queues
 - Temporary resource allocator that leverages aliasing to reduce memory usage
 - Support for multi-threaded recording and device-level thread safety
-- Multi-subpass render passes
 - Improved image and buffer views
 - Safe delayed destruction of Vulkan handles
 - Interoperability with plain Vulkan (WIP)
@@ -119,7 +118,6 @@ The following features are planned and will likely be available in the future:
 - Timestamp, occlusion and pipeline queries
 - Ray tracing features
 - Better handling of dynamic pipeline state
-- Replacing render passes with dynamic rendering
 - Improved pipeline building and management
 - Native support of commonly used Vulkan extensions
 - Vulkan profiles

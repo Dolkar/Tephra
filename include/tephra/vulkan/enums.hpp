@@ -381,9 +381,9 @@ enum class ImageUsage : uint32_t {
     SampledImage = VK_IMAGE_USAGE_SAMPLED_BIT,
     /// Allows the image to be used in a tp::DescriptorType::StorageImage descriptor.
     StorageImage = VK_IMAGE_USAGE_STORAGE_BIT,
-    /// Allows the image to be used as a color attachment in tp::Job::cmdExecuteRenderPass.
+    /// Allows the image to be used as a tp::ColorAttachment inside a render pass.
     ColorAttachment = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
-    /// Allows the image to be used as a depth or stencil attachment in tp::Job::cmdExecuteRenderPass.
+    /// Allows the image to be used as a tp::DepthStencilAttachment inside a render pass.
     DepthStencilAttachment = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
     /// Allows the image to be used in a tp::DescriptorType::InputAttachment descriptor.
     InputAttachment = VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT

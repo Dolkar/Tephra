@@ -11,7 +11,6 @@ namespace tp {
 /// @see tp::DescriptorType for classification of descriptors into Storage, Sampled and Uniform.
 /// @see tp::BufferRenderAccess
 /// @see tp::ImageRenderAccess
-/// @see tp::SubpassDependency
 enum class RenderAccess : uint64_t {
     /// Read access of indirect command data through an indirect drawing command.
     DrawIndirectRead = 1 << 0,
