@@ -3,7 +3,7 @@
 
 **License**: [MIT](https://github.com/Dolkar/Tephra/blob/main/LICENSE)
 
-**Current version**: [v0.1](https://dolkar.github.io/Tephra/changelog.html)
+**Current version**: [v0.2.0](https://dolkar.github.io/Tephra/changelog.html)
 
 **Links**: [User guide](https://dolkar.github.io/Tephra/user-guide.html) | [API Documentation](https://dolkar.github.io/Tephra/annotated.html) |
            [Discussions](https://github.com/Dolkar/Tephra/discussions)
@@ -139,7 +139,7 @@ runnable showcase.
 - Only the Visual Studio build path for the Windows platform is maintained, but the library itself is written to be
   platform independent.
 - Vulkan headers version 1.3.239 or newer, provided with the SDK [here](https://www.lunarg.com/vulkan-sdk/)
-- Compatible devices must support Vulkan 1.2 or newer, as well as the [timeline semaphore feature](https://vulkan.gpuinfo.org/listdevicescoverage.php?core=1.2&feature=timelineSemaphore&platform=all)
+- Compatible devices must support Vulkan 1.3 or newer, as well as the [timeline semaphore feature](https://vulkan.gpuinfo.org/listdevicescoverage.php?core=1.2&feature=timelineSemaphore&platform=all)
 
 Building the documentation
 - Python 3.6 or newer
