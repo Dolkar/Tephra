@@ -294,7 +294,14 @@ public:
     /// on the device.
     /// @param queue
     ///     The queue to have its enqueued jobs submitted for execution.
-    void submitQueuedJobs(const DeviceQueue& queue);
+    /// @param lastJobToSubmit
+    ///     Optionally requests a partial submit of the enqueued jobs. If not empty, any job that was enqueued after
+    ///     the one associated with the given semaphore will not be submitted.
+    /// @remarks
+    ///     This method is **not** thread-safe between calls with the same `queue` parameter. However, through the
+    ///     use of the `lastJobToSubmit` parameter, it is safe to enqueue jobs asynchronously to submitting them within
+    ///     the same queue.
+    void submitQueuedJobs(const DeviceQueue& queue, const JobSemaphore& lastJobToSubmit = {});
 
     /// Submits a present operation to the specified queue for each of the given tp::Swapchain objects,
     /// queueing the given acquired image from each swapchain for presentation.

@@ -1,13 +1,20 @@
 /** @page changelog Changelog
 
-@brief The history of changes of Tephra in the main branch is described here. Early development versions (0.x) have breaking
-changes in minor version increments. Once stable (1.x & onward), breaking changes will happen only on major version
-increments.
+@brief The history of changes of Tephra in the main branch is described here. Early development versions (0.x) have
+breaking changes in minor version increments. Once stable (1.x & onward), breaking changes will happen only on major
+version increments.
 
 @tableofcontents
 
+@section v0-1-1 In-dev version 0.1.1
+Released 2023-10-23
+- Allowed limited asynchronous enqueue and submit to the same device queue.
+    - Added `lastJobToSubmit` parameter to tp::Device::submitQueuedJobs to be able to specify a partial submit operation.
+- Fixed several bugs in the job-local image allocator.
+    - Unused images now don't get allocated at all.
+
 @section v0-1 In-dev version 0.1
 Released 2023-07-15
-- Initial release on GitHub
+- Initial release on GitHub.
 
 **/

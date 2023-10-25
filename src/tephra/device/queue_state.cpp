@@ -19,7 +19,15 @@ void QueueState::enqueueJob(Job job) {
     JobData* jobData = JobResourcePoolContainer::getJobData(job);
     broadcastResourceExports(jobData->record, jobData->signalJobSemaphore);
 
-    queuedJobs.push_back(std::move(job));
+    {
+        std::lock_guard<Mutex> mutexLock(queuedJobsMutex);
+        TEPHRA_ASSERT(
+            queuedJobs.empty() ||
+            jobData->signalJobSemaphore.timestamp >
+                JobResourcePoolContainer::getJobData(queuedJobs.back())->signalJobSemaphore.timestamp);
+
+        queuedJobs.push_back(std::move(job));
+    }
 }
 
 void QueueState::forgetResource(VkBufferHandle vkBufferHandle) {
@@ -32,19 +40,51 @@ void QueueState::forgetResource(VkImageHandle vkImageHandle) {
     syncState->awaitingImageForgets.push_back(vkImageHandle);
 }
 
-void QueueState::submitQueuedJobs() {
-    if (queuedJobs.empty()) {
-        return;
-    }
-    consumeAwaitingForgets();
+void QueueState::submitQueuedJobs(const JobSemaphore& lastJobToSubmit) {
+    // Gather jobs we want to submit
+    ScratchVector<Job*> jobsToSubmit;
+    {
+        std::lock_guard<Mutex> mutexLock(queuedJobsMutex);
+        if (queuedJobs.empty())
+            return;
 
+        for (Job& job : queuedJobs) {
+            JobData* jobData = JobResourcePoolContainer::getJobData(job);
+
+            if (!lastJobToSubmit.isNull() && jobData->signalJobSemaphore.timestamp > lastJobToSubmit.timestamp) {
+                break;
+            }
+
+            jobsToSubmit.push_back(&job);
+        }
+    }
+
+    // Compile and submit jobs outside the lock
+    consumeAwaitingForgets();
+    submitJobs(view(jobsToSubmit));
+
+    {
+        std::lock_guard<Mutex> mutexLock(queuedJobsMutex);
+        for (Job* job : jobsToSubmit) {
+            TEPHRA_ASSERT(!queuedJobs.empty());
+            TEPHRA_ASSERT(job == &queuedJobs.front());
+
+            JobResourcePoolContainer::queueReleaseSubmittedJob(std::move(*job));
+            queuedJobs.pop_front();
+        }
+    }
+
+    // TODO: Check as validation perf warning if any resource has too many distinct accesses
+}
+
+void QueueState::submitJobs(ArrayView<Job*> jobs) {
     // Set up for job compilation
     const QueueInfo& queueInfo = deviceImpl->getQueueMap()->getQueueInfos()[queueIndex];
     CommandPool* commandPool = deviceImpl->getCommandPoolPool()->acquirePool(
         queueInfo.identifier.type, queueInfo.name.c_str());
 
     SubmitBatch submitBatch;
-    submitBatch.submitEntries.reserve(queuedJobs.size());
+    submitBatch.submitEntries.reserve(jobs.size());
 
     const auto& vkiCommands = deviceImpl->getCommandPoolPool()->getVkiCommands();
     PrimaryBufferRecorder recorder = PrimaryBufferRecorder(
@@ -58,12 +98,12 @@ void QueueState::submitQueuedJobs() {
 
     // Compile queued jobs into vulkan commands while building up submit information
     std::size_t startJobIndex = 0;
-    while (startJobIndex < queuedJobs.size()) {
+    while (startJobIndex < jobs.size()) {
         // Process as many jobs as we can in the same submit
         std::size_t endJobIndex = startJobIndex + 1;
-        while (endJobIndex < queuedJobs.size()) {
-            Job& job = queuedJobs[endJobIndex];
-            JobData* jobData = JobResourcePoolContainer::getJobData(job);
+        while (endJobIndex < jobs.size()) {
+            Job* job = jobs[endJobIndex];
+            JobData* jobData = JobResourcePoolContainer::getJobData(*job);
 
             // Putting this in the same submit would cause the previous jobs to wait, too
             bool hasWaits = !jobData->waitJobSemaphores.empty() || !jobData->waitExternalSemaphores.empty();
@@ -111,13 +151,6 @@ void QueueState::submitQueuedJobs() {
     // Queue the release of the primary command pool once the jobs finish
     deviceImpl->getTimelineManager()->addCleanupCallback(
         [=]() { deviceImpl->getCommandPoolPool()->releasePool(commandPool); });
-
-    while (!queuedJobs.empty()) {
-        JobResourcePoolContainer::queueReleaseSubmittedJob(std::move(queuedJobs.front()));
-        queuedJobs.pop_front();
-    }
-
-    // TODO: Check as validation perf warning if any resource has too many distinct accesses
 }
 
 void QueueState::broadcastResourceExports(const JobRecordStorage& jobRecord, const JobSemaphore& srcSemaphore) {

@@ -31,7 +31,7 @@ public:
     void forgetResource(VkBufferHandle vkBufferHandle);
     void forgetResource(VkImageHandle vkImageHandle);
 
-    void submitQueuedJobs();
+    void submitQueuedJobs(const JobSemaphore& lastJobToSubmit);
 
     TEPHRA_MAKE_NONCOPYABLE(QueueState);
     TEPHRA_MAKE_MOVABLE_DEFAULT(QueueState);
@@ -42,9 +42,14 @@ private:
     uint32_t queueIndex;
 
     std::deque<Job> queuedJobs;
+    // Mutex guarding against simulateneous enqueue and submit
+    Mutex queuedJobsMutex;
     std::unique_ptr<QueueSyncState> syncState;
-    // For each queue, stores the last timestamp that has been waited on
+    // For each (other) queue, stores the last timestamp that has been waited on
     std::vector<uint64_t> queueLastQueriedTimestamps;
+
+    // Compiles and submits the given jobs
+    void submitJobs(ArrayView<Job*> jobs);
 
     // Analyze cross-queue export commands in the job and broadcast them
     void broadcastResourceExports(const JobRecordStorage& jobRecord, const JobSemaphore& srcSemaphore);
