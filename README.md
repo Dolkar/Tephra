@@ -138,8 +138,8 @@ runnable showcase.
 - Tephra is a C++ library. It makes use of C++17 features, the standard library and C++ exceptions.
 - Only the Visual Studio build path for the Windows platform is maintained, but the library itself is written to be
   platform independent.
-- Vulkan headers version 1.3.239 or newer, provided with the SDK [here](https://www.lunarg.com/vulkan-sdk/)
-- Compatible devices must support Vulkan 1.3 or newer, as well as the [timeline semaphore feature](https://vulkan.gpuinfo.org/listdevicescoverage.php?core=1.2&feature=timelineSemaphore&platform=all)
+- Vulkan headers version 1.3.239 or newer, provided with the SDK [here](https://www.lunarg.com/vulkan-sdk/).
+- Compatible devices must support Vulkan 1.3 or newer.
 
 Building the documentation
 - Python 3.6 or newer

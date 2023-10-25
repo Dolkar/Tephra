@@ -975,22 +975,23 @@ private:
 Render passes are the graphics counterpart of compute passes. As mentioned before, a render pass is a collection
 of consecutive rendering commands that share the same set of attachments, aka render targets. You can draw thousands
 of objects and millions of triangles within a single render pass, for example when drawing the main camera's view to
-a color and depth buffer, or even just one or two for a full-screen effect.
+a color and depth buffer, or even just one or two triangles for a full-screen effect.
 
 To record a render pass, use the tp::Job::cmdExecuteRenderPass command. It asks for a tp::RenderPassSetup structure
 that describes what images are to be used as attachments for the render pass, as well as how the images should be treated
 at the start and end of the pass. Render passes are able to clear and resolve attachments as part of their execution,
-generally more efficiently than commands like tp::Job::cmdClearImage and tp::Job::cmdResolveImage.
+generally more efficiently than separate commands like tp::Job::cmdClearImage and tp::Job::cmdResolveImage.
 
-The tp::DepthStencilAttachment and tp::ColorAttachment structures describes a depth / stencil attachment and a color
-attachment for a render pass, respectively. Besides the actual image view that will be assigned to the attachment, they
-also have you specify the load and store operations for the attachment that take place at the start and end of the render
-pass. The tp::AttachmentLoadOp determines whether the contents of the image view should cleared to some color, be loaded
-to preserve what was there previously, or discarded with `DontCare`. Discarding is likely going to be the fastest option,
-but should only be used if you know for sure you won't need the existing contents. Similarly, the tp::AttachmentStoreOp
-specifies whether the contents need to be accessible after the render pass ends, or if they should also be discarded with
-`DontCare`, for example when a depth buffer would be used just for the depth tests and its contents aren't needed
-afterwards. If you selected the tp::AttachmentLoadOp::Clear load operation, you also need to provide a valid clear value.
+The tp::DepthStencilAttachment and tp::ColorAttachment structures describe a depth / stencil attachment and a color
+attachment for use in a render pass, respectively. Besides the actual image view that will be used as the attachment,
+they also have you specify the load and store operations for the image that will take place at the start and end of the
+render pass. The tp::AttachmentLoadOp determines whether the contents of the image view should cleared to some color, be
+loaded to preserve its previous contents, or discarded with `DontCare`. Discarding or clearing are likely going to be the
+fastest options, but should only be used if you know you won't need the existing contents. Similarly, the
+tp::AttachmentStoreOp specifies whether the contents need to be accessible after the render pass ends, or if they should
+also be discarded with `DontCare`, which can be useful, for example, for a depth buffer that is used just for the depth
+tests and its contents aren't needed afterwards. If you selected the tp::AttachmentLoadOp::Clear load operation, you also
+need to provide a valid clear value.
 
 tp::DepthStencilAttachment has some additional configuration options compared to color attachments. You can promise that
 the depth / stencil attachment will be used as read-only. That can be useful not just as an optimization, but it can also
@@ -1003,14 +1004,14 @@ parameter can be set to another image with identical parameters, just without mu
 attachment to it at the end of the render pass. tp::ResolveMode then allows you to specify what algorithm should be used
 to resolve it.
 
-The tp::RenderPassSetup structure, besides a tp::DepthStencilAttachment and a list of tp::ColorAttachment structures also
-takes a list of tp::BufferRenderAccess and tp::ImageRenderAccess, which, similarly to the compute pass, allow you to
+The tp::RenderPassSetup structure, besides a tp::DepthStencilAttachment and a list of tp::ColorAttachment structures,
+also takes a list of tp::BufferRenderAccess and tp::ImageRenderAccess, which, similarly to the compute pass, allow you to
 specify additional unexported resources that will be accessed directly from the shaders. Next, it optionally takes a
 render area, through which you can promise to the implementation that you will only render to a smaller rectangular area
-of the attachments. By default, the entire extent of the views is used. In the case of a render pass with no attachments,
-the render area must be defined. For multi-view rendering support, there is also the option to render to more than one
-layer, which can be selected through shader-specific methods, or have the entire geometry be duplicated to multiple layers
-through the `viewMask` parameter.
+of the attachments. By default, the entire extent of the views is used, but in the case of a render pass with no
+attachments, the render area must be defined. For multi-view rendering support, there is also the option to render to
+more than one layer, which can be selected through shader-specific methods, or have the entire geometry be duplicated to
+multiple layers by setting the `viewMask` parameter to a non-zero value.
 
 Recording commands is similar to compute passes and was described in the previous section. The main differences is that
 we are using tp::RenderList instead of a tp::ComputeList. tp::RenderList offers various drawing commands, as well as
