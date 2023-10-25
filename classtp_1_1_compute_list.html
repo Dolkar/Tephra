@@ -56,7 +56,7 @@
         <h1>
           <span class="m-breadcrumb"><a href="namespacetp.html">tp</a>::<wbr/></span>ComputeList <span class="m-thin">class</span>
         </h1>
-        <p>Provides an interface to directly record compute commands into a Vulkan   <a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkCommandBuffer.html" class="m-doc-external">VkCommandBuffer</a> inside a compute pass.</p>
+        <p>Provides an interface to directly record compute commands into a Vulkan   <a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkCommandBuffer.html" class="m-doc-external">VkCommandBuffer</a> inside a compute pass.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -70,7 +70,7 @@
             </li>
           </ul>
         </nav>
-<p>The behavior and expected usage differs depending on the variant of the <code>commandRecording</code> parameter passed to <a href="classtp_1_1_job.html#a3743dd4c6e7f8d56e153290543342afb" class="m-doc">tp::<wbr />Job::<wbr />cmdExecuteComputePass</a>.</p><p>If the list was provided through the tp::ArrayView&lt;tp::ComputeList&gt; variant, then <a href="classtp_1_1_compute_list.html#a2461b00f05368227d9fda369d70850fd" class="m-doc">tp::<wbr />ComputeList::<wbr />beginRecording</a> must be called before the first and <a href="classtp_1_1_compute_list.html#a969c0b1eb83b5b690343215d2ae81a39" class="m-doc">tp::<wbr />ComputeList::<wbr />endRecording</a> after the last recorded command.</p><p>If the list was provided as a parameter to <a href="namespacetp.html#aa35536cf20aa7489b1e861514ec00ea4" class="m-doc">tp::<wbr />ComputeInlineCallback</a> using the function callback variant, <a href="classtp_1_1_compute_list.html#a2461b00f05368227d9fda369d70850fd" class="m-doc">tp::<wbr />ComputeList::<wbr />beginRecording</a> and <a href="classtp_1_1_compute_list.html#a969c0b1eb83b5b690343215d2ae81a39" class="m-doc">tp::<wbr />ComputeList::<wbr />endRecording</a> must not be called. Any changed state (cmdBind..., cmdSet...) persists between all inline lists within the same <a href="classtp_1_1_job.html" class="m-doc">tp::<wbr />Job</a>.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="classtp_1_1_job.html#a3743dd4c6e7f8d56e153290543342afb" class="m-doc">tp::<wbr />Job::<wbr />cmdExecuteComputePass</a></p><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkCommandBuffer.html" class="m-doc-external">VkCommandBuffer</a></p></aside>
+<p>The behavior and expected usage differs depending on the variant of the <code>commandRecording</code> parameter passed to <a href="classtp_1_1_job.html#a3743dd4c6e7f8d56e153290543342afb" class="m-doc">tp::<wbr />Job::<wbr />cmdExecuteComputePass</a>.</p><p>If the list was provided through the tp::ArrayView&lt;tp::ComputeList&gt; variant, then <a href="classtp_1_1_compute_list.html#a2461b00f05368227d9fda369d70850fd" class="m-doc">tp::<wbr />ComputeList::<wbr />beginRecording</a> must be called before the first and <a href="classtp_1_1_compute_list.html#a969c0b1eb83b5b690343215d2ae81a39" class="m-doc">tp::<wbr />ComputeList::<wbr />endRecording</a> after the last recorded command.</p><p>If the list was provided as a parameter to <a href="namespacetp.html#aa35536cf20aa7489b1e861514ec00ea4" class="m-doc">tp::<wbr />ComputeInlineCallback</a> using the function callback variant, <a href="classtp_1_1_compute_list.html#a2461b00f05368227d9fda369d70850fd" class="m-doc">tp::<wbr />ComputeList::<wbr />beginRecording</a> and <a href="classtp_1_1_compute_list.html#a969c0b1eb83b5b690343215d2ae81a39" class="m-doc">tp::<wbr />ComputeList::<wbr />endRecording</a> must not be called. Any changed state (cmdBind..., cmdSet...) persists between all inline lists within the same <a href="classtp_1_1_job.html" class="m-doc">tp::<wbr />Job</a>.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="classtp_1_1_job.html#a3743dd4c6e7f8d56e153290543342afb" class="m-doc">tp::<wbr />Job::<wbr />cmdExecuteComputePass</a></p><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkCommandBuffer.html" class="m-doc-external">VkCommandBuffer</a></p></aside>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
@@ -138,7 +138,7 @@
                 </tr>
               </tbody>
             </table>
-<aside class="m-note m-default"><h4>Remark</h4><p>The parent <a href="classtp_1_1_job.html" class="m-doc">tp::<wbr />Job</a> must be in an enqueued state.</p><p>The <a href="classtp_1_1_compute_list.html" class="m-doc">tp::<wbr />ComputeList</a> must not have been received as a parameter to <a href="namespacetp.html#aa35536cf20aa7489b1e861514ec00ea4" class="m-doc">tp::<wbr />ComputeInlineCallback</a>.</p><p>The <a href="classtp_1_1_command_pool.html" class="m-doc">tp::<wbr />CommandPool</a> is not thread safe. Only one thread may be recording commands using the same pool at a time.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/vkBeginCommandBuffer.html" class="m-doc-external">vkBeginCommandBuffer</a></p></aside>
+<aside class="m-note m-default"><h4>Remark</h4><p>The parent <a href="classtp_1_1_job.html" class="m-doc">tp::<wbr />Job</a> must be in an enqueued state.</p><p>The <a href="classtp_1_1_compute_list.html" class="m-doc">tp::<wbr />ComputeList</a> must not have been received as a parameter to <a href="namespacetp.html#aa35536cf20aa7489b1e861514ec00ea4" class="m-doc">tp::<wbr />ComputeInlineCallback</a>.</p><p>The <a href="classtp_1_1_command_pool.html" class="m-doc">tp::<wbr />CommandPool</a> is not thread safe. Only one thread may be recording commands using the same pool at a time.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/vkBeginCommandBuffer.html" class="m-doc-external">vkBeginCommandBuffer</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="a0b377fe3da1edec80b9a0e81087b0e65"><div>
             <h3>
@@ -156,7 +156,7 @@
                 </tr>
               </tbody>
             </table>
-<aside class="m-note m-default"><h4>Remark</h4><p>If the pipeline was created with a <a href="classtp_1_1_pipeline_layout.html" class="m-doc">tp::<wbr />PipelineLayout</a> whose descriptor set layouts are compatible with the pipeline layout of sets previously bound with <a href="classtp_1_1_command_list.html#a0636227ef981fbd2998c802dd73a8eb2" class="m-doc">tp::<wbr />ComputeList::<wbr />cmdBindDescriptorSets</a>, then the descriptor sets are not disturbed and may still be accessed, up to the first incompatible set number.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/vkCmdBindPipeline.html" class="m-doc-external">vkCmdBindPipeline</a></p></aside>
+<aside class="m-note m-default"><h4>Remark</h4><p>If the pipeline was created with a <a href="classtp_1_1_pipeline_layout.html" class="m-doc">tp::<wbr />PipelineLayout</a> whose descriptor set layouts are compatible with the pipeline layout of sets previously bound with <a href="classtp_1_1_command_list.html#a0636227ef981fbd2998c802dd73a8eb2" class="m-doc">tp::<wbr />ComputeList::<wbr />cmdBindDescriptorSets</a>, then the descriptor sets are not disturbed and may still be accessed, up to the first incompatible set number.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/vkCmdBindPipeline.html" class="m-doc-external">vkCmdBindPipeline</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="a9516223319123c64e738b820f47a9480"><div>
             <h3>
@@ -165,7 +165,7 @@
               uint32_t groupCountZ = 1)</span></span>
             </h3>
             <p>Records a dispatch of <code>groupCountX * groupCountY * groupCountZ</code> compute workgroups.</p>
-<aside class="m-note m-default"><h4>Remark</h4><p>The parameters describe the number of workgroups, <em>NOT</em> the number of invocations. The total number of invocations in each dimension will be the number of workgroups multiplied with the workgroup side as defined by the compute shader in the currently bound pipeline.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/vkCmdDispatch.html" class="m-doc-external">vkCmdDispatch</a></p></aside>
+<aside class="m-note m-default"><h4>Remark</h4><p>The parameters describe the number of workgroups, <em>NOT</em> the number of invocations. The total number of invocations in each dimension will be the number of workgroups multiplied with the workgroup side as defined by the compute shader in the currently bound pipeline.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/vkCmdDispatch.html" class="m-doc-external">vkCmdDispatch</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="a1d6af307e7fc185351a250543149e2d5"><div>
             <h3>
@@ -179,11 +179,11 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">dispatchParamBuffer</td>
-                  <td>The buffer containing dispatch parameters in the form of   <a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkDispatchIndirectCommand.html" class="m-doc-external">VkDispatchIndirectCommand</a>.</td>
+                  <td>The buffer containing dispatch parameters in the form of   <a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkDispatchIndirectCommand.html" class="m-doc-external">VkDispatchIndirectCommand</a>.</td>
                 </tr>
               </tbody>
             </table>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/vkCmdDispatchIndirect.html" class="m-doc-external">vkCmdDispatchIndirect</a></p></aside>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/vkCmdDispatchIndirect.html" class="m-doc-external">vkCmdDispatchIndirect</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="adc3552ffb74d64e5c0b9f02a57fb3587"><div>
             <h3>
@@ -201,14 +201,14 @@
                 </tr>
               </tbody>
             </table>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/vkCmdPipelineBarrier.html" class="m-doc-external">vkCmdPipelineBarrier</a></p></aside>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/vkCmdPipelineBarrier.html" class="m-doc-external">vkCmdPipelineBarrier</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="a969c0b1eb83b5b690343215d2ae81a39"><div>
             <h3>
               <span class="m-doc-wrap-bumper">void tp::<wbr />ComputeList::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a969c0b1eb83b5b690343215d2ae81a39" class="m-doc-self">endRecording</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
             <p>Ends recording commands to the list. No other methods can be called after this point.</p>
-<aside class="m-note m-default"><h4>Remark</h4><p>The parent <a href="classtp_1_1_job.html" class="m-doc">tp::<wbr />Job</a> must be in an enqueued state.</p><p>The <a href="classtp_1_1_compute_list.html" class="m-doc">tp::<wbr />ComputeList</a> must not have been received as a parameter to <a href="namespacetp.html#aa35536cf20aa7489b1e861514ec00ea4" class="m-doc">tp::<wbr />ComputeInlineCallback</a>.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/vkEndCommandBuffer.html" class="m-doc-external">vkEndCommandBuffer</a></p></aside>
+<aside class="m-note m-default"><h4>Remark</h4><p>The parent <a href="classtp_1_1_job.html" class="m-doc">tp::<wbr />Job</a> must be in an enqueued state.</p><p>The <a href="classtp_1_1_compute_list.html" class="m-doc">tp::<wbr />ComputeList</a> must not have been received as a parameter to <a href="namespacetp.html#aa35536cf20aa7489b1e861514ec00ea4" class="m-doc">tp::<wbr />ComputeInlineCallback</a>.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/vkEndCommandBuffer.html" class="m-doc-external">vkEndCommandBuffer</a></p></aside>
           </div></section>
         </section>
       </div>

@@ -70,7 +70,7 @@
             </li>
           </ul>
         </nav>
-<p>Optionally, it can be made to interpret the data in a particular format for binding to a <a href="classtp_1_1_descriptor.html" class="m-doc">tp::<wbr />Descriptor</a> of the <a href="namespacetp.html#a3dccbef68c07e939a1f37825018d2c67a87f4470e128117163f6071e645f404a9" class="m-doc">tp::<wbr />DescriptorType::<wbr />TexelBuffer</a> or <a href="namespacetp.html#a3dccbef68c07e939a1f37825018d2c67aae1f93780c3073aeadaf118d550f0c65" class="m-doc">tp::<wbr />DescriptorType::<wbr />StorageTexelBuffer</a> types. Such buffer views are called texel buffer views.</p><aside class="m-note m-default"><h4>See also</h4><p>tp::Buffer::createView</p><p>tp::BufferView::createView</p><p><a href="classtp_1_1_job.html#a10e5565ef8b6c2553c9d4572ac223852" class="m-doc">tp::<wbr />Job::<wbr />allocateLocalBuffer</a></p><p><a href="classtp_1_1_job.html#ae59e1c14bc1cd1e7ecc2aa403d134a23" class="m-doc">tp::<wbr />Job::<wbr />allocatePreinitializedBuffer</a></p><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkBufferView.html" class="m-doc-external">VkBufferView</a></p></aside>
+<p>Optionally, it can be made to interpret the data in a particular format for binding to a <a href="classtp_1_1_descriptor.html" class="m-doc">tp::<wbr />Descriptor</a> of the <a href="namespacetp.html#a3dccbef68c07e939a1f37825018d2c67a87f4470e128117163f6071e645f404a9" class="m-doc">tp::<wbr />DescriptorType::<wbr />TexelBuffer</a> or <a href="namespacetp.html#a3dccbef68c07e939a1f37825018d2c67aae1f93780c3073aeadaf118d550f0c65" class="m-doc">tp::<wbr />DescriptorType::<wbr />StorageTexelBuffer</a> types. Such buffer views are called texel buffer views.</p><aside class="m-note m-default"><h4>See also</h4><p>tp::Buffer::createView</p><p>tp::BufferView::createView</p><p><a href="classtp_1_1_job.html#a10e5565ef8b6c2553c9d4572ac223852" class="m-doc">tp::<wbr />Job::<wbr />allocateLocalBuffer</a></p><p><a href="classtp_1_1_job.html#ae59e1c14bc1cd1e7ecc2aa403d134a23" class="m-doc">tp::<wbr />Job::<wbr />allocatePreinitializedBuffer</a></p><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkBufferView.html" class="m-doc-external">VkBufferView</a></p></aside>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
@@ -129,11 +129,11 @@
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#af50007534090cc742cd07d002c2cf282" class="m-doc">vkGetBufferViewHandle</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="structtp_1_1_vk_object_handle.html" class="m-doc">VkBufferViewHandle</a></span>
             </dt>
-            <dd>Returns the associated Vulkan   <a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkBufferView.html" class="m-doc-external">VkBufferView</a> handle of a texel buffer view, <code>VK_NULL_HANDLE</code> otherwise.</dd>
+            <dd>Returns the associated Vulkan   <a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkBufferView.html" class="m-doc-external">VkBufferView</a> handle of a texel buffer view, <code>VK_NULL_HANDLE</code> otherwise.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#ab2ab01b5f2e4461b50a163bea6b16a0c" class="m-doc">vkResolveBufferHandle</a>(</span><span class="m-doc-wrap">uint64_t* offset) const -&gt; <a href="structtp_1_1_vk_object_handle.html" class="m-doc">VkBufferHandle</a></span>
             </dt>
-            <dd>Resolves and returns the underlying   <a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkBuffer.html" class="m-doc-external">VkBuffer</a> handle of this view or <code>VK_NULL_HANDLE</code> if it doesn&#x27;t exist.</dd>
+            <dd>Resolves and returns the underlying   <a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkBuffer.html" class="m-doc-external">VkBuffer</a> handle of this view or <code>VK_NULL_HANDLE</code> if it doesn&#x27;t exist.</dd>
           </dl>
         </section>
         <section id="friends">
@@ -234,14 +234,14 @@
             <h3>
               <span class="m-doc-wrap-bumper"><a href="structtp_1_1_vk_object_handle.html" class="m-doc">VkBufferViewHandle</a> tp::<wbr />BufferView::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af50007534090cc742cd07d002c2cf282" class="m-doc-self">vkGetBufferViewHandle</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
-            <p>Returns the associated Vulkan   <a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkBufferView.html" class="m-doc-external">VkBufferView</a> handle of a texel buffer view, <code>VK_NULL_HANDLE</code> otherwise.</p>
-<aside class="m-note m-default"><h4>Remark</h4><p>If the viewed buffer is a job-local buffer, the   <a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkBufferView.html" class="m-doc-external">VkBufferView</a> handle will exist only after the <a href="classtp_1_1_job.html" class="m-doc">tp::<wbr />Job</a> has been enqueued.</p></aside>
+            <p>Returns the associated Vulkan   <a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkBufferView.html" class="m-doc-external">VkBufferView</a> handle of a texel buffer view, <code>VK_NULL_HANDLE</code> otherwise.</p>
+<aside class="m-note m-default"><h4>Remark</h4><p>If the viewed buffer is a job-local buffer, the   <a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkBufferView.html" class="m-doc-external">VkBufferView</a> handle will exist only after the <a href="classtp_1_1_job.html" class="m-doc">tp::<wbr />Job</a> has been enqueued.</p></aside>
           </div></section>
           <section class="m-doc-details" id="ab2ab01b5f2e4461b50a163bea6b16a0c"><div>
             <h3>
               <span class="m-doc-wrap-bumper"><a href="structtp_1_1_vk_object_handle.html" class="m-doc">VkBufferHandle</a> tp::<wbr />BufferView::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab2ab01b5f2e4461b50a163bea6b16a0c" class="m-doc-self">vkResolveBufferHandle</a>(</span><span class="m-doc-wrap">uint64_t* offset) const</span></span>
             </h3>
-            <p>Resolves and returns the underlying   <a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkBuffer.html" class="m-doc-external">VkBuffer</a> handle of this view or <code>VK_NULL_HANDLE</code> if it doesn&#x27;t exist.</p>
+            <p>Resolves and returns the underlying   <a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkBuffer.html" class="m-doc-external">VkBuffer</a> handle of this view or <code>VK_NULL_HANDLE</code> if it doesn&#x27;t exist.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -253,7 +253,7 @@
                 </tr>
               </tbody>
             </table>
-<aside class="m-note m-default"><h4>Remark</h4><p>If the viewed buffer is a job-local buffer, the underlying   <a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkBuffer.html" class="m-doc-external">VkBuffer</a> handle will exist only after the <a href="classtp_1_1_job.html" class="m-doc">tp::<wbr />Job</a> has been enqueued.</p></aside>
+<aside class="m-note m-default"><h4>Remark</h4><p>If the viewed buffer is a job-local buffer, the underlying   <a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkBuffer.html" class="m-doc-external">VkBuffer</a> handle will exist only after the <a href="classtp_1_1_job.html" class="m-doc">tp::<wbr />Job</a> has been enqueued.</p></aside>
           </div></section>
         </section>
       </div>

@@ -122,21 +122,9 @@
             </dt>
             <dd>Internal Tephra error violating an assertion. May be caused by a previous invalid usage.</dd>
             <dt>
-              struct <a href="structtp_1_1_attachment_binding.html" class="m-doc">AttachmentBinding</a>
-            </dt>
-            <dd>Serves to bind an attachment to the given bind point for a subpass.</dd>
-            <dt>
-              struct <a href="structtp_1_1_attachment_bind_point.html" class="m-doc">AttachmentBindPoint</a>
-            </dt>
-            <dd>Identifies a bind point for an attachment and determines how the graphics pipeline will access the attachment.</dd>
-            <dt>
               struct <a href="structtp_1_1_attachment_blend_state.html" class="m-doc">AttachmentBlendState</a>
             </dt>
             <dd>Specifies the output blending state of a render pass attachment.</dd>
-            <dt>
-              struct <a href="structtp_1_1_attachment_description.html" class="m-doc">AttachmentDescription</a>
-            </dt>
-            <dd>Describes the format and sample count of images that can be used as attachments within the render pass.</dd>
             <dt>
               struct <a href="structtp_1_1_blend_state.html" class="m-doc">BlendState</a>
             </dt>
@@ -174,6 +162,10 @@
             </dt>
             <dd>Specifies a constant clear value.</dd>
             <dt>
+              struct <a href="structtp_1_1_color_attachment.html" class="m-doc">ColorAttachment</a>
+            </dt>
+            <dd>Represents an <a href="classtp_1_1_image_view.html" class="m-doc">tp::<wbr />ImageView</a> as a render pass color attachment, allowing it to be bound as a render target inside of a render pass. Also specifies any operations on it that are to be done at the beginning or end of the render pass.</dd>
+            <dt>
               class <a href="classtp_1_1_command_list.html" class="m-doc">CommandList</a>
             </dt>
             <dd>An abstract class that implements common functionality for recording commands inside either a compute or render pass. See <a href="classtp_1_1_compute_list.html" class="m-doc">tp::<wbr />ComputeList</a> and <a href="classtp_1_1_render_list.html" class="m-doc">tp::<wbr />RenderList</a> for further details.</dd>
@@ -184,7 +176,7 @@
             <dt>
               class <a href="classtp_1_1_compute_list.html" class="m-doc">ComputeList</a>
             </dt>
-            <dd>Provides an interface to directly record compute commands into a Vulkan   <a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkCommandBuffer.html" class="m-doc-external">VkCommandBuffer</a> inside a compute pass.</dd>
+            <dd>Provides an interface to directly record compute commands into a Vulkan   <a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkCommandBuffer.html" class="m-doc-external">VkCommandBuffer</a> inside a compute pass.</dd>
             <dt>
               struct <a href="structtp_1_1_compute_pass_setup.html" class="m-doc">ComputePassSetup</a>
             </dt>
@@ -215,6 +207,10 @@
               class <a href="classtp_1_1_debug_report_handler.html" class="m-doc">DebugReportHandler</a>
             </dt>
             <dd>A base class for debug report handlers, containing callbacks through which debug messages and runtime errors are reported.</dd>
+            <dt>
+              struct <a href="structtp_1_1_depth_stencil_attachment.html" class="m-doc">DepthStencilAttachment</a>
+            </dt>
+            <dd>Represents an <a href="classtp_1_1_image_view.html" class="m-doc">tp::<wbr />ImageView</a> as a render pass depth &amp; stencil attachment, allowing it to be bound inside of a render pass. Also specifies any operations that are to be done on it at the beginning or end of the render pass.</dd>
             <dt>
               class <a href="classtp_1_1_descriptor.html" class="m-doc">Descriptor</a>
             </dt>
@@ -440,15 +436,7 @@
             <dt>
               class <a href="classtp_1_1_render_list.html" class="m-doc">RenderList</a>
             </dt>
-            <dd>Provides an interface to directly record graphics commands into a Vulkan   <a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkCommandBuffer.html" class="m-doc-external">VkCommandBuffer</a> inside a compute pass.</dd>
-            <dt>
-              struct <a href="structtp_1_1_render_pass_attachment.html" class="m-doc">RenderPassAttachment</a>
-            </dt>
-            <dd>Represents an <a href="classtp_1_1_image_view.html" class="m-doc">tp::<wbr />ImageView</a> as a render pass attachment, allowing it to be bound as a render target inside of its subpasses. Also specifies any operations that are to be done at the beginning or end of the render pass. Clearing an image through an attachment load operation tends to be more efficient than with an explicit command.</dd>
-            <dt>
-              class <a href="classtp_1_1_render_pass_layout.html" class="m-doc">RenderPassLayout</a>
-            </dt>
-            <dd>Describes ahead of time the layout and characteritics of a render pass.</dd>
+            <dd>Provides an interface to directly record graphics commands into a Vulkan   <a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkCommandBuffer.html" class="m-doc-external">VkCommandBuffer</a> inside a compute pass.</dd>
             <dt>
               struct <a href="structtp_1_1_render_pass_setup.html" class="m-doc">RenderPassSetup</a>
             </dt>
@@ -494,17 +482,9 @@
             </dt>
             <dd>Specifies the full state of a stencil operation.</dd>
             <dt>
-              struct <a href="structtp_1_1_subpass_dependency.html" class="m-doc">SubpassDependency</a>
-            </dt>
-            <dd>Specifies a dependency on another subpass from the current subpass.</dd>
-            <dt>
-              struct <a href="structtp_1_1_subpass_layout.html" class="m-doc">SubpassLayout</a>
-            </dt>
-            <dd>Describes a single subpass of a render pass, the attachments bindings and the subpass&#x27; dependencies.</dd>
-            <dt>
               struct <a href="structtp_1_1_surface_capabilities.html" class="m-doc">SurfaceCapabilities</a>
             </dt>
-            <dd>Describes the capabilities of a   <a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkSurfaceKHR.html" class="m-doc-external">VkSurfaceKHR</a> and the capabilities of a physical device to present to that surface.</dd>
+            <dd>Describes the capabilities of a   <a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkSurfaceKHR.html" class="m-doc-external">VkSurfaceKHR</a> and the capabilities of a physical device to present to that surface.</dd>
             <dt>
               class <a href="classtp_1_1_surface_lost_error.html" class="m-doc">SurfaceLostError</a>
             </dt>
@@ -572,13 +552,6 @@
         <section id="enum-members">
           <h2><a href="#enum-members">Enums</a></h2>
           <dl class="m-doc">
-            <dt>
-              <span class="m-doc-wrap-bumper">enum class <a href="#a6991b358994d01dff68977e4a9cf9710" class="m-doc">AttachmentBindPointType</a> { </span><span class="m-doc-wrap"><a href="#a6991b358994d01dff68977e4a9cf9710acb5feb1b7314637725a2e73bdc9f7295" class="m-doc">Color</a>,
-              <a href="#a6991b358994d01dff68977e4a9cf9710a324118a6721dd6b8a9b9f4e327df2bf5" class="m-doc">Input</a>,
-              <a href="#a6991b358994d01dff68977e4a9cf9710a2fa8076285272883c91e14402975a441" class="m-doc">DepthStencil</a>,
-              <a href="#a6991b358994d01dff68977e4a9cf9710a369b06d5985c13f7a81497ce840ad809" class="m-doc">ResolveFromColor</a> }</span>
-            </dt>
-            <dd>Describes how a bound attachment will be interpreted.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">enum class <a href="#aa57e260754413ae9a64d57adb264c384" class="m-doc">AttachmentLoadOp</a>: uint32_t { </span><span class="m-doc-wrap"><a href="#aa57e260754413ae9a64d57adb264c384af19dbf2edb3a0bd74b0524d960ff21eb" class="m-doc">Load</a> = VK_ATTACHMENT_LOAD_OP_LOAD,
               <a href="#aa57e260754413ae9a64d57adb264c384adc30bc0c7914db5918da4263fce93ad2" class="m-doc">Clear</a> = VK_ATTACHMENT_LOAD_OP_CLEAR,
@@ -723,8 +696,7 @@
               <a href="#a3dccbef68c07e939a1f37825018d2c67a88f133adfed6c854e5731cdffbf208cf" class="m-doc">UniformBuffer</a> = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
               <a href="#a3dccbef68c07e939a1f37825018d2c67a439f57c2c466c89db942b3de48298b2b" class="m-doc">StorageBuffer</a> = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
               <a href="#a3dccbef68c07e939a1f37825018d2c67a517b91f0588b3bf6c80ff3b19b2a7f57" class="m-doc">UniformBufferDynamic</a> = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
-              <a href="#a3dccbef68c07e939a1f37825018d2c67ada8c94227ee0e3b5cd40da12d594ad55" class="m-doc">StorageBufferDynamic</a> = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC,
-              <a href="#a3dccbef68c07e939a1f37825018d2c67a261d965f5dd43c6873489b68730dbe57" class="m-doc">InputAttachment</a> = VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT }</span>
+              <a href="#a3dccbef68c07e939a1f37825018d2c67ada8c94227ee0e3b5cd40da12d594ad55" class="m-doc">StorageBufferDynamic</a> = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC }</span>
             </dt>
             <dd>Specifies how a certain resource is to be accessed from within a shader.</dd>
             <dt>
@@ -1118,8 +1090,7 @@
             </dt>
             <dd>Defines the memory location types according to its accessibility and intended use.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">enum class <a href="#ab3d0ece6c3b49e1866143d74ead604dd" class="m-doc">MultisampleLevel</a>: uint32_t { </span><span class="m-doc-wrap"><a href="#ab3d0ece6c3b49e1866143d74ead604ddaec0fc0100c4fc1ce4eea230c3dc10360" class="m-doc">Undefined</a> = 0,
-              <a href="#ab3d0ece6c3b49e1866143d74ead604dda6dbf9ac2da09ee1d3debf5a51873ec6d" class="m-doc">x1</a> = VK_SAMPLE_COUNT_1_BIT,
+              <span class="m-doc-wrap-bumper">enum class <a href="#ab3d0ece6c3b49e1866143d74ead604dd" class="m-doc">MultisampleLevel</a>: uint32_t { </span><span class="m-doc-wrap"><a href="#ab3d0ece6c3b49e1866143d74ead604dda6dbf9ac2da09ee1d3debf5a51873ec6d" class="m-doc">x1</a> = VK_SAMPLE_COUNT_1_BIT,
               <a href="#ab3d0ece6c3b49e1866143d74ead604dda8e683187a00e5d462a4aeee69e9d3d9c" class="m-doc">x2</a> = VK_SAMPLE_COUNT_2_BIT,
               <a href="#ab3d0ece6c3b49e1866143d74ead604ddabf947d200d7b021b18d38437f3bc1940" class="m-doc">x4</a> = VK_SAMPLE_COUNT_4_BIT,
               <a href="#ab3d0ece6c3b49e1866143d74ead604ddaf2eebf3df8eb7d5db757de1c2d00d74d" class="m-doc">x8</a> = VK_SAMPLE_COUNT_8_BIT,
@@ -1228,6 +1199,13 @@
               <a href="#a7b3b9770de7339614190cd96c3426092ad53f4cffb9edd4c910a417f0eb9acdce" class="m-doc">FragmentShaderUniformRead</a> = 1 &lt;&lt; 27 }</span>
             </dt>
             <dd>Describes a kind of resource access from the render pipeline.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">enum class <a href="#a198f24458c6fe67ac726d5e3c4ffdb9a" class="m-doc">ResolveMode</a>: uint32_t { </span><span class="m-doc-wrap"><a href="#a198f24458c6fe67ac726d5e3c4ffdb9aa37b0558e20b714c1470618154c8ca42e" class="m-doc">SampleZero</a> = VK_RESOLVE_MODE_SAMPLE_ZERO_BIT,
+              <a href="#a198f24458c6fe67ac726d5e3c4ffdb9aab1897515d548a960afe49ecf66a29021" class="m-doc">Average</a> = VK_RESOLVE_MODE_AVERAGE_BIT,
+              <a href="#a198f24458c6fe67ac726d5e3c4ffdb9aa78d811e98514cd165dda532286610fd2" class="m-doc">Min</a> = VK_RESOLVE_MODE_MIN_BIT,
+              <a href="#a198f24458c6fe67ac726d5e3c4ffdb9aa6a061313d22e51e0f25b7cd4dc065233" class="m-doc">Max</a> = VK_RESOLVE_MODE_MAX_BIT }</span>
+            </dt>
+            <dd>Determines the method how a multisampled image should be resolved.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">enum class <a href="#a44c647dc6cc6cd66e8b47575b8ce8ae6" class="m-doc">SamplerAddressMode</a>: uint32_t { </span><span class="m-doc-wrap"><a href="#a44c647dc6cc6cd66e8b47575b8ce8ae6a7020426cfb0a204051be4b3053d2acc8" class="m-doc">Repeat</a> = VK_SAMPLER_ADDRESS_MODE_REPEAT,
               <a href="#a44c647dc6cc6cd66e8b47575b8ce8ae6a12ce4a5977988214a6b098b8cb0bf695" class="m-doc">MirroredRepeat</a> = VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT,
@@ -1418,6 +1396,10 @@
             </dt>
             <dd>The type of the user-provided function callback for recording commands to a render pass inline.</dd>
             <dt>
+              using <a href="#a3fcc5a6aef9e25f660dbf5a23a927aea" class="m-doc">ResolveModeMask</a> = <a href="classtp_1_1_enum_bit_mask.html" class="m-doc">EnumBitMask</a>&lt;<a href="namespacetp.html#a198f24458c6fe67ac726d5e3c4ffdb9a" class="m-doc">ResolveMode</a>&gt;
+            </dt>
+            <dd></dd>
+            <dt>
               using <a href="#a30a2cfebc7d6bf76df2d13f0cee84cc6" class="m-doc">ShaderStageMask</a> = <a href="classtp_1_1_enum_bit_mask.html" class="m-doc">EnumBitMask</a>&lt;<a href="namespacetp.html#a28bf5f9a43fe93cf183f121ebec2163a" class="m-doc">ShaderStage</a>&gt;
             </dt>
             <dd></dd>
@@ -1476,12 +1458,12 @@
               <div class="m-doc-template">template&lt;typename T&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#a8afebc445ea6f34a84cd0a9fe043bb4a" class="m-doc-self">getVkFeatureStructureType</a>(</span><span class="m-doc-wrap">) -&gt; VkStructureType <span class="m-label m-flat m-danger">deleted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
-            <dd>Returns the   <a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkStructureType.html" class="m-doc-external">VkStructureType</a> enum value corresponding to the given Vulkan structure type. These structures specify physical device features and can be used in <a href="classtp_1_1_physical_device.html#a4fda56ed3ec8434de6b7cdbcf10e6b04" class="m-doc">tp::<wbr />PhysicalDevice::<wbr />vkQueryFeatures</a>.</dd>
+            <dd>Returns the   <a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkStructureType.html" class="m-doc-external">VkStructureType</a> enum value corresponding to the given Vulkan structure type. These structures specify physical device features and can be used in <a href="classtp_1_1_physical_device.html#a4fda56ed3ec8434de6b7cdbcf10e6b04" class="m-doc">tp::<wbr />PhysicalDevice::<wbr />vkQueryFeatures</a>.</dd>
             <dt id="a819b3bc00fc5132bda91f6ccc850cb46">
               <div class="m-doc-template">template&lt;typename T&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#a819b3bc00fc5132bda91f6ccc850cb46" class="m-doc-self">getVkPropertyStructureType</a>(</span><span class="m-doc-wrap">) -&gt; VkStructureType <span class="m-label m-flat m-danger">deleted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
-            <dd>Returns the   <a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkStructureType.html" class="m-doc-external">VkStructureType</a> enum value corresponding to the given Vulkan structure type. These structures specify physical device properties and can be used in <a href="classtp_1_1_physical_device.html#adb42c7230b1e247a698a0d7425460a3a" class="m-doc">tp::<wbr />PhysicalDevice::<wbr />vkQueryProperties</a>.</dd>
+            <dd>Returns the   <a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkStructureType.html" class="m-doc-external">VkStructureType</a> enum value corresponding to the given Vulkan structure type. These structures specify physical device properties and can be used in <a href="classtp_1_1_physical_device.html#adb42c7230b1e247a698a0d7425460a3a" class="m-doc">tp::<wbr />PhysicalDevice::<wbr />vkQueryProperties</a>.</dd>
             <dt id="afbac767ca250ef4495e83a45f8bc82b0">
               <span class="m-doc-wrap-bumper">auto <a href="#afbac767ca250ef4495e83a45f8bc82b0" class="m-doc-self">operator!=</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_buffer.html" class="m-doc">Buffer</a>&amp; lhs,
               const <a href="classtp_1_1_buffer.html" class="m-doc">Buffer</a>&amp; rhs) -&gt; bool</span>
@@ -1566,47 +1548,12 @@
         </section>
         <section>
           <h2>Enum documentation</h2>
-          <section class="m-doc-details" id="a6991b358994d01dff68977e4a9cf9710"><div>
-            <h3>
-              enum class tp::<wbr /><a href="#a6991b358994d01dff68977e4a9cf9710" class="m-doc-self">AttachmentBindPointType</a>
-            </h3>
-            <p>Describes how a bound attachment will be interpreted.</p>
-            <table class="m-table m-fullwidth m-flat m-doc">
-              <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
-              <tbody>
-                <tr>
-                  <td><a href="#a6991b358994d01dff68977e4a9cf9710acb5feb1b7314637725a2e73bdc9f7295" class="m-doc-self" id="a6991b358994d01dff68977e4a9cf9710acb5feb1b7314637725a2e73bdc9f7295">Color</a></td>
-                  <td>
-                  <p>A color attachment for storing rasterization outputs.</p>
-                  </td>
-                </tr>
-                <tr>
-                  <td><a href="#a6991b358994d01dff68977e4a9cf9710a324118a6721dd6b8a9b9f4e327df2bf5" class="m-doc-self" id="a6991b358994d01dff68977e4a9cf9710a324118a6721dd6b8a9b9f4e327df2bf5">Input</a></td>
-                  <td>
-                  <p>An input attachment for loading pixel-local data from previous subpasses.</p>
-                  </td>
-                </tr>
-                <tr>
-                  <td><a href="#a6991b358994d01dff68977e4a9cf9710a2fa8076285272883c91e14402975a441" class="m-doc-self" id="a6991b358994d01dff68977e4a9cf9710a2fa8076285272883c91e14402975a441">DepthStencil</a></td>
-                  <td>
-                  <p>A depth and/or stencil attachment used during rasterization.</p>
-                  </td>
-                </tr>
-                <tr>
-                  <td><a href="#a6991b358994d01dff68977e4a9cf9710a369b06d5985c13f7a81497ce840ad809" class="m-doc-self" id="a6991b358994d01dff68977e4a9cf9710a369b06d5985c13f7a81497ce840ad809">ResolveFromColor</a></td>
-                  <td>
-                  <p>An attachment that will be a target of a multisample resolve operation from a Color attachment.</p>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div></section>
           <section class="m-doc-details" id="aa57e260754413ae9a64d57adb264c384"><div>
             <h3>
               enum class tp::<wbr /><a href="#aa57e260754413ae9a64d57adb264c384" class="m-doc-self">AttachmentLoadOp</a>: uint32_t
             </h3>
             <p>The load operation applied to the contents of an attachment at the start of a render pass.</p>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkAttachmentLoadOp.html" class="m-doc-external">VkAttachmentLoadOp</a></p></aside>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkAttachmentLoadOp.html" class="m-doc-external">VkAttachmentLoadOp</a></p></aside>
             <table class="m-table m-fullwidth m-flat m-doc">
               <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
               <tbody>
@@ -1636,7 +1583,7 @@
               enum class tp::<wbr /><a href="#ae8ae216230f07b1ccb769eac93fa9c3d" class="m-doc-self">AttachmentStoreOp</a>: uint32_t
             </h3>
             <p>The store operation applied to the contents of an attachment.</p>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkAttachmentStoreOp.html" class="m-doc-external">VkAttachmentStoreOp</a></p></aside>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkAttachmentStoreOp.html" class="m-doc-external">VkAttachmentStoreOp</a></p></aside>
             <table class="m-table m-fullwidth m-flat m-doc">
               <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
               <tbody>
@@ -1660,28 +1607,28 @@
               enum class tp::<wbr /><a href="#a61ff7a7fc09d75005d831407a545073c" class="m-doc-self">BlendFactor</a>: uint32_t
             </h3>
             <p>Framebuffer blending factors.</p>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkBlendFactor.html" class="m-doc-external">VkBlendFactor</a></p></aside>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkBlendFactor.html" class="m-doc-external">VkBlendFactor</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="a1adc8c964207f52d3ec83dc7d4d29a7e"><div>
             <h3>
               enum class tp::<wbr /><a href="#a1adc8c964207f52d3ec83dc7d4d29a7e" class="m-doc-self">BlendOp</a>: uint32_t
             </h3>
             <p>Framebuffer blending operators.</p>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkBlendOp.html" class="m-doc-external">VkBlendOp</a></p></aside>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkBlendOp.html" class="m-doc-external">VkBlendOp</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="a4884ae599a7d76ce351f14937f7cba6e"><div>
             <h3>
               enum class tp::<wbr /><a href="#a4884ae599a7d76ce351f14937f7cba6e" class="m-doc-self">BorderColor</a>: uint32_t
             </h3>
             <p>The border color applied when using a border <a href="namespacetp.html#a44c647dc6cc6cd66e8b47575b8ce8ae6" class="m-doc">tp::<wbr />SamplerAddressMode</a>.</p>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkBorderColor.html" class="m-doc-external">VkBorderColor</a></p></aside>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkBorderColor.html" class="m-doc-external">VkBorderColor</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="aab7f7936c98d373925f0e1728496c63d"><div>
             <h3>
               enum class tp::<wbr /><a href="#aab7f7936c98d373925f0e1728496c63d" class="m-doc-self">BufferUsage</a>: uint32_t
             </h3>
             <p>The allowed usage of a <a href="classtp_1_1_buffer.html" class="m-doc">tp::<wbr />Buffer</a>.</p>
-<aside class="m-note m-default"><h4>Remark</h4><p>Copy commands that don&#x27;t involve an image, as well as <a href="classtp_1_1_job.html#a78f67cc52c918d52712ff22503bcdecf" class="m-doc">tp::<wbr />Job::<wbr />cmdFillBuffer</a> and <a href="classtp_1_1_job.html#a16b30333631c552bc5a69b4ba2b4a259" class="m-doc">tp::<wbr />Job::<wbr />cmdUpdateBuffer</a> are implicitly allowed and don&#x27;t require a usage flag.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkBufferUsageFlagBits.html" class="m-doc-external">VkBufferUsageFlagBits</a></p></aside>
+<aside class="m-note m-default"><h4>Remark</h4><p>Copy commands that don&#x27;t involve an image, as well as <a href="classtp_1_1_job.html#a78f67cc52c918d52712ff22503bcdecf" class="m-doc">tp::<wbr />Job::<wbr />cmdFillBuffer</a> and <a href="classtp_1_1_job.html#a16b30333631c552bc5a69b4ba2b4a259" class="m-doc">tp::<wbr />Job::<wbr />cmdUpdateBuffer</a> are implicitly allowed and don&#x27;t require a usage flag.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkBufferUsageFlagBits.html" class="m-doc-external">VkBufferUsageFlagBits</a></p></aside>
             <table class="m-table m-fullwidth m-flat m-doc">
               <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
               <tbody>
@@ -1737,7 +1684,7 @@
                   <td><a href="#aab7f7936c98d373925f0e1728496c63daa85fec0d8738bc31273f1a5d6d10e618" class="m-doc-self" id="aab7f7936c98d373925f0e1728496c63daa85fec0d8738bc31273f1a5d6d10e618">DeviceAddress</a></td>
                   <td>
                   <p>Allows the use of <a href="classtp_1_1_buffer.html#a64154fc86785f52a233711674831f9f8" class="m-doc">tp::<wbr />Buffer::<wbr />getDeviceAddress</a> and <a href="classtp_1_1_buffer_view.html#afc740414807f8b5e6028f0f06c89ee57" class="m-doc">tp::<wbr />BufferView::<wbr />getDeviceAddress</a> to access the buffer from shaders through its address.</p>
-<aside class="m-note m-default"><h4>Remark</h4><p>Requires the   <a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkPhysicalDeviceVulkan12Features.html" class="m-doc-external">VkPhysicalDeviceVulkan12Features</a>::<code>bufferDeviceAddress</code> feature to be enabled.</p></aside>
+<aside class="m-note m-default"><h4>Remark</h4><p>Requires the   <a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkPhysicalDeviceVulkan12Features.html" class="m-doc-external">VkPhysicalDeviceVulkan12Features</a>::<code>bufferDeviceAddress</code> feature to be enabled.</p></aside>
                   </td>
                 </tr>
               </tbody>
@@ -1748,28 +1695,28 @@
               enum class tp::<wbr /><a href="#aaea1c69200026254bb364a7a65096d8a" class="m-doc-self">ColorComponent</a>: uint32_t
             </h3>
             <p>Identifies a component of a color image.</p>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkColorComponentFlagBits.html" class="m-doc-external">VkColorComponentFlagBits</a></p></aside>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkColorComponentFlagBits.html" class="m-doc-external">VkColorComponentFlagBits</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="ab0d53b2900e95e6841cafefc5f75fb8c"><div>
             <h3>
               enum class tp::<wbr /><a href="#ab0d53b2900e95e6841cafefc5f75fb8c" class="m-doc-self">CompareOp</a>: uint32_t
             </h3>
             <p>Comparison operators for depth, stencil and sampler operations.</p>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkCompareOp.html" class="m-doc-external">VkCompareOp</a></p></aside>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkCompareOp.html" class="m-doc-external">VkCompareOp</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="a7166b175e87a3fe1df22dba46004f180"><div>
             <h3>
               enum class tp::<wbr /><a href="#a7166b175e87a3fe1df22dba46004f180" class="m-doc-self">ComponentSwizzle</a>: uint32_t
             </h3>
             <p>Specifies the values placed in a component of the output color vector.</p>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkComponentSwizzle.html" class="m-doc-external">VkComponentSwizzle</a></p></aside>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkComponentSwizzle.html" class="m-doc-external">VkComponentSwizzle</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="a98c0da3e03273ad1faa3fe9a2eea521d"><div>
             <h3>
               enum class tp::<wbr /><a href="#a98c0da3e03273ad1faa3fe9a2eea521d" class="m-doc-self">CompositeAlpha</a>: uint32_t
             </h3>
             <p>The alpha composition used for the surface upon presentation.</p>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkCompositeAlphaFlagBitsKHR.html" class="m-doc-external">VkCompositeAlphaFlagBitsKHR</a></p></aside>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkCompositeAlphaFlagBitsKHR.html" class="m-doc-external">VkCompositeAlphaFlagBitsKHR</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="a7f03d242703821957cc6c3ecd0a20ddc"><div>
             <h3>
@@ -1818,7 +1765,7 @@
               enum class tp::<wbr /><a href="#abd936e997d7d782ffadb96ce54c25bce" class="m-doc-self">CullModeFlag</a>: uint32_t
             </h3>
             <p>Flags controlling which triangles get discarded.</p>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkCullModeFlagBits.html" class="m-doc-external">VkCullModeFlagBits</a></p></aside>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkCullModeFlagBits.html" class="m-doc-external">VkCullModeFlagBits</a></p></aside>
             <table class="m-table m-fullwidth m-flat m-doc">
               <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
               <tbody>
@@ -1842,21 +1789,21 @@
               enum class tp::<wbr /><a href="#aebb0e43b671ab8fa2b665268d4cc5104" class="m-doc-self">DebugMessageSeverity</a>: uint32_t
             </h3>
             <p>The severity of a reported debug message.</p>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkDebugUtilsMessageSeverityFlagBitsEXT.html" class="m-doc-external">VkDebugUtilsMessageSeverityFlagBitsEXT</a></p></aside>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkDebugUtilsMessageSeverityFlagBitsEXT.html" class="m-doc-external">VkDebugUtilsMessageSeverityFlagBitsEXT</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="aae1e4be7787435644b789ba8d4c7d47b"><div>
             <h3>
               enum class tp::<wbr /><a href="#aae1e4be7787435644b789ba8d4c7d47b" class="m-doc-self">DebugMessageType</a>: uint32_t
             </h3>
             <p>The type of a reported debug message.</p>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkDebugUtilsMessageTypeFlagBitsEXT.html" class="m-doc-external">VkDebugUtilsMessageTypeFlagBitsEXT</a></p></aside>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkDebugUtilsMessageTypeFlagBitsEXT.html" class="m-doc-external">VkDebugUtilsMessageTypeFlagBitsEXT</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="a68db4f071c78c4f26776f577588416bb"><div>
             <h3>
               enum class tp::<wbr /><a href="#a68db4f071c78c4f26776f577588416bb" class="m-doc-self">DescriptorBindingFlag</a>
             </h3>
             <p>Specifies additional properties of a <a href="structtp_1_1_descriptor_binding.html" class="m-doc">tp::<wbr />DescriptorBinding</a>.</p>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkDescriptorBindingFlagBits.html" class="m-doc-external">VkDescriptorBindingFlagBits</a></p></aside>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkDescriptorBindingFlagBits.html" class="m-doc-external">VkDescriptorBindingFlagBits</a></p></aside>
             <table class="m-table m-fullwidth m-flat m-doc">
               <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
               <tbody>
@@ -1864,28 +1811,28 @@
                   <td><a href="#a68db4f071c78c4f26776f577588416bba16d008687eb1211c484cfc25158d727d" class="m-doc-self" id="a68db4f071c78c4f26776f577588416bba16d008687eb1211c484cfc25158d727d">PartiallyBound</a></td>
                   <td>
                   <p>Indicates that the descriptors in this binding that are not dynamically used don&#x27;t need to contain valid descriptors at the time the descriptors are consumed. A descriptor is dynamically used if any shader invocation executes an instruction that performs any memory access using the descriptor.</p>
-<aside class="m-note m-default"><h4>Remark</h4><p>The use of this flag requires the   <a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkPhysicalDeviceVulkan12Features.html" class="m-doc-external">VkPhysicalDeviceVulkan12Features</a>::<code>descriptorBindingPartiallyBound</code> feature to be enabled.</p></aside>
+<aside class="m-note m-default"><h4>Remark</h4><p>The use of this flag requires the   <a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkPhysicalDeviceVulkan12Features.html" class="m-doc-external">VkPhysicalDeviceVulkan12Features</a>::<code>descriptorBindingPartiallyBound</code> feature to be enabled.</p></aside>
                   </td>
                 </tr>
                 <tr>
                   <td><a href="#a68db4f071c78c4f26776f577588416bba1179d614653f3ffe87397333a212495c" class="m-doc-self" id="a68db4f071c78c4f26776f577588416bba1179d614653f3ffe87397333a212495c">VariableDescriptorCount</a></td>
                   <td>
                   <p>Indicates that this descriptor binding has a variable size that will be specified when a descriptor set is allocated using this layout. The <code>arraySize</code> of <a href="structtp_1_1_descriptor_binding.html" class="m-doc">tp::<wbr />DescriptorBinding</a> is then treated as an upper bound on the size of this binding.</p>
-<aside class="m-note m-default"><h4>Remark</h4><p>This flag must only be used for the last binding in the array passed to <a href="classtp_1_1_device.html#afbd384e7dd4404796818f72625356f6f" class="m-doc">tp::<wbr />Device::<wbr />createDescriptorSetLayout</a>, and it must also be the binding with the largest value of <code>bindingNumber</code>.</p><p>The use of this flag requires the   <a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkPhysicalDeviceVulkan12Features.html" class="m-doc-external">VkPhysicalDeviceVulkan12Features</a>::<code>descriptorBindingVariableDescriptorCount</code> feature to be enabled.</p></aside>
+<aside class="m-note m-default"><h4>Remark</h4><p>This flag must only be used for the last binding in the array passed to <a href="classtp_1_1_device.html#afbd384e7dd4404796818f72625356f6f" class="m-doc">tp::<wbr />Device::<wbr />createDescriptorSetLayout</a>, and it must also be the binding with the largest value of <code>bindingNumber</code>.</p><p>The use of this flag requires the   <a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkPhysicalDeviceVulkan12Features.html" class="m-doc-external">VkPhysicalDeviceVulkan12Features</a>::<code>descriptorBindingVariableDescriptorCount</code> feature to be enabled.</p></aside>
                   </td>
                 </tr>
                 <tr>
                   <td><a href="#a68db4f071c78c4f26776f577588416bbad8e3e9c741ef9b5af4c97ff192f3e52f" class="m-doc-self" id="a68db4f071c78c4f26776f577588416bbad8e3e9c741ef9b5af4c97ff192f3e52f">AliasStorageImage</a></td>
                   <td>
                   <p>Allows binding the same image to a sampled image descriptor that uses this flag at the same time as to a storage image descriptor. Internally, the image will be transitioned to a general layout, just like for a storage image.</p>
-<aside class="m-note m-default"><h4>Remark</h4><p>The read access performed through this descriptor will be the same as if its type was <a href="namespacetp.html#a3dccbef68c07e939a1f37825018d2c67aa078fa7ad769f9e7b53b8c42e3b7bbab" class="m-doc">tp::<wbr />DescriptorType::<wbr />StorageImage</a>.</p><p>This flag may potentially reduce sampling performance of the image, especially if the image has previously been bound as a render target.</p><p>This flag is only valid with descriptor types <a href="namespacetp.html#a3dccbef68c07e939a1f37825018d2c67a4520c597ce328c250d1ca5192047d71d" class="m-doc">tp::<wbr />DescriptorType::<wbr />SampledImage</a>, <a href="namespacetp.html#a3dccbef68c07e939a1f37825018d2c67a8cfe077ac9aea5235b0c3fda85914029" class="m-doc">tp::<wbr />DescriptorType::<wbr />CombinedImageSampler</a> and <a href="namespacetp.html#a3dccbef68c07e939a1f37825018d2c67a261d965f5dd43c6873489b68730dbe57" class="m-doc">tp::<wbr />DescriptorType::<wbr />InputAttachment</a>.</p></aside>
+<aside class="m-note m-default"><h4>Remark</h4><p>The read access performed through this descriptor will be the same as if its type was <a href="namespacetp.html#a3dccbef68c07e939a1f37825018d2c67aa078fa7ad769f9e7b53b8c42e3b7bbab" class="m-doc">tp::<wbr />DescriptorType::<wbr />StorageImage</a>.</p><p>This flag may potentially reduce sampling performance of the image, especially if the image has previously been bound as a render target.</p><p>This flag is only valid with descriptor types <a href="namespacetp.html#a3dccbef68c07e939a1f37825018d2c67a4520c597ce328c250d1ca5192047d71d" class="m-doc">tp::<wbr />DescriptorType::<wbr />SampledImage</a>, <a href="namespacetp.html#a3dccbef68c07e939a1f37825018d2c67a8cfe077ac9aea5235b0c3fda85914029" class="m-doc">tp::<wbr />DescriptorType::<wbr />CombinedImageSampler</a> and tp::DescriptorType::InputAttachment.</p></aside>
                   </td>
                 </tr>
                 <tr>
                   <td><a href="#a68db4f071c78c4f26776f577588416bba4b8308424b6fb4b70803778cfc461015" class="m-doc-self" id="a68db4f071c78c4f26776f577588416bba4b8308424b6fb4b70803778cfc461015">UpdateAfterBind</a></td>
                   <td>
                   <p>Allows this binding to be updated inside a descriptor set after it has already been bound and used. This only affects <a href="classtp_1_1utils_1_1_mutable_descriptor_set.html#aedbc219709beef89faafff3a5f8daea6" class="m-doc">tp::<wbr />utils::<wbr />MutableDescriptorSet::<wbr />setImmediate</a> or other custom methods relying on <code>VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT</code>.</p>
-<aside class="m-note m-default"><h4>Remark</h4><p>The use of this flag requires the various <code>descriptorBindingUpdateAfterBind</code> features in   <a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkPhysicalDeviceVulkan12Features.html" class="m-doc-external">VkPhysicalDeviceVulkan12Features</a> depending on the type of the descriptor binding.</p></aside>
+<aside class="m-note m-default"><h4>Remark</h4><p>The use of this flag requires the various <code>descriptorBindingUpdateAfterBind</code> features in   <a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkPhysicalDeviceVulkan12Features.html" class="m-doc-external">VkPhysicalDeviceVulkan12Features</a> depending on the type of the descriptor binding.</p></aside>
                   </td>
                 </tr>
               </tbody>
@@ -1913,7 +1860,7 @@
               enum class tp::<wbr /><a href="#a3dccbef68c07e939a1f37825018d2c67" class="m-doc-self">DescriptorType</a>: uint32_t
             </h3>
             <p>Specifies how a certain resource is to be accessed from within a shader.</p>
-<p>In terms of the type of access, descriptors can be categorized by their <a href="namespacetp.html#a3dccbef68c07e939a1f37825018d2c67" class="m-doc">tp::<wbr />DescriptorType</a> into:</p><p>Sampled descriptors, providing read-only access with format conversions:</p><ul><li><a href="namespacetp.html#a3dccbef68c07e939a1f37825018d2c67a8cfe077ac9aea5235b0c3fda85914029" class="m-doc">tp::<wbr />DescriptorType::<wbr />CombinedImageSampler</a></li><li><a href="namespacetp.html#a3dccbef68c07e939a1f37825018d2c67a4520c597ce328c250d1ca5192047d71d" class="m-doc">tp::<wbr />DescriptorType::<wbr />SampledImage</a></li><li><a href="namespacetp.html#a3dccbef68c07e939a1f37825018d2c67a261d965f5dd43c6873489b68730dbe57" class="m-doc">tp::<wbr />DescriptorType::<wbr />InputAttachment</a></li><li><a href="namespacetp.html#a3dccbef68c07e939a1f37825018d2c67a87f4470e128117163f6071e645f404a9" class="m-doc">tp::<wbr />DescriptorType::<wbr />TexelBuffer</a></li></ul><p>Storage descriptors, providing read, write and atomic access:</p><ul><li><a href="namespacetp.html#a3dccbef68c07e939a1f37825018d2c67aa078fa7ad769f9e7b53b8c42e3b7bbab" class="m-doc">tp::<wbr />DescriptorType::<wbr />StorageImage</a></li><li><a href="namespacetp.html#a3dccbef68c07e939a1f37825018d2c67a439f57c2c466c89db942b3de48298b2b" class="m-doc">tp::<wbr />DescriptorType::<wbr />StorageBuffer</a></li><li><a href="namespacetp.html#a3dccbef68c07e939a1f37825018d2c67ada8c94227ee0e3b5cd40da12d594ad55" class="m-doc">tp::<wbr />DescriptorType::<wbr />StorageBufferDynamic</a></li><li><a href="namespacetp.html#a3dccbef68c07e939a1f37825018d2c67aae1f93780c3073aeadaf118d550f0c65" class="m-doc">tp::<wbr />DescriptorType::<wbr />StorageTexelBuffer</a></li></ul><p>Uniform buffer descriptors, providing read-only access to uniform buffers:</p><ul><li><a href="namespacetp.html#a3dccbef68c07e939a1f37825018d2c67a88f133adfed6c854e5731cdffbf208cf" class="m-doc">tp::<wbr />DescriptorType::<wbr />UniformBuffer</a></li><li><a href="namespacetp.html#a3dccbef68c07e939a1f37825018d2c67a517b91f0588b3bf6c80ff3b19b2a7f57" class="m-doc">tp::<wbr />DescriptorType::<wbr />UniformBufferDynamic</a></li></ul><p><a href="classtp_1_1_sampler.html" class="m-doc">Sampler</a> descriptors:</p><ul><li><a href="namespacetp.html#a3dccbef68c07e939a1f37825018d2c67a5bca2f066df1fe641b2b779db2a63c0a" class="m-doc">tp::<wbr />DescriptorType::<wbr />Sampler</a></li></ul><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkDescriptorType.html" class="m-doc-external">VkDescriptorType</a></p></aside>
+<p>In terms of the type of access, descriptors can be categorized by their <a href="namespacetp.html#a3dccbef68c07e939a1f37825018d2c67" class="m-doc">tp::<wbr />DescriptorType</a> into:</p><p>Sampled descriptors, providing read-only access with format conversions:</p><ul><li><a href="namespacetp.html#a3dccbef68c07e939a1f37825018d2c67a8cfe077ac9aea5235b0c3fda85914029" class="m-doc">tp::<wbr />DescriptorType::<wbr />CombinedImageSampler</a></li><li><a href="namespacetp.html#a3dccbef68c07e939a1f37825018d2c67a4520c597ce328c250d1ca5192047d71d" class="m-doc">tp::<wbr />DescriptorType::<wbr />SampledImage</a></li><li>tp::DescriptorType::InputAttachment</li><li><a href="namespacetp.html#a3dccbef68c07e939a1f37825018d2c67a87f4470e128117163f6071e645f404a9" class="m-doc">tp::<wbr />DescriptorType::<wbr />TexelBuffer</a></li></ul><p>Storage descriptors, providing read, write and atomic access:</p><ul><li><a href="namespacetp.html#a3dccbef68c07e939a1f37825018d2c67aa078fa7ad769f9e7b53b8c42e3b7bbab" class="m-doc">tp::<wbr />DescriptorType::<wbr />StorageImage</a></li><li><a href="namespacetp.html#a3dccbef68c07e939a1f37825018d2c67a439f57c2c466c89db942b3de48298b2b" class="m-doc">tp::<wbr />DescriptorType::<wbr />StorageBuffer</a></li><li><a href="namespacetp.html#a3dccbef68c07e939a1f37825018d2c67ada8c94227ee0e3b5cd40da12d594ad55" class="m-doc">tp::<wbr />DescriptorType::<wbr />StorageBufferDynamic</a></li><li><a href="namespacetp.html#a3dccbef68c07e939a1f37825018d2c67aae1f93780c3073aeadaf118d550f0c65" class="m-doc">tp::<wbr />DescriptorType::<wbr />StorageTexelBuffer</a></li></ul><p>Uniform buffer descriptors, providing read-only access to uniform buffers:</p><ul><li><a href="namespacetp.html#a3dccbef68c07e939a1f37825018d2c67a88f133adfed6c854e5731cdffbf208cf" class="m-doc">tp::<wbr />DescriptorType::<wbr />UniformBuffer</a></li><li><a href="namespacetp.html#a3dccbef68c07e939a1f37825018d2c67a517b91f0588b3bf6c80ff3b19b2a7f57" class="m-doc">tp::<wbr />DescriptorType::<wbr />UniformBufferDynamic</a></li></ul><p><a href="classtp_1_1_sampler.html" class="m-doc">Sampler</a> descriptors:</p><ul><li><a href="namespacetp.html#a3dccbef68c07e939a1f37825018d2c67a5bca2f066df1fe641b2b779db2a63c0a" class="m-doc">tp::<wbr />DescriptorType::<wbr />Sampler</a></li></ul><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkDescriptorType.html" class="m-doc-external">VkDescriptorType</a></p></aside>
             <table class="m-table m-fullwidth m-flat m-doc">
               <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
               <tbody>
@@ -1977,12 +1924,6 @@
                   <p>A descriptor for a <a href="classtp_1_1_buffer_view.html" class="m-doc">tp::<wbr />BufferView</a> object as a read/write buffer with a dynamic offset.</p>
                   </td>
                 </tr>
-                <tr>
-                  <td><a href="#a3dccbef68c07e939a1f37825018d2c67a261d965f5dd43c6873489b68730dbe57" class="m-doc-self" id="a3dccbef68c07e939a1f37825018d2c67a261d965f5dd43c6873489b68730dbe57">InputAttachment</a></td>
-                  <td>
-                  <p>A descriptor for a <a href="classtp_1_1_image_view.html" class="m-doc">tp::<wbr />ImageView</a> object that is bound as an input attachment in a subpass of a render pass.</p>
-                  </td>
-                </tr>
               </tbody>
             </table>
           </div></section>
@@ -1991,7 +1932,7 @@
               enum class tp::<wbr /><a href="#ab139408aa3663ba76ee13852300d49ec" class="m-doc-self">DeviceType</a>
             </h3>
             <p>The general type of a physical device.</p>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkPhysicalDeviceType.html" class="m-doc-external">VkPhysicalDeviceType</a></p></aside>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkPhysicalDeviceType.html" class="m-doc-external">VkPhysicalDeviceType</a></p></aside>
             <table class="m-table m-fullwidth m-flat m-doc">
               <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
               <tbody>
@@ -2040,7 +1981,7 @@
               enum class tp::<wbr /><a href="#a8d68684e76a2f3ad68b401360669a4d0" class="m-doc-self">DynamicState</a>: uint32_t
             </h3>
             <p>Specifies the parts of the <a href="classtp_1_1_graphics_pipeline_setup.html" class="m-doc">tp::<wbr />GraphicsPipelineSetup</a> state that are to be taken from the dynamic state commands recorded into a <a href="classtp_1_1_render_list.html" class="m-doc">tp::<wbr />RenderList</a>, rather than from the pipeline setup, which will be ignored.</p>
-<aside class="m-note m-default"><h4>Remark</h4><p><code>VK_DYNAMIC_STATE_VIEWPORT</code> and <code>VK_DYNAMIC_STATE_SCISSOR</code> are always enabled and therefore not present in this enum. The remaining missing values are supported, but don&#x27;t have corresponding methods to set their state defined in <a href="classtp_1_1_render_list.html" class="m-doc">tp::<wbr />RenderList</a> - you will need to call the Vulkan functions directly.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkDynamicState.html" class="m-doc-external">VkDynamicState</a></p></aside>
+<aside class="m-note m-default"><h4>Remark</h4><p><code>VK_DYNAMIC_STATE_VIEWPORT</code> and <code>VK_DYNAMIC_STATE_SCISSOR</code> are always enabled and therefore not present in this enum. The remaining missing values are supported, but don&#x27;t have corresponding methods to set their state defined in <a href="classtp_1_1_render_list.html" class="m-doc">tp::<wbr />RenderList</a> - you will need to call the Vulkan functions directly.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkDynamicState.html" class="m-doc-external">VkDynamicState</a></p></aside>
             <table class="m-table m-fullwidth m-flat m-doc">
               <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
               <tbody>
@@ -2076,7 +2017,7 @@
               enum class tp::<wbr /><a href="#a9851b2784725953c6ed73e502916dc37" class="m-doc-self">ErrorType</a>: int32_t
             </h3>
             <p>The type of an error returned by either Vulkan or Tephra.</p>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkResult.html" class="m-doc-external">VkResult</a></p></aside>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkResult.html" class="m-doc-external">VkResult</a></p></aside>
             <table class="m-table m-fullwidth m-flat m-doc">
               <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
               <tbody>
@@ -2196,21 +2137,21 @@
               enum class tp::<wbr /><a href="#ae199b5e28f6985b81882e95edb9f4858" class="m-doc-self">Filter</a>: uint32_t
             </h3>
             <p>The filtering mode.</p>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkFilter.html" class="m-doc-external">VkFilter</a></p></aside>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkFilter.html" class="m-doc-external">VkFilter</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="a575466ff8f546f00468d04124cee38b5"><div>
             <h3>
               enum class tp::<wbr /><a href="#a575466ff8f546f00468d04124cee38b5" class="m-doc-self">Format</a>: uint32_t
             </h3>
             <p>The formats that data can be stored in inside buffers and images.</p>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkFormat.html" class="m-doc-external">VkFormat</a></p></aside>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkFormat.html" class="m-doc-external">VkFormat</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="a810f0af83c826b971537fa367f479c2c"><div>
             <h3>
               enum class tp::<wbr /><a href="#a810f0af83c826b971537fa367f479c2c" class="m-doc-self">FormatFeature</a>: uint32_t
             </h3>
             <p>Describes additional features of a particular format.</p>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkFormatFeatureFlagBits.html" class="m-doc-external">VkFormatFeatureFlagBits</a></p></aside>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkFormatFeatureFlagBits.html" class="m-doc-external">VkFormatFeatureFlagBits</a></p></aside>
             <table class="m-table m-fullwidth m-flat m-doc">
               <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
               <tbody>
@@ -2234,7 +2175,7 @@
               enum class tp::<wbr /><a href="#aa73f5415779ee4a54698b9167399ce95" class="m-doc-self">FormatUsage</a>: uint32_t
             </h3>
             <p>The usage of a resource using a particular format.</p>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkFormatFeatureFlagBits.html" class="m-doc-external">VkFormatFeatureFlagBits</a></p></aside>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkFormatFeatureFlagBits.html" class="m-doc-external">VkFormatFeatureFlagBits</a></p></aside>
             <table class="m-table m-fullwidth m-flat m-doc">
               <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
               <tbody>
@@ -2253,13 +2194,13 @@
                 <tr>
                   <td><a href="#aa73f5415779ee4a54698b9167399ce95afddd0a8661f380ee89f529eff813b03d" class="m-doc-self" id="aa73f5415779ee4a54698b9167399ce95afddd0a8661f380ee89f529eff813b03d">ColorAttachment</a></td>
                   <td>
-                  <p>Corresponds to usage through <a href="namespacetp.html#a6991b358994d01dff68977e4a9cf9710acb5feb1b7314637725a2e73bdc9f7295" class="m-doc">tp::<wbr />AttachmentBindPointType::<wbr />Color</a> or <a href="namespacetp.html#a6991b358994d01dff68977e4a9cf9710a324118a6721dd6b8a9b9f4e327df2bf5" class="m-doc">tp::<wbr />AttachmentBindPointType::<wbr />Input</a>.</p>
+                  <p>Corresponds to usage through <a href="structtp_1_1_color_attachment.html" class="m-doc">tp::<wbr />ColorAttachment</a>.</p>
                   </td>
                 </tr>
                 <tr>
                   <td><a href="#aa73f5415779ee4a54698b9167399ce95a652fd1408b3de263e32147770a48931e" class="m-doc-self" id="aa73f5415779ee4a54698b9167399ce95a652fd1408b3de263e32147770a48931e">DepthStencilAttachment</a></td>
                   <td>
-                  <p>Corresponds to usage through <a href="namespacetp.html#a6991b358994d01dff68977e4a9cf9710a2fa8076285272883c91e14402975a441" class="m-doc">tp::<wbr />AttachmentBindPointType::<wbr />DepthStencil</a>.</p>
+                  <p>Corresponds to usage through <a href="structtp_1_1_depth_stencil_attachment.html" class="m-doc">tp::<wbr />DepthStencilAttachment</a>.</p>
                   </td>
                 </tr>
                 <tr>
@@ -2288,14 +2229,14 @@
               enum class tp::<wbr /><a href="#ab98e45acd8507475443cd54a645ca76b" class="m-doc-self">ImageAspect</a>: uint32_t
             </h3>
             <p>The aspect storing a type of data of an image view.</p>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkImageAspectFlagBits.html" class="m-doc-external">VkImageAspectFlagBits</a></p></aside>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkImageAspectFlagBits.html" class="m-doc-external">VkImageAspectFlagBits</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="a1424160f768fad8d4b99f93167b269a8"><div>
             <h3>
               enum class tp::<wbr /><a href="#a1424160f768fad8d4b99f93167b269a8" class="m-doc-self">ImageFlag</a>: uint32_t
             </h3>
             <p>Additional image creation options.</p>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkImageCreateFlagBits.html" class="m-doc-external">VkImageCreateFlagBits</a></p></aside>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkImageCreateFlagBits.html" class="m-doc-external">VkImageCreateFlagBits</a></p></aside>
             <table class="m-table m-fullwidth m-flat m-doc">
               <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
               <tbody>
@@ -2354,7 +2295,7 @@
               enum class tp::<wbr /><a href="#a6664b04e5b0dd2db10648d870477c899" class="m-doc-self">ImageUsage</a>: uint32_t
             </h3>
             <p>The allowed usage of a <a href="classtp_1_1_image.html" class="m-doc">tp::<wbr />Image</a>.</p>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkImageUsageFlagBits.html" class="m-doc-external">VkImageUsageFlagBits</a></p></aside>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkImageUsageFlagBits.html" class="m-doc-external">VkImageUsageFlagBits</a></p></aside>
             <table class="m-table m-fullwidth m-flat m-doc">
               <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
               <tbody>
@@ -2385,19 +2326,19 @@
                 <tr>
                   <td><a href="#a6664b04e5b0dd2db10648d870477c899afddd0a8661f380ee89f529eff813b03d" class="m-doc-self" id="a6664b04e5b0dd2db10648d870477c899afddd0a8661f380ee89f529eff813b03d">ColorAttachment</a></td>
                   <td>
-                  <p>Allows the image to be used as a color attachment in <a href="classtp_1_1_job.html#ab739735917361ff75d3b892339007815" class="m-doc">tp::<wbr />Job::<wbr />cmdExecuteRenderPass</a>.</p>
+                  <p>Allows the image to be used as a <a href="structtp_1_1_color_attachment.html" class="m-doc">tp::<wbr />ColorAttachment</a> inside a render pass.</p>
                   </td>
                 </tr>
                 <tr>
                   <td><a href="#a6664b04e5b0dd2db10648d870477c899a652fd1408b3de263e32147770a48931e" class="m-doc-self" id="a6664b04e5b0dd2db10648d870477c899a652fd1408b3de263e32147770a48931e">DepthStencilAttachment</a></td>
                   <td>
-                  <p>Allows the image to be used as a depth or stencil attachment in <a href="classtp_1_1_job.html#ab739735917361ff75d3b892339007815" class="m-doc">tp::<wbr />Job::<wbr />cmdExecuteRenderPass</a>.</p>
+                  <p>Allows the image to be used as a <a href="structtp_1_1_depth_stencil_attachment.html" class="m-doc">tp::<wbr />DepthStencilAttachment</a> inside a render pass.</p>
                   </td>
                 </tr>
                 <tr>
                   <td><a href="#a6664b04e5b0dd2db10648d870477c899a261d965f5dd43c6873489b68730dbe57" class="m-doc-self" id="a6664b04e5b0dd2db10648d870477c899a261d965f5dd43c6873489b68730dbe57">InputAttachment</a></td>
                   <td>
-                  <p>Allows the image to be used in a <a href="namespacetp.html#a3dccbef68c07e939a1f37825018d2c67a261d965f5dd43c6873489b68730dbe57" class="m-doc">tp::<wbr />DescriptorType::<wbr />InputAttachment</a> descriptor.</p>
+                  <p>Allows the image to be used in a tp::DescriptorType::InputAttachment descriptor.</p>
                   </td>
                 </tr>
               </tbody>
@@ -2408,7 +2349,7 @@
               enum class tp::<wbr /><a href="#a0d27ef619231fa3c59ec96267d66a4bd" class="m-doc-self">ImageViewType</a>: uint32_t
             </h3>
             <p>The dimensionality of an image view.</p>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkImageViewType.html" class="m-doc-external">VkImageViewType</a></p></aside>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkImageViewType.html" class="m-doc-external">VkImageViewType</a></p></aside>
             <table class="m-table m-fullwidth m-flat m-doc">
               <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
               <tbody>
@@ -2462,7 +2403,7 @@
               enum class tp::<wbr /><a href="#afea3b5dc483f1a9ae7d17decbf3252a5" class="m-doc-self">IndexType</a>: uint32_t
             </h3>
             <p>The type of values of an index buffer.</p>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkIndexType.html" class="m-doc-external">VkIndexType</a></p></aside>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkIndexType.html" class="m-doc-external">VkIndexType</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="a5df1d5c2318a4fed95fbba467fd86ee3"><div>
             <h3>
@@ -2511,7 +2452,7 @@
               enum class tp::<wbr /><a href="#ad3517ebcddd999d1c09952449ca9a1ef" class="m-doc-self">LogicOp</a>: uint32_t
             </h3>
             <p>Logical comparison operators.</p>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkLogicOp.html" class="m-doc-external">VkLogicOp</a></p></aside>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkLogicOp.html" class="m-doc-external">VkLogicOp</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="a9bd7d8270f938631e796ff2c0966667c"><div>
             <h3>
@@ -2547,7 +2488,7 @@
               enum class tp::<wbr /><a href="#a0ae67108bd96881f5af690bbec57c181" class="m-doc-self">MemoryLocation</a>: uint8_t
             </h3>
             <p>Defines the memory location types according to its accessibility and intended use.</p>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkMemoryPropertyFlagBits.html" class="m-doc-external">VkMemoryPropertyFlagBits</a></p></aside>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkMemoryPropertyFlagBits.html" class="m-doc-external">VkMemoryPropertyFlagBits</a></p></aside>
             <table class="m-table m-fullwidth m-flat m-doc">
               <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
               <tbody>
@@ -2595,14 +2536,14 @@
               enum class tp::<wbr /><a href="#ab3d0ece6c3b49e1866143d74ead604dd" class="m-doc-self">MultisampleLevel</a>: uint32_t
             </h3>
             <p>Sample counts that can be used for image storage operations.</p>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkSampleCountFlagBits.html" class="m-doc-external">VkSampleCountFlagBits</a></p></aside>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkSampleCountFlagBits.html" class="m-doc-external">VkSampleCountFlagBits</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="ab276b2ab37239d4b36982c2ba13a1414"><div>
             <h3>
               enum class tp::<wbr /><a href="#ab276b2ab37239d4b36982c2ba13a1414" class="m-doc-self">PipelineFlag</a>: uint32_t
             </h3>
             <p>Additional pipeline creation options.</p>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkPipelineCreateFlagBits.html" class="m-doc-external">VkPipelineCreateFlagBits</a></p></aside>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkPipelineCreateFlagBits.html" class="m-doc-external">VkPipelineCreateFlagBits</a></p></aside>
             <table class="m-table m-fullwidth m-flat m-doc">
               <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
               <tbody>
@@ -2620,7 +2561,7 @@
               enum class tp::<wbr /><a href="#ad7c69a8d8b81187a779224a594b4ed27" class="m-doc-self">PresentMode</a>: uint32_t
             </h3>
             <p>The possible presentation modes for a surface.</p>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkPresentModeKHR.html" class="m-doc-external">VkPresentModeKHR</a></p></aside>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkPresentModeKHR.html" class="m-doc-external">VkPresentModeKHR</a></p></aside>
             <table class="m-table m-fullwidth m-flat m-doc">
               <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
               <tbody>
@@ -2656,7 +2597,7 @@
               enum class tp::<wbr /><a href="#a12b2dbc0529baf76533e072273ffaf14" class="m-doc-self">PrimitiveTopology</a>: uint32_t
             </h3>
             <p>Specifies the type of primitive topology.</p>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkPrimitiveTopology.html" class="m-doc-external">VkPrimitiveTopology</a></p></aside>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkPrimitiveTopology.html" class="m-doc-external">VkPrimitiveTopology</a></p></aside>
             <table class="m-table m-fullwidth m-flat m-doc">
               <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
               <tbody>
@@ -2734,7 +2675,7 @@
               enum class tp::<wbr /><a href="#a8b32a8b4b40aee5fed67bc3c3d63ead7" class="m-doc-self">QueueType</a>: uint32_t
             </h3>
             <p>The type of a device queue, defining the operations supported on it as well as its performance characteristics.</p>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkQueueFlagBits.html" class="m-doc-external">VkQueueFlagBits</a></p></aside>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkQueueFlagBits.html" class="m-doc-external">VkQueueFlagBits</a></p></aside>
             <table class="m-table m-fullwidth m-flat m-doc">
               <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
               <tbody>
@@ -2780,7 +2721,7 @@
               enum class tp::<wbr /><a href="#a65671ead4547e19c32dc453c79d304f9" class="m-doc-self">RasterizationMode</a>
             </h3>
             <p>The mode used for rasterization of primitives.</p>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkPolygonMode.html" class="m-doc-external">VkPolygonMode</a></p></aside>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkPolygonMode.html" class="m-doc-external">VkPolygonMode</a></p></aside>
             <table class="m-table m-fullwidth m-flat m-doc">
               <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
               <tbody>
@@ -2985,7 +2926,7 @@
               enum class tp::<wbr /><a href="#a7b3b9770de7339614190cd96c3426092" class="m-doc-self">RenderAccess</a>: uint64_t
             </h3>
             <p>Describes a kind of resource access from the render pipeline.</p>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="namespacetp.html#a3dccbef68c07e939a1f37825018d2c67" class="m-doc">tp::<wbr />DescriptorType</a> for classification of descriptors into Storage, Sampled and Uniform.</p><p><a href="structtp_1_1_buffer_render_access.html" class="m-doc">tp::<wbr />BufferRenderAccess</a></p><p><a href="structtp_1_1_image_render_access.html" class="m-doc">tp::<wbr />ImageRenderAccess</a></p><p><a href="structtp_1_1_subpass_dependency.html" class="m-doc">tp::<wbr />SubpassDependency</a></p></aside>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="namespacetp.html#a3dccbef68c07e939a1f37825018d2c67" class="m-doc">tp::<wbr />DescriptorType</a> for classification of descriptors into Storage, Sampled and Uniform.</p><p><a href="structtp_1_1_buffer_render_access.html" class="m-doc">tp::<wbr />BufferRenderAccess</a></p><p><a href="structtp_1_1_image_render_access.html" class="m-doc">tp::<wbr />ImageRenderAccess</a></p></aside>
             <table class="m-table m-fullwidth m-flat m-doc">
               <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
               <tbody>
@@ -3160,19 +3101,26 @@
               </tbody>
             </table>
           </div></section>
+          <section class="m-doc-details" id="a198f24458c6fe67ac726d5e3c4ffdb9a"><div>
+            <h3>
+              enum class tp::<wbr /><a href="#a198f24458c6fe67ac726d5e3c4ffdb9a" class="m-doc-self">ResolveMode</a>: uint32_t
+            </h3>
+            <p>Determines the method how a multisampled image should be resolved.</p>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkResolveModeFlagBits.html" class="m-doc-external">VkResolveModeFlagBits</a></p></aside>
+          </div></section>
           <section class="m-doc-details" id="a44c647dc6cc6cd66e8b47575b8ce8ae6"><div>
             <h3>
               enum class tp::<wbr /><a href="#a44c647dc6cc6cd66e8b47575b8ce8ae6" class="m-doc-self">SamplerAddressMode</a>: uint32_t
             </h3>
             <p>The behavior of sampling with texture coordinates outside an image.</p>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkSamplerAddressMode.html" class="m-doc-external">VkSamplerAddressMode</a></p></aside>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkSamplerAddressMode.html" class="m-doc-external">VkSamplerAddressMode</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="a28bf5f9a43fe93cf183f121ebec2163a"><div>
             <h3>
               enum class tp::<wbr /><a href="#a28bf5f9a43fe93cf183f121ebec2163a" class="m-doc-self">ShaderStage</a>: uint32_t
             </h3>
             <p>Specifies the stage of shader execution.</p>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkShaderStageFlagBits.html" class="m-doc-external">VkShaderStageFlagBits</a></p></aside>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkShaderStageFlagBits.html" class="m-doc-external">VkShaderStageFlagBits</a></p></aside>
             <table class="m-table m-fullwidth m-flat m-doc">
               <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
               <tbody>
@@ -3285,14 +3233,14 @@
               enum class tp::<wbr /><a href="#a8193d924e7a53e53b5fde467024d1200" class="m-doc-self">StencilOp</a>: uint32_t
             </h3>
             <p>Stencil function specifying what happens to the stored stencil value.</p>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkStencilOp.html" class="m-doc-external">VkStencilOp</a></p></aside>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkStencilOp.html" class="m-doc-external">VkStencilOp</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="a4b9ef31a79898b23c45cf42e1e2f875a"><div>
             <h3>
               enum class tp::<wbr /><a href="#a4b9ef31a79898b23c45cf42e1e2f875a" class="m-doc-self">SurfaceTransform</a>: uint32_t
             </h3>
             <p>Transforms applied to a surface upon presentation.</p>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkSurfaceTransformFlagBitsKHR.html" class="m-doc-external">VkSurfaceTransformFlagBitsKHR</a></p></aside>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkSurfaceTransformFlagBitsKHR.html" class="m-doc-external">VkSurfaceTransformFlagBitsKHR</a></p></aside>
             <table class="m-table m-fullwidth m-flat m-doc">
               <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
               <tbody>
@@ -3355,7 +3303,7 @@
               enum class tp::<wbr /><a href="#ae1e4540d7cbc0c0a864a76044620b42f" class="m-doc-self">SwapchainFlag</a>: uint32_t
             </h3>
             <p>Additional swapchain creation options.</p>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkSwapchainCreateFlagBitsKHR.html" class="m-doc-external">VkSwapchainCreateFlagBitsKHR</a></p></aside>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkSwapchainCreateFlagBitsKHR.html" class="m-doc-external">VkSwapchainCreateFlagBitsKHR</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="a4a14ed8aa064f1af362ae2ee1e87ace1"><div>
             <h3>
@@ -3403,21 +3351,21 @@
               enum class tp::<wbr /><a href="#a2d4d2e583e723731d859127347e0df8e" class="m-doc-self">ValidationFeatureDisable</a>: uint32_t
             </h3>
             <p>Validation features part of the standard set that may be optionally disabled.</p>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="structtp_1_1_vulkan_validation_setup.html" class="m-doc">tp::<wbr />VulkanValidationSetup</a></p><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkValidationFeatureDisableEXT.html" class="m-doc-external">VkValidationFeatureDisableEXT</a></p></aside>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="structtp_1_1_vulkan_validation_setup.html" class="m-doc">tp::<wbr />VulkanValidationSetup</a></p><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkValidationFeatureDisableEXT.html" class="m-doc-external">VkValidationFeatureDisableEXT</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="a42931d68ca39e625158d56faa51800ae"><div>
             <h3>
               enum class tp::<wbr /><a href="#a42931d68ca39e625158d56faa51800ae" class="m-doc-self">ValidationFeatureEnable</a>: uint32_t
             </h3>
             <p>Optional validation features that may additionally be enabled.</p>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="structtp_1_1_vulkan_validation_setup.html" class="m-doc">tp::<wbr />VulkanValidationSetup</a></p><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkValidationFeatureEnableEXT.html" class="m-doc-external">VkValidationFeatureEnableEXT</a></p></aside>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="structtp_1_1_vulkan_validation_setup.html" class="m-doc">tp::<wbr />VulkanValidationSetup</a></p><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkValidationFeatureEnableEXT.html" class="m-doc-external">VkValidationFeatureEnableEXT</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="a67caa79015ff900edfff5470eccb6830"><div>
             <h3>
               enum class tp::<wbr /><a href="#a67caa79015ff900edfff5470eccb6830" class="m-doc-self">VertexInputRate</a>: uint32_t
             </h3>
             <p>The rate at which input attributes are pulled from buffers.</p>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkVertexInputRate.html" class="m-doc-external">VkVertexInputRate</a></p></aside>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkVertexInputRate.html" class="m-doc-external">VkVertexInputRate</a></p></aside>
             <table class="m-table m-fullwidth m-flat m-doc">
               <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
               <tbody>
@@ -3578,7 +3526,13 @@
               using tp::<wbr /><a href="#abce3813304107869c695ab3e0bafa0fa" class="m-doc-self">RenderInlineCallback</a> = std::function&lt;void(<a href="classtp_1_1_render_list.html" class="m-doc">RenderList</a>&amp;)&gt;
             </h3>
             <p>The type of the user-provided function callback for recording commands to a render pass inline.</p>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="classtp_1_1_job.html#ab739735917361ff75d3b892339007815" class="m-doc">tp::<wbr />Job::<wbr />cmdExecuteRenderPass</a></p></aside>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="classtp_1_1_job.html#a8db1261d6e0e2e9c1536cd50de39b547" class="m-doc">tp::<wbr />Job::<wbr />cmdExecuteRenderPass</a></p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a3fcc5a6aef9e25f660dbf5a23a927aea"><div>
+            <h3>
+              using tp::<wbr /><a href="#a3fcc5a6aef9e25f660dbf5a23a927aea" class="m-doc-self">ResolveModeMask</a> = <a href="classtp_1_1_enum_bit_mask.html" class="m-doc">EnumBitMask</a>&lt;<a href="namespacetp.html#a198f24458c6fe67ac726d5e3c4ffdb9a" class="m-doc">ResolveMode</a>&gt;
+            </h3>
+<p>A bitmask of <a href="namespacetp.html#a198f24458c6fe67ac726d5e3c4ffdb9a" class="m-doc">tp::<wbr />ResolveMode</a> values.</p>
           </div></section>
           <section class="m-doc-details" id="a30a2cfebc7d6bf76df2d13f0cee84cc6"><div>
             <h3>

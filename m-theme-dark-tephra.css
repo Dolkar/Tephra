@@ -124,13 +124,13 @@
   --success-filled-background-color: #2a703f;
   --success-filled-link-color: #3bd267;
   --success-filled-link-active-color: #acecbe;
-
+  
   --warning-color: var(--link-active-color);
-  --warning-link-active-color: #e9ecae;
-  --warning-filled-color: #e9ecae;
-  --warning-filled-background-color: #6d702a;
-  --warning-filled-link-color: #b8bf2b;
-  --warning-filled-link-active-color: #e9ecae;
+  --warning-link-active-color: var(--link-active-color);
+  --warning-filled-color: #e1ddce;
+  --warning-filled-background-color: #622110;
+  --warning-filled-link-color: var(--link-color);
+  --warning-filled-link-active-color: var(--link-active-color);
 
   --danger-color: var(--link-active-color);
   --danger-link-active-color: #ff9391;

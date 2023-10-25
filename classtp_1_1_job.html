@@ -95,8 +95,8 @@
             </dt>
             <dd>Allocates a preinitialized buffer for use within this job, with initial contents provided outside of it.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#a2f39a93b1597cde8e30a493daf444102" class="m-doc">cmdBeginDebugLabel</a>(</span><span class="m-doc-wrap">const char* name,
-              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;float&gt; color = {})</span>
+              <span class="m-doc-wrap-bumper">void <a href="#a91aa92a3dfc3938149a6c07302aa9348" class="m-doc">cmdBeginDebugLabel</a>(</span><span class="m-doc-wrap">const char* name,
+              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const float&gt; color = {})</span>
             </dt>
             <dd>Begins a debug label, marking the following commands until the next <a href="classtp_1_1_job.html#a95656466061cff2de6c61a68e8d827f2" class="m-doc">tp::<wbr />Job::<wbr />cmdEndDebugLabel</a> with the given name and optional color for display in validation and debugging tools.</dd>
             <dt>
@@ -153,7 +153,7 @@
             <dt>
               <span class="m-doc-wrap-bumper">void <a href="#a95656466061cff2de6c61a68e8d827f2" class="m-doc">cmdEndDebugLabel</a>(</span><span class="m-doc-wrap">)</span>
             </dt>
-            <dd>Ends the last debug label. Must be preceded by <a href="classtp_1_1_job.html#a2f39a93b1597cde8e30a493daf444102" class="m-doc">tp::<wbr />Job::<wbr />cmdBeginDebugLabel</a>.</dd>
+            <dd>Ends the last debug label. Must be preceded by <a href="classtp_1_1_job.html#a91aa92a3dfc3938149a6c07302aa9348" class="m-doc">tp::<wbr />Job::<wbr />cmdBeginDebugLabel</a>.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">void <a href="#a3743dd4c6e7f8d56e153290543342afb" class="m-doc">cmdExecuteComputePass</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_compute_pass_setup.html" class="m-doc">ComputePassSetup</a>&amp; setup,
               std::variant&lt;<a href="classtp_1_1_array_view.html" class="m-doc">ArrayView</a>&lt;<a href="classtp_1_1_compute_list.html" class="m-doc">ComputeList</a>&gt;, <a href="namespacetp.html#aa35536cf20aa7489b1e861514ec00ea4" class="m-doc">ComputeInlineCallback</a>&gt; commandRecording,
@@ -161,11 +161,11 @@
             </dt>
             <dd>Forms a compute pass that executes lists of compute commands.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#ab739735917361ff75d3b892339007815" class="m-doc">cmdExecuteRenderPass</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_render_pass_setup.html" class="m-doc">RenderPassSetup</a>&amp; setup,
-              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const std::variant&lt;<a href="classtp_1_1_array_view.html" class="m-doc">ArrayView</a>&lt;<a href="classtp_1_1_render_list.html" class="m-doc">RenderList</a>&gt;, <a href="namespacetp.html#abce3813304107869c695ab3e0bafa0fa" class="m-doc">RenderInlineCallback</a>&gt;&gt; subpassCommandRecording,
+              <span class="m-doc-wrap-bumper">void <a href="#a8db1261d6e0e2e9c1536cd50de39b547" class="m-doc">cmdExecuteRenderPass</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_render_pass_setup.html" class="m-doc">RenderPassSetup</a>&amp; setup,
+              std::variant&lt;<a href="classtp_1_1_array_view.html" class="m-doc">ArrayView</a>&lt;<a href="classtp_1_1_render_list.html" class="m-doc">RenderList</a>&gt;, <a href="namespacetp.html#abce3813304107869c695ab3e0bafa0fa" class="m-doc">RenderInlineCallback</a>&gt; commandRecording,
               const char* debugName = nullptr)</span>
             </dt>
-            <dd>Forms a render pass that executes lists of render commands in each of its subpasses.</dd>
+            <dd>Forms a render pass that executes lists of render commands.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">void <a href="#a967f5a891d8e50cb73d0f6b7c6cec066" class="m-doc">cmdExportResource</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_buffer_view.html" class="m-doc">BufferView</a>&amp; buffer,
               <a href="namespacetp.html#a35126e5e403003db788eb060b78e88bf" class="m-doc">ReadAccessMask</a> readAccessMask,
@@ -191,8 +191,8 @@
             </dt>
             <dd>Fills the buffer with a fixed value.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#a4acadcc8aab07803700471e28918713e" class="m-doc">cmdInsertDebugLabel</a>(</span><span class="m-doc-wrap">const char* name,
-              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;float&gt; color = {})</span>
+              <span class="m-doc-wrap-bumper">void <a href="#a2b117218f7058c7b4ca3f6cb8a55df3f" class="m-doc">cmdInsertDebugLabel</a>(</span><span class="m-doc-wrap">const char* name,
+              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const float&gt; color = {})</span>
             </dt>
             <dd>Inserts a debug label, marking the following commands with the given name and optional color for display in validation and debugging tools.</dd>
             <dt>
@@ -337,10 +337,10 @@
             </table>
 <aside class="m-note m-default"><h4>Remark</h4><p>The buffer may only be used for commands within this job or in command lists that execute within it, unless such a use happens before the job gets submitted.</p><p>The intended use of preinitialized buffers is for uploading data to the device through <a href="classtp_1_1_host_mapped_memory.html" class="m-doc">tp::<wbr />HostMappedMemory</a>. Unlike job-local buffers, they are created immediately.</p></aside>
           </div></section>
-          <section class="m-doc-details" id="a2f39a93b1597cde8e30a493daf444102"><div>
+          <section class="m-doc-details" id="a91aa92a3dfc3938149a6c07302aa9348"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void tp::<wbr />Job::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2f39a93b1597cde8e30a493daf444102" class="m-doc-self">cmdBeginDebugLabel</a>(</span><span class="m-doc-wrap">const char* name,
-              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;float&gt; color = {})</span></span>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />Job::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a91aa92a3dfc3938149a6c07302aa9348" class="m-doc-self">cmdBeginDebugLabel</a>(</span><span class="m-doc-wrap">const char* name,
+              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const float&gt; color = {})</span></span>
             </h3>
             <p>Begins a debug label, marking the following commands until the next <a href="classtp_1_1_job.html#a95656466061cff2de6c61a68e8d827f2" class="m-doc">tp::<wbr />Job::<wbr />cmdEndDebugLabel</a> with the given name and optional color for display in validation and debugging tools.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -391,7 +391,7 @@
                 </tr>
               </tbody>
             </table>
-<aside class="m-note m-default"><h4>Remark</h4><p>The images must not be multisampled. Use <a href="classtp_1_1_job.html#ac74a3929dfcfb91e412f39a1539c09d5" class="m-doc">tp::<wbr />Job::<wbr />cmdResolveImage</a> for that purpose.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/vkCmdBlitImage.html" class="m-doc-external">vkCmdBlitImage</a></p></aside>
+<aside class="m-note m-default"><h4>Remark</h4><p>The images must not be multisampled. Use <a href="classtp_1_1_job.html#ac74a3929dfcfb91e412f39a1539c09d5" class="m-doc">tp::<wbr />Job::<wbr />cmdResolveImage</a> for that purpose.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/vkCmdBlitImage.html" class="m-doc-external">vkCmdBlitImage</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="a4aed4f4ac99e3090785561c937170f5b"><div>
             <h3>
@@ -414,7 +414,7 @@
                 </tr>
               </tbody>
             </table>
-<aside class="m-note m-default"><h4>Remark</h4><p>Clearing images through the use of a <a href="structtp_1_1_render_pass_attachment.html" class="m-doc">tp::<wbr />RenderPassAttachment</a> may be more efficient.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/vkCmdClearColorImage.html" class="m-doc-external">vkCmdClearColorImage</a></p><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/vkCmdClearDepthStencilImage.html" class="m-doc-external">vkCmdClearDepthStencilImage</a></p></aside>
+<aside class="m-note m-default"><h4>Remark</h4><p>Clearing images as part of a render pass may be more efficient.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/vkCmdClearColorImage.html" class="m-doc-external">vkCmdClearColorImage</a></p><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/vkCmdClearDepthStencilImage.html" class="m-doc-external">vkCmdClearDepthStencilImage</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="a35673a68b54628a1dd79de5527a2c3c1"><div>
             <h3>
@@ -442,7 +442,7 @@
                 </tr>
               </tbody>
             </table>
-<aside class="m-note m-default"><h4>Remark</h4><p>Clearing images through the use of a <a href="structtp_1_1_render_pass_attachment.html" class="m-doc">tp::<wbr />RenderPassAttachment</a> may be more efficient.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/vkCmdClearColorImage.html" class="m-doc-external">vkCmdClearColorImage</a></p><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/vkCmdClearDepthStencilImage.html" class="m-doc-external">vkCmdClearDepthStencilImage</a></p></aside>
+<aside class="m-note m-default"><h4>Remark</h4><p>Clearing images as part of a render pass may be more efficient.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/vkCmdClearColorImage.html" class="m-doc-external">vkCmdClearColorImage</a></p><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/vkCmdClearDepthStencilImage.html" class="m-doc-external">vkCmdClearDepthStencilImage</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="a013f09d33bc1bd883c1fe64460d50e2c"><div>
             <h3>
@@ -470,7 +470,7 @@
                 </tr>
               </tbody>
             </table>
-<aside class="m-note m-default"><h4>Remark</h4><p>The result is undefined if the copy regions overlap in memory.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/vkCmdCopyBuffer.html" class="m-doc-external">vkCmdCopyBuffer</a></p></aside>
+<aside class="m-note m-default"><h4>Remark</h4><p>The result is undefined if the copy regions overlap in memory.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/vkCmdCopyBuffer.html" class="m-doc-external">vkCmdCopyBuffer</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="aba90522bc9701418d2615b9696e8f70b"><div>
             <h3>
@@ -498,7 +498,7 @@
                 </tr>
               </tbody>
             </table>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/vkCmdCopyBufferToImage.html" class="m-doc-external">vkCmdCopyBufferToImage</a></p></aside>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/vkCmdCopyBufferToImage.html" class="m-doc-external">vkCmdCopyBufferToImage</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="a697432214a7bd787fee2c303aa3ccd0d"><div>
             <h3>
@@ -526,7 +526,7 @@
                 </tr>
               </tbody>
             </table>
-<aside class="m-note m-default"><h4>Remark</h4><p>The result is undefined if the copy regions overlap in memory.</p><p>The formats of both images must share the same <a href="namespacetp.html#a8c768c8069720fcaef48f25d4c28dbd9" class="m-doc">tp::<wbr />FormatCompatibilityClass</a> and must have the same number of samples. If the formats are different, the data is reinterpreted without any format conversion.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/vkCmdCopyImage.html" class="m-doc-external">vkCmdCopyImage</a></p></aside>
+<aside class="m-note m-default"><h4>Remark</h4><p>The result is undefined if the copy regions overlap in memory.</p><p>The formats of both images must share the same <a href="namespacetp.html#a8c768c8069720fcaef48f25d4c28dbd9" class="m-doc">tp::<wbr />FormatCompatibilityClass</a> and must have the same number of samples. If the formats are different, the data is reinterpreted without any format conversion.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/vkCmdCopyImage.html" class="m-doc-external">vkCmdCopyImage</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="a936867fb0b3bb0361db691b1d4732197"><div>
             <h3>
@@ -554,7 +554,7 @@
                 </tr>
               </tbody>
             </table>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/vkCmdCopyImageToBuffer.html" class="m-doc-external">vkCmdCopyImageToBuffer</a></p></aside>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/vkCmdCopyImageToBuffer.html" class="m-doc-external">vkCmdCopyImageToBuffer</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="aff9e156e1c971a4d2f43018a759202d0"><div>
             <h3>
@@ -599,7 +599,7 @@
             <h3>
               <span class="m-doc-wrap-bumper">void tp::<wbr />Job::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a95656466061cff2de6c61a68e8d827f2" class="m-doc-self">cmdEndDebugLabel</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
-            <p>Ends the last debug label. Must be preceded by <a href="classtp_1_1_job.html#a2f39a93b1597cde8e30a493daf444102" class="m-doc">tp::<wbr />Job::<wbr />cmdBeginDebugLabel</a>.</p>
+            <p>Ends the last debug label. Must be preceded by <a href="classtp_1_1_job.html#a91aa92a3dfc3938149a6c07302aa9348" class="m-doc">tp::<wbr />Job::<wbr />cmdBeginDebugLabel</a>.</p>
 <aside class="m-note m-default"><h4>Remark</h4><p>The call will have no effect when <a href="namespacetp_1_1_application_extension.html#a87720f5be2958c77e3766715f1e5c38e" class="m-doc">tp::<wbr />ApplicationExtension::<wbr />EXT_DebugUtils</a> is not enabled.</p></aside>
           </div></section>
           <section class="m-doc-details" id="a3743dd4c6e7f8d56e153290543342afb"><div>
@@ -628,15 +628,15 @@
                 </tr>
               </tbody>
             </table>
-<aside class="m-note m-default"><h4>Remark</h4><p>Any usage of resources inside the compute pass beyond what the resources were previously exported for must be specified inside the <code>setup</code> structure.</p><p>The dependencies between the compute pass and the rest of the <a href="classtp_1_1_job.html" class="m-doc">tp::<wbr />Job</a> are synchronized automatically. Dependencies between commands executed within the same compute pass are not, and must be synchronized manually with tp::RenderList::cmdPipelineBarrier.</p><p>Inline callbacks will be called during the call to <a href="classtp_1_1_device.html#ad3000c7128fed3d6743de8f457eb1934" class="m-doc">tp::<wbr />Device::<wbr />submitQueuedJobs</a> in the provided order. <a href="classtp_1_1_device.html" class="m-doc">Device</a> queue thread safety rules apply: No operations on the target queue are permitted inside the callback.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/vkCmdExecuteCommands.html" class="m-doc-external">vkCmdExecuteCommands</a></p></aside>
+<aside class="m-note m-default"><h4>Remark</h4><p>Any usage of resources inside the compute pass beyond accesses that the resources were previously exported for must be specified inside the <code>setup</code> structure.</p><p>The dependencies between the compute pass and the rest of the <a href="classtp_1_1_job.html" class="m-doc">tp::<wbr />Job</a> are synchronized automatically. Dependencies between commands executed within the same compute pass are not, and must be synchronized manually with <a href="classtp_1_1_compute_list.html#adc3552ffb74d64e5c0b9f02a57fb3587" class="m-doc">tp::<wbr />ComputeList::<wbr />cmdPipelineBarrier</a>.</p><p>Inline callbacks will be called during the call to <a href="classtp_1_1_device.html#ad3000c7128fed3d6743de8f457eb1934" class="m-doc">tp::<wbr />Device::<wbr />submitQueuedJobs</a> in the provided order. <a href="classtp_1_1_device.html" class="m-doc">Device</a> queue thread safety rules apply: No operations on the target queue are permitted inside the callback.</p></aside>
           </div></section>
-          <section class="m-doc-details" id="ab739735917361ff75d3b892339007815"><div>
+          <section class="m-doc-details" id="a8db1261d6e0e2e9c1536cd50de39b547"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void tp::<wbr />Job::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab739735917361ff75d3b892339007815" class="m-doc-self">cmdExecuteRenderPass</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_render_pass_setup.html" class="m-doc">RenderPassSetup</a>&amp; setup,
-              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const std::variant&lt;<a href="classtp_1_1_array_view.html" class="m-doc">ArrayView</a>&lt;<a href="classtp_1_1_render_list.html" class="m-doc">RenderList</a>&gt;, <a href="namespacetp.html#abce3813304107869c695ab3e0bafa0fa" class="m-doc">RenderInlineCallback</a>&gt;&gt; subpassCommandRecording,
+              <span class="m-doc-wrap-bumper">void tp::<wbr />Job::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8db1261d6e0e2e9c1536cd50de39b547" class="m-doc-self">cmdExecuteRenderPass</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_render_pass_setup.html" class="m-doc">RenderPassSetup</a>&amp; setup,
+              std::variant&lt;<a href="classtp_1_1_array_view.html" class="m-doc">ArrayView</a>&lt;<a href="classtp_1_1_render_list.html" class="m-doc">RenderList</a>&gt;, <a href="namespacetp.html#abce3813304107869c695ab3e0bafa0fa" class="m-doc">RenderInlineCallback</a>&gt; commandRecording,
               const char* debugName = nullptr)</span></span>
             </h3>
-            <p>Forms a render pass that executes lists of render commands in each of its subpasses.</p>
+            <p>Forms a render pass that executes lists of render commands.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -647,8 +647,8 @@
                   <td>The setup structure describing the render pass, its attachments and its non-attachment resource usage.</td>
                 </tr>
                 <tr>
-                  <td>subpassCommandRecording</td>
-                  <td><p>For each subpass in the render pass, describes how render commands are to be recorded to it. Each element can be either:</p><ul><li>A non-empty array view of null <a href="classtp_1_1_render_list.html" class="m-doc">tp::<wbr />RenderList</a> objects that will be initialized by the function call. Commands must be recorded to these lists while the job is in an enqueued state. The lists will be executed in the order they are written to this array.</li><li>A function callback to record commands to a <a href="classtp_1_1_render_list.html" class="m-doc">tp::<wbr />RenderList</a> that will be provided as its parameter. This function will be called as a part of the next <a href="classtp_1_1_device.html#ad3000c7128fed3d6743de8f457eb1934" class="m-doc">tp::<wbr />Device::<wbr />submitQueuedJobs</a> call after the job has been enqueued to the same queue.</li></ul></td>
+                  <td>commandRecording</td>
+                  <td><p>Describes how render commands are to be recorded for the render pass. The parameter can be either:</p><ul><li>A non-empty array view of null <a href="classtp_1_1_render_list.html" class="m-doc">tp::<wbr />RenderList</a> objects that will be initialized by the function call. Commands must be recorded to these lists while the job is in an enqueued state. The lists are executed in the order they are in this array.</li><li>A function callback to record commands to a <a href="classtp_1_1_render_list.html" class="m-doc">tp::<wbr />RenderList</a> that will be provided as its parameter. This function will be called as a part of the next <a href="classtp_1_1_device.html#ad3000c7128fed3d6743de8f457eb1934" class="m-doc">tp::<wbr />Device::<wbr />submitQueuedJobs</a> call after the job has been enqueued to the same queue.</li></ul></td>
                 </tr>
                 <tr>
                   <td>debugName</td>
@@ -656,7 +656,7 @@
                 </tr>
               </tbody>
             </table>
-<aside class="m-note m-default"><h4>Remark</h4><p>The size of the <code>subpassCommandRecording</code> array must be the same as the number of subpasses used to create the <a href="classtp_1_1_render_pass_layout.html" class="m-doc">tp::<wbr />RenderPassLayout</a> provided in the given <code>setup</code> structure.</p><p>Any usage of non-attachment resources inside the render pass beyond what the resources were previously exported for must be specified inside the <code>setup</code> structure.</p><p>The dependencies between the render pass and the rest of the <a href="classtp_1_1_job.html" class="m-doc">tp::<wbr />Job</a>, as well as the dependencies between subpasses as declared during creation of the provided <a href="classtp_1_1_render_pass_layout.html" class="m-doc">tp::<wbr />RenderPassLayout</a> are synchronized automatically. Dependencies between commands executed within the same subpass are not - see <a href="structtp_1_1_subpass_dependency.html" class="m-doc">tp::<wbr />SubpassDependency</a>.</p><p>Inline callbacks will be called during the call to <a href="classtp_1_1_device.html#ad3000c7128fed3d6743de8f457eb1934" class="m-doc">tp::<wbr />Device::<wbr />submitQueuedJobs</a> in the provided order. <a href="classtp_1_1_device.html" class="m-doc">Device</a> queue thread safety rules apply: No operations on the target queue are permitted inside the callback.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="classtp_1_1_render_pass_layout.html" class="m-doc">tp::<wbr />RenderPassLayout</a></p><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkRenderPass.html" class="m-doc-external">VkRenderPass</a></p><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkFramebuffer.html" class="m-doc-external">VkFramebuffer</a></p><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/vkCmdExecuteCommands.html" class="m-doc-external">vkCmdExecuteCommands</a></p></aside>
+<aside class="m-note m-default"><h4>Remark</h4><p>Any usage of non-attachment resources inside the render pass beyond accesses that the resources were previously exported for must be specified inside the <code>setup</code> structure.</p><p>The dependencies between the render pass and the rest of the <a href="classtp_1_1_job.html" class="m-doc">tp::<wbr />Job</a> are synchronized automatically. Dependencies between commands executed within the same render pass are not, except for guarantees provided by the rasterization order.</p><p>Inline callbacks will be called during the call to <a href="classtp_1_1_device.html#ad3000c7128fed3d6743de8f457eb1934" class="m-doc">tp::<wbr />Device::<wbr />submitQueuedJobs</a> in the provided order. <a href="classtp_1_1_device.html" class="m-doc">Device</a> queue thread safety rules apply: No operations on the target queue are permitted inside the callback.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkCmdBeginRendering.html" class="m-doc-external">VkCmdBeginRendering</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="a967f5a891d8e50cb73d0f6b7c6cec066"><div>
             <h3>
@@ -768,12 +768,12 @@
                 </tr>
               </tbody>
             </table>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/vkCmdFillBuffer.html" class="m-doc-external">vkCmdFillBuffer</a></p></aside>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/vkCmdFillBuffer.html" class="m-doc-external">vkCmdFillBuffer</a></p></aside>
           </div></section>
-          <section class="m-doc-details" id="a4acadcc8aab07803700471e28918713e"><div>
+          <section class="m-doc-details" id="a2b117218f7058c7b4ca3f6cb8a55df3f"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void tp::<wbr />Job::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4acadcc8aab07803700471e28918713e" class="m-doc-self">cmdInsertDebugLabel</a>(</span><span class="m-doc-wrap">const char* name,
-              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;float&gt; color = {})</span></span>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />Job::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2b117218f7058c7b4ca3f6cb8a55df3f" class="m-doc-self">cmdInsertDebugLabel</a>(</span><span class="m-doc-wrap">const char* name,
+              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const float&gt; color = {})</span></span>
             </h3>
             <p>Inserts a debug label, marking the following commands with the given name and optional color for display in validation and debugging tools.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -819,7 +819,7 @@
                 </tr>
               </tbody>
             </table>
-<aside class="m-note m-default"><h4>Remark</h4><p>Resolving images through the use of a <a href="structtp_1_1_render_pass_attachment.html" class="m-doc">tp::<wbr />RenderPassAttachment</a> bound to a <a href="structtp_1_1_attachment_binding.html" class="m-doc">tp::<wbr />AttachmentBinding</a> with its bind point type set to <a href="namespacetp.html#a6991b358994d01dff68977e4a9cf9710a369b06d5985c13f7a81497ce840ad809" class="m-doc">tp::<wbr />AttachmentBindPointType::<wbr />ResolveFromColor</a> may be more efficient.</p><p>Only images with color formats are supported. For automatically resolving depth stencil images, consider   <a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VK_KHR_depth_stencil_resolve.html" class="m-doc-external">VK_<wbr />KHR_<wbr />depth_<wbr />stencil_<wbr />resolve</a></p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/vkCmdResolveImage.html" class="m-doc-external">vkCmdResolveImage</a></p></aside>
+<aside class="m-note m-default"><h4>Remark</h4><p>Resolving images as part of a render pass may be more efficient.</p><p>Only images with color formats are supported. For automatically resolving depth stencil images, consider   <a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VK_KHR_depth_stencil_resolve.html" class="m-doc-external">VK_<wbr />KHR_<wbr />depth_<wbr />stencil_<wbr />resolve</a></p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/vkCmdResolveImage.html" class="m-doc-external">vkCmdResolveImage</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="a16b30333631c552bc5a69b4ba2b4a259"><div>
             <h3>
@@ -842,7 +842,7 @@
                 </tr>
               </tbody>
             </table>
-<aside class="m-note m-default"><h4>Remark</h4><p>The size of the data array must be less or equal to 65536 bytes. For larger updates, use <a href="classtp_1_1_host_mapped_memory.html" class="m-doc">tp::<wbr />HostMappedMemory</a>. A copy of the data is made upon this call, which is later copied again to a Vulkan command buffer. It should therefore only be used for very small amounts of data.</p><p>The size of the <code>data</code> array must be a multiple of 4 and smaller or equal to the size of <code>dstBuffer</code>.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/vkCmdUpdateBuffer.html" class="m-doc-external">vkCmdUpdateBuffer</a></p></aside>
+<aside class="m-note m-default"><h4>Remark</h4><p>The size of the data array must be less or equal to 65536 bytes. For larger updates, use <a href="classtp_1_1_host_mapped_memory.html" class="m-doc">tp::<wbr />HostMappedMemory</a>. A copy of the data is made upon this call, which is later copied again to a Vulkan command buffer. It should therefore only be used for very small amounts of data.</p><p>The size of the <code>data</code> array must be a multiple of 4 and smaller or equal to the size of <code>dstBuffer</code>.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/vkCmdUpdateBuffer.html" class="m-doc-external">vkCmdUpdateBuffer</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="a89daeb18ba2053291787120b8327e334"><div>
             <h3>
@@ -860,7 +860,7 @@
                 </tr>
               </tbody>
             </table>
-<aside class="m-note m-default"><h4>Remark</h4><p>Only one thread may record commands with a single command pool at a time.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="classtp_1_1_compute_list.html#a2461b00f05368227d9fda369d70850fd" class="m-doc">tp::<wbr />ComputeList::<wbr />beginRecording</a></p><p><a href="classtp_1_1_render_list.html#aa26b965c672012ffb31856c9f7fa22b5" class="m-doc">tp::<wbr />RenderList::<wbr />beginRecording</a></p><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkCommandPool.html" class="m-doc-external">VkCommandPool</a></p></aside>
+<aside class="m-note m-default"><h4>Remark</h4><p>Only one thread may record commands with a single command pool at a time.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="classtp_1_1_compute_list.html#a2461b00f05368227d9fda369d70850fd" class="m-doc">tp::<wbr />ComputeList::<wbr />beginRecording</a></p><p><a href="classtp_1_1_render_list.html#aa26b965c672012ffb31856c9f7fa22b5" class="m-doc">tp::<wbr />RenderList::<wbr />beginRecording</a></p><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkCommandPool.html" class="m-doc-external">VkCommandPool</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="ab3732621f0046402f75589a27560ccd9"><div>
             <h3>

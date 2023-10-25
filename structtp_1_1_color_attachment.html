@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>tp::SubpassDependency struct | Tephra Documentation</title>
+  <title>tp::ColorAttachment struct | Tephra Documentation</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark-tephra.css" />
   <link rel="stylesheet" href="m-documentation.css" />
@@ -54,9 +54,9 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="namespacetp.html">tp</a>::<wbr/></span>SubpassDependency <span class="m-thin">struct</span>
+          <span class="m-breadcrumb"><a href="namespacetp.html">tp</a>::<wbr/></span>ColorAttachment <span class="m-thin">struct</span>
         </h1>
-        <p>Specifies a dependency on another subpass from the current subpass.</p>
+        <p>Represents an <a href="classtp_1_1_image_view.html" class="m-doc">tp::<wbr />ImageView</a> as a render pass color attachment, allowing it to be bound as a render target inside of a render pass. Also specifies any operations on it that are to be done at the beginning or end of the render pass.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -68,64 +68,64 @@
             </li>
           </ul>
         </nav>
-<aside class="m-note m-default"><h4>Remark</h4><p>Dependencies on attachment resources may only be pixel-local. Sampling an output attachment as a texture in a following subpass is not allowed. A separate render pass must be used instead.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="structtp_1_1_subpass_layout.html" class="m-doc">tp::<wbr />SubpassLayout</a></p><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkSubpassDependency.html" class="m-doc-external">VkSubpassDependency</a></p></aside>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="structtp_1_1_render_pass_setup.html" class="m-doc">tp::<wbr />RenderPassSetup</a></p></aside>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a9e806164adb1ae75bbbf96f341c3cdb1" class="m-doc">SubpassDependency</a>(</span><span class="m-doc-wrap">uint32_t sourceSubpassIndex) <span class="m-label m-flat m-info">explicit</span> </span>
+            <dt id="abdb745bddf872dc28df729f5244da476">
+              <span class="m-doc-wrap-bumper"><a href="#abdb745bddf872dc28df729f5244da476" class="m-doc-self">ColorAttachment</a>(</span><span class="m-doc-wrap">)</span>
             </dt>
-            <dd>Specifies a subpass dependency on a given source subpass that depends only on its attachments.</dd>
+            <dd>Describes an empty attachment.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#ac2d059d4f2d15f6d358531cc766d2bd6" class="m-doc">SubpassDependency</a>(</span><span class="m-doc-wrap">uint32_t sourceSubpassIndex,
-              <a href="namespacetp.html#a27ff299d9bea0828188ea855c0a8cc08" class="m-doc">RenderAccessMask</a> additionalSourceAccessMask,
-              <a href="namespacetp.html#a27ff299d9bea0828188ea855c0a8cc08" class="m-doc">RenderAccessMask</a> additionalDestinationAccessMask)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a2fb7f5229158a590582a4400d21427b4" class="m-doc">ColorAttachment</a>(</span><span class="m-doc-wrap"><a href="classtp_1_1_image_view.html" class="m-doc">ImageView</a> image,
+              <a href="namespacetp.html#aa57e260754413ae9a64d57adb264c384" class="m-doc">AttachmentLoadOp</a> loadOp,
+              <a href="namespacetp.html#ae8ae216230f07b1ccb769eac93fa9c3d" class="m-doc">AttachmentStoreOp</a> storeOp,
+              <a href="structtp_1_1_clear_value.html" class="m-doc">ClearValue</a> clearValue = {},
+              <a href="classtp_1_1_image_view.html" class="m-doc">ImageView</a> resolveImage = {},
+              <a href="namespacetp.html#a198f24458c6fe67ac726d5e3c4ffdb9a" class="m-doc">ResolveMode</a> resolveMode = ResolveMode::Average)</span>
             </dt>
-            <dd>Specifies a subpass dependency on a given source subpass with additional non-attachment dependencies.</dd>
+            <dd></dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a9e806164adb1ae75bbbf96f341c3cdb1"><div>
+          <section class="m-doc-details" id="a2fb7f5229158a590582a4400d21427b4"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> tp::<wbr />SubpassDependency::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9e806164adb1ae75bbbf96f341c3cdb1" class="m-doc-self">SubpassDependency</a>(</span><span class="m-doc-wrap">uint32_t sourceSubpassIndex) <span class="m-label m-info">explicit</span> </span></span>
+              <span class="m-doc-wrap-bumper"> tp::<wbr />ColorAttachment::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2fb7f5229158a590582a4400d21427b4" class="m-doc-self">ColorAttachment</a>(</span><span class="m-doc-wrap"><a href="classtp_1_1_image_view.html" class="m-doc">ImageView</a> image,
+              <a href="namespacetp.html#aa57e260754413ae9a64d57adb264c384" class="m-doc">AttachmentLoadOp</a> loadOp,
+              <a href="namespacetp.html#ae8ae216230f07b1ccb769eac93fa9c3d" class="m-doc">AttachmentStoreOp</a> storeOp,
+              <a href="structtp_1_1_clear_value.html" class="m-doc">ClearValue</a> clearValue = {},
+              <a href="classtp_1_1_image_view.html" class="m-doc">ImageView</a> resolveImage = {},
+              <a href="namespacetp.html#a198f24458c6fe67ac726d5e3c4ffdb9a" class="m-doc">ResolveMode</a> resolveMode = ResolveMode::Average)</span></span>
             </h3>
-            <p>Specifies a subpass dependency on a given source subpass that depends only on its attachments.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
               </thead>
               <tbody>
                 <tr>
-                  <td style="width: 1%">sourceSubpassIndex</td>
-                  <td>Index of the source subpass.</td>
-                </tr>
-              </tbody>
-            </table>
-          </div></section>
-          <section class="m-doc-details" id="ac2d059d4f2d15f6d358531cc766d2bd6"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper"> tp::<wbr />SubpassDependency::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac2d059d4f2d15f6d358531cc766d2bd6" class="m-doc-self">SubpassDependency</a>(</span><span class="m-doc-wrap">uint32_t sourceSubpassIndex,
-              <a href="namespacetp.html#a27ff299d9bea0828188ea855c0a8cc08" class="m-doc">RenderAccessMask</a> additionalSourceAccessMask,
-              <a href="namespacetp.html#a27ff299d9bea0828188ea855c0a8cc08" class="m-doc">RenderAccessMask</a> additionalDestinationAccessMask)</span></span>
-            </h3>
-            <p>Specifies a subpass dependency on a given source subpass with additional non-attachment dependencies.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">sourceSubpassIndex</td>
-                  <td>Index of the source subpass.</td>
+                  <td style="width: 1%">image</td>
+                  <td>The image view used as an attachment.</td>
                 </tr>
                 <tr>
-                  <td>additionalSourceAccessMask</td>
-                  <td>The additional, non-attachment source accesses.</td>
+                  <td>loadOp</td>
+                  <td>The load operation done at the start of the render pass.</td>
                 </tr>
                 <tr>
-                  <td>additionalDestinationAccessMask</td>
-                  <td>The additional, non-attachment destination accesses.</td>
+                  <td>storeOp</td>
+                  <td>The store operation done at the end of the render pass.</td>
+                </tr>
+                <tr>
+                  <td>clearValue</td>
+                  <td>If load operation is <a href="namespacetp.html#aa57e260754413ae9a64d57adb264c384adc30bc0c7914db5918da4263fce93ad2" class="m-doc">tp::<wbr />AttachmentLoadOp::<wbr />Clear</a>, specifies the clear value.</td>
+                </tr>
+                <tr>
+                  <td>resolveImage</td>
+                  <td>The image view that resolved multisample data will be written to at the end of the render pass.</td>
+                </tr>
+                <tr>
+                  <td>resolveMode</td>
+                  <td>The resolve mode that will be used if <code>resolveImage</code> is defined.</td>
                 </tr>
               </tbody>
             </table>

@@ -69,7 +69,7 @@
             </li>
           </ul>
         </nav>
-<p>A device object is the main means of interacting with the actual device on the platform. Through it most other objects in Tephra are created. Such objects can only be used with this device and other objects created from it. The device also provides the means to submit work to the device, by enqueueing <a href="classtp_1_1_job.html" class="m-doc">tp::<wbr />Job</a> objects to a particular <a href="structtp_1_1_device_queue.html" class="m-doc">tp::<wbr />DeviceQueue</a> with <a href="classtp_1_1_device.html#a1fb94f90c9cd0968b70750ec5be5a41b" class="m-doc">tp::<wbr />Device::<wbr />enqueueJob</a> and then submitting them for execution with <a href="classtp_1_1_device.html#ad3000c7128fed3d6743de8f457eb1934" class="m-doc">tp::<wbr />Device::<wbr />submitQueuedJobs</a>.</p><aside class="m-note m-default"><h4>Remark</h4><p>Access to the <a href="classtp_1_1_device.html" class="m-doc">Device</a> object is internally synchronized, meaning it is safe to operate on it from multiple threads at the same time. However, beware that the device&#x27;s queues aren&#x27;t. Only one method may operate on a particular <a href="structtp_1_1_device_queue.html" class="m-doc">tp::<wbr />DeviceQueue</a> at any time.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="classtp_1_1_application.html#a415c0b6fcd2e3500caa020f2d96e90d9" class="m-doc">tp::<wbr />Application::<wbr />createDevice</a></p><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkDevice.html" class="m-doc-external">VkDevice</a></p></aside>
+<p>A device object is the main means of interacting with the actual device on the platform. Through it most other objects in Tephra are created. Such objects can only be used with this device and other objects created from it. The device also provides the means to submit work to the device, by enqueueing <a href="classtp_1_1_job.html" class="m-doc">tp::<wbr />Job</a> objects to a particular <a href="structtp_1_1_device_queue.html" class="m-doc">tp::<wbr />DeviceQueue</a> with <a href="classtp_1_1_device.html#a1fb94f90c9cd0968b70750ec5be5a41b" class="m-doc">tp::<wbr />Device::<wbr />enqueueJob</a> and then submitting them for execution with <a href="classtp_1_1_device.html#ad3000c7128fed3d6743de8f457eb1934" class="m-doc">tp::<wbr />Device::<wbr />submitQueuedJobs</a>.</p><aside class="m-note m-default"><h4>Remark</h4><p>Access to the <a href="classtp_1_1_device.html" class="m-doc">Device</a> object is internally synchronized, meaning it is safe to operate on it from multiple threads at the same time. However, beware that the device&#x27;s queues aren&#x27;t. Only one method may operate on a particular <a href="structtp_1_1_device_queue.html" class="m-doc">tp::<wbr />DeviceQueue</a> at any time.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="classtp_1_1_application.html#a415c0b6fcd2e3500caa020f2d96e90d9" class="m-doc">tp::<wbr />Application::<wbr />createDevice</a></p><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkDevice.html" class="m-doc-external">VkDevice</a></p></aside>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
@@ -134,12 +134,6 @@
               const char* debugName = nullptr) -&gt; <a href="classtp_1_1_pipeline_layout.html" class="m-doc">PipelineLayout</a></span>
             </dt>
             <dd>Creates a <a href="classtp_1_1_pipeline_layout.html" class="m-doc">tp::<wbr />PipelineLayout</a> object from the given descriptor set and push constant layouts.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a6e8ef72bf6b97308b8b3a0c771665cd7" class="m-doc">createRenderPassLayout</a>(</span><span class="m-doc-wrap"><a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const <a href="structtp_1_1_attachment_description.html" class="m-doc">AttachmentDescription</a>&gt; attachmentDescriptions,
-              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const <a href="structtp_1_1_subpass_layout.html" class="m-doc">SubpassLayout</a>&gt; subpassLayouts,
-              const char* debugName = nullptr) -&gt; <a href="classtp_1_1_render_pass_layout.html" class="m-doc">RenderPassLayout</a></span>
-            </dt>
-            <dd>Creates a <a href="classtp_1_1_render_pass_layout.html" class="m-doc">tp::<wbr />RenderPassLayout</a> object from the given attachment descriptions and subpass layouts.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#adc4fbef87e05ca7209197ab272c4cc99" class="m-doc">createSampler</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_sampler_setup.html" class="m-doc">SamplerSetup</a>&amp; setup,
               const char* debugName = nullptr) -&gt; <a href="classtp_1_1_sampler.html" class="m-doc">Sampler</a></span>
@@ -208,11 +202,11 @@
             <dt id="a0c36ebc5af1d5a1e12ed2427481bc843">
               <span class="m-doc-wrap-bumper">auto <a href="#a0c36ebc5af1d5a1e12ed2427481bc843" class="m-doc-self">vkGetDeviceHandle</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="structtp_1_1_vk_object_handle.html" class="m-doc">VkDeviceHandle</a></span>
             </dt>
-            <dd>Returns the Vulkan   <a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkDevice.html" class="m-doc-external">VkDevice</a> handle.</dd>
+            <dd>Returns the Vulkan   <a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkDevice.html" class="m-doc-external">VkDevice</a> handle.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a832e021603ef88a515b25c3c71eb03ac" class="m-doc">vkGetQueueHandle</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_device_queue.html" class="m-doc">DeviceQueue</a>&amp; queue) const -&gt; <a href="structtp_1_1_vk_object_handle.html" class="m-doc">VkQueueHandle</a></span>
             </dt>
-            <dd>Returns the Vulkan   <a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkQueue.html" class="m-doc-external">VkQueue</a> handle associated with the given <a href="structtp_1_1_device_queue.html" class="m-doc">tp::<wbr />DeviceQueue</a>.</dd>
+            <dd>Returns the Vulkan   <a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkQueue.html" class="m-doc-external">VkQueue</a> handle associated with the given <a href="structtp_1_1_device_queue.html" class="m-doc">tp::<wbr />DeviceQueue</a>.</dd>
             <dt id="a59bf909458f12faa276cc3deeffd8334">
               <span class="m-doc-wrap-bumper">auto <a href="#a59bf909458f12faa276cc3deeffd8334" class="m-doc-self">vkLoadDeviceProcedure</a>(</span><span class="m-doc-wrap">const char* procedureName) const -&gt; void*</span>
             </dt>
@@ -475,33 +469,6 @@
             </table>
 <aside class="m-note m-default"><h4>Remark</h4><p>The set number provided during the creation of each <a href="classtp_1_1_descriptor_set_layout.html" class="m-doc">tp::<wbr />DescriptorSetLayout</a> must match its index in the array.</p></aside>
           </div></section>
-          <section class="m-doc-details" id="a6e8ef72bf6b97308b8b3a0c771665cd7"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper"><a href="classtp_1_1_render_pass_layout.html" class="m-doc">RenderPassLayout</a> tp::<wbr />Device::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6e8ef72bf6b97308b8b3a0c771665cd7" class="m-doc-self">createRenderPassLayout</a>(</span><span class="m-doc-wrap"><a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const <a href="structtp_1_1_attachment_description.html" class="m-doc">AttachmentDescription</a>&gt; attachmentDescriptions,
-              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const <a href="structtp_1_1_subpass_layout.html" class="m-doc">SubpassLayout</a>&gt; subpassLayouts,
-              const char* debugName = nullptr)</span></span>
-            </h3>
-            <p>Creates a <a href="classtp_1_1_render_pass_layout.html" class="m-doc">tp::<wbr />RenderPassLayout</a> object from the given attachment descriptions and subpass layouts.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">attachmentDescriptions</td>
-                  <td>Describes the layout and properties of attachments that will be used during a render pass executed with this layout.</td>
-                </tr>
-                <tr>
-                  <td>subpassLayouts</td>
-                  <td>Describes the layout and properties of the subpasses inside the render pass created with this layout.</td>
-                </tr>
-                <tr>
-                  <td>debugName</td>
-                  <td>The debug name identifier for the object.</td>
-                </tr>
-              </tbody>
-            </table>
-          </div></section>
           <section class="m-doc-details" id="adc4fbef87e05ca7209197ab272c4cc99"><div>
             <h3>
               <span class="m-doc-wrap-bumper"><a href="classtp_1_1_sampler.html" class="m-doc">Sampler</a> tp::<wbr />Device::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adc4fbef87e05ca7209197ab272c4cc99" class="m-doc-self">createSampler</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_sampler_setup.html" class="m-doc">SamplerSetup</a>&amp; setup,
@@ -763,7 +730,7 @@
             <h3>
               <span class="m-doc-wrap-bumper"><a href="structtp_1_1_vk_object_handle.html" class="m-doc">VkQueueHandle</a> tp::<wbr />Device::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a832e021603ef88a515b25c3c71eb03ac" class="m-doc-self">vkGetQueueHandle</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_device_queue.html" class="m-doc">DeviceQueue</a>&amp; queue) const</span></span>
             </h3>
-            <p>Returns the Vulkan   <a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkQueue.html" class="m-doc-external">VkQueue</a> handle associated with the given <a href="structtp_1_1_device_queue.html" class="m-doc">tp::<wbr />DeviceQueue</a>.</p>
+            <p>Returns the Vulkan   <a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkQueue.html" class="m-doc-external">VkQueue</a> handle associated with the given <a href="structtp_1_1_device_queue.html" class="m-doc">tp::<wbr />DeviceQueue</a>.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>

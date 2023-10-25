@@ -69,26 +69,26 @@
             </li>
           </ul>
         </nav>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkCommandBuffer.html" class="m-doc-external">VkCommandBuffer</a></p></aside>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkCommandBuffer.html" class="m-doc-external">VkCommandBuffer</a></p></aside>
         <section id="derived-classes">
           <h2><a href="#derived-classes">Derived classes</a></h2>
           <dl class="m-doc">
             <dt>
               class <a href="classtp_1_1_compute_list.html" class="m-doc">ComputeList</a>
             </dt>
-            <dd>Provides an interface to directly record compute commands into a Vulkan   <a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkCommandBuffer.html" class="m-doc-external">VkCommandBuffer</a> inside a compute pass.</dd>
+            <dd>Provides an interface to directly record compute commands into a Vulkan   <a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkCommandBuffer.html" class="m-doc-external">VkCommandBuffer</a> inside a compute pass.</dd>
             <dt>
               class <a href="classtp_1_1_render_list.html" class="m-doc">RenderList</a>
             </dt>
-            <dd>Provides an interface to directly record graphics commands into a Vulkan   <a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkCommandBuffer.html" class="m-doc-external">VkCommandBuffer</a> inside a compute pass.</dd>
+            <dd>Provides an interface to directly record graphics commands into a Vulkan   <a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkCommandBuffer.html" class="m-doc-external">VkCommandBuffer</a> inside a compute pass.</dd>
           </dl>
         </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#a7045fbaa2fd98bafb68133ee836fc366" class="m-doc">cmdBeginDebugLabel</a>(</span><span class="m-doc-wrap">const char* name,
-              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;float&gt; color = {})</span>
+              <span class="m-doc-wrap-bumper">void <a href="#adef86fbf5c065755116c2f5d62dae977" class="m-doc">cmdBeginDebugLabel</a>(</span><span class="m-doc-wrap">const char* name,
+              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const float&gt; color = {})</span>
             </dt>
             <dd>Begins a debug label, marking the following commands until the next <a href="classtp_1_1_command_list.html#ab749605c5419f436de4a533b98a05913" class="m-doc">tp::<wbr />CommandList::<wbr />cmdEndDebugLabel</a> with the given name and optional color for display in validation and debugging tools.</dd>
             <dt>
@@ -101,10 +101,10 @@
             <dt>
               <span class="m-doc-wrap-bumper">void <a href="#ab749605c5419f436de4a533b98a05913" class="m-doc">cmdEndDebugLabel</a>(</span><span class="m-doc-wrap">)</span>
             </dt>
-            <dd>Ends the last debug label. Must be preceded by <a href="classtp_1_1_command_list.html#a7045fbaa2fd98bafb68133ee836fc366" class="m-doc">tp::<wbr />CommandList::<wbr />cmdBeginDebugLabel</a>.</dd>
+            <dd>Ends the last debug label. Must be preceded by <a href="classtp_1_1_command_list.html#adef86fbf5c065755116c2f5d62dae977" class="m-doc">tp::<wbr />CommandList::<wbr />cmdBeginDebugLabel</a>.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#ab99033580d4632b35cc51d5e4c0fd977" class="m-doc">cmdInsertDebugLabel</a>(</span><span class="m-doc-wrap">const char* name,
-              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;float&gt; color = {})</span>
+              <span class="m-doc-wrap-bumper">void <a href="#ae4f9e3e2c6dab4916707fc003aaa1b6f" class="m-doc">cmdInsertDebugLabel</a>(</span><span class="m-doc-wrap">const char* name,
+              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const float&gt; color = {})</span>
             </dt>
             <dd>Inserts a debug label, marking the following commands with the given name and optional color for display in validation and debugging tools.</dd>
             <dt>
@@ -130,15 +130,15 @@
             <dt id="a81914d5675d536bb0af390a07bcf89c5">
               <span class="m-doc-wrap-bumper">auto <a href="#a81914d5675d536bb0af390a07bcf89c5" class="m-doc-self">vkGetCommandBufferHandle</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="structtp_1_1_vk_object_handle.html" class="m-doc">VkCommandBufferHandle</a></span>
             </dt>
-            <dd>Returns the associated   <a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkCommandBuffer.html" class="m-doc-external">VkCommandBuffer</a> handle if the command list is being recorded, VK_NULL_HANDLE otherwise.</dd>
+            <dd>Returns the associated   <a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkCommandBuffer.html" class="m-doc-external">VkCommandBuffer</a> handle if the command list is being recorded, VK_NULL_HANDLE otherwise.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a7045fbaa2fd98bafb68133ee836fc366"><div>
+          <section class="m-doc-details" id="adef86fbf5c065755116c2f5d62dae977"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void tp::<wbr />CommandList::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7045fbaa2fd98bafb68133ee836fc366" class="m-doc-self">cmdBeginDebugLabel</a>(</span><span class="m-doc-wrap">const char* name,
-              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;float&gt; color = {})</span></span>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />CommandList::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adef86fbf5c065755116c2f5d62dae977" class="m-doc-self">cmdBeginDebugLabel</a>(</span><span class="m-doc-wrap">const char* name,
+              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const float&gt; color = {})</span></span>
             </h3>
             <p>Begins a debug label, marking the following commands until the next <a href="classtp_1_1_command_list.html#ab749605c5419f436de4a533b98a05913" class="m-doc">tp::<wbr />CommandList::<wbr />cmdEndDebugLabel</a> with the given name and optional color for display in validation and debugging tools.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -189,19 +189,19 @@
                 </tr>
               </tbody>
             </table>
-<p>The provided descriptor sets are bound consecutively, meaning the first descriptor set gets bound to set number <code>firstSet</code>, the second one to <code>firstSet + 1</code> and so on.</p><aside class="m-note m-default"><h4>Remark</h4><p>If the descriptor sets previously bound to numbers up to <code>firstSet - 1</code> were bound using a pipeline layout compatible up to the set number <code>firstSet - 1</code>, then the lower numbered bindings are not disturbed and may still be accessed.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/vkCmdBindDescriptorSets.html" class="m-doc-external">vkCmdBindDescriptorSets</a></p></aside>
+<p>The provided descriptor sets are bound consecutively, meaning the first descriptor set gets bound to set number <code>firstSet</code>, the second one to <code>firstSet + 1</code> and so on.</p><aside class="m-note m-default"><h4>Remark</h4><p>If the descriptor sets previously bound to numbers up to <code>firstSet - 1</code> were bound using a pipeline layout compatible up to the set number <code>firstSet - 1</code>, then the lower numbered bindings are not disturbed and may still be accessed.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/vkCmdBindDescriptorSets.html" class="m-doc-external">vkCmdBindDescriptorSets</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="ab749605c5419f436de4a533b98a05913"><div>
             <h3>
               <span class="m-doc-wrap-bumper">void tp::<wbr />CommandList::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab749605c5419f436de4a533b98a05913" class="m-doc-self">cmdEndDebugLabel</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
-            <p>Ends the last debug label. Must be preceded by <a href="classtp_1_1_command_list.html#a7045fbaa2fd98bafb68133ee836fc366" class="m-doc">tp::<wbr />CommandList::<wbr />cmdBeginDebugLabel</a>.</p>
+            <p>Ends the last debug label. Must be preceded by <a href="classtp_1_1_command_list.html#adef86fbf5c065755116c2f5d62dae977" class="m-doc">tp::<wbr />CommandList::<wbr />cmdBeginDebugLabel</a>.</p>
 <aside class="m-note m-default"><h4>Remark</h4><p>The call will have no effect when <a href="namespacetp_1_1_application_extension.html#a87720f5be2958c77e3766715f1e5c38e" class="m-doc">tp::<wbr />ApplicationExtension::<wbr />EXT_DebugUtils</a> is not enabled.</p></aside>
           </div></section>
-          <section class="m-doc-details" id="ab99033580d4632b35cc51d5e4c0fd977"><div>
+          <section class="m-doc-details" id="ae4f9e3e2c6dab4916707fc003aaa1b6f"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void tp::<wbr />CommandList::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab99033580d4632b35cc51d5e4c0fd977" class="m-doc-self">cmdInsertDebugLabel</a>(</span><span class="m-doc-wrap">const char* name,
-              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;float&gt; color = {})</span></span>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />CommandList::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae4f9e3e2c6dab4916707fc003aaa1b6f" class="m-doc-self">cmdInsertDebugLabel</a>(</span><span class="m-doc-wrap">const char* name,
+              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const float&gt; color = {})</span></span>
             </h3>
             <p>Inserts a debug label, marking the following commands with the given name and optional color for display in validation and debugging tools.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -255,7 +255,7 @@
                 </tr>
               </tbody>
             </table>
-<aside class="m-note m-default"><h4>Remark</h4><p>Values outside of the updated range are not disturbed.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/vkCmdPushConstants.html" class="m-doc-external">vkCmdPushConstants</a></p></aside>
+<aside class="m-note m-default"><h4>Remark</h4><p>Values outside of the updated range are not disturbed.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/vkCmdPushConstants.html" class="m-doc-external">vkCmdPushConstants</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="a700efa4defb59e3b12e97e9791faa627"><div>
             <h3>
@@ -293,7 +293,7 @@
                 </tr>
               </tbody>
             </table>
-<aside class="m-note m-default"><h4>Remark</h4><p>Values outside of the updated range are not disturbed.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/vkCmdPushConstants.html" class="m-doc-external">vkCmdPushConstants</a></p></aside>
+<aside class="m-note m-default"><h4>Remark</h4><p>Values outside of the updated range are not disturbed.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/vkCmdPushConstants.html" class="m-doc-external">vkCmdPushConstants</a></p></aside>
           </div></section>
         </section>
       </div>

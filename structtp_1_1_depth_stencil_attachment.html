@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>tp::RenderPassAttachment struct | Tephra Documentation</title>
+  <title>tp::DepthStencilAttachment struct | Tephra Documentation</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark-tephra.css" />
   <link rel="stylesheet" href="m-documentation.css" />
@@ -54,9 +54,9 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="namespacetp.html">tp</a>::<wbr/></span>RenderPassAttachment <span class="m-thin">struct</span>
+          <span class="m-breadcrumb"><a href="namespacetp.html">tp</a>::<wbr/></span>DepthStencilAttachment <span class="m-thin">struct</span>
         </h1>
-        <p>Represents an <a href="classtp_1_1_image_view.html" class="m-doc">tp::<wbr />ImageView</a> as a render pass attachment, allowing it to be bound as a render target inside of its subpasses. Also specifies any operations that are to be done at the beginning or end of the render pass. Clearing an image through an attachment load operation tends to be more efficient than with an explicit command.</p>
+        <p>Represents an <a href="classtp_1_1_image_view.html" class="m-doc">tp::<wbr />ImageView</a> as a render pass depth &amp; stencil attachment, allowing it to be bound inside of a render pass. Also specifies any operations that are to be done on it at the beginning or end of the render pass.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -72,34 +72,49 @@
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
+            <dt id="a51b82b255cfe79bc41871724be8083d0">
+              <span class="m-doc-wrap-bumper"><a href="#a51b82b255cfe79bc41871724be8083d0" class="m-doc-self">DepthStencilAttachment</a>(</span><span class="m-doc-wrap">)</span>
+            </dt>
+            <dd>Describes an empty attachment.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a8932cc1ddd4ef3be6627e292ef9a8f96" class="m-doc">RenderPassAttachment</a>(</span><span class="m-doc-wrap"><a href="classtp_1_1_image_view.html" class="m-doc">ImageView</a> image,
-              <a href="namespacetp.html#aa57e260754413ae9a64d57adb264c384" class="m-doc">AttachmentLoadOp</a> loadOp,
-              <a href="namespacetp.html#ae8ae216230f07b1ccb769eac93fa9c3d" class="m-doc">AttachmentStoreOp</a> storeOp,
+              <span class="m-doc-wrap-bumper"><a href="#a5868aca6ee140a3ba7ecaef060f68898" class="m-doc">DepthStencilAttachment</a>(</span><span class="m-doc-wrap"><a href="classtp_1_1_image_view.html" class="m-doc">ImageView</a> image,
+              bool depthReadOnly,
+              <a href="namespacetp.html#aa57e260754413ae9a64d57adb264c384" class="m-doc">AttachmentLoadOp</a> depthLoadOp,
+              <a href="namespacetp.html#ae8ae216230f07b1ccb769eac93fa9c3d" class="m-doc">AttachmentStoreOp</a> depthStoreOp,
+              bool stencilReadOnly,
               <a href="namespacetp.html#aa57e260754413ae9a64d57adb264c384" class="m-doc">AttachmentLoadOp</a> stencilLoadOp,
               <a href="namespacetp.html#ae8ae216230f07b1ccb769eac93fa9c3d" class="m-doc">AttachmentStoreOp</a> stencilStoreOp,
-              <a href="structtp_1_1_clear_value.html" class="m-doc">ClearValue</a> clearValue = {})</span>
+              <a href="structtp_1_1_clear_value.html" class="m-doc">ClearValue</a> clearValue = {},
+              <a href="classtp_1_1_image_view.html" class="m-doc">ImageView</a> resolveImage = {},
+              <a href="namespacetp.html#a198f24458c6fe67ac726d5e3c4ffdb9a" class="m-doc">ResolveMode</a> resolveMode = ResolveMode::Average)</span>
             </dt>
             <dd></dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a4f4e5f943258ab148433691858342f65" class="m-doc">RenderPassAttachment</a>(</span><span class="m-doc-wrap"><a href="classtp_1_1_image_view.html" class="m-doc">ImageView</a> image,
+              <span class="m-doc-wrap-bumper"><a href="#a01051b8a571669f29d484729695092d0" class="m-doc">DepthStencilAttachment</a>(</span><span class="m-doc-wrap"><a href="classtp_1_1_image_view.html" class="m-doc">ImageView</a> image,
+              bool readOnly,
               <a href="namespacetp.html#aa57e260754413ae9a64d57adb264c384" class="m-doc">AttachmentLoadOp</a> loadOp,
               <a href="namespacetp.html#ae8ae216230f07b1ccb769eac93fa9c3d" class="m-doc">AttachmentStoreOp</a> storeOp,
-              <a href="structtp_1_1_clear_value.html" class="m-doc">ClearValue</a> clearValue = {})</span>
+              <a href="structtp_1_1_clear_value.html" class="m-doc">ClearValue</a> clearValue = {},
+              <a href="classtp_1_1_image_view.html" class="m-doc">ImageView</a> resolveImage = {},
+              <a href="namespacetp.html#a198f24458c6fe67ac726d5e3c4ffdb9a" class="m-doc">ResolveMode</a> resolveMode = ResolveMode::Average)</span>
             </dt>
             <dd></dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a8932cc1ddd4ef3be6627e292ef9a8f96"><div>
+          <section class="m-doc-details" id="a5868aca6ee140a3ba7ecaef060f68898"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> tp::<wbr />RenderPassAttachment::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8932cc1ddd4ef3be6627e292ef9a8f96" class="m-doc-self">RenderPassAttachment</a>(</span><span class="m-doc-wrap"><a href="classtp_1_1_image_view.html" class="m-doc">ImageView</a> image,
-              <a href="namespacetp.html#aa57e260754413ae9a64d57adb264c384" class="m-doc">AttachmentLoadOp</a> loadOp,
-              <a href="namespacetp.html#ae8ae216230f07b1ccb769eac93fa9c3d" class="m-doc">AttachmentStoreOp</a> storeOp,
+              <span class="m-doc-wrap-bumper"> tp::<wbr />DepthStencilAttachment::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5868aca6ee140a3ba7ecaef060f68898" class="m-doc-self">DepthStencilAttachment</a>(</span><span class="m-doc-wrap"><a href="classtp_1_1_image_view.html" class="m-doc">ImageView</a> image,
+              bool depthReadOnly,
+              <a href="namespacetp.html#aa57e260754413ae9a64d57adb264c384" class="m-doc">AttachmentLoadOp</a> depthLoadOp,
+              <a href="namespacetp.html#ae8ae216230f07b1ccb769eac93fa9c3d" class="m-doc">AttachmentStoreOp</a> depthStoreOp,
+              bool stencilReadOnly,
               <a href="namespacetp.html#aa57e260754413ae9a64d57adb264c384" class="m-doc">AttachmentLoadOp</a> stencilLoadOp,
               <a href="namespacetp.html#ae8ae216230f07b1ccb769eac93fa9c3d" class="m-doc">AttachmentStoreOp</a> stencilStoreOp,
-              <a href="structtp_1_1_clear_value.html" class="m-doc">ClearValue</a> clearValue = {})</span></span>
+              <a href="structtp_1_1_clear_value.html" class="m-doc">ClearValue</a> clearValue = {},
+              <a href="classtp_1_1_image_view.html" class="m-doc">ImageView</a> resolveImage = {},
+              <a href="namespacetp.html#a198f24458c6fe67ac726d5e3c4ffdb9a" class="m-doc">ResolveMode</a> resolveMode = ResolveMode::Average)</span></span>
             </h3>
             <table class="m-table m-fullwidth m-flat">
               <thead>
@@ -111,34 +126,53 @@
                   <td>The image view used as an attachment.</td>
                 </tr>
                 <tr>
-                  <td>loadOp</td>
-                  <td>The load operation for the color / depth aspect done at the start of a render pass.</td>
+                  <td>depthReadOnly</td>
+                  <td>If <code>true</code>, specifies that the depth aspect will not be written to inside the render pass.</td>
                 </tr>
                 <tr>
-                  <td>storeOp</td>
-                  <td>The store operation for the color / depth aspect done at the end of a render pass.</td>
+                  <td>depthLoadOp</td>
+                  <td>The load operation for the depth aspect done at the start of the render pass.</td>
+                </tr>
+                <tr>
+                  <td>depthStoreOp</td>
+                  <td>The store operation for the depth aspect done at the end of the render pass.</td>
+                </tr>
+                <tr>
+                  <td>stencilReadOnly</td>
+                  <td>If <code>true</code>, specifies that the stenncil aspect will not be written to inside the render pass.</td>
                 </tr>
                 <tr>
                   <td>stencilLoadOp</td>
-                  <td>The load operation for the stencil aspect done at the start of a render pass.</td>
+                  <td>The load operation for the stencil aspect done at the start of the render pass.</td>
                 </tr>
                 <tr>
                   <td>stencilStoreOp</td>
-                  <td>The store operation for the stencil aspect done at the end of a render pass.</td>
+                  <td>The store operation for the stencil aspect done at the end of the render pass.</td>
                 </tr>
                 <tr>
                   <td>clearValue</td>
                   <td>If load operation is <a href="namespacetp.html#aa57e260754413ae9a64d57adb264c384adc30bc0c7914db5918da4263fce93ad2" class="m-doc">tp::<wbr />AttachmentLoadOp::<wbr />Clear</a>, specifies the clear value.</td>
+                </tr>
+                <tr>
+                  <td>resolveImage</td>
+                  <td>The image view that resolved multisample data will be written to at the end of the render pass.</td>
+                </tr>
+                <tr>
+                  <td>resolveMode</td>
+                  <td>The resolve mode that will be used if <code>resolveImage</code> is defined.</td>
                 </tr>
               </tbody>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a4f4e5f943258ab148433691858342f65"><div>
+          <section class="m-doc-details" id="a01051b8a571669f29d484729695092d0"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> tp::<wbr />RenderPassAttachment::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4f4e5f943258ab148433691858342f65" class="m-doc-self">RenderPassAttachment</a>(</span><span class="m-doc-wrap"><a href="classtp_1_1_image_view.html" class="m-doc">ImageView</a> image,
+              <span class="m-doc-wrap-bumper"> tp::<wbr />DepthStencilAttachment::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a01051b8a571669f29d484729695092d0" class="m-doc-self">DepthStencilAttachment</a>(</span><span class="m-doc-wrap"><a href="classtp_1_1_image_view.html" class="m-doc">ImageView</a> image,
+              bool readOnly,
               <a href="namespacetp.html#aa57e260754413ae9a64d57adb264c384" class="m-doc">AttachmentLoadOp</a> loadOp,
               <a href="namespacetp.html#ae8ae216230f07b1ccb769eac93fa9c3d" class="m-doc">AttachmentStoreOp</a> storeOp,
-              <a href="structtp_1_1_clear_value.html" class="m-doc">ClearValue</a> clearValue = {})</span></span>
+              <a href="structtp_1_1_clear_value.html" class="m-doc">ClearValue</a> clearValue = {},
+              <a href="classtp_1_1_image_view.html" class="m-doc">ImageView</a> resolveImage = {},
+              <a href="namespacetp.html#a198f24458c6fe67ac726d5e3c4ffdb9a" class="m-doc">ResolveMode</a> resolveMode = ResolveMode::Average)</span></span>
             </h3>
             <table class="m-table m-fullwidth m-flat">
               <thead>
@@ -150,16 +184,28 @@
                   <td>The image view used as an attachment.</td>
                 </tr>
                 <tr>
+                  <td>readOnly</td>
+                  <td>If <code>true</code>, specifies that the attachment will not be written to inside the render pass.</td>
+                </tr>
+                <tr>
                   <td>loadOp</td>
-                  <td>The load operation done at the start of a render pass.</td>
+                  <td>The load operation done at the start of the render pass.</td>
                 </tr>
                 <tr>
                   <td>storeOp</td>
-                  <td>The store operation done at the end of a render pass.</td>
+                  <td>The store operation done at the end of the render pass.</td>
                 </tr>
                 <tr>
                   <td>clearValue</td>
                   <td>If load operation is <a href="namespacetp.html#aa57e260754413ae9a64d57adb264c384adc30bc0c7914db5918da4263fce93ad2" class="m-doc">tp::<wbr />AttachmentLoadOp::<wbr />Clear</a>, specifies the clear value.</td>
+                </tr>
+                <tr>
+                  <td>resolveImage</td>
+                  <td>The image view that resolved multisample data will be written to at the end of the render pass.</td>
+                </tr>
+                <tr>
+                  <td>resolveMode</td>
+                  <td>The resolve mode that will be used if <code>resolveImage</code> is defined.</td>
                 </tr>
               </tbody>
             </table>
