@@ -12,27 +12,23 @@ void RenderList::beginRecording(CommandPool* commandPool) {
 
     TEPHRA_ASSERT(vkCommandBufferHandle.isNull());
     TEPHRA_ASSERTD(vkFutureCommandBuffer != nullptr, "beginRecording() of inline RenderList");
-    TEPHRA_ASSERTD(vkRenderingInfo.sType == VK_STRUCTURE_TYPE_RENDERING_INFO, "invalid vkRenderingInfo was provided");
+    TEPHRA_ASSERTD(vkInheritanceInfo != nullptr, "inheritance info was not provided");
 
-    vkCommandBufferHandle = commandPool->acquirePrimaryCommandBuffer(debugTarget->getObjectName());
+    // Record to a secondary command buffer (somehow faster than using primary command buffers on Nvidia)
+    vkCommandBufferHandle = commandPool->acquireSecondaryCommandBuffer(debugTarget->getObjectName());
 
-    // Record to a fresh primary command buffer
     VkCommandBufferBeginInfo beginInfo;
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
     beginInfo.pNext = nullptr;
-    beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-    beginInfo.pInheritanceInfo = nullptr;
+    beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT | VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT;
+    beginInfo.pInheritanceInfo = vkInheritanceInfo;
 
     throwRetcodeErrors(vkiCommands->beginCommandBuffer(vkCommandBufferHandle, &beginInfo));
-
-    // Start rendering using the info we were given
-    vkiCommands->cmdBeginRendering(vkCommandBufferHandle, &vkRenderingInfo);
 }
 
 void RenderList::endRecording() {
     TEPHRA_DEBUG_SET_CONTEXT(debugTarget.get(), "endRecording", nullptr);
 
-    vkiCommands->cmdEndRendering(vkCommandBufferHandle);
     throwRetcodeErrors(vkiCommands->endCommandBuffer(vkCommandBufferHandle));
 
     // The command buffer is ready to be used now
@@ -190,15 +186,15 @@ RenderList::RenderList(
     VkCommandBufferHandle vkInlineCommandBuffer,
     DebugTarget debugTarget)
     : CommandList(vkiCommands, VK_PIPELINE_BIND_POINT_GRAPHICS, vkInlineCommandBuffer, std::move(debugTarget)),
-      vkRenderingInfo() {}
+      vkInheritanceInfo(nullptr) {}
 
 RenderList::RenderList(
     const VulkanCommandInterface* vkiCommands,
     VkCommandBufferHandle* vkFutureCommandBuffer,
-    const VkRenderingInfo& vkRenderingInfo,
+    const VkCommandBufferInheritanceInfo* vkInheritanceInfo,
     DebugTarget debugTarget)
     : CommandList(vkiCommands, VK_PIPELINE_BIND_POINT_GRAPHICS, vkFutureCommandBuffer, std::move(debugTarget)),
-      vkRenderingInfo(vkRenderingInfo) {}
+      vkInheritanceInfo(vkInheritanceInfo) {}
 
 RenderPassSetup::RenderPassSetup(
     DepthStencilAttachment depthStencilAttachment,

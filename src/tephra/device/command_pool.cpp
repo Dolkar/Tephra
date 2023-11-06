@@ -7,24 +7,40 @@ CommandPool::CommandPool(VkCommandPoolHandle vkCommandPoolHandle, CommandPoolPoo
     : vkCommandPoolHandle(vkCommandPoolHandle),
       commandPoolPool(commandPoolPool),
       queueType(queueType),
-      usedCommandBuffers(0) {}
+      usedPrimaryBuffers(0),
+      usedSecondaryBuffers(0) {}
 
 void CommandPool::reset() {
     commandPoolPool->resetCommandPool(vkCommandPoolHandle, false);
-    usedCommandBuffers = 0;
+    usedPrimaryBuffers = 0;
+    usedSecondaryBuffers = 0;
 }
 
 VkCommandBufferHandle CommandPool::acquirePrimaryCommandBuffer(const char* debugName) {
-    if (usedCommandBuffers == commandBuffers.size()) {
+    if (usedPrimaryBuffers == primaryBuffers.size()) {
         VkCommandBufferHandle vkNewCommandBufferHandle;
-        // Tephra only uses primary command buffers after dynamic rendering
         commandPoolPool->allocateCommandBuffers(
             vkCommandPoolHandle, VK_COMMAND_BUFFER_LEVEL_PRIMARY, viewOne(vkNewCommandBufferHandle));
 
-        commandBuffers.push_back(vkNewCommandBufferHandle);
+        primaryBuffers.push_back(vkNewCommandBufferHandle);
     }
 
-    VkCommandBufferHandle vkCommandBufferHandle = commandBuffers[usedCommandBuffers++];
+    VkCommandBufferHandle vkCommandBufferHandle = primaryBuffers[usedPrimaryBuffers++];
+    commandPoolPool->getParentDeviceImpl()->getLogicalDevice()->setObjectDebugName(vkCommandBufferHandle, debugName);
+
+    return vkCommandBufferHandle;
+}
+
+VkCommandBufferHandle CommandPool::acquireSecondaryCommandBuffer(const char* debugName) {
+    if (usedSecondaryBuffers == secondaryBuffers.size()) {
+        VkCommandBufferHandle vkNewCommandBufferHandle;
+        commandPoolPool->allocateCommandBuffers(
+            vkCommandPoolHandle, VK_COMMAND_BUFFER_LEVEL_SECONDARY, viewOne(vkNewCommandBufferHandle));
+
+        secondaryBuffers.push_back(vkNewCommandBufferHandle);
+    }
+
+    VkCommandBufferHandle vkCommandBufferHandle = secondaryBuffers[usedSecondaryBuffers++];
     commandPoolPool->getParentDeviceImpl()->getLogicalDevice()->setObjectDebugName(vkCommandBufferHandle, debugName);
 
     return vkCommandBufferHandle;

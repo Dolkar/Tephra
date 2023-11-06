@@ -51,6 +51,7 @@ void RenderPass::assignDeferred(
     const DebugTarget& listDebugTarget,
     ArrayView<RenderList>& listsToAssign) {
     prepareNonAttachmentAccesses(setup);
+    prepareRendering(setup, true);
 
     isInline = false;
     inlineRecordingCallback = {};
@@ -62,22 +63,14 @@ void RenderPass::assignDeferred(
     vkDeferredCommandBuffers.clear();
     vkDeferredCommandBuffers.resize(listsToAssign.size());
 
-    // Create render lists. We want them all to be a part of the same render pass, so we add
-    // suspend and resume flags as necessary
-    VkRenderingInfo vkRenderingInfo = prepareRendering(setup);
-    VkRenderingFlags baseRenderingFlags = vkRenderingInfo.flags;
+    // Create render lists using secondary command buffer with rendering inheritance
+    prepareInheritance(setup);
 
     for (std::size_t i = 0; i < listsToAssign.size(); i++) {
-        vkRenderingInfo.flags = baseRenderingFlags;
-        if (i != 0) // not first
-            vkRenderingInfo.flags |= VK_RENDERING_RESUMING_BIT;
-        if (i + 1 != listsToAssign.size()) // not last
-            vkRenderingInfo.flags |= VK_RENDERING_SUSPENDING_BIT;
-
         listsToAssign[i] = RenderList(
             &deviceImpl->getCommandPoolPool()->getVkiCommands(),
             &vkDeferredCommandBuffers[i],
-            vkRenderingInfo,
+            &vkInheritanceInfo,
             listDebugTarget);
     }
 }
@@ -87,11 +80,11 @@ void RenderPass::assignInline(
     RenderInlineCallback recordingCallback,
     DebugTarget listDebugTarget) {
     prepareNonAttachmentAccesses(setup);
+    prepareRendering(setup, false);
 
     isInline = true;
     inlineRecordingCallback = std::move(recordingCallback);
     inlineListDebugTarget = std::move(listDebugTarget);
-    vkInlineRenderingInfo = prepareRendering(setup);
     vkDeferredCommandBuffers.clear();
 }
 
@@ -111,23 +104,34 @@ void RenderPass::resolveAttachmentViews() {
 }
 
 void RenderPass::recordPass(PrimaryBufferRecorder& recorder) {
-    if (isInline) {
-        // Begin and end rendering here
-        VkCommandBufferHandle vkCommandBufferHandle = recorder.requestBuffer();
-        recorder.getVkiCommands().cmdBeginRendering(vkCommandBufferHandle, &vkInlineRenderingInfo);
+    // Begin and end rendering here
+    VkCommandBufferHandle vkPrimaryCommandBufferHandle = recorder.requestBuffer();
+    recorder.getVkiCommands().cmdBeginRendering(vkPrimaryCommandBufferHandle, &vkRenderingInfo);
 
+    if (isInline) {
         // Call the inline command recorder callback
         RenderList inlineList = RenderList(
-            &recorder.getVkiCommands(), vkCommandBufferHandle, std::move(inlineListDebugTarget));
+            &recorder.getVkiCommands(), vkPrimaryCommandBufferHandle, std::move(inlineListDebugTarget));
         inlineRecordingCallback(inlineList);
 
-        recorder.getVkiCommands().cmdEndRendering(vkCommandBufferHandle);
     } else {
+        // Execute deferred command buffers that ended up being recorded
+        ScratchVector<VkCommandBuffer> vkFilledCommandBuffers;
+
         for (VkCommandBufferHandle vkCommandBuffer : vkDeferredCommandBuffers) {
             if (!vkCommandBuffer.isNull())
-                recorder.appendBuffer(vkCommandBuffer);
+                vkFilledCommandBuffers.push_back(vkCommandBuffer);
+        }
+
+        if (!vkFilledCommandBuffers.empty()) {
+            recorder.getVkiCommands().cmdExecuteCommands(
+                recorder.requestBuffer(),
+                static_cast<uint32_t>(vkFilledCommandBuffers.size()),
+                vkFilledCommandBuffers.data());
         }
     }
+
+    recorder.getVkiCommands().cmdEndRendering(vkPrimaryCommandBufferHandle);
 }
 
 void RenderPass::prepareNonAttachmentAccesses(const RenderPassSetup& setup) {
@@ -137,15 +141,13 @@ void RenderPass::prepareNonAttachmentAccesses(const RenderPassSetup& setup) {
     imageAccesses.insert(imageAccesses.begin(), setup.imageAccesses.begin(), setup.imageAccesses.end());
 }
 
-VkRenderingInfo RenderPass::prepareRendering(const RenderPassSetup& setup) {
-    VkRenderingInfo renderingInfo;
-    renderingInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO_KHR;
-    renderingInfo.pNext = nullptr;
-    // We add resuming / suspending flags later depending on the method
-    renderingInfo.flags = 0;
-    renderingInfo.renderArea = setup.renderArea;
-    renderingInfo.layerCount = setup.layerCount;
-    renderingInfo.viewMask = setup.viewMask;
+void RenderPass::prepareRendering(const RenderPassSetup& setup, bool useSecondaryCmdBuffers) {
+    vkRenderingInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO_KHR;
+    vkRenderingInfo.pNext = nullptr;
+    vkRenderingInfo.flags = useSecondaryCmdBuffers ? VK_RENDERING_CONTENTS_SECONDARY_COMMAND_BUFFERS_BIT : 0;
+    vkRenderingInfo.renderArea = setup.renderArea;
+    vkRenderingInfo.layerCount = setup.layerCount;
+    vkRenderingInfo.viewMask = setup.viewMask;
 
     // Prepare attachments, but we can't resolve the images yet
     vkRenderingAttachments.clear();
@@ -231,12 +233,63 @@ VkRenderingInfo RenderPass::prepareRendering(const RenderPassSetup& setup) {
     }
 
     // Assign pointers now that vkRenderingAttachments is final
-    renderingInfo.pDepthAttachment = &vkRenderingAttachments[0];
-    renderingInfo.pStencilAttachment = &vkRenderingAttachments[1];
-    renderingInfo.colorAttachmentCount = static_cast<uint32_t>(vkRenderingAttachments.size() - 2);
-    renderingInfo.pColorAttachments = vkRenderingAttachments.data() + 2;
+    vkRenderingInfo.pDepthAttachment = &vkRenderingAttachments[0];
+    vkRenderingInfo.pStencilAttachment = &vkRenderingAttachments[1];
+    vkRenderingInfo.colorAttachmentCount = static_cast<uint32_t>(vkRenderingAttachments.size() - 2);
+    vkRenderingInfo.pColorAttachments = vkRenderingAttachments.data() + 2;
+}
 
-    return renderingInfo;
+void RenderPass::prepareInheritance(const RenderPassSetup& setup) {
+    TEPHRA_ASSERT(vkRenderingInfo.sType == VK_STRUCTURE_TYPE_RENDERING_INFO_KHR);
+
+    vkInheritanceRenderingInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_RENDERING_INFO;
+    vkInheritanceRenderingInfo.pNext = nullptr;
+    vkInheritanceRenderingInfo.flags = vkRenderingInfo.flags;
+    vkInheritanceRenderingInfo.viewMask = vkRenderingInfo.viewMask;
+
+    // Depth and stencil attachments
+    {
+        const DepthStencilAttachment& attachment = setup.depthStencilAttachment;
+
+        bool hasImage = !attachment.image.isNull();
+        bool hasDepth = hasImage && attachment.image.getWholeRange().aspectMask.contains(ImageAspect::Depth);
+        bool hasStencil = hasImage && attachment.image.getWholeRange().aspectMask.contains(ImageAspect::Stencil);
+
+        if (hasDepth) {
+            vkInheritanceRenderingInfo.depthAttachmentFormat = vkCastConvertibleEnum(attachment.image.getFormat());
+        } else {
+            vkInheritanceRenderingInfo.depthAttachmentFormat = VK_FORMAT_UNDEFINED;
+        }
+
+        if (hasStencil) {
+            vkInheritanceRenderingInfo.stencilAttachmentFormat = vkCastConvertibleEnum(attachment.image.getFormat());
+        } else {
+            vkInheritanceRenderingInfo.stencilAttachmentFormat = VK_FORMAT_UNDEFINED;
+        }
+    }
+
+    // Color attachments
+    vkColorAttachmentFormats.clear();
+    vkColorAttachmentFormats.reserve(setup.colorAttachments.size());
+    for (const ColorAttachment& attachment : setup.colorAttachments) {
+        if (!attachment.image.isNull()) {
+            vkColorAttachmentFormats.push_back(vkCastConvertibleEnum(attachment.image.getFormat()));
+        } else {
+            vkColorAttachmentFormats.push_back(VK_FORMAT_UNDEFINED);
+        }
+    }
+    vkInheritanceRenderingInfo.colorAttachmentCount = static_cast<uint32_t>(vkColorAttachmentFormats.size());
+    vkInheritanceRenderingInfo.pColorAttachmentFormats = vkColorAttachmentFormats.data();
+
+    // Also need base inheritance info to redirect to vkInheritanceRenderingInfo
+    vkInheritanceInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_INFO;
+    vkInheritanceInfo.pNext = &vkInheritanceRenderingInfo;
+    vkInheritanceInfo.renderPass = VK_NULL_HANDLE;
+    vkInheritanceInfo.subpass = 0;
+    vkInheritanceInfo.framebuffer = nullptr;
+    vkInheritanceInfo.occlusionQueryEnable = false;
+    vkInheritanceInfo.queryFlags = 0; // TODO
+    vkInheritanceInfo.pipelineStatistics = 0; // TODO
 }
 
 }

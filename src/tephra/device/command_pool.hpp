@@ -16,8 +16,11 @@ public:
     // Resets the command buffers allocated from this pool, allowing them to be reused
     void reset();
 
-    // Returns a free command buffer handle, allocating new one if necessary
+    // Returns a free primary command buffer handle, allocating new one if necessary
     VkCommandBufferHandle acquirePrimaryCommandBuffer(const char* debugName);
+
+    // Returns a free secondary command buffer handle, allocating new ones if necessary
+    VkCommandBufferHandle acquireSecondaryCommandBuffer(const char* debugName);
 
     QueueType getQueueType() const {
         return queueType;
@@ -33,8 +36,10 @@ private:
     VkCommandPoolHandle vkCommandPoolHandle;
     CommandPoolPool* commandPoolPool;
     QueueType queueType;
-    std::vector<VkCommandBufferHandle> commandBuffers;
-    uint32_t usedCommandBuffers;
+    std::vector<VkCommandBufferHandle> primaryBuffers;
+    uint32_t usedPrimaryBuffers;
+    std::vector<VkCommandBufferHandle> secondaryBuffers;
+    uint32_t usedSecondaryBuffers;
 };
 
 // A pool of command pools, yes

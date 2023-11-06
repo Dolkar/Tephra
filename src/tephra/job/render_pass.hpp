@@ -68,16 +68,21 @@ private:
     bool isInline = false;
     RenderInlineCallback inlineRecordingCallback;
     DebugTarget inlineListDebugTarget;
-    VkRenderingInfo vkInlineRenderingInfo = {};
+    VkRenderingInfo vkRenderingInfo = {};
+    VkCommandBufferInheritanceRenderingInfo vkInheritanceRenderingInfo = {};
+    VkCommandBufferInheritanceInfo vkInheritanceInfo = {};
 
     std::vector<VkCommandBufferHandle> vkDeferredCommandBuffers;
     std::vector<VkRenderingAttachmentInfo> vkRenderingAttachments;
+    std::vector<VkFormat> vkColorAttachmentFormats;
 
     void prepareNonAttachmentAccesses(const RenderPassSetup& setup);
 
     // Fills out vkRenderingAttachments and attachmentsToResolve, then prepares VkRenderingInfo that points
     // to entries in vkRenderingAttachments.
-    VkRenderingInfo prepareRendering(const RenderPassSetup& setup);
+    void prepareRendering(const RenderPassSetup& setup, bool useSecondaryCmdBuffers);
+    // Prepares inheritance for secondary command buffer recording using the prepared rendering info
+    void prepareInheritance(const RenderPassSetup& setup);
 };
 
 }

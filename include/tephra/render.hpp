@@ -316,7 +316,7 @@ private:
     friend class Job;
     friend class RenderPass;
 
-    VkRenderingInfo vkRenderingInfo = {};
+    const VkCommandBufferInheritanceInfo* vkInheritanceInfo = nullptr;
 
     RenderList(
         const VulkanCommandInterface* vkiCommands,
@@ -326,7 +326,7 @@ private:
     RenderList(
         const VulkanCommandInterface* vkiCommands,
         VkCommandBufferHandle* vkFutureCommandBuffer,
-        const VkRenderingInfo& vkRenderingInfo,
+        const VkCommandBufferInheritanceInfo* vkInheritanceInfo,
         DebugTarget debugTarget);
 };
 

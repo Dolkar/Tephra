@@ -462,8 +462,8 @@ public:
     /// @param commandRecording
     ///     Describes how compute commands are to be recorded for the compute pass. The parameter can be either:
     ///     - A non-empty array view of null tp::ComputeList objects that will be initialized by the function call.
-    ///       Commands must be recorded to these lists while the job is in an enqueued state. The lists are executed
-    ///       in the order they are in this array.
+    ///       Commands can be recorded to these lists while the job is in an enqueued state. The lists are executed
+    ///       in the order they are in this array and lists with no recorded commands will be skipped.
     ///     - A function callback to record commands to a tp::ComputeList that will be provided as its parameter. This
     ///       function will be called as a part of the next tp::Device::submitQueuedJobs call after the job has been
     ///       enqueued to the same queue.
@@ -490,8 +490,8 @@ public:
     /// @param commandRecording
     ///     Describes how render commands are to be recorded for the render pass. The parameter can be either:
     ///     - A non-empty array view of null tp::RenderList objects that will be initialized by the function call.
-    ///       Commands must be recorded to these lists while the job is in an enqueued state. The lists are executed
-    ///       in the order they are in this array.
+    ///       Commands can be recorded to these lists while the job is in an enqueued state. The lists are executed
+    ///       in the order they are in this array and lists with no recorded commands will be skipped.
     ///     - A function callback to record commands to a tp::RenderList that will be provided as its parameter. This
     ///       function will be called as a part of the next tp::Device::submitQueuedJobs call after the job has been
     ///       enqueued to the same queue.
