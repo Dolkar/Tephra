@@ -246,6 +246,7 @@ void RenderPass::prepareInheritance(const RenderPassSetup& setup) {
     vkInheritanceRenderingInfo.pNext = nullptr;
     vkInheritanceRenderingInfo.flags = vkRenderingInfo.flags;
     vkInheritanceRenderingInfo.viewMask = vkRenderingInfo.viewMask;
+    vkInheritanceRenderingInfo.rasterizationSamples = vkCastConvertibleEnum(MultisampleLevel::x1);
 
     // Depth and stencil attachments
     {
@@ -266,6 +267,10 @@ void RenderPass::prepareInheritance(const RenderPassSetup& setup) {
         } else {
             vkInheritanceRenderingInfo.stencilAttachmentFormat = VK_FORMAT_UNDEFINED;
         }
+
+        if (hasImage) {
+            vkInheritanceRenderingInfo.rasterizationSamples = vkCastConvertibleEnum(attachment.image.getSampleLevel());
+        }
     }
 
     // Color attachments
@@ -274,6 +279,7 @@ void RenderPass::prepareInheritance(const RenderPassSetup& setup) {
     for (const ColorAttachment& attachment : setup.colorAttachments) {
         if (!attachment.image.isNull()) {
             vkColorAttachmentFormats.push_back(vkCastConvertibleEnum(attachment.image.getFormat()));
+            vkInheritanceRenderingInfo.rasterizationSamples = vkCastConvertibleEnum(attachment.image.getSampleLevel());
         } else {
             vkColorAttachmentFormats.push_back(VK_FORMAT_UNDEFINED);
         }
