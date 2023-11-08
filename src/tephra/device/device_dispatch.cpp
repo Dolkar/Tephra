@@ -414,20 +414,20 @@ JobSemaphore Device::enqueueJob(
 
     // Add the semaphores to the job data structure as well
     for (const auto& semaphore : waitJobSemaphores) {
-        jobData->waitJobSemaphores.push_back(semaphore);
+        jobData->semaphores.jobWaits.push_back(semaphore);
     }
     for (const auto& semaphore : waitExternalSemaphores) {
-        jobData->waitExternalSemaphores.push_back(semaphore);
+        jobData->semaphores.externalWaits.push_back(semaphore);
     }
     for (const auto& semaphore : signalExternalSemaphores) {
-        jobData->signalExternalSemaphores.push_back(semaphore);
+        jobData->semaphores.externalSignals.push_back(semaphore);
     }
 
     // Acquire new unique timestamp for the job that it will signal once complete
     JobSemaphore signalSemaphore;
     signalSemaphore.queue = queue;
     signalSemaphore.timestamp = deviceImpl->getTimelineManager()->trackNextTimestamp(queueIndex);
-    jobData->signalJobSemaphore = signalSemaphore;
+    jobData->semaphores.jobSignal = signalSemaphore;
 
     // Update the timeline manager to process its callbacks and free up some resources before allocating again
     deviceImpl->getTimelineManager()->update();
@@ -446,7 +446,11 @@ JobSemaphore Device::enqueueJob(
     return signalSemaphore;
 }
 
-void Device::submitQueuedJobs(const DeviceQueue& queue, const JobSemaphore& lastJobToSubmit) {
+void Device::submitQueuedJobs(
+    const DeviceQueue& queue,
+    const JobSemaphore& lastJobToSubmit,
+    ArrayParameter<const JobSemaphore> waitJobSemaphores,
+    ArrayParameter<const ExternalSemaphore> waitExternalSemaphores) {
     auto deviceImpl = static_cast<DeviceContainer*>(this);
     TEPHRA_DEBUG_SET_CONTEXT(
         deviceImpl->getDebugTarget(), "submitQueuedJobs", deviceImpl->getQueueMap()->getQueueInfo(queue).name.c_str());
@@ -468,7 +472,7 @@ void Device::submitQueuedJobs(const DeviceQueue& queue, const JobSemaphore& last
         }
     }
 
-    deviceImpl->getQueueState(queueIndex)->submitQueuedJobs(lastJobToSubmit);
+    deviceImpl->getQueueState(queueIndex)->submitQueuedJobs(lastJobToSubmit, waitJobSemaphores, waitExternalSemaphores);
 }
 
 void Device::submitPresentImagesKHR(

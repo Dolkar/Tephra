@@ -268,8 +268,8 @@ public:
     /// @param job
     ///     The tp::Job object to enqueue. The ownership is transferred from the user over to the implementation.
     /// @param waitJobSemaphores
-    ///     A list of job semaphores that the job will wait on before actually executing on the device. It is only
-    ///     necessary to wait on semaphores of jobs submitted to other queues.
+    ///     A list of job semaphores that the job will wait on before actually executing on the device. It is not
+    ///     necessary to wait on semaphores of jobs submitted to the same queue.
     /// @param waitExternalSemaphores
     ///     A list of external semaphores the job will wait on before executing on the device.
     /// @param signalExternalSemaphores
@@ -297,11 +297,20 @@ public:
     /// @param lastJobToSubmit
     ///     Optionally requests a partial submit of the enqueued jobs. If not empty, any job that was enqueued after
     ///     the one associated with the given semaphore will not be submitted.
+    /// @param waitJobSemaphores
+    ///     A list of additional job semaphores the queue will wait on before executing any enqueued jobs. It is not
+    ///     necessary to wait on semaphores of jobs submitted to the same queue.
+    /// @param waitExternalSemaphores
+    ///     A list of additional external semaphores the queue will wait on before executing any enqueued jobs.
     /// @remarks
     ///     This method is **not** thread-safe between calls with the same `queue` parameter. However, through the
     ///     use of the `lastJobToSubmit` parameter, it is safe to enqueue jobs asynchronously to submitting them within
     ///     the same queue.
-    void submitQueuedJobs(const DeviceQueue& queue, const JobSemaphore& lastJobToSubmit = {});
+    void submitQueuedJobs(
+        const DeviceQueue& queue,
+        const JobSemaphore& lastJobToSubmit = {},
+        ArrayParameter<const JobSemaphore> waitJobSemaphores = {},
+        ArrayParameter<const ExternalSemaphore> waitExternalSemaphores = {});
 
     /// Submits a present operation to the specified queue for each of the given tp::Swapchain objects,
     /// queueing the given acquired image from each swapchain for presentation.

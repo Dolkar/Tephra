@@ -411,8 +411,8 @@ void compileJob(
         }
     }
 
-    TEPHRA_ASSERT(!jobData->signalJobSemaphore.isNull());
-    BarrierList barriers(jobData->signalJobSemaphore.timestamp);
+    TEPHRA_ASSERT(!jobData->semaphores.jobSignal.isNull());
+    BarrierList barriers(jobData->semaphores.jobSignal.timestamp);
     {
         // Setup barriers and handle incoming exports
         auto queueInfos = jobData->resourcePoolImpl->getParentDeviceImpl()->getQueueMap()->getQueueInfos();

@@ -205,6 +205,22 @@ struct JobRecordStorage {
     std::deque<RenderPass> renderPassStorage;
 };
 
+struct JobSemaphoreStorage {
+    std::vector<JobSemaphore> jobWaits;
+    JobSemaphore jobSignal;
+    std::vector<ExternalSemaphore> externalWaits;
+    std::vector<ExternalSemaphore> externalSignals;
+
+    void insertWaits(
+        ArrayParameter<const JobSemaphore> newJobWaits,
+        ArrayParameter<const ExternalSemaphore> newExternalWaits) {
+        jobWaits.insert(jobWaits.end(), newJobWaits.begin(), newJobWaits.end());
+        externalWaits.insert(externalWaits.end(), newExternalWaits.begin(), newExternalWaits.end());
+    }
+
+    void clear();
+};
+
 class JobResourcePoolContainer;
 
 struct JobData {
@@ -218,10 +234,7 @@ struct JobData {
     JobFlagMask flags;
     JobRecordStorage record;
     JobResourceStorage resources;
-    std::vector<JobSemaphore> waitJobSemaphores;
-    JobSemaphore signalJobSemaphore;
-    std::vector<ExternalSemaphore> waitExternalSemaphores;
-    std::vector<ExternalSemaphore> signalExternalSemaphores;
+    JobSemaphoreStorage semaphores;
 };
 
 }
