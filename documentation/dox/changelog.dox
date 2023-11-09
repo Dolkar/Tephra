@@ -6,6 +6,14 @@ version increments.
 
 @tableofcontents
 
+@section v0-2-1 In-dev version 0.2.1
+Released 2023-11-08
+- Added optional parameters to tp::Device::submitQueuedJobs to allow inserting additional wait operations that will
+  be done before any of the enqueued jobs will be executed on the device. This allows for waiting on workloads that
+  may be determined to be needed during the recording phase of a job, after it has already been enqueued.
+- Removed the requirement to finish recording of all tp::RenderList and tp::ComputeList in a render or compute pass,
+  respectively.
+
 @section v0-2-0 In-dev version 0.2.0
 Released 2023-10-25
 - Switched to using Vulkan's [dynamic rendering](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VK_KHR_dynamic_rendering.html)
