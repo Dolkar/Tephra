@@ -244,7 +244,8 @@ void RenderPass::prepareInheritance(const RenderPassSetup& setup) {
 
     vkInheritanceRenderingInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_RENDERING_INFO;
     vkInheritanceRenderingInfo.pNext = nullptr;
-    vkInheritanceRenderingInfo.flags = vkRenderingInfo.flags;
+    // Flags need to be identical, except for this bit
+    vkInheritanceRenderingInfo.flags = vkRenderingInfo.flags & (~VK_RENDERING_CONTENTS_SECONDARY_COMMAND_BUFFERS_BIT);
     vkInheritanceRenderingInfo.viewMask = vkRenderingInfo.viewMask;
     vkInheritanceRenderingInfo.rasterizationSamples = vkCastConvertibleEnum(MultisampleLevel::x1);
 
