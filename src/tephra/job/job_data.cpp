@@ -34,10 +34,14 @@ void JobData::clear() {
     jobIdInPool = ~0;
     record.clear();
     resources.clear();
-    waitJobSemaphores.clear();
-    signalJobSemaphore = JobSemaphore();
-    waitExternalSemaphores.clear();
-    signalExternalSemaphores.clear();
+    semaphores.clear();
+}
+
+void JobSemaphoreStorage::clear() {
+    jobWaits.clear();
+    jobSignal = JobSemaphore();
+    externalWaits.clear();
+    externalSignals.clear();
 }
 
 }

@@ -131,9 +131,7 @@ enum class DescriptorType : uint32_t {
     /// A descriptor for a tp::BufferView object as a read-only uniform (constant) buffer with a dynamic offset.
     UniformBufferDynamic = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
     /// A descriptor for a tp::BufferView object as a read/write buffer with a dynamic offset.
-    StorageBufferDynamic = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC,
-    /// A descriptor for a tp::ImageView object that is bound as an input attachment in a subpass of a render pass.
-    InputAttachment = VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT
+    StorageBufferDynamic = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC
 };
 TEPHRA_VULKAN_COMPATIBLE_ENUM(DescriptorType, VkDescriptorType);
 
@@ -304,7 +302,6 @@ TEPHRA_VULKAN_COMPATIBLE_ENUM(BlendFactor, VkBlendFactor);
 /// Sample counts that can be used for image storage operations.
 /// @see @vksymbol{VkSampleCountFlagBits}
 enum class MultisampleLevel : uint32_t {
-    Undefined = 0,
     x1 = VK_SAMPLE_COUNT_1_BIT,
     x2 = VK_SAMPLE_COUNT_2_BIT,
     x4 = VK_SAMPLE_COUNT_4_BIT,
@@ -340,6 +337,17 @@ enum class ColorComponent : uint32_t {
 TEPHRA_VULKAN_COMPATIBLE_ENUM(ColorComponent, VkColorComponentFlagBits);
 TEPHRA_MAKE_ENUM_BIT_MASK(ColorComponentMask, ColorComponent);
 
+/// Determines the method how a multisampled image should be resolved
+/// @see @vksymbol{VkResolveModeFlagBits}
+enum class ResolveMode : uint32_t {
+    SampleZero = VK_RESOLVE_MODE_SAMPLE_ZERO_BIT,
+    Average = VK_RESOLVE_MODE_AVERAGE_BIT,
+    Min = VK_RESOLVE_MODE_MIN_BIT,
+    Max = VK_RESOLVE_MODE_MAX_BIT
+};
+TEPHRA_VULKAN_COMPATIBLE_ENUM(ResolveMode, VkResolveModeFlagBits);
+TEPHRA_MAKE_ENUM_BIT_MASK(ResolveModeMask, ResolveMode);
+
 /// Specifies the parts of the tp::GraphicsPipelineSetup state that are to be taken from the dynamic state commands
 /// recorded into a tp::RenderList, rather than from the pipeline setup, which will be ignored.
 /// @remarks
@@ -373,9 +381,9 @@ enum class ImageUsage : uint32_t {
     SampledImage = VK_IMAGE_USAGE_SAMPLED_BIT,
     /// Allows the image to be used in a tp::DescriptorType::StorageImage descriptor.
     StorageImage = VK_IMAGE_USAGE_STORAGE_BIT,
-    /// Allows the image to be used as a color attachment in tp::Job::cmdExecuteRenderPass.
+    /// Allows the image to be used as a tp::ColorAttachment inside a render pass.
     ColorAttachment = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
-    /// Allows the image to be used as a depth or stencil attachment in tp::Job::cmdExecuteRenderPass.
+    /// Allows the image to be used as a tp::DepthStencilAttachment inside a render pass.
     DepthStencilAttachment = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
     /// Allows the image to be used in a tp::DescriptorType::InputAttachment descriptor.
     InputAttachment = VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT

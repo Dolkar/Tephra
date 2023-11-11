@@ -39,7 +39,6 @@ private:
 
     tp::DescriptorSetLayout descriptorSetLayout;
     tp::PipelineLayout pipelineLayout;
-    tp::RenderPassLayout renderPassLayout;
     tp::Pipeline pipeline;
 
     std::deque<tp::JobSemaphore> frameSemaphores;

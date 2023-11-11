@@ -109,7 +109,7 @@ void JobResourcePoolContainer::allocateJobResources(Job& job) {
     TEPHRA_ASSERT(jobData->resourcePoolImpl != nullptr);
 
     JobResourcePoolContainer* resourcePool = jobData->resourcePoolImpl;
-    uint64_t jobTimestamp = jobData->signalJobSemaphore.timestamp;
+    uint64_t jobTimestamp = jobData->semaphores.jobSignal.timestamp;
 
     job.finalize();
     resourcePool->tryFreeSubmittedJobs();
@@ -118,8 +118,9 @@ void JobResourcePoolContainer::allocateJobResources(Job& job) {
     resourcePool->preinitBufferPool.finalizeJobAllocations(jobData->jobIdInPool, jobName);
     jobData->resources.localDescriptorSets.allocatePreparedDescriptorSets();
 
-    for (std::size_t renderPassIndex = 0; renderPassIndex < jobData->record.renderPassCount; renderPassIndex++) {
-        jobData->record.renderPassStorage[renderPassIndex].createFramebuffer();
+    // After allocations, resolve attachments of render passes
+    for (std::size_t i = 0; i < jobData->record.renderPassCount; i++) {
+        jobData->record.renderPassStorage[i].resolveAttachmentViews();
     }
 }
 
@@ -131,7 +132,7 @@ void JobResourcePoolContainer::queueReleaseSubmittedJob(Job job) {
     TEPHRA_ASSERT(jobData != nullptr);
     TEPHRA_ASSERT(jobData->resourcePoolImpl != nullptr);
     job.jobData = nullptr;
-    TEPHRA_ASSERT(!jobData->signalJobSemaphore.isNull());
+    TEPHRA_ASSERT(!jobData->semaphores.jobSignal.isNull());
 
     queueReleaseJob(jobData);
 }
@@ -143,7 +144,7 @@ void JobResourcePoolContainer::queueReleaseJob(JobData* jobData) {
 
     std::lock_guard<Mutex> mutexLock(resourcePool->jobReleaseQueueMutex);
     // Keep the queue approximately sorted by how early we can release the jobs
-    if (jobData->signalJobSemaphore.isNull())
+    if (jobData->semaphores.jobSignal.isNull())
         resourcePool->jobReleaseQueue.push_front(jobData);
     else
         resourcePool->jobReleaseQueue.push_back(jobData);
@@ -167,9 +168,9 @@ void JobResourcePoolContainer::tryFreeSubmittedJobs() {
         while (!jobReleaseQueue.empty()) {
             JobData* jobData = jobReleaseQueue.front();
 
-            if (!jobData->signalJobSemaphore.isNull() &&
+            if (!jobData->semaphores.jobSignal.isNull() &&
                 !deviceImpl->getTimelineManager()->wasTimestampReachedInQueue(
-                    baseQueueIndex, jobData->signalJobSemaphore.timestamp)) {
+                    baseQueueIndex, jobData->semaphores.jobSignal.timestamp)) {
                 break;
             }
             jobsToRelease.push_back(jobData);

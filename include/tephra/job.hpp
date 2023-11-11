@@ -420,7 +420,7 @@ public:
     /// @param value
     ///     The value that the image will be cleared to. It must be valid for the format of the image.
     /// @remarks
-    ///     Clearing images through the use of a tp::RenderPassAttachment may be more efficient.
+    ///     Clearing images as part of a render pass may be more efficient.
     /// @see @vksymbol{vkCmdClearColorImage}
     /// @see @vksymbol{vkCmdClearDepthStencilImage}
     void cmdClearImage(const ImageView& dstImage, ClearValue value);
@@ -433,7 +433,7 @@ public:
     /// @param ranges
     ///     An array specifying the ranges of the image to clear.
     /// @remarks
-    ///     Clearing images through the use of a tp::RenderPassAttachment may be more efficient.
+    ///     Clearing images as part of a render pass may be more efficient.
     /// @see @vksymbol{vkCmdClearColorImage}
     /// @see @vksymbol{vkCmdClearDepthStencilImage}
     void cmdClearImage(const ImageView& dstImage, ClearValue value, ArrayParameter<const ImageSubresourceRange> ranges);
@@ -446,8 +446,7 @@ public:
     /// @param resolveRegions
     ///     An array specifying the regions to resolve.
     /// @remarks
-    ///     Resolving images through the use of a tp::RenderPassAttachment bound to a tp::AttachmentBinding with its
-    ///     bind point type set to tp::AttachmentBindPointType::ResolveFromColor may be more efficient.
+    ///     Resolving images as part of a render pass may be more efficient.
     /// @remarks
     ///     Only images with color formats are supported. For automatically resolving depth stencil images, consider
     ///     @vksymbol{VK_KHR_depth_stencil_resolve}
@@ -463,63 +462,55 @@ public:
     /// @param commandRecording
     ///     Describes how compute commands are to be recorded for the compute pass. The parameter can be either:
     ///     - A non-empty array view of null tp::ComputeList objects that will be initialized by the function call.
-    ///       Commands must be recorded to these lists while the job is in an enqueued state. The lists are executed
-    ///       in the order they are in this array.
+    ///       Commands can be recorded to these lists while the job is in an enqueued state. The lists are executed
+    ///       in the order they are in this array and lists with no recorded commands will be skipped.
     ///     - A function callback to record commands to a tp::ComputeList that will be provided as its parameter. This
     ///       function will be called as a part of the next tp::Device::submitQueuedJobs call after the job has been
     ///       enqueued to the same queue.
     /// @param debugName
     ///     The debug name identifier for the compute pass.
     /// @remarks
-    ///     Any usage of resources inside the compute pass beyond what the resources were previously exported for must
-    ///     be specified inside the `setup` structure.
+    ///     Any usage of resources inside the compute pass beyond accesses that the resources were previously exported
+    ///     for must be specified inside the `setup` structure.
     /// @remarks
     ///     The dependencies between the compute pass and the rest of the tp::Job are synchronized automatically.
     ///     Dependencies between commands executed within the same compute pass are not, and must be synchronized
-    ///     manually with tp::RenderList::cmdPipelineBarrier.
+    ///     manually with tp::ComputeList::cmdPipelineBarrier.
     /// @remarks
     ///     Inline callbacks will be called during the call to tp::Device::submitQueuedJobs in the provided order.
     ///     Device queue thread safety rules apply: No operations on the target queue are permitted inside the callback.
-    /// @see @vksymbol{vkCmdExecuteCommands}
     void cmdExecuteComputePass(
         const ComputePassSetup& setup,
         std::variant<ArrayView<ComputeList>, ComputeInlineCallback> commandRecording,
         const char* debugName = nullptr);
 
-    /// Forms a render pass that executes lists of render commands in each of its subpasses.
+    /// Forms a render pass that executes lists of render commands.
     /// @param setup
     ///     The setup structure describing the render pass, its attachments and its non-attachment resource usage.
-    /// @param subpassCommandRecording
-    ///     For each subpass in the render pass, describes how render commands are to be recorded to it. Each element
-    ///     can be either:
+    /// @param commandRecording
+    ///     Describes how render commands are to be recorded for the render pass. The parameter can be either:
     ///     - A non-empty array view of null tp::RenderList objects that will be initialized by the function call.
-    ///       Commands must be recorded to these lists while the job is in an enqueued state. The lists will be
-    ///       executed in the order they are written to this array.
+    ///       Commands can be recorded to these lists while the job is in an enqueued state. The lists are executed
+    ///       in the order they are in this array and lists with no recorded commands will be skipped.
     ///     - A function callback to record commands to a tp::RenderList that will be provided as its parameter. This
     ///       function will be called as a part of the next tp::Device::submitQueuedJobs call after the job has been
     ///       enqueued to the same queue.
     /// @param debugName
     ///     The debug name identifier for the render pass.
     /// @remarks
-    ///     The size of the `subpassCommandRecording` array must be the same as the number of subpasses used to
-    ///     create the tp::RenderPassLayout provided in the given `setup` structure.
+    ///     Any usage of non-attachment resources inside the render pass beyond accesses that the resources were
+    ///     previously exported for must be specified inside the `setup` structure.
     /// @remarks
-    ///     Any usage of non-attachment resources inside the render pass beyond what the resources were previously
-    ///     exported for must be specified inside the `setup` structure.
-    /// @remarks
-    ///     The dependencies between the render pass and the rest of the tp::Job, as well as the dependencies between
-    ///     subpasses as declared during creation of the provided tp::RenderPassLayout are synchronized automatically.
-    ///     Dependencies between commands executed within the same subpass are not - see tp::SubpassDependency.
+    ///     The dependencies between the render pass and the rest of the tp::Job are synchronized automatically.
+    ///     Dependencies between commands executed within the same render pass are not, except for guarantees
+    ///     provided by the rasterization order.
     /// @remarks
     ///     Inline callbacks will be called during the call to tp::Device::submitQueuedJobs in the provided order.
     ///     Device queue thread safety rules apply: No operations on the target queue are permitted inside the callback.
-    /// @see tp::RenderPassLayout
-    /// @see @vksymbol{VkRenderPass}
-    /// @see @vksymbol{VkFramebuffer}
-    /// @see @vksymbol{vkCmdExecuteCommands}
+    /// @see @vksymbol{VkCmdBeginRendering}
     void cmdExecuteRenderPass(
         const RenderPassSetup& setup,
-        ArrayParameter<const std::variant<ArrayView<RenderList>, RenderInlineCallback>> subpassCommandRecording,
+        std::variant<ArrayView<RenderList>, RenderInlineCallback> commandRecording,
         const char* debugName = nullptr);
 
     /// Begins a debug label, marking the following commands until the next tp::Job::cmdEndDebugLabel with the
@@ -530,7 +521,7 @@ public:
     ///     The color of the label. Only used by external tools.
     /// @remarks
     ///     The call will have no effect when tp::ApplicationExtension::EXT_DebugUtils is not enabled.
-    void cmdBeginDebugLabel(const char* name, ArrayParameter<float> color = {});
+    void cmdBeginDebugLabel(const char* name, ArrayParameter<const float> color = {});
 
     /// Inserts a debug label, marking the following commands with the given name and optional color for display in
     /// validation and debugging tools.
@@ -540,7 +531,7 @@ public:
     ///     The color of the label. Only used by external tools.
     /// @remarks
     ///     The call will have no effect when tp::ApplicationExtension::EXT_DebugUtils is not enabled.
-    void cmdInsertDebugLabel(const char* name, ArrayParameter<float> color = {});
+    void cmdInsertDebugLabel(const char* name, ArrayParameter<const float> color = {});
 
     /// Ends the last debug label. Must be preceded by tp::Job::cmdBeginDebugLabel.
     /// @remarks

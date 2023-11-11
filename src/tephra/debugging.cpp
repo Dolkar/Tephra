@@ -58,6 +58,27 @@ DebugContext* DebugTarget::setDestructorContext() {
         return nullptr;
     }
 }
+
+DebugTarget::DebugTarget(const DebugTarget& other)
+    : parentTarget(other.parentTarget),
+      typeName(other.typeName),
+      objectName(other.objectName),
+      debugReporter(other.debugReporter) {
+    // Disallow copying only during destruction
+    TEPHRA_ASSERT(other.destructorContext == nullptr);
+}
+
+DebugTarget& DebugTarget::operator=(const DebugTarget& other) {
+    parentTarget = other.parentTarget;
+    typeName = other.typeName;
+    objectName = other.objectName;
+    debugReporter = other.debugReporter;
+
+    // Disallow copying only during destruction
+    TEPHRA_ASSERT(destructorContext == nullptr);
+    TEPHRA_ASSERT(other.destructorContext == nullptr);
+    return *this;
+}
 #endif
 
 #ifdef TEPHRA_ENABLE_DEBUG_REPORTING

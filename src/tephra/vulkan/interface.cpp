@@ -98,10 +98,6 @@ VulkanDeviceInterface::VulkanDeviceInterface(const VulkanInstanceInterface& vkiI
     deviceWaitIdle = LOAD_DEVICE_PROCEDURE(vkDeviceWaitIdle);
     createShaderModule = LOAD_DEVICE_PROCEDURE(vkCreateShaderModule);
     destroyShaderModule = LOAD_DEVICE_PROCEDURE(vkDestroyShaderModule);
-    createRenderPass = LOAD_DEVICE_PROCEDURE(vkCreateRenderPass);
-    destroyRenderPass = LOAD_DEVICE_PROCEDURE(vkDestroyRenderPass);
-    createFramebuffer = LOAD_DEVICE_PROCEDURE(vkCreateFramebuffer);
-    destroyFramebuffer = LOAD_DEVICE_PROCEDURE(vkDestroyFramebuffer);
     createDescriptorSetLayout = LOAD_DEVICE_PROCEDURE(vkCreateDescriptorSetLayout);
     destroyDescriptorSetLayout = LOAD_DEVICE_PROCEDURE(vkDestroyDescriptorSetLayout);
     updateDescriptorSets = LOAD_DEVICE_PROCEDURE(vkUpdateDescriptorSets);
@@ -227,10 +223,9 @@ VulkanCommandInterface::VulkanCommandInterface(
     cmdWriteTimestamp = LOAD_DEVICE_PROCEDURE(vkCmdWriteTimestamp);
     cmdCopyQueryPoolResults = LOAD_DEVICE_PROCEDURE(vkCmdCopyQueryPoolResults);
     cmdPushConstants = LOAD_DEVICE_PROCEDURE(vkCmdPushConstants);
-    cmdBeginRenderPass = LOAD_DEVICE_PROCEDURE(vkCmdBeginRenderPass);
-    cmdNextSubpass = LOAD_DEVICE_PROCEDURE(vkCmdNextSubpass);
-    cmdEndRenderPass = LOAD_DEVICE_PROCEDURE(vkCmdEndRenderPass);
     cmdExecuteCommands = LOAD_DEVICE_PROCEDURE(vkCmdExecuteCommands);
+    cmdBeginRendering = LOAD_DEVICE_PROCEDURE(vkCmdBeginRendering);
+    cmdEndRendering = LOAD_DEVICE_PROCEDURE(vkCmdEndRendering);
 
     cmdBuildAccelerationStructuresKHR = LOAD_DEVICE_EXT_PROCEDURE(vkCmdBuildAccelerationStructuresKHR);
     cmdBuildAccelerationStructuresIndirectKHR = LOAD_DEVICE_EXT_PROCEDURE(vkCmdBuildAccelerationStructuresIndirectKHR);

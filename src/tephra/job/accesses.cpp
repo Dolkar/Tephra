@@ -7,7 +7,6 @@ VkImageLayout vkGetImageLayoutForDescriptor(DescriptorType descriptorType, bool 
     switch (descriptorType) {
     case DescriptorType::CombinedImageSampler:
     case DescriptorType::SampledImage:
-    case DescriptorType::InputAttachment:
         return aliasStorageImage ? VK_IMAGE_LAYOUT_GENERAL : VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
     case DescriptorType::StorageImage:
         return VK_IMAGE_LAYOUT_GENERAL;
@@ -279,38 +278,6 @@ VkImageLayout vkGetImageLayoutFromRenderAccess(RenderAccessMask renderMask) {
 
     TEPHRA_ASSERTD(false, "Invalid render access for an image resource");
     return VK_IMAGE_LAYOUT_UNDEFINED;
-}
-
-void convertAttachmentAccessToVkAccess(
-    AttachmentBindPointType bindPointType,
-    bool isReadOnly,
-    VkPipelineStageFlags* stageMask,
-    VkAccessFlags* accessMask) {
-    switch (bindPointType) {
-    case AttachmentBindPointType::ResolveFromColor:
-    case AttachmentBindPointType::Color:
-        *stageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-        if (isReadOnly)
-            *accessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT;
-        else
-            *accessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-        break;
-    case AttachmentBindPointType::Input:
-        *stageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
-        *accessMask = VK_ACCESS_INPUT_ATTACHMENT_READ_BIT;
-        break;
-    case AttachmentBindPointType::DepthStencil:
-        *stageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
-        if (isReadOnly)
-            *accessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
-        else
-            *accessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-        break;
-    default:
-        *stageMask = 0;
-        *accessMask = 0;
-        break;
-    }
 }
 
 // Calculates the intersection of two subresource ranges

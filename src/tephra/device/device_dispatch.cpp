@@ -167,25 +167,6 @@ PipelineLayout Device::createPipelineLayout(
     return pipelineLayout;
 }
 
-RenderPassLayout Device::createRenderPassLayout(
-    ArrayParameter<const AttachmentDescription> attachmentDescriptions,
-    ArrayParameter<const SubpassLayout> subpassLayouts,
-    const char* debugName) {
-    auto deviceImpl = static_cast<DeviceContainer*>(this);
-    TEPHRA_DEBUG_SET_CONTEXT(deviceImpl->getDebugTarget(), "createRenderPassLayout", debugName);
-
-    auto info = RenderPassTemplate(deviceImpl, attachmentDescriptions, subpassLayouts);
-    VkRenderPassHandle vkHandle = deviceImpl->getLogicalDevice()->createRenderPass(
-        view(info.attachmentInfos), view(info.subpassInfos), view(info.dependencyInfos));
-
-    auto renderPassLayout = RenderPassLayout(
-        vkMakeHandleLifeguard(vkHandle), std::make_unique<RenderPassTemplate>(std::move(info)));
-
-    deviceImpl->getLogicalDevice()->setObjectDebugName(renderPassLayout.vkGetTemplateRenderPassHandle(), debugName);
-
-    return std::move(renderPassLayout);
-}
-
 OwningPtr<DescriptorPool> Device::createDescriptorPool(const DescriptorPoolSetup& setup, const char* debugName) {
     auto deviceImpl = static_cast<DeviceContainer*>(this);
     TEPHRA_DEBUG_SET_CONTEXT(deviceImpl->getDebugTarget(), "createDescriptorPool", debugName);
@@ -440,20 +421,20 @@ JobSemaphore Device::enqueueJob(
 
     // Add the semaphores to the job data structure as well
     for (const auto& semaphore : waitJobSemaphores) {
-        jobData->waitJobSemaphores.push_back(semaphore);
+        jobData->semaphores.jobWaits.push_back(semaphore);
     }
     for (const auto& semaphore : waitExternalSemaphores) {
-        jobData->waitExternalSemaphores.push_back(semaphore);
+        jobData->semaphores.externalWaits.push_back(semaphore);
     }
     for (const auto& semaphore : signalExternalSemaphores) {
-        jobData->signalExternalSemaphores.push_back(semaphore);
+        jobData->semaphores.externalSignals.push_back(semaphore);
     }
 
     // Acquire new unique timestamp for the job that it will signal once complete
     JobSemaphore signalSemaphore;
     signalSemaphore.queue = queue;
     signalSemaphore.timestamp = deviceImpl->getTimelineManager()->trackNextTimestamp(queueIndex);
-    jobData->signalJobSemaphore = signalSemaphore;
+    jobData->semaphores.jobSignal = signalSemaphore;
 
     // Update the timeline manager to process its callbacks and free up some resources before allocating again
     deviceImpl->getTimelineManager()->update();
@@ -472,7 +453,11 @@ JobSemaphore Device::enqueueJob(
     return signalSemaphore;
 }
 
-void Device::submitQueuedJobs(const DeviceQueue& queue) {
+void Device::submitQueuedJobs(
+    const DeviceQueue& queue,
+    const JobSemaphore& lastJobToSubmit,
+    ArrayParameter<const JobSemaphore> waitJobSemaphores,
+    ArrayParameter<const ExternalSemaphore> waitExternalSemaphores) {
     auto deviceImpl = static_cast<DeviceContainer*>(this);
     TEPHRA_DEBUG_SET_CONTEXT(
         deviceImpl->getDebugTarget(), "submitQueuedJobs", deviceImpl->getQueueMap()->getQueueInfo(queue).name.c_str());
@@ -484,9 +469,17 @@ void Device::submitQueuedJobs(const DeviceQueue& queue) {
             reportDebugMessage(
                 DebugMessageSeverity::Error, DebugMessageType::Validation, "'queue' is an invalid DeviceQueue handle.");
         }
+
+        if (!lastJobToSubmit.isNull() && lastJobToSubmit.queue != queue) {
+            reportDebugMessage(
+                DebugMessageSeverity::Error,
+                DebugMessageType::Validation,
+                "The 'lastJobToSubmit' semaphore belongs to a job that was enqueued to a different queue than the one "
+                "identified by the 'queue' parameter.");
+        }
     }
 
-    deviceImpl->getQueueState(queueIndex)->submitQueuedJobs();
+    deviceImpl->getQueueState(queueIndex)->submitQueuedJobs(lastJobToSubmit, waitJobSemaphores, waitExternalSemaphores);
 }
 
 void Device::submitPresentImagesKHR(
@@ -731,8 +724,6 @@ template Lifeguard<VkImageViewHandle> Device::vkMakeHandleLifeguard(VkImageViewH
 template Lifeguard<VkSamplerHandle> Device::vkMakeHandleLifeguard(VkSamplerHandle vkHandle);
 template Lifeguard<VkDescriptorPoolHandle> Device::vkMakeHandleLifeguard(VkDescriptorPoolHandle vkHandle);
 template Lifeguard<VkPipelineHandle> Device::vkMakeHandleLifeguard(VkPipelineHandle vkHandle);
-template Lifeguard<VkRenderPassHandle> Device::vkMakeHandleLifeguard(VkRenderPassHandle vkHandle);
-template Lifeguard<VkFramebufferHandle> Device::vkMakeHandleLifeguard(VkFramebufferHandle vkHandle);
 template Lifeguard<VkSwapchainHandleKHR> Device::vkMakeHandleLifeguard(VkSwapchainHandleKHR vkHandle);
 template Lifeguard<VkSemaphoreHandle> Device::vkMakeHandleLifeguard(VkSemaphoreHandle vkHandle);
 

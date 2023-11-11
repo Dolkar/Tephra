@@ -239,17 +239,6 @@ void Instance::listPhysicalDevices() {
             continue;
         }
 
-        const auto& vk12Features = device.vkQueryFeatures<VkPhysicalDeviceVulkan12Features>();
-        if (vk12Features.timelineSemaphore == VK_FALSE) {
-            reportDebugMessage(
-                DebugMessageSeverity::Warning,
-                DebugMessageType::General,
-                "Physical device '",
-                device.name,
-                "' is not available because it does not support the required timeline semaphore feature.");
-            continue;
-        }
-
         physicalDevices.push_back(std::move(device));
     }
 }

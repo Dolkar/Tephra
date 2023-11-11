@@ -90,10 +90,6 @@ public:
     PFN_vkDeviceWaitIdle deviceWaitIdle = nullptr;
     PFN_vkCreateShaderModule createShaderModule = nullptr;
     PFN_vkDestroyShaderModule destroyShaderModule = nullptr;
-    PFN_vkCreateRenderPass createRenderPass = nullptr;
-    PFN_vkDestroyRenderPass destroyRenderPass = nullptr;
-    PFN_vkCreateFramebuffer createFramebuffer = nullptr;
-    PFN_vkDestroyFramebuffer destroyFramebuffer = nullptr;
     PFN_vkCreateDescriptorSetLayout createDescriptorSetLayout = nullptr;
     PFN_vkDestroyDescriptorSetLayout destroyDescriptorSetLayout = nullptr;
     PFN_vkUpdateDescriptorSets updateDescriptorSets = nullptr;
@@ -224,10 +220,9 @@ public:
     PFN_vkCmdWriteTimestamp cmdWriteTimestamp = nullptr;
     PFN_vkCmdCopyQueryPoolResults cmdCopyQueryPoolResults = nullptr;
     PFN_vkCmdPushConstants cmdPushConstants = nullptr;
-    PFN_vkCmdBeginRenderPass cmdBeginRenderPass = nullptr;
-    PFN_vkCmdNextSubpass cmdNextSubpass = nullptr;
-    PFN_vkCmdEndRenderPass cmdEndRenderPass = nullptr;
     PFN_vkCmdExecuteCommands cmdExecuteCommands = nullptr;
+    PFN_vkCmdBeginRendering cmdBeginRendering = nullptr;
+    PFN_vkCmdEndRendering cmdEndRendering = nullptr;
 
     PFN_vkCmdBuildAccelerationStructuresKHR cmdBuildAccelerationStructuresKHR = nullptr;
     PFN_vkCmdBuildAccelerationStructuresIndirectKHR cmdBuildAccelerationStructuresIndirectKHR = nullptr;

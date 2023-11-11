@@ -315,23 +315,6 @@ void prepareBarriers(
             identifyCommandResourceAccesses(cmd, newBufferAccesses, newImageAccesses);
             processAccesses(cmdIndex, view(newBufferAccesses), view(newImageAccesses), barriers, queueSyncState);
             barriers.markExportedResourceUsage();
-
-            // Attachments get synchronized internally in Vulkan render passes, so we must overwrite the access state
-            // with the latest usage, similarly to ImportExternalImage
-            auto* data = getCommandData<JobRecordStorage::ExecuteRenderPassData>(cmd);
-            for (const AttachmentAccess& entry : data->pass->getAttachmentAccesses()) {
-                if (!entry.isSplitAccess())
-                    continue;
-
-                ImageAccessRange range = entry.image.getWholeRange();
-                VkImageHandle vkImageHandle = resolveImageAccess(entry.image, &range);
-
-                auto mapHit = queueSyncState->imageResourceMap.find(vkImageHandle);
-                if (mapHit != queueSyncState->imageResourceMap.end()) {
-                    mapHit->second.insertNewAccess(
-                        { vkImageHandle, range, entry.lastAccess, entry.lastLayout }, barriers.getBarrierCount(), true);
-                }
-            }
             break;
         }
         default: {
@@ -428,8 +411,8 @@ void compileJob(
         }
     }
 
-    TEPHRA_ASSERT(!jobData->signalJobSemaphore.isNull());
-    BarrierList barriers(jobData->signalJobSemaphore.timestamp);
+    TEPHRA_ASSERT(!jobData->semaphores.jobSignal.isNull());
+    BarrierList barriers(jobData->semaphores.jobSignal.timestamp);
     {
         // Setup barriers and handle incoming exports
         auto queueInfos = jobData->resourcePoolImpl->getParentDeviceImpl()->getQueueMap()->getQueueInfos();

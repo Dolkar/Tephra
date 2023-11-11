@@ -60,8 +60,6 @@ private:
     // The storage of destruction queues for each typed handle that needs to be queued
     // Order is important here - handle types will get destroyed from top to bottom
     using DestructionQueuesTuple = std::tuple<
-        DestructionQueue<VkFramebufferHandle>,
-        DestructionQueue<VkRenderPassHandle>,
         DestructionQueue<VkPipelineHandle>,
         DestructionQueue<VkDescriptorPoolHandle>,
         DestructionQueue<VkBufferViewHandle>,
@@ -96,8 +94,6 @@ void DeferredDestructor::destroyImmediately(T handle) {
         [ld](VkDescriptorUpdateTemplateHandle h) { ld->destroyDescriptorUpdateTemplate(h); },
         [ld](VkPipelineLayoutHandle h) { ld->destroyPipelineLayout(h); },
         [ld](VkPipelineCacheHandle h) { ld->destroyPipelineCache(h); },
-        [ld](VkFramebufferHandle h) { ld->destroyFramebuffer(h); },
-        [ld](VkRenderPassHandle h) { ld->destroyRenderPass(h); },
         [ld](VkPipelineHandle h) { ld->destroyPipeline(h); },
         [ld](VkDescriptorPoolHandle h) { ld->destroyDescriptorPool(h); },
         [ld](VkBufferViewHandle h) { ld->destroyBufferView(h); },

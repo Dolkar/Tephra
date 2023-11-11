@@ -1,13 +1,56 @@
 /** @page changelog Changelog
 
-@brief The history of changes of Tephra in the main branch is described here. Early development versions (0.x) have breaking
-changes in minor version increments. Once stable (1.x & onward), breaking changes will happen only on major version
-increments.
+@brief The history of changes of Tephra in the main branch is described here. Early development versions (0.x) have
+breaking changes in minor version increments. Once stable (1.x & onward), breaking changes will happen only on major
+version increments.
 
 @tableofcontents
 
-@section v0-1 In-dev version 0.1
+@section v0-2-1 In-dev version 0.2.1
+Released 2023-11-08
+- Added optional parameters to tp::Device::submitQueuedJobs to allow inserting additional wait operations that will
+  be done before any of the enqueued jobs will be executed on the device. This allows for waiting on workloads that
+  may be determined to be needed during the recording phase of a job, after it has already been enqueued.
+- Removed the requirement to finish recording of all tp::RenderList and tp::ComputeList in a render or compute pass,
+  respectively.
+
+@section v0-2-0 In-dev version 0.2.0
+Released 2023-10-25
+- Switched to using Vulkan's [dynamic rendering](https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VK_KHR_dynamic_rendering.html)
+  feature, replacing Vulkan render passes. Tephra's render passes remain as a concept, but received a significant
+  change and are closer to Tephra's compute passes now.
+- Introduced multi-view rendering functionality as a part of this switch.
+- Added tp::ColorAttachment, tp::DepthStencilAttachment and tp::ResolveMode.
+- Added tp::GraphicsPipelineSetup::setDepthStencilAttachment, tp::GraphicsPipelineSetup::setColorAttachments
+  and tp::GraphicsPipelineSetup::setMultiViewMask.
+
+@subsection v0-2-0-breaking Breaking changes
+@m_class{m-note m-warning}
+
+@parblock
+- Bumped up the minimum required Vulkan API version to 1.3
+- Removed tp::AttachmentBindPoint, tp::AttachmentBinding, tp::SubpassDependency, tp::SubpassLayout,
+  tp::AttachmentDescription, tp::AttachmentBindPointType, tp::RenderPassLayout and tp::RenderPassAttachment.
+- Removed tp::MultisampleLevel::Undefined and tp::DescriptorType::InputAttachment enum values.
+- Removed tp::Device::createRenderPassLayout.
+- Removed tp::GraphicsPipelineSetup::setRenderPassLayout.
+- Changed tp::GraphicsPipelineSetup constructor parameters. It no longer accepts a render pass layout and subpass
+  index.
+- Removed tp::RenderPassSetup structure's layout and attachments fields. Added depthStencilAttachment,
+  colorAttachments and viewMask fields instead. Changed the structure's constructors accordingly.
+- Changed tp::Job::cmdExecuteRenderPass parameters. It now accepts a single recording variant instead of one
+  per subpass.
+@endparblock
+
+@section v0-1-1 In-dev version 0.1.1
+Released 2023-10-23
+- Allowed limited asynchronous enqueue and submit to the same device queue.
+    - Added `lastJobToSubmit` parameter to tp::Device::submitQueuedJobs to be able to specify a partial submit operation.
+- Fixed several bugs in the job-local image allocator.
+    - Unused images now don't get allocated at all.
+
+@section v0-1-0 In-dev version 0.1.0
 Released 2023-07-15
-- Initial release on GitHub
+- Initial release on GitHub.
 
 **/

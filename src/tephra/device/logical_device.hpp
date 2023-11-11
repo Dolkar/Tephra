@@ -57,22 +57,6 @@ public:
 
     void destroyShaderModule(VkShaderModuleHandle vkShaderModuleHandle) noexcept;
 
-    VkRenderPassHandle createRenderPass(
-        ArrayParameter<const VkAttachmentDescription> attachments,
-        ArrayParameter<const VkSubpassDescription> subpasses,
-        ArrayParameter<const VkSubpassDependency> dependencies);
-
-    void destroyRenderPass(VkRenderPassHandle vkRenderPassHandle) noexcept;
-
-    VkFramebufferHandle createFramebuffer(
-        VkRenderPassHandle vkRenderPassHandle,
-        ArrayParameter<const VkImageViewHandle> attachments,
-        uint32_t width,
-        uint32_t height,
-        uint32_t layers);
-
-    void destroyFramebuffer(VkFramebufferHandle vkFramebufferHandle) noexcept;
-
     VkDescriptorSetLayoutHandle createDescriptorSetLayout(ArrayParameter<const DescriptorBinding> descriptorBindings);
 
     void destroyDescriptorSetLayout(VkDescriptorSetLayoutHandle vkDescriptorSetLayoutHandle) noexcept;

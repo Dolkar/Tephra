@@ -15,9 +15,9 @@ enum class FormatUsage : uint32_t {
     SampledImage = 1 << 0,
     /// Corresponds to usage through tp::DescriptorType::StorageImage.
     StorageImage = 1 << 1,
-    /// Corresponds to usage through tp::AttachmentBindPointType::Color or tp::AttachmentBindPointType::Input.
+    /// Corresponds to usage through tp::ColorAttachment.
     ColorAttachment = 1 << 2,
-    /// Corresponds to usage through tp::AttachmentBindPointType::DepthStencil.
+    /// Corresponds to usage through tp::DepthStencilAttachment.
     DepthStencilAttachment = 1 << 3,
     /// Corresponds to usage through tp::DescriptorType::TexelBuffer.
     TexelBuffer = 1 << 4,

@@ -17,9 +17,17 @@ void QueueState::enqueueJob(Job job) {
     JobResourcePoolContainer::allocateJobResources(job);
 
     JobData* jobData = JobResourcePoolContainer::getJobData(job);
-    broadcastResourceExports(jobData->record, jobData->signalJobSemaphore);
+    broadcastResourceExports(jobData->record, jobData->semaphores.jobSignal);
 
-    queuedJobs.push_back(std::move(job));
+    {
+        std::lock_guard<Mutex> mutexLock(queuedJobsMutex);
+        TEPHRA_ASSERT(
+            queuedJobs.empty() ||
+            jobData->semaphores.jobSignal.timestamp >
+                JobResourcePoolContainer::getJobData(queuedJobs.back())->semaphores.jobSignal.timestamp);
+
+        queuedJobs.push_back(std::move(job));
+    }
 }
 
 void QueueState::forgetResource(VkBufferHandle vkBufferHandle) {
@@ -32,19 +40,66 @@ void QueueState::forgetResource(VkImageHandle vkImageHandle) {
     syncState->awaitingImageForgets.push_back(vkImageHandle);
 }
 
-void QueueState::submitQueuedJobs() {
-    if (queuedJobs.empty()) {
+void QueueState::submitQueuedJobs(
+    const JobSemaphore& lastJobToSubmit,
+    ArrayParameter<const JobSemaphore> waitJobSemaphores,
+    ArrayParameter<const ExternalSemaphore> waitExternalSemaphores) {
+    // Gather jobs we want to submit
+    ScratchVector<Job*> jobsToSubmit;
+    {
+        std::lock_guard<Mutex> mutexLock(queuedJobsMutex);
+
+        for (Job& job : queuedJobs) {
+            JobData* jobData = JobResourcePoolContainer::getJobData(job);
+
+            if (!lastJobToSubmit.isNull() && jobData->semaphores.jobSignal.timestamp > lastJobToSubmit.timestamp) {
+                break;
+            }
+
+            jobsToSubmit.push_back(&job);
+        }
+    }
+
+    // Include any submit wait semaphores, ideally as part of the first job
+    if (!jobsToSubmit.empty()) {
+        JobSemaphoreStorage& firstSemaphores = JobResourcePoolContainer::getJobData(*jobsToSubmit[0])->semaphores;
+
+        firstSemaphores.insertWaits(view(queuedSemaphoreStorage.jobWaits), view(queuedSemaphoreStorage.externalWaits));
+        queuedSemaphoreStorage.clear();
+
+        firstSemaphores.insertWaits(waitJobSemaphores, waitExternalSemaphores);
+    } else {
+        // Otherwise we need to keep them around for the next submit
+        queuedSemaphoreStorage.insertWaits(waitJobSemaphores, waitExternalSemaphores);
         return;
     }
-    consumeAwaitingForgets();
 
+    // Compile and submit jobs outside the lock
+    consumeAwaitingForgets();
+    submitJobs(view(jobsToSubmit));
+
+    {
+        std::lock_guard<Mutex> mutexLock(queuedJobsMutex);
+        for (Job* job : jobsToSubmit) {
+            TEPHRA_ASSERT(!queuedJobs.empty());
+            TEPHRA_ASSERT(job == &queuedJobs.front());
+
+            JobResourcePoolContainer::queueReleaseSubmittedJob(std::move(*job));
+            queuedJobs.pop_front();
+        }
+    }
+
+    // TODO: Check as validation perf warning if any resource has too many distinct accesses
+}
+
+void QueueState::submitJobs(ArrayView<Job*> jobs) {
     // Set up for job compilation
     const QueueInfo& queueInfo = deviceImpl->getQueueMap()->getQueueInfos()[queueIndex];
     CommandPool* commandPool = deviceImpl->getCommandPoolPool()->acquirePool(
         queueInfo.identifier.type, queueInfo.name.c_str());
 
     SubmitBatch submitBatch;
-    submitBatch.submitEntries.reserve(queuedJobs.size());
+    submitBatch.submitEntries.reserve(jobs.size());
 
     const auto& vkiCommands = deviceImpl->getCommandPoolPool()->getVkiCommands();
     PrimaryBufferRecorder recorder = PrimaryBufferRecorder(
@@ -58,15 +113,15 @@ void QueueState::submitQueuedJobs() {
 
     // Compile queued jobs into vulkan commands while building up submit information
     std::size_t startJobIndex = 0;
-    while (startJobIndex < queuedJobs.size()) {
+    while (startJobIndex < jobs.size()) {
         // Process as many jobs as we can in the same submit
         std::size_t endJobIndex = startJobIndex + 1;
-        while (endJobIndex < queuedJobs.size()) {
-            Job& job = queuedJobs[endJobIndex];
-            JobData* jobData = JobResourcePoolContainer::getJobData(job);
+        while (endJobIndex < jobs.size()) {
+            Job* job = jobs[endJobIndex];
+            JobData* jobData = JobResourcePoolContainer::getJobData(*job);
 
             // Putting this in the same submit would cause the previous jobs to wait, too
-            bool hasWaits = !jobData->waitJobSemaphores.empty() || !jobData->waitExternalSemaphores.empty();
+            bool hasWaits = !jobData->semaphores.jobWaits.empty() || !jobData->semaphores.externalWaits.empty();
             // Jobs always signal a semaphore, but if it's flagged as small, assume it won't significantly delay it
             if (!jobData->flags.contains(tp::JobFlag::Small) || hasWaits)
                 break;
@@ -84,10 +139,10 @@ void QueueState::submitQueuedJobs() {
             JobData* jobData = JobResourcePoolContainer::getJobData(job);
 
             // Set up semaphores
-            resolveSemaphores(jobData, submitBatch);
+            resolveSemaphores(jobData->semaphores, submitBatch);
 
             incomingResourceExports.clear();
-            queryIncomingExports(jobData, incomingResourceExports);
+            queryIncomingExports(view(jobData->semaphores.jobWaits), incomingResourceExports);
 
             // Compile the job to Vulkan command buffers
             compileJob(compilationContext, job, view(incomingResourceExports));
@@ -111,13 +166,6 @@ void QueueState::submitQueuedJobs() {
     // Queue the release of the primary command pool once the jobs finish
     deviceImpl->getTimelineManager()->addCleanupCallback(
         [=]() { deviceImpl->getCommandPoolPool()->releasePool(commandPool); });
-
-    while (!queuedJobs.empty()) {
-        JobResourcePoolContainer::queueReleaseSubmittedJob(std::move(queuedJobs.front()));
-        queuedJobs.pop_front();
-    }
-
-    // TODO: Check as validation perf warning if any resource has too many distinct accesses
 }
 
 void QueueState::broadcastResourceExports(const JobRecordStorage& jobRecord, const JobSemaphore& srcSemaphore) {
@@ -163,7 +211,7 @@ void QueueState::broadcastResourceExports(const JobRecordStorage& jobRecord, con
 }
 
 void QueueState::queryIncomingExports(
-    const JobData* jobData,
+    ArrayParameter<const JobSemaphore> waitJobSemaphores,
     ScratchVector<CrossQueueSync::ExportEntry>& incomingExports) {
     ScratchVector<uint64_t> queueDstTimestamps(deviceImpl->getQueueMap()->getQueueInfos().size());
 
@@ -173,7 +221,7 @@ void QueueState::queryIncomingExports(
     }
 
     // Set explicitly waited timestamps
-    for (const JobSemaphore& jobSemaphore : jobData->waitJobSemaphores) {
+    for (const JobSemaphore& jobSemaphore : waitJobSemaphores) {
         uint32_t semaphoreQueueIndex = deviceImpl->getQueueMap()->getQueueUniqueIndex(jobSemaphore.queue);
         queueDstTimestamps[semaphoreQueueIndex] = tp::max(
             queueDstTimestamps[semaphoreQueueIndex], jobSemaphore.timestamp);
@@ -197,14 +245,14 @@ void QueueState::queryIncomingExports(
     deviceImpl->getCrossQueueSync()->queryIncomingExports(view(periods), dstQueueFamilyIndex, incomingExports);
 }
 
-void QueueState::resolveSemaphores(const JobData* jobData, SubmitBatch& submitBatch) const {
+void QueueState::resolveSemaphores(const JobSemaphoreStorage& semaphores, SubmitBatch& submitBatch) const {
     // Reduce to one job semaphore per queue
     ScratchVector<uint32_t> queueIndices;
-    queueIndices.reserve(jobData->waitJobSemaphores.size());
+    queueIndices.reserve(semaphores.jobWaits.size());
     ScratchVector<uint64_t> queueTimestamps;
-    queueTimestamps.reserve(jobData->waitJobSemaphores.size());
+    queueTimestamps.reserve(semaphores.jobWaits.size());
 
-    for (const JobSemaphore& jobSemaphore : jobData->waitJobSemaphores) {
+    for (const JobSemaphore& jobSemaphore : semaphores.jobWaits) {
         uint32_t semaphoreQueueIndex = deviceImpl->getQueueMap()->getQueueUniqueIndex(jobSemaphore.queue);
 
         bool added = false;
@@ -233,20 +281,20 @@ void QueueState::resolveSemaphores(const JobData* jobData, SubmitBatch& submitBa
         submitBatch.vkWaitStageFlags.push_back(VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT);
     }
 
-    for (const ExternalSemaphore& externalSemaphore : jobData->waitExternalSemaphores) {
+    for (const ExternalSemaphore& externalSemaphore : semaphores.externalWaits) {
         submitBatch.vkWaitSemaphores.push_back(externalSemaphore.vkSemaphoreHandle);
         submitBatch.waitSemaphoreValues.push_back(externalSemaphore.timestamp);
         submitBatch.vkWaitStageFlags.push_back(VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT);
     }
 
     // Add the one internal signal semaphore
-    TEPHRA_ASSERT(queueIndex == deviceImpl->getQueueMap()->getQueueUniqueIndex(jobData->signalJobSemaphore.queue));
+    TEPHRA_ASSERT(queueIndex == deviceImpl->getQueueMap()->getQueueUniqueIndex(semaphores.jobSignal.queue));
 
     VkSemaphoreHandle vkTimelineSemaphore = deviceImpl->getTimelineManager()->vkGetQueueSemaphoreHandle(queueIndex);
     submitBatch.vkSignalSemaphores.push_back(vkTimelineSemaphore);
-    submitBatch.signalSemaphoreValues.push_back(jobData->signalJobSemaphore.timestamp);
+    submitBatch.signalSemaphoreValues.push_back(semaphores.jobSignal.timestamp);
 
-    for (const ExternalSemaphore& externalSemaphore : jobData->signalExternalSemaphores) {
+    for (const ExternalSemaphore& externalSemaphore : semaphores.externalSignals) {
         submitBatch.vkSignalSemaphores.push_back(externalSemaphore.vkSemaphoreHandle);
         submitBatch.signalSemaphoreValues.push_back(externalSemaphore.timestamp);
     }

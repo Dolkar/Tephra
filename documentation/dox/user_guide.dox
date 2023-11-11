@@ -207,7 +207,6 @@ the symbols next to their names in [] and explained below.
         - tp::Pipeline
         - tp::PipelineCache
         - tp::PipelineLayout
-        - tp::RenderPassLayout [E]
         - tp::Sampler
         - tp::ShaderModule
         - tp::Swapchain [E]
@@ -255,10 +254,11 @@ be accessed by multiple threads if both of those acceses are read-only, such as 
 as a const reference. Recording a command like tp::Job::cmdClearImage still counts as a read-only access for the image,
 since the write operation takes place later on the gpu, not in the thread itself.
 
-For the sake of convenience, tp::Device is made thread-safe, too. The exception are device methods that operate on
-tp::DeviceQueue. Only one thread may enqueue or submit to a single queue at a time. Further, tp::PipelineCache is also
-thread-safe by extension of the Vulkan @vksymbol{VkPipelineCache} being thread-safe, to simplify multithreaded pipeline
-compilation.
+For the sake of convenience, the methods of tp::Device are designed to be thread-safe as well, but beware that objects
+passed to the methods as parameters, such as tp::DeviceQueue or tp::Swapchain, in general aren't safe to be used like
+that from multiple threads simultaneously.
+Further, tp::PipelineCache is also thread-safe by extension of the Vulkan @vksymbol{VkPipelineCache} being thread-safe,
+to simplify multithreaded pipeline compilation.
 
 Generally, pool objects like tp::JobResourcePool, tp::DescriptorPool and tp::CommandPool not only aren't thread-safe by
 themselves, but also objects allocated from them must collectively only be modified by a single thread at a time. The
@@ -973,121 +973,120 @@ private:
 @subsection ug-submits-render-passes Render Passes
 
 Render passes are the graphics counterpart of compute passes. As mentioned before, a render pass is a collection
-of rendering commands that share the same set of attachments, aka render targets. Before you can execute a render pass
-inside a tp::Job, you must first create a tp::RenderPassLayout object through tp::Device::createRenderPassLayout. This
-object distills the core characteristics of render passes that participate in the compilation of graphics pipelines.
+of consecutive rendering commands that share the same set of attachments, aka render targets. You can draw thousands
+of objects and millions of triangles within a single render pass, for example when drawing the main camera's view to
+a color and depth buffer, or even just one or two triangles for a full-screen effect.
 
-The render pass layout creation takes as its first parameter a list of tp::AttachmentDescription structures. They
-describe the format and optionally the multisample level of the attachments to be used by the render passes. The order
-of the attachments can be arbitrary, but they will get referenced by their index moving forward.
+To record a render pass, use the tp::Job::cmdExecuteRenderPass command. It asks for a tp::RenderPassSetup structure
+that describes what images are to be used as attachments for the render pass, as well as how the images should be treated
+at the start and end of the pass. Render passes are able to clear and resolve attachments as part of their execution,
+generally more efficiently than separate commands like tp::Job::cmdClearImage and tp::Job::cmdResolveImage.
 
-The next parameter is a list of subpass layouts. A subpass is what actually assigns the attachments to meaningful bind
-points as used by the shaders. For simplicity, you can define all your render passes with only a single subpass.
-Multiple subpasses within a render pass are useful for mobile devices and tiled architectures in general, which may be
-able to execute such a combined render pass more efficiently. The tp::SubpassLayout setup structure can be constructed
-with a list of tp::AttachmentBinding structs that reference and bind the attachments to the various bind points. The
-first parameter is a tp::AttachmentBindPoint that identifies a bind point by the type and number. You can use its static
-factory methods, for example @code{.cpp} tp::AttachmentBindPoint::Color(0) @endcode to bind to the first color
-attachment binding. The second parameter is then the index that identifies the attachment that will be assigned to the
-binding. Attachments can also be used to automatically resolve a multisampled render target.
-@code{.cpp} tp::AttachmentBindPoint::@endcode @code{.cpp}ResolveFromColor(index) @endcode will ensure that after the
-subpass ends, the color attachment with the given index in the same subpass will be resolved to the image bound to the
-resolve attachment.
+The tp::DepthStencilAttachment and tp::ColorAttachment structures describe a depth / stencil attachment and a color
+attachment for use in a render pass, respectively. Besides the actual image view that will be used as the attachment,
+they also have you specify the load and store operations for the image that will take place at the start and end of the
+render pass. The tp::AttachmentLoadOp determines whether the contents of the image view should cleared to some color, be
+loaded to preserve its previous contents, or discarded with `DontCare`. Discarding or clearing are likely going to be the
+fastest options, but should only be used if you know you won't need the existing contents. Similarly, the
+tp::AttachmentStoreOp specifies whether the contents need to be accessible after the render pass ends, or if they should
+also be discarded with `DontCare`, which can be useful, for example, for a depth buffer that is used just for the depth
+tests and its contents aren't needed afterwards. If you selected the tp::AttachmentLoadOp::Clear load operation, you also
+need to provide a valid clear value.
 
-With a tp::RenderPassLayout ready, we can record the tp::Job::cmdExecuteRenderPass command. The tp::RenderPassSetup
-structure takes a pointer to the layout and a list of tp::RenderPassAttachment structs that assign an actual image view
-to each attachment. It also has you specify the load and store operations for the attachment that take place at the start and
-end of the render pass. The tp::AttachmentLoadOp determines whether the contents of the image view should cleared to
-some color, be loaded to preserve what was there previously, or discarded with `DontCare`. Similarly, the
-tp::AttachmentStoreOp specifies whether the contents need to be accessible after the render pass ends, or also discarded
-with `DontCare`, for example when a depth buffer is to be used just for depth tests and its contents won't be needed
-afterwards. The last parameter of tp::RenderPassAttachment has you specify the clear value, if you used a `Clear` load op.
-Using attachment load ops is the fastest and also a convenient way of clearing your images at the start of rendering,
-just like resolve attachments are useful for resolving multisampled renders.
+tp::DepthStencilAttachment has some additional configuration options compared to color attachments. You can promise that
+the depth / stencil attachment will be used as read-only. That can be useful not just as an optimization, but it can also
+allow you to safely read that image as a texture at the same time. Since such images may encompass both depth and stencil
+aspects, the setup structure optionally lets you define load ops, store ops and read-only flags for the depth and stencil
+separately.
 
-The tp::RenderPassSetup structure also takes a list of tp::BufferRenderAccess and tp::ImageRenderAccess, which,
-similarly to the compute pass, allow you to specify additional unexported resources accessed directly from the shaders.
-Next, it optionally takes a render area, through which you can promise to the implementation that you will only render
-to a smaller rectangular area of the attachments. Otherwise, the entire extent of the views is used. For multi-view
-rendering support, there is also the option to render to more than one layer.
+The attachment setup structures are also the place to request multisampled attachments to be resolved. The `resolveImage`
+parameter can be set to another image with identical parameters, just without multisampling, to resolve the multisampled
+attachment to it at the end of the render pass. tp::ResolveMode then allows you to specify what algorithm should be used
+to resolve it.
 
-At this point, the recording is similar to compute passes and was described in the previous section. The main
-differences are that we are using tp::RenderList instead of a tp::ComputeList, and that you must record each subpass
-separately. tp::RenderList offers various drawing commands, as well as more stateful commands besides the usual pipeline
-and descriptor set binding. Notably, before any draws are issued, the viewport and scissor regions must be set with
-tp::RenderList::cmdSetViewport and tp::RenderList::cmdSetScissor. It is likely you will also need to bind an index and
-a vertex buffer, for which there are commands, too. If your graphics pipeline has any dynamic state, there are functions
-for setting that dynamically into the render list as well.
+The tp::RenderPassSetup structure, besides a tp::DepthStencilAttachment and a list of tp::ColorAttachment structures,
+also takes a list of tp::BufferRenderAccess and tp::ImageRenderAccess, which, similarly to the compute pass, allow you to
+specify additional unexported resources that will be accessed directly from the shaders. Next, it optionally takes a
+render area, through which you can promise to the implementation that you will only render to a smaller rectangular area
+of the attachments. By default, the entire extent of the views is used, but in the case of a render pass with no
+attachments, the render area must be defined. For multi-view rendering support, there is also the option to render to
+more than one layer, which can be selected through shader-specific methods, or have the entire geometry be duplicated to
+multiple layers by setting the `viewMask` parameter to a non-zero value.
 
-An important note to reiterate is that each render pass only renders to a fixed render area. For something like a bloom
-effect, which may render to progressively smaller render targets, each render target must be rendered to with a separate
-render pass.
+Recording commands is similar to compute passes and was described in the previous section. The main differences is that
+we are using tp::RenderList instead of a tp::ComputeList. tp::RenderList offers various drawing commands, as well as
+additional stateful commands besides the usual pipeline and descriptor set binding. Notably, before any draws are issued,
+the viewport and scissor regions must be set with tp::RenderList::cmdSetViewport and tp::RenderList::cmdSetScissor.
+It is likely you will also need to bind an index and a vertex buffer, for which there are commands, too. If your graphics
+pipeline has any dynamic state, there are functions for setting that dynamically into the render list as well. All this
+state is local to the render list. Every list starts with its state undefined and needs to have it set up separately.
 
 @code{.cpp}
 // Showcase of a simple render pass with a multisampled color and depth buffer with resolve
 class RenderPassExample {
 public:
-    RenderPassExample(tp::Device* device, tp::MultisampleLevel multisampleLevel)
+    explicit RenderPassExample(tp::MultisampleLevel multisampleLevel)
         : multisampleLevel(multisampleLevel) {
-        // Create the render pass layout, starting by specifying the attachments
-        tp::AttachmentDescription attachments[] = {
-            { tp::Format::DEPTH32_D32_SFLOAT, multisampleLevel },
-            { tp::Format::COL32_B8G8R8A8_UNORM, multisampleLevel },
-            // Extra attachment for the resolved color:
-            { tp::Format::COL32_B8G8R8A8_UNORM, tp::MultisampleLevel::x1 },
-        };
+        // Assume we're always dealing with multisampling in this example
+        assert(multisampleLevel != tp::MultisampleLevel::x1);
+    }
 
-        // Then bind those attachments to slots. With only one subpass, this is straightforward
-        tp::AttachmentBinding bindings[] = {
-            { tp::AttachmentBindPoint::DepthStencil(), 0 },
-            { tp::AttachmentBindPoint::Color(0), 1 },
-            { tp::AttachmentBindPoint::ResolveFromColor(0), 2 },
-        };
+    // Prepares a pipeline for use in this render pass
+    void setupPipeline(tp::GraphicsPipelineSetup& setup) {
+        // Set pipeline attachment formats and our multisample level
+        setup.setDepthStencilAttachment(depthFormat);
+        setup.setColorAttachments({ colorFormat });
 
-        auto subpassLayout = tp::SubpassLayout(tp::view(bindings), {});
-        renderPassLayout = device->createRenderPassLayout(tp::view(attachments), { subpassLayout });
+        setup.setMultisampling(multisampleLevel);
+
+        // We could also set other pipeline settings here that will be common to the render pass,
+        // like blending modes or multi-view rendering
     }
 
     // Adds the render pass to the job and allocates resources for it
     void setupPass(tp::Job& job, const tp::ImageView& resolvedImage) {
+        assert(resolvedImage.getFormat() == colorFormat);
+
         // Create the extra attachments as job-local images, see the next chapter for details
         auto imageSetup = tp::ImageSetup(tp::ImageType::Image2D, tp::ImageUsage::ColorAttachment,
-            tp::Format::COL32_B8G8R8A8_UNORM, resolvedImage.getExtent(), 1, 1, multisampleLevel);
+            colorFormat, resolvedImage.getExtent(), 1, 1, multisampleLevel);
         tp::ImageView colorImage = job.allocateLocalImage(imageSetup, "Multisampled color");
 
         imageSetup.usage = tp::ImageUsage::DepthStencilAttachment;
-        imageSetup.format = tp::Format::DEPTH32_D32_SFLOAT;
+        imageSetup.format = depthFormat;
         tp::ImageView depthImage = job.allocateLocalImage(imageSetup, "Multisampled depth");
 
         // Let's clear the images as part of the render pass
         tp::ClearValue clearColor = tp::ClearValue::ColorFloat(0.0f, 0.0f, 0.0f, 0.0f);
         tp::ClearValue clearDepth = tp::ClearValue::DepthStencil(1.0f, 0);
 
-        // Must provide the attachments in the same order as they were defined in the layout
-        tp::RenderPassAttachment attachments[] = {
-            // We clear the depth and color images, but we don't need the data after the render pass
-            { depthImage, tp::AttachmentLoadOp::Clear, tp::AttachmentStoreOp::DontCare, clearDepth },
-            { colorImage, tp::AttachmentLoadOp::Clear, tp::AttachmentStoreOp::DontCare, clearColor },
-            // Resolve image gets overwritten, so no load needed, but we want the resolved data
-            { resolvedImage, tp::AttachmentLoadOp::DontCare, tp::AttachmentStoreOp::Store}
-        };
+        // We clear the depth and color images, but we don't need the data after the render pass
+        auto depthAttachment = tp::DepthStencilAttachment(depthImage, false,
+            tp::AttachmentLoadOp::Clear, tp::AttachmentStoreOp::DontCare, clearDepth);
+        // We resolve the color attachment
+        auto colorAttachment = tp::ColorAttachment(colorImage,
+            tp::AttachmentLoadOp::Clear, tp::AttachmentStoreOp::DontCare, clearColor,
+            resolvedImage, tp::ResolveMode::Average);
 
         // Record the render pass, no additional non-attachment accesses to declare
-        auto renderPassSetup = tp::RenderPassSetup(&renderPassLayout, tp::view(attachments), {}, {});
+        auto renderPassSetup = tp::RenderPassSetup(
+            depthAttachment, tp::viewOne(colorAttachment), {}, {});
         // Record to a list this time, rather than using an inline callback
         job.cmdExecuteRenderPass(renderPassSetup, { tp::viewOne(renderList) });
-        // We need a command pool for that
+        // We'll need a command pool for that
         commandPool = job.createCommandPool();
     }
 
-    // Draws objects to the g-buffer subpass after setupPass gets called and the job is enqueued,
-    // but before its submitted
+    // Draws objects to the prepared renderList after setupPass gets called and the job is enqueued,
+    // but before it is submitted
     void drawObjects(const std::vector<Object>& objects, tp::Viewport viewport, tp::Rect2D scissor) {
         renderList.beginRecording(commandPool);
         renderList.cmdSetViewport({ viewport });
         renderList.cmdSetScissor({ scissor });
 
         for (const Object& object : objects) {
+            // Object's draw method here is responsible for binding pipelines compatible with the
+            // render pass (ones that called setupPipeline)
             object.Draw();
         }
 
@@ -1095,8 +1094,10 @@ public:
     }
 
 private:
+    static const tp::Format depthFormat = tp::Format::DEPTH32_D32_SFLOAT;
+    static const tp::Format colorFormat = tp::Format::COL32_B8G8R8A8_UNORM;
+
     tp::MultisampleLevel multisampleLevel;
-    tp::RenderPassLayout renderPassLayout;
     tp::CommandPool* commandPool;
     tp::RenderList renderList;
 };
@@ -1506,16 +1507,19 @@ another one gets bound.
 
 Graphics tp::Pipeline compilation works the same way as compute pipelines, but with more complexity and state to set.
 
-In the constructor, tp::GraphicsPipelineSetup accepts besides the pointer to a tp::PipelineLayout also a pointer to a
-tp::RenderPassLayout, which we've discussed in the @ref ug-submits-render-passes section, along with a subpass index.
-These define the fragment shader output interface and limit the pipeline to being executed only within render passes of
-the given layout.
-
-Speaking of shaders, the only required stage is the vertex shader stage. It, along with the often used fragment shader
-stage can also be provided in the constructor. Other stages can be set with tp::GraphicsPipelineSetup::setGeometryStage
+In the constructor, tp::GraphicsPipelineSetup also accepts a pointer to a tp::PipelineLayout object. The only required
+stage is the vertex shader stage. It, along with the often used fragment shader stage can also be provided in the
+constructor. Other stages can be set with tp::GraphicsPipelineSetup::setGeometryStage
 and tp::GraphicsPipelineSetup::setTessellationStages.
 
-Another commonly set property is an array of tp::VertexInputBinding describing the input interface of the vertex
+Graphics pipelines can only be bound and used within render passes that have attachment image formats matching those
+declared as part of the pipeline setup. You can do so with the tp::GraphicsPipelineSetup::setDepthStencilAttachment
+for the depth image and tp::GraphicsPipelineSetup::setColorAttachments for the color images. Both their number and
+format has to be the same as those of the image views that will be used for attachments in the render pass. This, along
+with other non-dynamic state of the graphics pipeline, means that you will likely end up with more than one pipeline
+for each shader stage combination.
+
+Another commonly changed state is an array of tp::VertexInputBinding describing the input interface of the vertex
 processing. One binding in the array corresponds to one vertex buffer bound at the same index. The structure contains a
 list of tp::VertexInputAttribute structs describing the layout of the attributes within this buffer and how they map to
 the attribute indices used in the shader. tp::VertexInputBinding also specifies whether the binding is to be consumed
@@ -1523,10 +1527,10 @@ per-vertex, or per-instance. They can be set trough tp::GraphicsPipelineSetup::s
 the input primitives, by default set to tp::PrimitiveTopology::TriangleList, can be changed with
 tp::GraphicsPipelineSetup::setTopology.
 
-There are many other configurable properties affecting all parts of the graphics pipeline. One of the more important
-ones is tp::GraphicsPipelineSetup::setDepthTest. By default, all depth operations are disabled. Setting `enable` to true
+There are many other configurable states affecting all parts of the graphics pipeline. One of the more important ones
+is tp::GraphicsPipelineSetup::setDepthTest. By default, all depth operations are disabled. Setting `enable` to true
 enables depth operations with the given depth test comparison operator. `enableWrite` also optionally enables depth
-writes. If depth operations are enabled, the used tp::RenderPassLayout must contain a depth attachment.
+writes. If depth (or stencil) operations are enabled, the pipeline setup must also describe a valid depth attachment.
 
 By default, face culling is also disabled. That can be changed by calling tp::GraphicsPipelineSetup::setCullMode, while
 also allowing you to specify which faces should be considered as front facing with
@@ -1554,10 +1558,13 @@ tp::ShaderModule fragmentShader = device->createShaderModule(tp::view(fragmentSh
 auto vertexShaderSetup = tp::ShaderStageSetup(&vertexShader, "main");
 auto fragmentShaderSetup = tp::ShaderStageSetup(&fragmentShader, "main");
 
-// Use already prepared pipeline layout and single-subpass render pass layout
-int subpassIndex = 0;
+// Use an already prepared pipeline layout
 auto pipelineSetup = tp::GraphicsPipelineSetup(
-    &pipelineLayout, &renderPassLayout, subpassIndex, vertexShaderSetup, fragmentShaderSetup);
+    &pipelineLayout, vertexShaderSetup, fragmentShaderSetup);
+
+// Set the formats of the attachments that will be used
+pipelineSetup.setDepthStencilAttachment(tp::Format::DEPTH32_D32_SFLOAT);
+pipelineSetup.setColorAttachments({ tp::Format::COL32_B8G8R8A8_UNORM });
 
 // Back face culling
 pipelineSetup.setCullMode(tp::CullModeFlag::BackFace);
@@ -1571,9 +1578,8 @@ auto alphaBlendState = tp::AttachmentBlendState(
 );
 pipelineSetup.setBlending(true, alphaBlendState);
 
-// Create a version with multisampling, which also needs a different render pass layout
+// Also create a version with multisampling
 tp::GraphicsPipelineSetup msPipelineSetup = pipelineSetup;
-msPipelineSetup.setRenderPassLayout(&msRenderPassLayout, subpassIndex);
 msPipelineSetup.setMultisampling(tp::MultisampleLevel::x4);
 
 device->compileGraphicsPipelines(
@@ -1746,6 +1752,7 @@ bool Window::drawFrame() {
     // We don't need the swapchain image's old contents. It's good practice to discard.
     renderJob.cmdDiscardContents(*acquiredImage.image);
 
+    // The render code should go here. For this example, just clear to magenta.
     renderJob.cmdClearImage(*acquiredImage.image, tp::ClearValue::ColorFloat(1.0f, 0.0f, 1.0f, 1.0f));
 
     // Finally export for present

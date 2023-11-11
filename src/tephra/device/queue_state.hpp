@@ -31,7 +31,10 @@ public:
     void forgetResource(VkBufferHandle vkBufferHandle);
     void forgetResource(VkImageHandle vkImageHandle);
 
-    void submitQueuedJobs();
+    void submitQueuedJobs(
+        const JobSemaphore& lastJobToSubmit,
+        ArrayParameter<const JobSemaphore> waitJobSemaphores,
+        ArrayParameter<const ExternalSemaphore> waitExternalSemaphores);
 
     TEPHRA_MAKE_NONCOPYABLE(QueueState);
     TEPHRA_MAKE_MOVABLE_DEFAULT(QueueState);
@@ -42,18 +45,27 @@ private:
     uint32_t queueIndex;
 
     std::deque<Job> queuedJobs;
+    // Mutex guarding against simulateneous enqueue and submit
+    Mutex queuedJobsMutex;
     std::unique_ptr<QueueSyncState> syncState;
-    // For each queue, stores the last timestamp that has been waited on
+    // For each (other) queue, stores the last timestamp that has been waited on
     std::vector<uint64_t> queueLastQueriedTimestamps;
+    // Submit semaphores we queued up for the next job
+    JobSemaphoreStorage queuedSemaphoreStorage;
+
+    // Compiles and submits the given jobs
+    void submitJobs(ArrayView<Job*> jobs);
 
     // Analyze cross-queue export commands in the job and broadcast them
     void broadcastResourceExports(const JobRecordStorage& jobRecord, const JobSemaphore& srcSemaphore);
 
     // Finds incoming resource exports from other queues
-    void queryIncomingExports(const JobData* jobData, ScratchVector<CrossQueueSync::ExportEntry>& incomingExports);
+    void queryIncomingExports(
+        ArrayParameter<const JobSemaphore> waitJobSemaphores,
+        ScratchVector<CrossQueueSync::ExportEntry>& incomingExports);
 
     // Translates semaphores to a Vulkan submit batch
-    void resolveSemaphores(const JobData* jobData, SubmitBatch& submitBatch) const;
+    void resolveSemaphores(const JobSemaphoreStorage& semaphores, SubmitBatch& submitBatch) const;
 
     // Handles forgotten resources
     void consumeAwaitingForgets();
