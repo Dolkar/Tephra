@@ -358,6 +358,7 @@ OwningPtr<AccelerationStructure> Device::allocateAccelerationStructure(
     const char* debugName) {
     auto deviceImpl = static_cast<DeviceContainer*>(this);
     TEPHRA_DEBUG_SET_CONTEXT(deviceImpl->getDebugTarget(), "allocateAccelerationStructure", debugName);
+    return {};
 }
 
 JobSemaphore Device::enqueueJob(

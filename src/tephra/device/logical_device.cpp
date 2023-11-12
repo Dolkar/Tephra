@@ -10,7 +10,7 @@ namespace tp {
 inline FunctionalityMask processExtensions(
     Instance* instance,
     VkFeatureMap& vkFeatureMap,
-    ScratchVector<const char* const>& vkExtensions) {
+    ScratchVector<const char*>& vkExtensions) {
     // Add own required features - these are guaranteed to be supported
     auto& vk12Features = vkFeatureMap.get<VkPhysicalDeviceVulkan12Features>();
     vk12Features.timelineSemaphore = VK_TRUE;
@@ -34,6 +34,8 @@ inline FunctionalityMask processExtensions(
         functionalityMask |= Functionality::MemoryBudgetEXT;
     if (vkFeatureMap.get<VkPhysicalDeviceVulkan12Features>().bufferDeviceAddress)
         functionalityMask |= Functionality::BufferDeviceAddress;
+
+    return functionalityMask;
 }
 
 LogicalDevice::LogicalDevice(Instance* instance, QueueMap* queueMap, const DeviceSetup& setup)
@@ -43,7 +45,7 @@ LogicalDevice::LogicalDevice(Instance* instance, QueueMap* queueMap, const Devic
     if (setup.vkFeatureMap != nullptr)
         vkFeatureMap = *setup.vkFeatureMap;
 
-    ScratchVector<const char* const> vkExtensions;
+    ScratchVector<const char*> vkExtensions;
     vkExtensions.insert(vkExtensions.begin(), setup.extensions.begin(), setup.extensions.end());
     auto& vk13Features = vkFeatureMap.get<VkPhysicalDeviceVulkan13Features>();
     vk13Features.dynamicRendering = VK_TRUE;
@@ -768,8 +770,6 @@ VkAccelerationStructureBuildSizesInfoKHR LogicalDevice::getAccelerationStructure
     const VkAccelerationStructureBuildGeometryInfoKHR& vkBuildInfo,
     const uint32_t* pMaxPrimitiveCounts) {
     // Unlike other functions, it is more convenient to create the structure elsewhere, so here we just wrap
-    VkAccelerationStructureBuildSizesInfoKHR sizes;
-
     // Our AS are always device-only
     VkAccelerationStructureBuildTypeKHR buildType = VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR;
 
