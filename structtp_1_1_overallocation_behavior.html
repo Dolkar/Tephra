@@ -120,7 +120,7 @@
                 </tr>
                 <tr>
                   <td>growFactor</td>
-                  <td>The factor applied to the total size of all allocations. Must be greater or equal to 0.</td>
+                  <td>The factor applied to the total size of all allocations. Must be greater or equal to 1.</td>
                 </tr>
                 <tr>
                   <td>minAllocationSize</td>
@@ -128,7 +128,7 @@
                 </tr>
               </tbody>
             </table>
-<p>Given a new allocation request, the size of the actual allocation to be made is calculated with the following formula: <code>max(floor(requestedSize * requestFactor), floor(poolSize * growFactor), minAllocationSize)</code> where <code>requestedSize</code> is the size of the requested allocation and <code>poolSize</code> is the sum of all allocations made by the pool.</p><aside class="m-note m-default"><h4>Remark</h4><p>The resulting size is just a hint and doesn&#x27;t have to be fulfilled exactly.</p></aside>
+<p>Given a new allocation request, the size of the actual allocation to be made is calculated with the following formula: <code>max(floor(requestedSize * requestFactor), floor(poolSize * (growFactor - 1.0)), minAllocationSize)</code> where <code>requestedSize</code> is the size of the requested allocation and <code>poolSize</code> is the sum of all allocations made by the pool.</p><aside class="m-note m-default"><h4>Remark</h4><p>The resulting size is just a hint and doesn&#x27;t have to be fulfilled exactly.</p></aside>
           </div></section>
           <section class="m-doc-details" id="a04d9f553ab2fd59c24abec4a5f4dc838"><div>
             <h3>
