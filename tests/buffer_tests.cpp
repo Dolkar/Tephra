@@ -50,19 +50,17 @@ public:
         {
             tp::HostMappedMemory writeAccess = buffer->mapForHostAccess(tp::MemoryAccess::WriteOnly);
             Assert::IsFalse(writeAccess.isNull());
-            uint8_t* byteWritePtr = writeAccess.getPtr<uint8_t*>();
+            uint8_t* byteWritePtr = writeAccess.getPtr<uint8_t>();
             memset(byteWritePtr, 0x33, buffer->getSize());
         }
 
         {
             tp::HostMappedMemory readAccess = buffer->mapForHostAccess(tp::MemoryAccess::ReadOnly);
             Assert::IsFalse(readAccess.isNull());
-            const uint8_t* byteReadPtr = readAccess.getPtr<const uint8_t*>();
-            const uint8_t* endPtr = byteReadPtr + buffer->getSize();
-
+            
             uint64_t sum = 0;
-            for (; byteReadPtr < endPtr; byteReadPtr++) {
-                sum += *byteReadPtr;
+            for (uint8_t byte : readAccess.getArrayView<uint8_t>()) {
+                sum += byte;
             }
 
             Assert::AreEqual(static_cast<uint64_t>(0x33 << 20), sum);
@@ -86,31 +84,31 @@ public:
 
         memset(refPtr, 0x00, reference.size());
 
-        std::srand(seed);
+        ctx.rand32.seed(seed);
         for (int i = 0; i < randomIters; i++) {
-            uint64_t viewSize = 1 + std::rand() % arraySize;
-            uint64_t viewOffset = (std::rand() % (arraySize - viewSize)) & offsetMask;
-            uint8_t writeValue = std::rand() & 0xff;
+            uint64_t viewSize = 1 + ctx.rand32() % arraySize;
+            uint64_t viewOffset = (ctx.rand32() % (arraySize - viewSize)) & offsetMask;
+            uint8_t writeValue = ctx.rand32() & 0xff;
             memset(refPtr + viewOffset, writeValue, viewSize);
         }
 
         // Then recreate it through Tephra buffer views
 
         tp::HostMappedMemory bufferMemory = buffer->mapForHostAccess(tp::MemoryAccess::ReadWrite);
-        uint8_t* byteBufferPtr = bufferMemory.getPtr<uint8_t*>();
+        uint8_t* byteBufferPtr = bufferMemory.getPtr<uint8_t>();
         memset(byteBufferPtr, 0x00, buffer->getSize());
 
-        std::srand(seed);
+        ctx.rand32.seed(seed);
         for (int i = 0; i < randomIters; i++) {
-            uint64_t viewSize = 1 + std::rand() % arraySize;
-            uint64_t viewOffset = (std::rand() % (arraySize - viewSize)) & offsetMask;
-            uint8_t writeValue = std::rand() & 0xff;
+            uint64_t viewSize = 1 + ctx.rand32() % arraySize;
+            uint64_t viewOffset = (ctx.rand32() % (arraySize - viewSize)) & offsetMask;
+            uint8_t writeValue = ctx.rand32() & 0xff;
 
             tp::BufferView bufView = buffer->getView(viewOffset, viewSize);
             Assert::AreEqual(viewSize, bufView.getSize());
 
             tp::HostMappedMemory writeAccess = bufView.mapForHostAccess(tp::MemoryAccess::WriteOnly);
-            uint8_t* byteWritePtr = writeAccess.getPtr<uint8_t*>();
+            uint8_t* byteWritePtr = writeAccess.getPtr<uint8_t>();
             memset(byteWritePtr, writeValue, bufView.getSize());
         }
 
@@ -294,7 +292,7 @@ public:
 
         Assert::IsFalse(memA.isNull());
         Assert::IsFalse(memB.isNull());
-        Assert::AreNotEqual(memA.getPtr<uint8_t*>(), memB.getPtr<uint8_t*>());
+        Assert::AreNotEqual(memA.getPtr<uint8_t>(), memB.getPtr<uint8_t>());
 
         // No trim expected
         uint64_t trimmedSize = ctx.noOverallocateCtx.jobResourcePool->trim();

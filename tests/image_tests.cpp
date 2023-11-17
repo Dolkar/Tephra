@@ -92,10 +92,10 @@ public:
 
         memset(refPtr, 0x00, reference.size());
 
-        std::srand(seed);
+        ctx.rand32.seed(seed);
         for (int i = 0; i < randomIters; i++) {
-            uint32_t viewOffset = std::rand() % (arrayCount - viewArrayCount);
-            uint8_t writeValue = std::rand() & 0xff;
+            uint32_t viewOffset = ctx.rand32() % (arrayCount - viewArrayCount);
+            uint8_t writeValue = ctx.rand32() & 0xff;
             memset(refPtr + viewOffset * arrayLevelSize, writeValue, viewArrayCount * arrayLevelSize);
         }
 
@@ -118,10 +118,10 @@ public:
             tp::BufferUsage::HostMapped | tp::BufferUsage::ImageTransfer);
         tp::BufferView stagingBuffer = job.allocatePreinitializedBuffer(stagingSetup, tp::MemoryPreference::Host);
 
-        std::srand(seed);
+        ctx.rand32.seed(seed);
         for (int i = 0; i < randomIters; i++) {
-            uint32_t viewOffset = std::rand() % (arrayCount - viewArrayCount);
-            uint8_t writeValue = std::rand() & 0xff;
+            uint32_t viewOffset = ctx.rand32() % (arrayCount - viewArrayCount);
+            uint8_t writeValue = ctx.rand32() & 0xff;
 
             // Data in staging buffer is laid out linearly, copy it randomly into the image layers
             auto viewSetup = tp::ImageViewSetup(
@@ -149,12 +149,12 @@ public:
 
         // Write data to the staging buffer
         tp::HostMappedMemory stagingMemory = stagingBuffer.mapForHostAccess(tp::MemoryAccess::WriteOnly);
-        uint8_t* byteBufferPtr = stagingMemory.getPtr<uint8_t*>();
+        uint8_t* byteBufferPtr = stagingMemory.getPtr<uint8_t>();
 
-        std::srand(seed);
+        ctx.rand32.seed(seed);
         for (int i = 0; i < randomIters; i++) {
-            uint32_t viewOffset = std::rand() % (arrayCount - viewArrayCount);
-            uint8_t writeValue = std::rand() & 0xff;
+            uint32_t viewOffset = ctx.rand32() % (arrayCount - viewArrayCount);
+            uint8_t writeValue = ctx.rand32() & 0xff;
 
             memset(byteBufferPtr + i * viewArrayCount * arrayLevelSize, writeValue, viewArrayCount * arrayLevelSize);
         }
@@ -164,7 +164,7 @@ public:
 
         // Check equivalence
         tp::HostMappedMemory readbackMemory = readbackBuffer->mapForHostAccess(tp::MemoryAccess::ReadOnly);
-        byteBufferPtr = readbackMemory.getPtr<uint8_t*>();
+        byteBufferPtr = readbackMemory.getPtr<uint8_t>();
 
         bool isEqual = std::equal(
             refPtr, refPtr + arrayCount * arrayLevelSize, byteBufferPtr, byteBufferPtr + arrayCount * arrayLevelSize);
@@ -428,7 +428,7 @@ public:
         std::vector<uint8_t> imageData = generateExampleImageData(imageSize);
 
         tp::HostMappedMemory uploadMemory = uploadBuffer.mapForHostAccess(tp::MemoryAccess::WriteOnly);
-        std::copy(imageData.begin(), imageData.end(), uploadMemory.getPtr<uint8_t*>());
+        std::copy(imageData.begin(), imageData.end(), uploadMemory.getPtr<uint8_t>());
 
         ctx.device->submitQueuedJobs(ctx.graphicsQueueCtx.queue);
 
@@ -436,7 +436,7 @@ public:
         ctx.device->waitForIdle();
 
         tp::HostMappedMemory readbackMemory = readbackBuffer->mapForHostAccess(tp::MemoryAccess::ReadOnly);
-        const uint8_t* readbackData = readbackMemory.getPtr<const uint8_t*>();
+        const uint8_t* readbackData = readbackMemory.getPtr<uint8_t>();
 
         // The average can be 127 or 128, permitting rounding errors
         Assert::IsTrue(readbackData[0] == 127 || readbackData[0] == 128);

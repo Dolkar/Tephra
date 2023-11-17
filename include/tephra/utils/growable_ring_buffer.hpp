@@ -122,7 +122,7 @@ namespace utils {
             tp::Device* device,
             tp::BufferUsageMask usage,
             tp::MemoryPreference memoryPreference,
-            tp::OverallocationBehavior overallocationBehavior = { 3.0f, 0.5f, 65536 },
+            tp::OverallocationBehavior overallocationBehavior = { 3.0f, 1.5f, 65536 },
             const char* debugName = nullptr);
 
         /// Allocate a tp::BufferView with the given size.

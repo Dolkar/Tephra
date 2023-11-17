@@ -175,7 +175,7 @@ void CubeExample::drawFrame() {
     // We can fill the uniform buffer now
     {
         tp::HostMappedMemory memory = uniformBuffer.mapForHostAccess(tp::MemoryAccess::WriteOnly);
-        fillUniformBufferData(memory.getPtr<vktexcube_vs_uniform*>());
+        fillUniformBufferData(memory.getPtr<vktexcube_vs_uniform>());
     }
 
     // Submit the queued jobs. At this point the commands in the job get compiled and the RenderList
@@ -242,7 +242,7 @@ void CubeExample::prepareTexture() {
     // Upload data to it
     {
         tp::HostMappedMemory memory = stagingBuffer.mapForHostAccess(tp::MemoryAccess::WriteOnly);
-        if (!loadLunarGTexture(memory.getPtr<uint8_t*>(), rowPitch, &extent.width, &extent.height)) {
+        if (!loadLunarGTexture(memory.getPtr<uint8_t>(), rowPitch, &extent.width, &extent.height)) {
             showErrorAndExit("Demo initialization failed", "Failed to load LunarG texture.");
         }
     }

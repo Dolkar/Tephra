@@ -1,11 +1,13 @@
 #pragma once
 
+#define NOMINMAX
 #include "CppUnitTest.h"
 #include <tephra/tephra.hpp>
 #include <tephra/utils/standard_report_handler.hpp>
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <random>
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
@@ -74,6 +76,7 @@ inline tp::ShaderModule loadShader(tp::Device* device, std::string path) {
     return device->createShaderModule(tp::view(shaderCode));
 }
 
+// Context for shared setup and handles for the purposes of integration tests
 struct TephraContext {
     struct QueueContext {
         tp::DeviceQueue queue;
@@ -135,17 +138,6 @@ struct TephraContext {
         tp::OverallocationBehavior noOverallocation = tp::OverallocationBehavior::Exact();
         noOverallocateCtx.jobResourcePool = device->createJobResourcePool(
             { noOverallocateCtx.queue, {}, noOverallocation, noOverallocation, noOverallocation });
-
-        ioComputeDescriptorSetLayout = device->createDescriptorSetLayout(
-            { tp::DescriptorBinding(0, tp::DescriptorType::TexelBuffer, tp::ShaderStage::Compute),
-              tp::DescriptorBinding(1, tp::DescriptorType::StorageTexelBuffer, tp::ShaderStage::Compute) });
-        ioComputePipelineLayout = device->createPipelineLayout({ &ioComputeDescriptorSetLayout });
-
-        tp::ShaderModule shaderModule = loadShader(device.get(), "square.spv");
-        auto pipelineSetup = tp::ComputePipelineSetup(&ioComputePipelineLayout, { &shaderModule, "main" });
-
-        tp::Pipeline* compiledPipelines[1] = { &squareComputePipeline };
-        device->compileComputePipelines({ &pipelineSetup }, nullptr, tp::view(compiledPipelines));
     }
 
     void resetJobResourcePools() {
@@ -161,10 +153,6 @@ struct TephraContext {
     void cleanup() {
         // Have to do it here instead of destructor, because this class lives in a static variable and
         // it can be destroyed before other static variables in Tephra
-        squareComputePipeline = {};
-        ioComputePipelineLayout = {};
-        ioComputeDescriptorSetLayout = {};
-
         asyncCompute1Ctx.jobResourcePool.reset();
         asyncCompute0Ctx.jobResourcePool.reset();
         graphicsQueueCtx.jobResourcePool.reset();
@@ -182,13 +170,10 @@ struct TephraContext {
     tp::OwningPtr<tp::Application> application;
     const tp::PhysicalDevice* physicalDevice = nullptr;
     tp::OwningPtr<tp::Device> device;
+    std::mt19937 rand32;
 
     QueueContext graphicsQueueCtx = QueueContext(tp::QueueType::Graphics);
     QueueContext asyncCompute0Ctx = QueueContext(tp::DeviceQueue(tp::QueueType::Compute, 0));
     QueueContext asyncCompute1Ctx = QueueContext(tp::DeviceQueue(tp::QueueType::Compute, 1));
     QueueContext noOverallocateCtx = QueueContext(tp::QueueType::Graphics);
-
-    tp::DescriptorSetLayout ioComputeDescriptorSetLayout;
-    tp::PipelineLayout ioComputePipelineLayout;
-    tp::Pipeline squareComputePipeline;
 };

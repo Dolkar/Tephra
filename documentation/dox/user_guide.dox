@@ -562,7 +562,7 @@ soon after the access is complete.
 template <typename T>
 void copyDataToBuffer(tp::BufferView& buffer, const std::vector<T>& data) {
     tp::HostMappedMemory memory = buffer.mapForHostAccess(tp::MemoryAccess::WriteOnly);
-    std::copy(data.begin(), data.end(), memory.getPtr<T*>());
+    std::copy(data.begin(), data.end(), memory.getPtr<T>());
 }
 @endcode
 
@@ -1151,7 +1151,7 @@ void uploadTex(tp::Job& job, const tp::ImageView& image, const std::vector<std::
         // Copy the data to the staging buffer. Can also be done later, at any point until the job
         // gets submitted.
         tp::HostMappedMemory memory = stagingBuffer.mapForHostAccess(tp::MemoryAccess::WriteOnly);
-        memcpy(memory.getPtr<std::byte*>(), data.data(), data.size());
+        memcpy(memory.getPtr<std::byte>(), data.data(), data.size());
     }
 
     // Record a command to copy the data to the first mip level of the image.
