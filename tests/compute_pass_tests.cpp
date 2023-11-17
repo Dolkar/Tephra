@@ -3,13 +3,28 @@
 namespace TephraIntegrationTests {
 
 // Tests for Compute passes, lists and, by extension, pipelines and descriptors
-TEST_CLASS(ComputeTests) {
+TEST_CLASS(ComputePassTests) {
 public:
     TEST_CLASS_INITIALIZE(Initialize) {
         ctx.initialize(false);
+
+        ioComputeDescriptorSetLayout = ctx.device->createDescriptorSetLayout(
+            { tp::DescriptorBinding(0, tp::DescriptorType::TexelBuffer, tp::ShaderStage::Compute),
+              tp::DescriptorBinding(1, tp::DescriptorType::StorageTexelBuffer, tp::ShaderStage::Compute) });
+        ioComputePipelineLayout = ctx.device->createPipelineLayout({ &ioComputeDescriptorSetLayout });
+
+        tp::ShaderModule shaderModule = loadShader(ctx.device.get(), "square.spv");
+        auto pipelineSetup = tp::ComputePipelineSetup(&ioComputePipelineLayout, { &shaderModule, "main" });
+
+        tp::Pipeline* compiledPipelines[1] = { &squareComputePipeline };
+        ctx.device->compileComputePipelines({ &pipelineSetup }, nullptr, tp::view(compiledPipelines));
     }
 
     TEST_CLASS_CLEANUP(Cleanup) {
+        squareComputePipeline = {};
+        ioComputePipelineLayout = {};
+        ioComputeDescriptorSetLayout = {};
+
         ctx.cleanup();
     }
 
@@ -29,7 +44,7 @@ public:
         {
             tp::HostMappedMemory writeAccess = hostBufferView.mapForHostAccess(tp::MemoryAccess::WriteOnly);
             Assert::IsFalse(writeAccess.isNull());
-            uint32_t* writePtr = writeAccess.getPtr<uint32_t*>();
+            uint32_t* writePtr = writeAccess.getPtr<uint32_t>();
             for (std::size_t i = 0; i < bufferSize / sizeof(uint32_t); i++) {
                 *(writePtr + i) = static_cast<uint32_t>(i);
             }
@@ -44,26 +59,26 @@ public:
 
         // Execute the first pass from host to temp device buffer
         tp::DescriptorSetView firstDescSet = job.allocateLocalDescriptorSet(
-            &ctx.ioComputeDescriptorSetLayout, { hostBufferView, tempBufferView });
+            &ioComputeDescriptorSetLayout, { hostBufferView, tempBufferView });
         std::vector<tp::BufferComputeAccess> bufferAccesses = {
             // Don't have to include the not yet acquired host buffer here
             { tempBufferView, tp::ComputeAccess::ComputeShaderStorageWrite }
         };
 
         job.cmdExecuteComputePass(tp::ComputePassSetup(tp::view(bufferAccesses), {}), [&](tp::ComputeList& inlineList) {
-            inlineList.cmdBindComputePipeline(ctx.squareComputePipeline);
-            inlineList.cmdBindDescriptorSets(ctx.ioComputePipelineLayout, { firstDescSet });
+            inlineList.cmdBindComputePipeline(squareComputePipeline);
+            inlineList.cmdBindDescriptorSets(ioComputePipelineLayout, { firstDescSet });
             inlineList.cmdDispatch(bufferSize / (sizeof(uint32_t) * groupSize), 1, 1);
         });
 
         // Execute the second pass, writing the output back to the host buffer
         tp::DescriptorSetView secondDescSet = job.allocateLocalDescriptorSet(
-            &ctx.ioComputeDescriptorSetLayout, { tempBufferView, hostBufferView });
+            &ioComputeDescriptorSetLayout, { tempBufferView, hostBufferView });
         bufferAccesses = { { tempBufferView, tp::ComputeAccess::ComputeShaderStorageRead },
                            { hostBufferView, tp::ComputeAccess::ComputeShaderStorageWrite } };
         job.cmdExecuteComputePass(tp::ComputePassSetup(tp::view(bufferAccesses), {}), [&](tp::ComputeList& inlineList) {
             // Compute pipeline is still bound from the previous inline pass
-            inlineList.cmdBindDescriptorSets(ctx.ioComputePipelineLayout, { secondDescSet });
+            inlineList.cmdBindDescriptorSets(ioComputePipelineLayout, { secondDescSet });
             inlineList.cmdDispatch(bufferSize / (sizeof(uint32_t) * groupSize), 1, 1);
         });
 
@@ -77,7 +92,7 @@ public:
         {
             tp::HostMappedMemory readAccess = hostBufferView.mapForHostAccess(tp::MemoryAccess::ReadOnly);
             Assert::IsFalse(readAccess.isNull());
-            const uint32_t* readPtr = readAccess.getPtr<const uint32_t*>();
+            const uint32_t* readPtr = readAccess.getPtr<uint32_t>();
 
             uint64_t error = 0;
             for (std::size_t i = 0; i < bufferSize / sizeof(uint32_t); i++) {
@@ -113,7 +128,7 @@ public:
         {
             tp::HostMappedMemory writeAccess = hostBufferView.mapForHostAccess(tp::MemoryAccess::WriteOnly);
             Assert::IsFalse(writeAccess.isNull());
-            uint32_t* writePtr = writeAccess.getPtr<uint32_t*>();
+            uint32_t* writePtr = writeAccess.getPtr<uint32_t>();
             for (std::size_t i = 0; i < bufferSize / sizeof(uint32_t); i++) {
                 *(writePtr + i) = static_cast<uint32_t>(i);
             }
@@ -129,9 +144,9 @@ public:
 
         // Allocate descriptor sets for job-local resources
         tp::DescriptorSetView firstPassDescriptor = job.allocateLocalDescriptorSet(
-            &ctx.ioComputeDescriptorSetLayout, { hostBufferView, tempBufferView });
+            &ioComputeDescriptorSetLayout, { hostBufferView, tempBufferView });
         tp::DescriptorSetView secondPassDescriptor = job.allocateLocalDescriptorSet(
-            &ctx.ioComputeDescriptorSetLayout, { tempBufferView, hostBufferView });
+            &ioComputeDescriptorSetLayout, { tempBufferView, hostBufferView });
 
         // Only define the compute pass without inline recording any commands
         tp::BufferComputeAccess bufferAccesses[2] = {
@@ -152,10 +167,10 @@ public:
 
         // Record compute pass commands after job has been enqueued
         computeList.beginRecording(commandPool);
-        computeList.cmdBindComputePipeline(ctx.squareComputePipeline);
+        computeList.cmdBindComputePipeline(squareComputePipeline);
 
         // First dispatch
-        computeList.cmdBindDescriptorSets(ctx.ioComputePipelineLayout, { firstPassDescriptor });
+        computeList.cmdBindDescriptorSets(ioComputePipelineLayout, { firstPassDescriptor });
         computeList.cmdDispatch(bufferSize / (sizeof(uint32_t) * groupSize), 1, 1);
 
         // Insert a barrier manually, synchronizing the writes of the previous dispatch to the reads of the following
@@ -164,7 +179,7 @@ public:
             { { tp::ComputeAccess::ComputeShaderStorageWrite, tp::ComputeAccess::ComputeShaderStorageRead } });
 
         // Second dispatch
-        computeList.cmdBindDescriptorSets(ctx.ioComputePipelineLayout, { secondPassDescriptor });
+        computeList.cmdBindDescriptorSets(ioComputePipelineLayout, { secondPassDescriptor });
         computeList.cmdDispatch(bufferSize / (sizeof(uint32_t) * groupSize), 1, 1);
 
         computeList.endRecording();
@@ -176,7 +191,7 @@ public:
         {
             tp::HostMappedMemory readAccess = hostBufferView.mapForHostAccess(tp::MemoryAccess::ReadOnly);
             Assert::IsFalse(readAccess.isNull());
-            const uint32_t* readPtr = readAccess.getPtr<const uint32_t*>();
+            const uint32_t* readPtr = readAccess.getPtr<uint32_t>();
 
             uint64_t error = 0;
             for (std::size_t i = 0; i < bufferSize / sizeof(uint32_t); i++) {
@@ -201,8 +216,14 @@ public:
 
 private:
     static TephraContext ctx;
+    static tp::DescriptorSetLayout ioComputeDescriptorSetLayout;
+    static tp::PipelineLayout ioComputePipelineLayout;
+    static tp::Pipeline squareComputePipeline;
 };
 
-TephraContext ComputeTests::ctx;
+TephraContext ComputePassTests::ctx;
+tp::DescriptorSetLayout ComputePassTests::ioComputeDescriptorSetLayout;
+tp::PipelineLayout ComputePassTests::ioComputePipelineLayout;
+tp::Pipeline ComputePassTests::squareComputePipeline;
 
 }

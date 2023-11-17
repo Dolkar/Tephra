@@ -115,10 +115,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="buffer_tests.cpp" />
-    <ClCompile Include="compute_tests.cpp" />
+    <ClCompile Include="compute_pass_tests.cpp" />
     <ClCompile Include="general_job_tests.cpp" />
     <ClCompile Include="image_tests.cpp" />
     <ClCompile Include="setup_tests.cpp" />
+    <ClCompile Include="streaming_compute_test.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\build\Tephra.vcxproj">
@@ -126,6 +127,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="shaders\distance_transform_shared.h" />
     <ClInclude Include="tests_common.hpp" />
   </ItemGroup>
   <ItemGroup>
@@ -135,18 +137,27 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4.0</ShaderModel>
       <FileType>Document</FileType>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(VULKAN_SDK)\Bin\glslangValidator.exe -S comp -e main -o "$(OutDir)%(Filename).spv" -V -D "%(FullPath)"</Command>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Compute HLSL to SPIR-V compilation</Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.%(Filename).spv</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(VULKAN_SDK)\Bin\glslangValidator.exe -S comp -e main -o "$(OutDir)%(Filename).spv" -V -D "%(FullPath)"</Command>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Compute HLSL to SPIR-V compilation</Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.%(Filename).spv</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(VULKAN_SDK)\Bin\glslangValidator.exe -S comp -e main -o "$(ProjectDir)\$(Platform)\$(Configuration)\%(Filename).spv" -V -D "%(FullPath)"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(VULKAN_SDK)\Bin\dxc.exe -spirv -HV 2021 -T cs_6_0 -E main -Fo "$(ProjectDir)\$(Platform)\$(Configuration)\%(Filename).spv" "%(FullPath)"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute HLSL to SPIR-V compilation</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)\$(Platform)\$(Configuration)\%(Filename).spv</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(VULKAN_SDK)\Bin\glslangValidator.exe -S comp -e main -o ".%(Filename).spv" -V -D "%(FullPath)"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(VULKAN_SDK)\Bin\dxc.exe -spirv -HV 2021 -T cs_6_0 -E main -Fo "$(ProjectDir)\$(Platform)\$(Configuration)\%(Filename).spv" "%(FullPath)"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute HLSL to SPIR-V compilation</Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.%(Filename).spv</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)\$(Platform)\$(Configuration)\%(Filename).spv</Outputs>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="shaders\distance_transform.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4.0</ShaderModel>
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(VULKAN_SDK)\Bin\dxc.exe -spirv -HV 2021 -T cs_6_0 -E main -Fo "$(ProjectDir)\$(Platform)\$(Configuration)\%(Filename).spv" "%(FullPath)"</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute HLSL to SPIR-V compilation</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)\$(Platform)\$(Configuration)\%(Filename).spv</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(VULKAN_SDK)\Bin\dxc.exe -spirv -HV 2021 -T cs_6_0 -E main -Fo "$(ProjectDir)\$(Platform)\$(Configuration)\%(Filename).spv" "%(FullPath)"</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute HLSL to SPIR-V compilation</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)\$(Platform)\$(Configuration)\%(Filename).spv</Outputs>
     </CustomBuild>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
