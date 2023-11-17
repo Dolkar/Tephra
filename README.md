@@ -1,5 +1,5 @@
 # Tephra
-**_A high-level C++17 graphics and computing library based on [Vulkan](https://www.vulkan.org/)_**
+**_A modern C++17 graphics and compute library filling the gap between [Vulkan](https://www.vulkan.org/) and high-level APIs such as OpenGL._**
 
 **License**: [MIT](https://github.com/Dolkar/Tephra/blob/main/LICENSE)
 
