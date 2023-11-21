@@ -78,8 +78,7 @@ public:
 
         // Also create our own job resource pool instead of using the shared test ones so we can apply our
         // allocation behavior. This pool will service the streamed input buffers and the ping-pong buffers.
-        auto jobPoolSetup = tp::JobResourcePoolSetup(
-            ctx->graphicsQueueCtx.queue, tp::JobResourcePoolFlag::DisableSuballocation);
+        auto jobPoolSetup = tp::JobResourcePoolSetup(ctx->graphicsQueueCtx.queue);
         jobPoolSetup.preinitBufferOverallocationBehavior = allocBehavior;
         jobResourcePool = ctx->device->createJobResourcePool(jobPoolSetup);
 
@@ -303,7 +302,7 @@ private:
             Assert::AreEqual(bufferSizeSum, parent->outputRingBuffer->getAllocatedSize());
 
             // For total pool size, include some leeway due to overallocation, fragmentation and aliasing
-            float leeway = parent->allocBehavior.growFactor * 1.3f;
+            float leeway = parent->allocBehavior.growFactor * 1.1f;
             uint64_t maxPoolSize = static_cast<uint64_t>(minPoolSize * leeway);
             Assert::IsTrue(maxPoolSize >= parent->outputRingBuffer->getTotalSize());
 
