@@ -181,7 +181,12 @@ enum class BufferUsage : uint32_t {
     /// from shaders through its address.
     /// @remarks
     ///     Requires the @vksymbol{VkPhysicalDeviceVulkan12Features}::`bufferDeviceAddress` feature to be enabled.
-    DeviceAddress = 1 << 8
+    DeviceAddress = 1 << 8,
+    /// Allows the use of the buffer as a read-only input to an acceleration structure build operation
+    /// TODO!
+    /// @remarks
+    ///     Requires the tp::DeviceExtension::KHR_AccelerationStructure device extension to be enabled.
+    AccelerationStructureInputKHR = 1 << 9,
 };
 TEPHRA_MAKE_ENUM_BIT_MASK(BufferUsageMask, BufferUsage);
 

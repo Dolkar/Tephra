@@ -62,6 +62,7 @@ private:
     using DestructionQueuesTuple = std::tuple<
         DestructionQueue<VkPipelineHandle>,
         DestructionQueue<VkDescriptorPoolHandle>,
+        DestructionQueue<VkAccelerationStructureHandleKHR>,
         DestructionQueue<VkBufferViewHandle>,
         DestructionQueue<VkBufferHandle>,
         DestructionQueue<VkImageViewHandle>,
@@ -106,6 +107,7 @@ void DeferredDestructor::destroyImmediately(T handle) {
             this->crossQueueSync->broadcastResourceForget(h);
             this->logicalDevice->destroyImage(h);
         },
+        [ld](VkAccelerationStructureHandleKHR h) { ld->destroyAccelerationStructureKHR(h); },
         [ld](VkSamplerHandle h) { ld->destroySampler(h); },
         [ld](VkSwapchainHandleKHR h) { ld->destroySwapchainKHR(h); },
         [ld](VkSemaphoreHandle h) { ld->destroySemaphore(h); },

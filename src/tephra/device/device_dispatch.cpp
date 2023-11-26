@@ -5,6 +5,7 @@
 #include "../job/render_pass.hpp"
 #include "../buffer_impl.hpp"
 #include "../image_impl.hpp"
+#include "../acceleration_structure_impl.hpp"
 #include "../pipeline_builder.hpp"
 #include "../descriptor_pool_impl.hpp"
 #include "../swapchain_impl.hpp"
@@ -17,6 +18,7 @@ namespace tp {
 constexpr const char* DeviceTypeName = "Device";
 constexpr const char* BufferTypeName = "Buffer";
 constexpr const char* ImageTypeName = "Image";
+constexpr const char* AccelerationStructureTypeName = "AccelerationStructure";
 constexpr const char* DescriptorPoolTypeName = "DescriptorPool";
 constexpr const char* JobResourcePoolTypeName = "JobResourcePool";
 constexpr const char* SwapchainTypeName = "Swapchain";
@@ -358,6 +360,29 @@ OwningPtr<AccelerationStructure> Device::allocateAccelerationStructure(
     const char* debugName) {
     auto deviceImpl = static_cast<DeviceContainer*>(this);
     TEPHRA_DEBUG_SET_CONTEXT(deviceImpl->getDebugTarget(), "allocateAccelerationStructure", debugName);
+
+    auto buildInfo = AccelerationStructureImpl::prepareBuildInfoForSizeQuery(setup);
+    auto vkBuildSizes = deviceImpl->getLogicalDevice()->getAccelerationStructureBuildSizes(
+        buildInfo.geomInfo, buildInfo.maxPrimitiveCounts.data());
+
+    // Create backing buffer to hold the AS
+    auto backingBufferSetup = BufferSetup(
+        vkBuildSizes.accelerationStructureSize,
+        BufferUsageMask::None(),
+        VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR);
+    auto [bufferHandleLifeguard, allocationHandleLifeguard] = deviceImpl->getMemoryAllocator()->allocateBuffer(
+        backingBufferSetup, MemoryPreference::Device);
+    auto backingBuffer = OwningPtr<Buffer>(new BufferImpl(
+        deviceImpl,
+        backingBufferSetup,
+        std::move(bufferHandleLifeguard),
+        std::move(allocationHandleLifeguard),
+        DebugTarget::makeSilent()));
+
+    auto accelerationStructureLifeguard = vkMakeHandleLifeguard(
+        deviceImpl->getLogicalDevice()->createAccelerationStructureKHR(backingBuffer->getDefaultView(), setup.type));
+    auto debugTarget = DebugTarget(deviceImpl->getDebugTarget(), AccelerationStructureTypeName, debugName);
+
     return {};
 }
 

@@ -738,7 +738,7 @@ void LogicalDevice::queuePresentKHR(
     throwRetcodeErrors(vkiDevice.queuePresentKHR(queueInfo.vkQueueHandle, &presentInfo));
 }
 
-VkAccelerationStructureKHR LogicalDevice::createAccelerationStructureKHR(
+VkAccelerationStructureHandleKHR LogicalDevice::createAccelerationStructureKHR(
     const BufferView& buffer,
     AccelerationStructureType type) {
     if (vkiDevice.createAccelerationStructureKHR == nullptr) {
@@ -759,10 +759,11 @@ VkAccelerationStructureKHR LogicalDevice::createAccelerationStructureKHR(
     VkAccelerationStructureKHR vkAccelerationHandle;
     throwRetcodeErrors(
         vkiDevice.createAccelerationStructureKHR(vkDeviceHandle, &createInfo, nullptr, &vkAccelerationHandle));
-    return vkAccelerationHandle;
+    return VkAccelerationStructureHandleKHR(vkAccelerationHandle);
 }
 
-void LogicalDevice::destroyAccelerationStructureKHR(VkAccelerationStructureKHR vkAccelerationStructureHandle) noexcept {
+void LogicalDevice::destroyAccelerationStructureKHR(
+    VkAccelerationStructureHandleKHR vkAccelerationStructureHandle) noexcept {
     vkiDevice.destroyAccelerationStructureKHR(vkDeviceHandle, vkAccelerationStructureHandle, nullptr);
 }
 

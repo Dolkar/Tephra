@@ -182,9 +182,11 @@ public:
         ArrayParameter<const VkSemaphoreHandle> vkSemaphoreHandles,
         ArrayView<VkResult> vkResults);
 
-    VkAccelerationStructureKHR createAccelerationStructureKHR(const BufferView& buffer, AccelerationStructureType type);
+    VkAccelerationStructureHandleKHR createAccelerationStructureKHR(
+        const BufferView& buffer,
+        AccelerationStructureType type);
 
-    void destroyAccelerationStructureKHR(VkAccelerationStructureKHR vkAccelerationStructureHandle) noexcept;
+    void destroyAccelerationStructureKHR(VkAccelerationStructureHandleKHR vkAccelerationStructureHandle) noexcept;
 
     VkAccelerationStructureBuildSizesInfoKHR getAccelerationStructureBuildSizes(
         const VkAccelerationStructureBuildGeometryInfoKHR& vkBuildInfo,

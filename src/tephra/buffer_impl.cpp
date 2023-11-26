@@ -24,6 +24,9 @@ BufferImpl::BufferImpl(
     } else {
         coherentlyMappedMemoryPtr = nullptr;
     }
+
+    if (bufferSetup.usage.containsAny(BufferUsage::DeviceAddress | BufferUsage::AccelerationStructureInputKHR))
+        deviceAddress = deviceImpl->getLogicalDevice()->getBufferDeviceAddress(bufferHandle.vkGetHandle());
 }
 
 MemoryLocation BufferImpl::getMemoryLocation_() const {
@@ -67,10 +70,6 @@ BufferView BufferImpl::createTexelView_(uint64_t offset, uint64_t size, Format f
     }
 
     return BufferView(this, offset, size, format);
-}
-
-DeviceAddress BufferImpl::getDeviceAddress_() const {
-    return deviceImpl->getLogicalDevice()->getBufferDeviceAddress(bufferHandle.vkGetHandle());
 }
 
 void BufferImpl::destroyHandles(bool immediately) {
@@ -141,6 +140,12 @@ uint64_t BufferImpl::getRequiredViewAlignment_(const DeviceContainer* deviceImpl
     }
     if (usage.contains(BufferUsage::VertexBuffer)) {
         alignment = tp::max(alignment, 8ull); // Conservative assumption of using 64-bit components
+    }
+    if (usage.contains(BufferUsage::DeviceAddress)) {
+        alignment = tp::max(alignment, 16ull); // Default buffer reference alignment
+    }
+    if (usage.contains(BufferUsage::AccelerationStructureInputKHR)) {
+        alignment = tp::max(alignment, 16ull);
     }
 
     return alignment;

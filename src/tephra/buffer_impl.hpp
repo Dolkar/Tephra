@@ -71,7 +71,10 @@ public:
 
     BufferView createTexelView_(uint64_t offset, uint64_t size, Format format);
 
-    DeviceAddress getDeviceAddress_() const;
+    DeviceAddress getDeviceAddress_() const {
+        TEPHRA_ASSERTD(deviceAddress != 0, "Device address queried for a buffer without appropriate usage flag!");
+        return deviceAddress;
+    }
 
     VmaAllocationHandle vmaGetMemoryAllocationHandle_() const {
         return memoryAllocationHandle.vkGetHandle();
@@ -105,6 +108,7 @@ private:
     Lifeguard<VmaAllocationHandle> memoryAllocationHandle;
     Lifeguard<VkBufferHandle> bufferHandle;
     BufferSetup bufferSetup;
+    DeviceAddress deviceAddress = 0;
 
     TexelViewHandleMap texelViewHandleMap;
     // For internal synchronization of memory mapping. In most cases the memory is coherent and the mutex won't be used
