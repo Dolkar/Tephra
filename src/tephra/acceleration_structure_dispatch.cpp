@@ -18,4 +18,21 @@ AccelerationStructureSetup AccelerationStructureSetup::BottomLevel(
     };
 }
 
+AccelerationStructureBuildInfo AccelerationStructureBuildInfo::TopLevel(
+    AccelerationStructureBuildMode mode,
+    AccelerationStructureView dstView,
+    InstanceGeometryBuildInfo instanceGeometry,
+    AccelerationStructureView srcView) {
+    return { mode, dstView, instanceGeometry, {}, {}, srcView };
+}
+
+AccelerationStructureBuildInfo AccelerationStructureBuildInfo::BottomLevel(
+    AccelerationStructureBuildMode mode,
+    AccelerationStructureView dstView,
+    ArrayView<const TriangleGeometryBuildInfo> triangleGeometries,
+    ArrayView<const AABBGeometrySetup> aabbGeometries,
+    AccelerationStructureView srcView) {
+    return { mode, dstView, InstanceGeometryBuildInfo({}), triangleGeometries, aabbGeometries, srcView };
+}
+
 }

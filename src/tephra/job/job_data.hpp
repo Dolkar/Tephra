@@ -31,7 +31,8 @@ enum class JobCommandTypes {
     ImportExternalImage,
     BeginDebugLabel,
     InsertDebugLabel,
-    EndDebugLabel
+    EndDebugLabel,
+    BuildAccelerationStructures
 };
 
 struct JobResourceStorage {

@@ -467,6 +467,8 @@ TEPHRA_VULKAN_COMPATIBLE_ENUM(AttachmentStoreOp, VkAttachmentStoreOp);
 enum class IndexType : uint32_t {
     UInt16 = VK_INDEX_TYPE_UINT16,
     UInt32 = VK_INDEX_TYPE_UINT32,
+    /// Specifies that no indices will be used. Can only be used in tp::TriangleGeometrySetup
+    NoneKHR = VK_INDEX_TYPE_NONE_KHR
 };
 TEPHRA_VULKAN_COMPATIBLE_ENUM(IndexType, VkIndexType);
 

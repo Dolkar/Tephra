@@ -31,8 +31,8 @@ public:
     BufferImpl(
         DeviceContainer* deviceImpl,
         const BufferSetup& bufferSetup,
-        Lifeguard<VkBufferHandle>&& bufferHandle,
-        Lifeguard<VmaAllocationHandle>&& memoryAllocationHandle,
+        Lifeguard<VkBufferHandle> bufferHandle,
+        Lifeguard<VmaAllocationHandle> memoryAllocationHandle,
         DebugTarget debugTarget);
 
     const DebugTarget* getDebugTarget() const {

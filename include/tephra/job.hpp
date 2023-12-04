@@ -2,6 +2,7 @@
 
 #include <tephra/physical_device.hpp>
 #include <tephra/descriptor.hpp>
+#include <tephra/acceleration_structure.hpp>
 #include <tephra/buffer.hpp>
 #include <tephra/image.hpp>
 #include <tephra/memory.hpp>
@@ -537,6 +538,8 @@ public:
     /// @remarks
     ///     The call will have no effect when tp::ApplicationExtension::EXT_DebugUtils is not enabled.
     void cmdEndDebugLabel();
+
+    void cmdBuildAccelerationStructures(ArrayParameter<AccelerationStructureBuildInfo> buildInfos);
 
     /// Updates the internal synchronization state for the buffer view to the given external access.
     ///

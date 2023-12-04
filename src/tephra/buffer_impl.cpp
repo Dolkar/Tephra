@@ -8,8 +8,8 @@ namespace tp {
 BufferImpl::BufferImpl(
     DeviceContainer* deviceImpl,
     const BufferSetup& bufferSetup,
-    Lifeguard<VkBufferHandle>&& bufferHandle,
-    Lifeguard<VmaAllocationHandle>&& memoryAllocationHandle,
+    Lifeguard<VkBufferHandle> bufferHandle,
+    Lifeguard<VmaAllocationHandle> memoryAllocationHandle,
     DebugTarget debugTarget)
     : debugTarget(std::move(debugTarget)),
       deviceImpl(deviceImpl),
@@ -26,7 +26,7 @@ BufferImpl::BufferImpl(
     }
 
     if (bufferSetup.usage.containsAny(BufferUsage::DeviceAddress | BufferUsage::AccelerationStructureInputKHR))
-        deviceAddress = deviceImpl->getLogicalDevice()->getBufferDeviceAddress(bufferHandle.vkGetHandle());
+        deviceAddress = deviceImpl->getLogicalDevice()->getBufferDeviceAddress(this->bufferHandle.vkGetHandle());
 }
 
 MemoryLocation BufferImpl::getMemoryLocation_() const {

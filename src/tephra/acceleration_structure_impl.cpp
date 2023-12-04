@@ -3,6 +3,20 @@
 #include "device/device_container.hpp"
 
 namespace tp {
+AccelerationStructureImpl::AccelerationStructureImpl(
+    DeviceContainer* deviceImpl,
+    const AccelerationStructureSetup& setup,
+    AccelerationStructureBuildInfo buildInfo,
+    const VkAccelerationStructureBuildSizesInfoKHR& vkBuildSizes,
+    Lifeguard<VkAccelerationStructureHandleKHR> accelerationStructureHandle,
+    BufferView backingBufferView,
+    OwningPtr<Buffer> backingBufferOwningPtr,
+    DebugTarget debugTarget)
+    : debugTarget(std::move(debugTarget)),
+      deviceImpl(deviceImpl),
+      accelerationStructureHandle(std::move(accelerationStructureHandle)),
+      backingBufferView(backingBufferView),
+      backingBufferOwningPtr(std::move(backingBufferOwningPtr)) {}
 
 AccelerationStructureBuildInfo AccelerationStructureImpl::prepareBuildInfoForSizeQuery(
     const AccelerationStructureSetup& setup) {

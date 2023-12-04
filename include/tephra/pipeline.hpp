@@ -157,7 +157,7 @@ class ShaderModule {
 public:
     ShaderModule() = default;
 
-    ShaderModule(Lifeguard<VkShaderModuleHandle>&& shaderModuleHandle)
+    ShaderModule(Lifeguard<VkShaderModuleHandle> shaderModuleHandle)
         : shaderModuleHandle(std::move(shaderModuleHandle)) {}
 
     /// Returns `true` if the shader module is null and not valid for use.
@@ -181,7 +181,7 @@ class PipelineLayout {
 public:
     PipelineLayout() {}
 
-    PipelineLayout(Lifeguard<VkPipelineLayoutHandle>&& pipelineLayoutHandle)
+    PipelineLayout(Lifeguard<VkPipelineLayoutHandle> pipelineLayoutHandle)
         : pipelineLayoutHandle(std::move(pipelineLayoutHandle)) {}
 
     /// Returns `true` if the pipeline layout is null and not valid for use.
@@ -209,7 +209,7 @@ class PipelineCache {
 public:
     PipelineCache() {}
 
-    PipelineCache(const Device* device, Lifeguard<VkPipelineCacheHandle>&& pipelineCacheHandle)
+    PipelineCache(const Device* device, Lifeguard<VkPipelineCacheHandle> pipelineCacheHandle)
         : device(device), pipelineCacheHandle(std::move(pipelineCacheHandle)) {}
 
     /// Returns `true` if the pipeline cache is null and not valid for use.
@@ -245,7 +245,7 @@ class Pipeline {
 public:
     Pipeline() {}
 
-    Pipeline(Lifeguard<VkPipelineHandle>&& pipelineHandle) : pipelineHandle(std::move(pipelineHandle)) {}
+    Pipeline(Lifeguard<VkPipelineHandle> pipelineHandle) : pipelineHandle(std::move(pipelineHandle)) {}
 
     /// Returns `true` if the pipeline is null and not valid for use.
     bool isNull() const {

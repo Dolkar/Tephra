@@ -479,6 +479,33 @@ void Job::cmdEndDebugLabel() {
         recordCommand<JobRecordStorage::DebugLabelData>(jobData->record, JobCommandTypes::EndDebugLabel, nullptr);
 }
 
+void Job::cmdBuildAccelerationStructures(ArrayParameter<AccelerationStructureBuildInfo> buildInfos) {
+    TEPHRA_DEBUG_SET_CONTEXT(debugTarget.get(), "cmdBuildAccelerationStructures", nullptr);
+
+    // Mark all buffers used
+    for (const AccelerationStructureBuildInfo& buildInfo : buildInfos) {
+        markResourceUsage(jobData, buildInfo.dstView.getBackingBufferView());
+
+        if (!buildInfo.srcView.isNull())
+            markResourceUsage(jobData, buildInfo.srcView.getBackingBufferView());
+
+        if (!buildInfo.instanceGeometry.instanceBuffer.isNull())
+            markResourceUsage(jobData, buildInfo.instanceGeometry.instanceBuffer);
+
+        for (const TriangleGeometryBuildInfo& triangles : buildInfo.triangleGeometries) {
+            markResourceUsage(jobData, triangles.vertexBuffer);
+            if (!triangles.indexBuffer.isNull())
+                markResourceUsage(jobData, triangles.indexBuffer);
+            if (!triangles.transformBuffer.isNull())
+                markResourceUsage(jobData, triangles.transformBuffer);
+        }
+
+        for (const AABBGeometryBuildInfo& aabbs : buildInfo.aabbGeometries) {
+            markResourceUsage(jobData, aabbs.aabbBuffer);
+        }
+    }
+}
+
 void Job::vkCmdImportExternalResource(
     const BufferView& buffer,
     VkPipelineStageFlags vkStageMask,

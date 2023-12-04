@@ -120,7 +120,7 @@ public:
     /// Creates a null sampler.
     Sampler() {}
 
-    Sampler(Lifeguard<VkSamplerHandle>&& samplerHandle) : samplerHandle(std::move(samplerHandle)) {}
+    Sampler(Lifeguard<VkSamplerHandle> samplerHandle) : samplerHandle(std::move(samplerHandle)) {}
 
     /// Returns `true` if the sampler is null and not valid for use.
     bool isNull() const {

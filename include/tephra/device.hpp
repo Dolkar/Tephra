@@ -4,9 +4,9 @@
 #include <tephra/job.hpp>
 #include <tephra/pipeline.hpp>
 #include <tephra/descriptor.hpp>
+#include <tephra/acceleration_structure.hpp>
 #include <tephra/buffer.hpp>
 #include <tephra/image.hpp>
-#include <tephra/acceleration_structure.hpp>
 #include <tephra/render.hpp>
 #include <tephra/memory.hpp>
 #include <tephra/debug_handler.hpp>
@@ -404,17 +404,16 @@ public:
     /// @param debugName
     ///     The debug name identifier for the object.
     /// @remarks
-    ///     `bufferHandle` must have been created from the same Vulkan device as returned by
-    ///     tp::Device::vkGetDeviceHandle.
-    ///     `memoryAllocationHandle` must have
+    ///     `bufferHandle` and `memoryAllocationHandle` must have been created from the same Vulkan device as returned
+    ///     by tp::Device::vkGetDeviceHandle.
     /// @remarks
     ///     The lifeguard handles can be either owning or non-owning, which determines whether the handles will be
     ///     properly disposed of when the buffer is destroyed. See tp::Device::vkMakeHandleLifeguard or
     ///     tp::Lifeguard::NonOwning.
     OwningPtr<Buffer> vkCreateExternalBuffer(
         const BufferSetup& setup,
-        Lifeguard<VkBufferHandle>&& bufferHandle,
-        Lifeguard<VmaAllocationHandle>&& memoryAllocationHandle,
+        Lifeguard<VkBufferHandle> bufferHandle,
+        Lifeguard<VmaAllocationHandle> memoryAllocationHandle,
         const char* debugName = nullptr);
 
     /// Creates a tp::Image object out of a raw Vulkan image handle and an optional VMA memory allocation handle.
@@ -430,13 +429,16 @@ public:
     /// @param debugName
     ///     The debug name identifier for the object.
     /// @remarks
+    ///     `imageHandle` and `memoryAllocationHandle` must have been created from the same Vulkan device as returned
+    ///     by tp::Device::vkGetDeviceHandle.
+    /// @remarks
     ///     The lifeguard handles can be either owning or non-owning, which determines whether the handles will be
     ///     properly disposed of when the image is destroyed. See tp::Device::vkMakeHandleLifeguard or
     ///     tp::Lifeguard::NonOwning.
     OwningPtr<Image> vkCreateExternalImage(
         const ImageSetup& setup,
-        Lifeguard<VkImageHandle>&& imageHandle,
-        Lifeguard<VmaAllocationHandle>&& memoryAllocationHandle,
+        Lifeguard<VkImageHandle> imageHandle,
+        Lifeguard<VmaAllocationHandle> memoryAllocationHandle,
         const char* debugName = nullptr);
 
     /// Wraps the given Vulkan handle object in an owning tp::Lifeguard, ensuring its safe deletion after the lifeguard

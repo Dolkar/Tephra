@@ -303,8 +303,8 @@ public:
     DescriptorSetLayout() {}
 
     DescriptorSetLayout(
-        Lifeguard<VkDescriptorSetLayoutHandle>&& descriptorSetLayoutHandle,
-        Lifeguard<VkDescriptorUpdateTemplateHandle>&& descriptorUpdateTemplateHandle,
+        Lifeguard<VkDescriptorSetLayoutHandle> descriptorSetLayoutHandle,
+        Lifeguard<VkDescriptorUpdateTemplateHandle> descriptorUpdateTemplateHandle,
         ArrayParameter<const DescriptorBinding> descriptorBindings);
 
     /// Returns `true` if the descriptor set layout is null and not valid for use.
@@ -382,7 +382,10 @@ private:
     VkDescriptorSetHandle* vkJobLocalDescriptorSetPtr;
 };
 
+/// Equality operator for tp::DescriptorSetView.
 bool operator==(const DescriptorSetView& lhs, const DescriptorSetView& rhs);
+
+/// Inequality operator for tp::DescriptorSetView.
 inline bool operator!=(const DescriptorSetView& lhs, const DescriptorSetView& rhs) {
     return !(lhs == rhs);
 }

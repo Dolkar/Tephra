@@ -383,7 +383,18 @@ OwningPtr<AccelerationStructure> Device::allocateAccelerationStructure(
         deviceImpl->getLogicalDevice()->createAccelerationStructureKHR(backingBuffer->getDefaultView(), setup.type));
     auto debugTarget = DebugTarget(deviceImpl->getDebugTarget(), AccelerationStructureTypeName, debugName);
 
-    return {};
+    auto accelerationStructure = OwningPtr<AccelerationStructure>(new AccelerationStructureImpl(
+        deviceImpl,
+        setup,
+        std::move(buildInfo),
+        vkBuildSizes,
+        std::move(accelerationStructureLifeguard),
+        backingBuffer->getDefaultView(),
+        std::move(backingBuffer),
+        std::move(debugTarget)
+    ));
+
+    return accelerationStructure;
 }
 
 JobSemaphore Device::enqueueJob(
@@ -631,8 +642,8 @@ void Device::updateSemaphores() {
 
 OwningPtr<Buffer> Device::vkCreateExternalBuffer(
     const BufferSetup& setup,
-    Lifeguard<VkBufferHandle>&& bufferHandle,
-    Lifeguard<VmaAllocationHandle>&& memoryAllocationHandle,
+    Lifeguard<VkBufferHandle> bufferHandle,
+    Lifeguard<VmaAllocationHandle> memoryAllocationHandle,
     const char* debugName) {
     auto deviceImpl = static_cast<DeviceContainer*>(this);
     TEPHRA_DEBUG_SET_CONTEXT(deviceImpl->getDebugTarget(), "vkCreateExternalBuffer", nullptr);
@@ -648,8 +659,8 @@ OwningPtr<Buffer> Device::vkCreateExternalBuffer(
 
 OwningPtr<Image> Device::vkCreateExternalImage(
     const ImageSetup& setup,
-    Lifeguard<VkImageHandle>&& imageHandle,
-    Lifeguard<VmaAllocationHandle>&& memoryAllocationHandle,
+    Lifeguard<VkImageHandle> imageHandle,
+    Lifeguard<VmaAllocationHandle> memoryAllocationHandle,
     const char* debugName) {
     auto deviceImpl = static_cast<DeviceContainer*>(this);
     TEPHRA_DEBUG_SET_CONTEXT(deviceImpl->getDebugTarget(), "vkCreateExternalImage", nullptr);

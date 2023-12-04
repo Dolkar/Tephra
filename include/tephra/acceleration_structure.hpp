@@ -1,8 +1,38 @@
 #pragma once
 
+#include <tephra/buffer.hpp>
 #include <tephra/common.hpp>
 
 namespace tp {
+
+class AccelerationStructureImpl;
+
+class AccelerationStructureView {
+public:
+    AccelerationStructureView();
+
+    bool isNull() const;
+
+    bool viewsJobLocalAccelerationStructure() const;
+
+    DeviceAddress getDeviceAddress() const;
+
+    BufferView getBackingBufferView() const;
+
+    VkAccelerationStructureHandleKHR vkResolveAccelerationStructureHandle() const;
+
+private:
+    friend bool operator==(const AccelerationStructureView&, const AccelerationStructureView&);
+    friend class AccelerationStructureImpl;
+
+    AccelerationStructureImpl* accelerationStructure;
+    BufferView backingBufferView;
+};
+
+bool operator==(const AccelerationStructureView& lhs, const AccelerationStructureView& rhs);
+inline bool operator!=(const AccelerationStructureView& lhs, const AccelerationStructureView& rhs) {
+    return !(lhs == rhs);
+}
 
 struct InstanceGeometrySetup {
     uint32_t maxInstanceCount;
@@ -65,6 +95,63 @@ public:
 
 protected:
     AccelerationStructure() {}
+};
+
+struct InstanceGeometryBuildInfo {
+    BufferView instanceBuffer; // VkAccelerationStructureInstanceKHR
+    bool arrayOfPointers;
+
+    InstanceGeometryBuildInfo(BufferView instanceBuffer, bool arrayOfPointers = false)
+        : instanceBuffer(instanceBuffer), arrayOfPointers(arrayOfPointers) {}
+};
+
+struct TriangleGeometryBuildInfo {
+    BufferView vertexBuffer;
+    uint64_t vertexStride;
+    BufferView indexBuffer;
+    uint32_t firstVertex;
+    BufferView transformBuffer;
+
+    TriangleGeometryBuildInfo(
+        BufferView vertexBuffer,
+        uint64_t vertexStride = 0,
+        BufferView indexBuffer = {},
+        uint32_t firstVertex = 0,
+        BufferView transformBuffer = {})
+        : vertexBuffer(vertexBuffer),
+          vertexStride(vertexStride),
+          indexBuffer(indexBuffer),
+          firstVertex(firstVertex),
+          transformBuffer(transformBuffer) {}
+};
+
+struct AABBGeometryBuildInfo {
+    BufferView aabbBuffer; // VkAabbPositionsKHR
+    uint64_t stride;
+
+    AABBGeometryBuildInfo(BufferView aabbBuffer, uint64_t stride = 8) : aabbBuffer(aabbBuffer), stride(stride) {}
+};
+
+struct AccelerationStructureBuildInfo {
+    AccelerationStructureBuildMode mode;
+    AccelerationStructureView dstView;
+    InstanceGeometryBuildInfo instanceGeometry;
+    ArrayView<const TriangleGeometryBuildInfo> triangleGeometries;
+    ArrayView<const AABBGeometrySetup> aabbGeometries;
+    AccelerationStructureView srcView;
+
+    static AccelerationStructureBuildInfo TopLevel(
+        AccelerationStructureBuildMode mode,
+        AccelerationStructureView dstView,
+        InstanceGeometryBuildInfo instanceGeometry,
+        AccelerationStructureView srcView = {});
+
+    static AccelerationStructureBuildInfo BottomLevel(
+        AccelerationStructureBuildMode mode,
+        AccelerationStructureView dstView,
+        ArrayView<const TriangleGeometryBuildInfo> triangleGeometries,
+        ArrayView<const AABBGeometrySetup> aabbGeometries,
+        AccelerationStructureView srcView = {});
 };
 
 }

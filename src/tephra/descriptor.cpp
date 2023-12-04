@@ -297,8 +297,8 @@ bool operator==(const FutureDescriptor& lhs, const FutureDescriptor& rhs) {
 }
 
 DescriptorSetLayout::DescriptorSetLayout(
-    Lifeguard<VkDescriptorSetLayoutHandle>&& descriptorSetLayoutHandle,
-    Lifeguard<VkDescriptorUpdateTemplateHandle>&& descriptorUpdateTemplateHandle,
+    Lifeguard<VkDescriptorSetLayoutHandle> descriptorSetLayoutHandle,
+    Lifeguard<VkDescriptorUpdateTemplateHandle> descriptorUpdateTemplateHandle,
     ArrayParameter<const DescriptorBinding> descriptorBindings_)
     : descriptorSetLayoutHandle(std::move(descriptorSetLayoutHandle)),
       descriptorUpdateTemplateHandle(std::move(descriptorUpdateTemplateHandle)) {
