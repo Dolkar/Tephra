@@ -37,7 +37,7 @@ public:
 private:
     struct AssignInfo : ResourceUsageRange {
         uint64_t size;
-        BufferUsageMask usageMask;
+        uint64_t alignment;
         JobLocalBufferImpl* resourcePtr;
     };
 

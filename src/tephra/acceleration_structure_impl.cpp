@@ -6,7 +6,7 @@ namespace tp {
 AccelerationStructureImpl::AccelerationStructureImpl(
     DeviceContainer* deviceImpl,
     const AccelerationStructureSetup& setup,
-    AccelerationStructureBuildInfo buildInfo,
+    AccelerationStructureInfo info,
     const VkAccelerationStructureBuildSizesInfoKHR& vkBuildSizes,
     Lifeguard<VkAccelerationStructureHandleKHR> accelerationStructureHandle,
     BufferView backingBufferView,
@@ -18,14 +18,13 @@ AccelerationStructureImpl::AccelerationStructureImpl(
       backingBufferView(backingBufferView),
       backingBufferOwningPtr(std::move(backingBufferOwningPtr)) {}
 
-AccelerationStructureBuildInfo AccelerationStructureImpl::prepareBuildInfoForSizeQuery(
-    const AccelerationStructureSetup& setup) {
+AccelerationStructureInfo AccelerationStructureImpl::prepareInfoForSizeQuery(const AccelerationStructureSetup& setup) {
     // Prepare geometry template
     VkAccelerationStructureGeometryKHR geomTemplate;
     geomTemplate.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR;
     geomTemplate.pNext = nullptr;
 
-    AccelerationStructureBuildInfo info;
+    AccelerationStructureInfo info;
     info.geomInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_GEOMETRY_INFO_KHR;
     info.geomInfo.pNext = nullptr;
     info.geomInfo.type = vkCastConvertibleEnum(setup.type);
@@ -101,6 +100,12 @@ AccelerationStructureBuildInfo AccelerationStructureImpl::prepareBuildInfoForSiz
     info.geomInfo.scratchData = MakeDeviceAddress();
 
     return info;
+}
+
+AccelerationStructureImpl& AccelerationStructureImpl::getAccelerationStructureImpl(
+    const AccelerationStructureView& asView) {
+    TEPHRA_ASSERT(asView.accelerationStructure != nullptr);
+    return *asView.accelerationStructure;
 }
 
 }

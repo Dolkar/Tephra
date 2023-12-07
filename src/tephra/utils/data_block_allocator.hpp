@@ -1,6 +1,7 @@
 #pragma once
 
 #include "math.hpp"
+#include <tephra/tools/array.hpp>
 #include <deque>
 #include <memory>
 
@@ -26,7 +27,7 @@ public:
         // Suballocate from the static sized blocks
         std::size_t padding = tailOffset % AlignSize == 0 ? 0 : AlignSize - (tailOffset % AlignSize);
 
-        // Switch to the next tail block
+        // Switch to the next block
         if (tailOffset + padding + requiredSize > BlockSize) {
             tailBlock++;
             tailOffset = 0;
@@ -43,6 +44,22 @@ public:
         tailOffset += requiredSize;
 
         return ptr;
+    }
+
+    // Helper that copies the given array to the allocator and returns a view to it
+    template <typename T>
+    ArrayView<T> copyArray(ArrayParameter<const T> data) {
+        if (data.empty())
+            return {};
+
+        T* ptr = allocate<T>(data.size());
+        ArrayView<T> copyView = ArrayView<T>(ptr, data.size());
+
+        for (auto& element : data) {
+            new (ptr++) T{ element };
+        }
+
+        return copyView;
     }
 
     // Makes the allocator start anew, overwriting the previously allocated memory

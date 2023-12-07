@@ -361,15 +361,16 @@ OwningPtr<AccelerationStructure> Device::allocateAccelerationStructure(
     auto deviceImpl = static_cast<DeviceContainer*>(this);
     TEPHRA_DEBUG_SET_CONTEXT(deviceImpl->getDebugTarget(), "allocateAccelerationStructure", debugName);
 
-    auto buildInfo = AccelerationStructureImpl::prepareBuildInfoForSizeQuery(setup);
+    auto asInfo = AccelerationStructureImpl::prepareInfoForSizeQuery(setup);
     auto vkBuildSizes = deviceImpl->getLogicalDevice()->getAccelerationStructureBuildSizes(
-        buildInfo.geomInfo, buildInfo.maxPrimitiveCounts.data());
+        asInfo.geomInfo, asInfo.maxPrimitiveCounts.data());
 
     // Create backing buffer to hold the AS
     auto backingBufferSetup = BufferSetup(
         vkBuildSizes.accelerationStructureSize,
         BufferUsageMask::None(),
-        VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR);
+        VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR,
+        256);
     auto [bufferHandleLifeguard, allocationHandleLifeguard] = deviceImpl->getMemoryAllocator()->allocateBuffer(
         backingBufferSetup, MemoryPreference::Device);
     auto backingBuffer = OwningPtr<Buffer>(new BufferImpl(
@@ -383,16 +384,16 @@ OwningPtr<AccelerationStructure> Device::allocateAccelerationStructure(
         deviceImpl->getLogicalDevice()->createAccelerationStructureKHR(backingBuffer->getDefaultView(), setup.type));
     auto debugTarget = DebugTarget(deviceImpl->getDebugTarget(), AccelerationStructureTypeName, debugName);
 
+    BufferView backingBufferView = backingBuffer->getDefaultView();
     auto accelerationStructure = OwningPtr<AccelerationStructure>(new AccelerationStructureImpl(
         deviceImpl,
         setup,
-        std::move(buildInfo),
+        std::move(asInfo),
         vkBuildSizes,
         std::move(accelerationStructureLifeguard),
-        backingBuffer->getDefaultView(),
+        backingBufferView,
         std::move(backingBuffer),
-        std::move(debugTarget)
-    ));
+        std::move(debugTarget)));
 
     return accelerationStructure;
 }

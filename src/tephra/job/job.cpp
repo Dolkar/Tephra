@@ -4,6 +4,7 @@
 #include "render_pass.hpp"
 #include "../device/device_container.hpp"
 #include "../swapchain_impl.hpp"
+#include "../acceleration_structure_impl.hpp"
 #include <tephra/job.hpp>
 
 namespace tp {
@@ -195,18 +196,9 @@ void Job::cmdCopyBuffer(
     markResourceUsage(jobData, srcBuffer);
     markResourceUsage(jobData, dstBuffer);
 
-    BufferCopyRegion* copyRegionsData = jobData->record.cmdBuffer.allocate<BufferCopyRegion>(copyRegions.size());
-
+    ArrayView<BufferCopyRegion> copyRegionsData = jobData->record.cmdBuffer.copyArray(copyRegions);
     recordCommand<JobRecordStorage::CopyBufferData>(
-        jobData->record,
-        JobCommandTypes::CopyBuffer,
-        srcBuffer,
-        dstBuffer,
-        ArrayView<BufferCopyRegion>(copyRegionsData, copyRegions.size()));
-
-    for (auto& region : copyRegions) {
-        new (copyRegionsData++) BufferCopyRegion{ region };
-    }
+        jobData->record, JobCommandTypes::CopyBuffer, srcBuffer, dstBuffer, copyRegionsData);
 }
 
 void Job::cmdCopyImage(
@@ -218,18 +210,9 @@ void Job::cmdCopyImage(
     markResourceUsage(jobData, srcImage);
     markResourceUsage(jobData, dstImage);
 
-    ImageCopyRegion* copyRegionsData = jobData->record.cmdBuffer.allocate<ImageCopyRegion>(copyRegions.size());
-
+    ArrayView<ImageCopyRegion> copyRegionsData = jobData->record.cmdBuffer.copyArray(copyRegions);
     recordCommand<JobRecordStorage::CopyImageData>(
-        jobData->record,
-        JobCommandTypes::CopyImage,
-        srcImage,
-        dstImage,
-        ArrayView<ImageCopyRegion>(copyRegionsData, copyRegions.size()));
-
-    for (auto& region : copyRegions) {
-        new (copyRegionsData++) ImageCopyRegion{ region };
-    }
+        jobData->record, JobCommandTypes::CopyImage, srcImage, dstImage, copyRegionsData);
 }
 
 void Job::cmdCopyBufferToImage(
@@ -242,9 +225,9 @@ void Job::cmdCopyBufferToImage(
         // check buffer usage for ImageTransfer
         const tp::BufferSetup* bufSetup;
         if (srcBuffer.viewsJobLocalBuffer()) {
-            bufSetup = &JobLocalBufferImpl::getBufferImpl(srcBuffer)->getBufferSetup();
+            bufSetup = &JobLocalBufferImpl::getBufferImpl(srcBuffer).getBufferSetup();
         } else {
-            bufSetup = &BufferImpl::getBufferImpl(srcBuffer)->getBufferSetup();
+            bufSetup = &BufferImpl::getBufferImpl(srcBuffer).getBufferSetup();
         }
         if (!bufSetup->usage.contains(BufferUsage::ImageTransfer)) {
             reportDebugMessage(
@@ -257,19 +240,9 @@ void Job::cmdCopyBufferToImage(
     markResourceUsage(jobData, srcBuffer);
     markResourceUsage(jobData, dstImage);
 
-    BufferImageCopyRegion* copyRegionsData = jobData->record.cmdBuffer.allocate<BufferImageCopyRegion>(
-        copyRegions.size());
-
+    ArrayView<BufferImageCopyRegion> copyRegionsData = jobData->record.cmdBuffer.copyArray(copyRegions);
     recordCommand<JobRecordStorage::CopyBufferImageData>(
-        jobData->record,
-        JobCommandTypes::CopyBufferToImage,
-        srcBuffer,
-        dstImage,
-        ArrayView<BufferImageCopyRegion>(copyRegionsData, copyRegions.size()));
-
-    for (auto& region : copyRegions) {
-        new (copyRegionsData++) BufferImageCopyRegion{ region };
-    }
+        jobData->record, JobCommandTypes::CopyBufferToImage, srcBuffer, dstImage, copyRegionsData);
 }
 
 void Job::cmdCopyImageToBuffer(
@@ -282,9 +255,9 @@ void Job::cmdCopyImageToBuffer(
         // check buffer usage for ImageTransfer
         const tp::BufferSetup* bufSetup;
         if (dstBuffer.viewsJobLocalBuffer()) {
-            bufSetup = &JobLocalBufferImpl::getBufferImpl(dstBuffer)->getBufferSetup();
+            bufSetup = &JobLocalBufferImpl::getBufferImpl(dstBuffer).getBufferSetup();
         } else {
-            bufSetup = &BufferImpl::getBufferImpl(dstBuffer)->getBufferSetup();
+            bufSetup = &BufferImpl::getBufferImpl(dstBuffer).getBufferSetup();
         }
         if (!bufSetup->usage.contains(BufferUsage::ImageTransfer)) {
             reportDebugMessage(
@@ -297,19 +270,9 @@ void Job::cmdCopyImageToBuffer(
     markResourceUsage(jobData, srcImage);
     markResourceUsage(jobData, dstBuffer);
 
-    BufferImageCopyRegion* copyRegionsData = jobData->record.cmdBuffer.allocate<BufferImageCopyRegion>(
-        copyRegions.size());
-
+    ArrayView<BufferImageCopyRegion> copyRegionsData = jobData->record.cmdBuffer.copyArray(copyRegions);
     recordCommand<JobRecordStorage::CopyBufferImageData>(
-        jobData->record,
-        JobCommandTypes::CopyImageToBuffer,
-        dstBuffer,
-        srcImage,
-        ArrayView<BufferImageCopyRegion>(copyRegionsData, copyRegions.size()));
-
-    for (auto& region : copyRegions) {
-        new (copyRegionsData++) BufferImageCopyRegion{ region };
-    }
+        jobData->record, JobCommandTypes::CopyImageToBuffer, dstBuffer, srcImage, copyRegionsData);
 }
 
 void Job::cmdBlitImage(
@@ -322,19 +285,9 @@ void Job::cmdBlitImage(
     markResourceUsage(jobData, srcImage);
     markResourceUsage(jobData, dstImage);
 
-    ImageBlitRegion* blitRegionsData = jobData->record.cmdBuffer.allocate<ImageBlitRegion>(blitRegions.size());
-
+    ArrayView<ImageBlitRegion> blitRegionsData = jobData->record.cmdBuffer.copyArray(blitRegions);
     recordCommand<JobRecordStorage::BlitImageData>(
-        jobData->record,
-        JobCommandTypes::BlitImage,
-        srcImage,
-        dstImage,
-        ArrayView<ImageBlitRegion>(blitRegionsData, blitRegions.size()),
-        filter);
-
-    for (auto& region : blitRegions) {
-        new (blitRegionsData++) ImageBlitRegion{ region };
-    }
+        jobData->record, JobCommandTypes::BlitImage, srcImage, dstImage, blitRegionsData, filter);
 }
 
 void Job::cmdClearImage(const ImageView& dstImage, ClearValue value) {
@@ -346,18 +299,9 @@ void Job::cmdClearImage(const ImageView& dstImage, ClearValue value, ArrayParame
 
     markResourceUsage(jobData, dstImage);
 
-    ImageSubresourceRange* rangesData = jobData->record.cmdBuffer.allocate<ImageSubresourceRange>(ranges.size());
-
+    ArrayView<ImageSubresourceRange> rangesData = jobData->record.cmdBuffer.copyArray(ranges);
     recordCommand<JobRecordStorage::ClearImageData>(
-        jobData->record,
-        JobCommandTypes::ClearImage,
-        dstImage,
-        value,
-        ArrayView<ImageSubresourceRange>(rangesData, ranges.size()));
-
-    for (auto& range : ranges) {
-        new (rangesData++) ImageSubresourceRange{ range };
-    }
+        jobData->record, JobCommandTypes::ClearImage, dstImage, value, rangesData);
 }
 
 void Job::cmdResolveImage(
@@ -370,18 +314,10 @@ void Job::cmdResolveImage(
     markResourceUsage(jobData, dstImage);
 
     // Reuse copy image data since it's identical for resolve
-    ImageCopyRegion* resolveRegionsData = jobData->record.cmdBuffer.allocate<ImageCopyRegion>(resolveRegions.size());
+    ArrayView<ImageCopyRegion> resolveRegionsData = jobData->record.cmdBuffer.copyArray(resolveRegions);
 
     recordCommand<JobRecordStorage::CopyImageData>(
-        jobData->record,
-        JobCommandTypes::ResolveImage,
-        srcImage,
-        dstImage,
-        ArrayView<ImageCopyRegion>(resolveRegionsData, resolveRegions.size()));
-
-    for (auto& region : resolveRegions) {
-        new (resolveRegionsData++) ImageCopyRegion{ region };
-    }
+        jobData->record, JobCommandTypes::ResolveImage, srcImage, dstImage, resolveRegionsData);
 }
 
 void Job::cmdExecuteComputePass(
@@ -479,10 +415,10 @@ void Job::cmdEndDebugLabel() {
         recordCommand<JobRecordStorage::DebugLabelData>(jobData->record, JobCommandTypes::EndDebugLabel, nullptr);
 }
 
-void Job::cmdBuildAccelerationStructures(ArrayParameter<AccelerationStructureBuildInfo> buildInfos) {
+void Job::cmdBuildAccelerationStructures(ArrayParameter<const AccelerationStructureBuildInfo> buildInfos) {
     TEPHRA_DEBUG_SET_CONTEXT(debugTarget.get(), "cmdBuildAccelerationStructures", nullptr);
 
-    // Mark all buffers used
+    // Mark all buffers as used
     for (const AccelerationStructureBuildInfo& buildInfo : buildInfos) {
         markResourceUsage(jobData, buildInfo.dstView.getBackingBufferView());
 
@@ -504,6 +440,33 @@ void Job::cmdBuildAccelerationStructures(ArrayParameter<AccelerationStructureBui
             markResourceUsage(jobData, aabbs.aabbBuffer);
         }
     }
+
+    // Also allocate scratch buffers for the build operations and also mark them as used
+    ScratchVector<BufferView> scratchBuffers;
+    scratchBuffers.reserve(buildInfos.size());
+    for (const AccelerationStructureBuildInfo& buildInfo : buildInfos) {
+        auto& asImpl = AccelerationStructureImpl::getAccelerationStructureImpl(buildInfo.dstView);
+        uint64_t scratchBufferSize = asImpl.getScratchBufferSize(buildInfo.mode);
+
+        auto scratchBufferSetup = BufferSetup(
+            scratchBufferSize, BufferUsage::StorageBuffer | BufferUsage::DeviceAddress, 0, 256);
+        BufferView scratchBuffer = jobData->resources.localBuffers.acquireNewBuffer(scratchBufferSetup, nullptr);
+        markResourceUsage(jobData, scratchBuffer);
+        scratchBuffers.push_back(scratchBuffer);
+    }
+
+    // Make a deep copy of the buildInfos array inside the command buffer
+    ArrayView<AccelerationStructureBuildInfo> buildInfosData = jobData->record.cmdBuffer.copyArray(buildInfos);
+
+    for (AccelerationStructureBuildInfo& buildInfoData : buildInfosData) {
+        buildInfoData.triangleGeometries = jobData->record.cmdBuffer.copyArray<TriangleGeometryBuildInfo>(
+            buildInfoData.triangleGeometries);
+        buildInfoData.aabbGeometries = jobData->record.cmdBuffer.copyArray<AABBGeometryBuildInfo>(
+            buildInfoData.aabbGeometries);
+    }
+
+    recordCommand<JobRecordStorage::BuildAccelerationStructuresData>(
+        jobData->record, JobCommandTypes::BuildAccelerationStructures, buildInfosData, scratchBuffers);
 }
 
 void Job::vkCmdImportExternalResource(

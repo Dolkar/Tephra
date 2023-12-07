@@ -6,14 +6,14 @@
 
 namespace tp {
 
-struct AccelerationStructureBuildInfo {
+struct AccelerationStructureInfo {
     VkAccelerationStructureBuildGeometryInfoKHR geomInfo;
     std::vector<VkAccelerationStructureGeometryKHR> geoms;
     std::vector<uint32_t> maxPrimitiveCounts;
 
-    AccelerationStructureBuildInfo() = default;
-    TEPHRA_MAKE_NONCOPYABLE(AccelerationStructureBuildInfo);
-    TEPHRA_MAKE_MOVABLE_DEFAULT(AccelerationStructureBuildInfo);
+    AccelerationStructureInfo() = default;
+    TEPHRA_MAKE_NONCOPYABLE(AccelerationStructureInfo);
+    TEPHRA_MAKE_MOVABLE_DEFAULT(AccelerationStructureInfo);
 };
 
 class AccelerationStructureImpl : public AccelerationStructure {
@@ -21,17 +21,19 @@ public:
     AccelerationStructureImpl(
         DeviceContainer* deviceImpl,
         const AccelerationStructureSetup& setup,
-        AccelerationStructureBuildInfo buildInfo,
+        AccelerationStructureInfo info,
         const VkAccelerationStructureBuildSizesInfoKHR& vkBuildSizes,
         Lifeguard<VkAccelerationStructureHandleKHR> accelerationStructureHandle,
         BufferView backingBufferView,
         OwningPtr<Buffer> backingBufferOwningPtr,
         DebugTarget debugTarget);
 
-    // Prepares build info with only enough information needed to query the required size
-    static AccelerationStructureBuildInfo prepareBuildInfoForSizeQuery(const AccelerationStructureSetup& setup);
+    uint64_t getScratchBufferSize(AccelerationStructureBuildMode buildMode);
 
-    static AccelerationStructureImpl* getViewImpl(const AccelerationStructureView& asView);
+    // Prepares build info with only enough information needed to query the required size
+    static AccelerationStructureInfo prepareInfoForSizeQuery(const AccelerationStructureSetup& setup);
+
+    static AccelerationStructureImpl& getAccelerationStructureImpl(const AccelerationStructureView& asView);
 
 private:
     static VkDeviceOrHostAddressKHR MakeDeviceAddress(VkDeviceAddress address = 0) {

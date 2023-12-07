@@ -61,7 +61,7 @@ public:
     // Translates view of the local buffer to a view of the underlying resource.
     static BufferView getViewToUnderlyingBuffer(const BufferView& bufferView);
 
-    static JobLocalBufferImpl* getBufferImpl(const BufferView& bufferView);
+    static JobLocalBufferImpl& getBufferImpl(const BufferView& bufferView);
 
 private:
     DebugTarget debugTarget;

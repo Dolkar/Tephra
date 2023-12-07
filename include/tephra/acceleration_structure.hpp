@@ -137,7 +137,7 @@ struct AccelerationStructureBuildInfo {
     AccelerationStructureView dstView;
     InstanceGeometryBuildInfo instanceGeometry;
     ArrayView<const TriangleGeometryBuildInfo> triangleGeometries;
-    ArrayView<const AABBGeometrySetup> aabbGeometries;
+    ArrayView<const AABBGeometryBuildInfo> aabbGeometries;
     AccelerationStructureView srcView;
 
     static AccelerationStructureBuildInfo TopLevel(
@@ -150,7 +150,7 @@ struct AccelerationStructureBuildInfo {
         AccelerationStructureBuildMode mode,
         AccelerationStructureView dstView,
         ArrayView<const TriangleGeometryBuildInfo> triangleGeometries,
-        ArrayView<const AABBGeometrySetup> aabbGeometries,
+        ArrayView<const AABBGeometryBuildInfo> aabbGeometries,
         AccelerationStructureView srcView = {});
 };
 

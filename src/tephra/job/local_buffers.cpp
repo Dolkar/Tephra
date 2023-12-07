@@ -39,7 +39,7 @@ DeviceAddress JobLocalBufferImpl::getDeviceAddress() const {
 }
 
 uint64_t JobLocalBufferImpl::getRequiredViewAlignment() const {
-    return BufferImpl::getRequiredViewAlignment_(deviceImpl, bufferSetup.usage);
+    return BufferImpl::getRequiredViewAlignment_(deviceImpl, bufferSetup.usage, bufferSetup.additionalAlignment);
 }
 
 void JobLocalBufferImpl::createPendingBufferViews(std::deque<BufferView>& jobPendingBufferViews) {
@@ -66,9 +66,10 @@ BufferView JobLocalBufferImpl::getViewToUnderlyingBuffer(const BufferView& buffe
     return BufferView(underlyingBuffer, finalOffset, bufferView.size, bufferView.format);
 }
 
-JobLocalBufferImpl* JobLocalBufferImpl::getBufferImpl(const BufferView& bufferView) {
+JobLocalBufferImpl& JobLocalBufferImpl::getBufferImpl(const BufferView& bufferView) {
     TEPHRA_ASSERT(bufferView.viewsJobLocalBuffer());
-    return bufferView.jobLocalBuffer;
+    TEPHRA_ASSERT(bufferView.jobLocalBuffer != nullptr);
+    return *bufferView.jobLocalBuffer;
 }
 
 BufferView JobLocalBuffers::acquireNewBuffer(BufferSetup setup, const char* debugName) {
@@ -90,7 +91,7 @@ void JobLocalBuffers::markBufferUsage(const BufferView& bufferView, uint64_t usa
 }
 
 uint64_t JobLocalBuffers::getLocalBufferIndex(const BufferView& bufferView) const {
-    return JobLocalBufferImpl::getBufferImpl(bufferView)->getLocalIndex();
+    return JobLocalBufferImpl::getBufferImpl(bufferView).getLocalIndex();
 }
 
 const ResourceUsageRange& JobLocalBuffers::getBufferUsage(const BufferView& bufferView) const {

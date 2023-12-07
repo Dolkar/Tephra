@@ -108,16 +108,22 @@ HostMappedMemory BufferImpl::mapViewForHostAccess(const BufferView& bufferView, 
     return HostMappedMemory(bufferView.persistentBuffer, bufferView.offset, bufferView.size, accessType);
 }
 
-BufferImpl* BufferImpl::getBufferImpl(const BufferView& bufferView) {
+BufferImpl& BufferImpl::getBufferImpl(const BufferView& bufferView) {
     TEPHRA_ASSERT(!bufferView.viewsJobLocalBuffer());
-    return bufferView.persistentBuffer;
+    TEPHRA_ASSERT(bufferView.persistentBuffer != nullptr);
+    return *bufferView.persistentBuffer;
 }
 
-uint64_t BufferImpl::getRequiredViewAlignment_(const DeviceContainer* deviceImpl, BufferUsageMask usage) {
+uint64_t BufferImpl::getRequiredViewAlignment_(
+    const DeviceContainer* deviceImpl,
+    BufferUsageMask usage,
+    uint32_t userAlignment) {
     const VkPhysicalDeviceLimits& deviceLimits = deviceImpl->getPhysicalDevice()
                                                      ->vkQueryProperties<VkPhysicalDeviceLimits>();
 
     uint64_t alignment = 4; // General minimum alignment
+    alignment = tp::max(alignment, static_cast<uint64_t>(userAlignment));
+
     if (usage.contains(BufferUsage::ImageTransfer)) {
         // Buffer-Image copies require alignment to match texel block size. As there is no way for us to know
         // what sort of copies will be done with the buffer, so let's be conservative

@@ -196,6 +196,7 @@ struct BufferSetup {
     uint64_t size;
     BufferUsageMask usage;
     VkBufferUsageFlags vkAdditionalUsage;
+    uint32_t additionalAlignment;
 
     /// @param size
     ///     The size of the new buffer in bytes.
@@ -203,8 +204,15 @@ struct BufferSetup {
     ///     A mask of tp::BufferUsage specifying the permitted set of usages of the new buffer.
     /// @param vkAdditionalUsage
     ///     A mask of additional Vulkan usage flags that will be passed to @vksymbol{VkBufferCreateInfo}.
-    BufferSetup(uint64_t size, BufferUsageMask usage, VkBufferUsageFlags vkAdditionalUsage = 0)
-        : size(size), usage(usage), vkAdditionalUsage(vkAdditionalUsage) {}
+    /// @param additionalAlignment
+    ///     Extra user-specified alignment that should be taken into account for this buffer and its views.
+    ///     Must be a power of two.
+    BufferSetup(
+        uint64_t size,
+        BufferUsageMask usage,
+        VkBufferUsageFlags vkAdditionalUsage = 0,
+        uint32_t additionalAlignment = 1)
+        : size(size), usage(usage), vkAdditionalUsage(vkAdditionalUsage), additionalAlignment(additionalAlignment) {}
 };
 
 /// Represents a linear array of data visible to the device.

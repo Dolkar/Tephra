@@ -94,9 +94,10 @@ VkImageViewHandle ImageImpl::vkGetImageViewHandle(const ImageView& imageView) {
     }
 }
 
-ImageImpl* ImageImpl::getImageImpl(const ImageView& imageView) {
+ImageImpl& ImageImpl::getImageImpl(const ImageView& imageView) {
     TEPHRA_ASSERT(!imageView.viewsJobLocalImage());
-    return imageView.persistentImage;
+    TEPHRA_ASSERT(imageView.persistentImage != nullptr);
+    return *imageView.persistentImage;
 }
 
 ImageViewSetup ImageImpl::getDefaultViewSetup(const ImageSetup& imageSetup) {

@@ -62,7 +62,7 @@ public:
     }
 
     uint64_t getRequiredViewAlignment_() const {
-        return getRequiredViewAlignment_(deviceImpl, bufferSetup.usage);
+        return getRequiredViewAlignment_(deviceImpl, bufferSetup.usage, bufferSetup.additionalAlignment);
     }
 
     void* beginHostAccess(uint64_t offset, uint64_t size, MemoryAccess accessType);
@@ -90,9 +90,12 @@ public:
 
     static HostMappedMemory mapViewForHostAccess(const BufferView& bufferView, MemoryAccess accessType);
 
-    static BufferImpl* getBufferImpl(const BufferView& bufferView);
+    static BufferImpl& getBufferImpl(const BufferView& bufferView);
 
-    static uint64_t getRequiredViewAlignment_(const DeviceContainer* deviceImpl, BufferUsageMask usage);
+    static uint64_t getRequiredViewAlignment_(
+        const DeviceContainer* deviceImpl,
+        BufferUsageMask usage,
+        uint32_t userAlignment);
 
     TEPHRA_MAKE_NONCOPYABLE(BufferImpl);
     TEPHRA_MAKE_NONMOVABLE(BufferImpl);

@@ -36,7 +36,8 @@ void JobLocalBufferAllocator::allocateJobBuffers(
         assignInfo.firstUsage = bufLocalUsage.firstUsage;
         assignInfo.lastUsage = bufLocalUsage.lastUsage;
         assignInfo.size = bufferSetup.size;
-        assignInfo.usageMask = bufferSetup.usage;
+        assignInfo.alignment = BufferImpl::getRequiredViewAlignment_(
+            deviceImpl, bufferSetup.usage, bufferSetup.additionalAlignment);
         assignInfo.resourcePtr = &bufferResources->buffers[i];
         assignInfos.push_back(assignInfo);
     }
@@ -89,7 +90,7 @@ std::unique_ptr<Buffer> JobLocalBufferAllocator::allocateBackingBuffer(
     // provided that the allocated buffers are large enough.
     BufferUsageMask usageMask = BufferUsage::ImageTransfer | BufferUsage::HostMapped | BufferUsage::TexelBuffer |
         BufferUsage::UniformBuffer | BufferUsage::StorageBuffer | BufferUsage::IndexBuffer | BufferUsage::VertexBuffer |
-        BufferUsage::IndirectBuffer;
+        BufferUsage::IndirectBuffer | BufferUsage::AccelerationStructureInputKHR;
     if (deviceImpl->getLogicalDevice()->isFunctionalityAvailable(tp::Functionality::BufferDeviceAddress))
         usageMask |= BufferUsage::DeviceAddress;
 
@@ -128,10 +129,8 @@ uint64_t JobLocalBufferAllocator::allocateJobBufferGroup(
     uint64_t leftoverSize = 0;
 
     for (int i = 0; i < buffersToAlloc.size(); i++) {
-        uint64_t requiredAlignment = BufferImpl::getRequiredViewAlignment_(deviceImpl, buffersToAlloc[i].usageMask);
-
         auto [backingBufferIndex, offset] = suballocator.allocate(
-            buffersToAlloc[i].size, ResourceUsageRange(buffersToAlloc[i]), requiredAlignment);
+            buffersToAlloc[i].size, ResourceUsageRange(buffersToAlloc[i]), buffersToAlloc[i].alignment);
         if (backingBufferIndex < backingBuffers.size()) {
             // The allocation fits - assign and update timestamp
             auto& [backingBuffer, lastUseTimestamp] = backingBuffers[backingBufferIndex];

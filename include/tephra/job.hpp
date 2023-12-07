@@ -539,7 +539,7 @@ public:
     ///     The call will have no effect when tp::ApplicationExtension::EXT_DebugUtils is not enabled.
     void cmdEndDebugLabel();
 
-    void cmdBuildAccelerationStructures(ArrayParameter<AccelerationStructureBuildInfo> buildInfos);
+    void cmdBuildAccelerationStructures(ArrayParameter<const AccelerationStructureBuildInfo> buildInfos);
 
     /// Updates the internal synchronization state for the buffer view to the given external access.
     ///

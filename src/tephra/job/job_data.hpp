@@ -193,6 +193,16 @@ struct JobRecordStorage {
         }
     };
 
+    struct BuildAccelerationStructuresData {
+        ArrayView<AccelerationStructureBuildInfo> buildInfos;
+        ArrayView<BufferView> scratchBuffers;
+
+        BuildAccelerationStructuresData(
+            ArrayView<AccelerationStructureBuildInfo> buildInfos,
+            ArrayView<BufferView> scratchBuffers)
+            : buildInfos(buildInfos), scratchBuffers(scratchBuffers) {}
+    };
+
     void clear();
 
     uint64_t commandCount = 0;

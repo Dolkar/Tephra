@@ -240,7 +240,7 @@ VkBufferHandle Buffer::vkGetBufferHandle() const {
 
 uint64_t Buffer::getRequiredViewAlignment(const Device* device, BufferUsageMask usage) {
     auto deviceImpl = static_cast<const DeviceContainer*>(device);
-    return BufferImpl::getRequiredViewAlignment_(deviceImpl, usage);
+    return BufferImpl::getRequiredViewAlignment_(deviceImpl, usage, 1);
 }
 
 BufferImpl::~BufferImpl() {

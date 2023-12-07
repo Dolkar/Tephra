@@ -30,7 +30,7 @@ AccelerationStructureBuildInfo AccelerationStructureBuildInfo::BottomLevel(
     AccelerationStructureBuildMode mode,
     AccelerationStructureView dstView,
     ArrayView<const TriangleGeometryBuildInfo> triangleGeometries,
-    ArrayView<const AABBGeometrySetup> aabbGeometries,
+    ArrayView<const AABBGeometryBuildInfo> aabbGeometries,
     AccelerationStructureView srcView) {
     return { mode, dstView, InstanceGeometryBuildInfo({}), triangleGeometries, aabbGeometries, srcView };
 }
