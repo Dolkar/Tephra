@@ -6,50 +6,74 @@
 
 namespace tp {
 
-struct AccelerationStructureInfo {
-    VkAccelerationStructureBuildGeometryInfoKHR geomInfo;
-    std::vector<VkAccelerationStructureGeometryKHR> geoms;
-    std::vector<uint32_t> maxPrimitiveCounts;
+class AccelerationStructureBuilder {
+public:
+    AccelerationStructureBuilder() = default;
+    AccelerationStructureBuilder(DeviceContainer* deviceImpl, const AccelerationStructureSetup& setup);
 
-    AccelerationStructureInfo() = default;
-    TEPHRA_MAKE_NONCOPYABLE(AccelerationStructureInfo);
-    TEPHRA_MAKE_MOVABLE_DEFAULT(AccelerationStructureInfo);
+    TEPHRA_MAKE_NONCOPYABLE(AccelerationStructureBuilder);
+    TEPHRA_MAKE_MOVABLE_DEFAULT(AccelerationStructureBuilder);
+
+    uint64_t getStorageSize() const {
+        return vkBuildSizes.accelerationStructureSize;
+    }
+
+    uint64_t getScratchBufferSize(AccelerationStructureBuildMode buildMode) const {
+        if (buildMode == AccelerationStructureBuildMode::Build)
+            return vkBuildSizes.buildScratchSize;
+        else
+            return vkBuildSizes.updateScratchSize;
+    }
+
+    std::pair<VkAccelerationStructureBuildGeometryInfoKHR, const VkAccelerationStructureBuildRangeInfoKHR*> prepareBuild(
+        const AccelerationStructureBuildInfo& buildInfo,
+        const BufferView& scratchBuffer);
+
+private:
+    // Initializes the geometries and maxPrimitiveCounts array with null resources from setup structure
+    void initGeometries(const AccelerationStructureSetup& setup);
+    // Makes the Vulkan build info structure with null resources from setup structure
+    VkAccelerationStructureBuildGeometryInfoKHR makeVkBuildInfo(
+        AccelerationStructureBuildMode buildMode = AccelerationStructureBuildMode::Build) const;
+
+    AccelerationStructureType type;
+    AccelerationStructureBuildFlagMask buildFlags;
+    std::vector<VkAccelerationStructureGeometryKHR> vkGeometries;
+    std::vector<uint32_t> maxPrimitiveCounts;
+    std::vector<VkAccelerationStructureBuildRangeInfoKHR> vkBuildRanges;
+    VkAccelerationStructureBuildSizesInfoKHR vkBuildSizes;
 };
 
 class AccelerationStructureImpl : public AccelerationStructure {
 public:
     AccelerationStructureImpl(
         DeviceContainer* deviceImpl,
-        const AccelerationStructureSetup& setup,
-        AccelerationStructureInfo info,
-        const VkAccelerationStructureBuildSizesInfoKHR& vkBuildSizes,
+        AccelerationStructureBuilder builder,
         Lifeguard<VkAccelerationStructureHandleKHR> accelerationStructureHandle,
-        BufferView backingBufferView,
-        OwningPtr<Buffer> backingBufferOwningPtr,
+        OwningPtr<Buffer> backingBuffer,
         DebugTarget debugTarget);
 
-    uint64_t getScratchBufferSize(AccelerationStructureBuildMode buildMode);
+    AccelerationStructureBuilder& getBuilder() {
+        return builder;
+    }
 
-    // Prepares build info with only enough information needed to query the required size
-    static AccelerationStructureInfo prepareInfoForSizeQuery(const AccelerationStructureSetup& setup);
+    DeviceAddress getDeviceAddress_() const {
+        return deviceAddress;
+    }
+
+    VkAccelerationStructureHandleKHR vkGetHandle() const {
+        return accelerationStructureHandle.vkGetHandle();
+    }
 
     static AccelerationStructureImpl& getAccelerationStructureImpl(const AccelerationStructureView& asView);
 
 private:
-    static VkDeviceOrHostAddressKHR MakeDeviceAddress(VkDeviceAddress address = 0) {
-        return { address };
-    }
-
-    static VkDeviceOrHostAddressConstKHR MakeConstDeviceAddress(VkDeviceAddress address = 0) {
-        return { address };
-    }
-
     DebugTarget debugTarget;
     DeviceContainer* deviceImpl;
+    AccelerationStructureBuilder builder;
     Lifeguard<VkAccelerationStructureHandleKHR> accelerationStructureHandle;
-    BufferView backingBufferView;
-    // Optional owning reference to the backing pointer. The AS may but does not have to own its backing buffer.
-    OwningPtr<Buffer> backingBufferOwningPtr;
+    OwningPtr<Buffer> backingBuffer;
+    DeviceAddress deviceAddress;
 };
 
 }

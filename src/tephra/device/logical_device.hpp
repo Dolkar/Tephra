@@ -192,6 +192,9 @@ public:
         const VkAccelerationStructureBuildGeometryInfoKHR& vkBuildInfo,
         const uint32_t* pMaxPrimitiveCounts);
 
+    DeviceAddress getAccelerationStructureDeviceAddress(
+        VkAccelerationStructureHandleKHR vkAccelerationStructureHandle) const;
+
     template <typename Interface>
     Interface loadDeviceInterface() const {
         return instance->loadDeviceInterface<Interface>(vkDeviceHandle);

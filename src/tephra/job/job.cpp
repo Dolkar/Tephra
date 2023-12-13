@@ -418,6 +418,19 @@ void Job::cmdEndDebugLabel() {
 void Job::cmdBuildAccelerationStructures(ArrayParameter<const AccelerationStructureBuildInfo> buildInfos) {
     TEPHRA_DEBUG_SET_CONTEXT(debugTarget.get(), "cmdBuildAccelerationStructures", nullptr);
 
+    // Allocate scratch buffers for the build operations
+    ScratchVector<BufferView> scratchBuffers;
+    scratchBuffers.reserve(buildInfos.size());
+    for (const AccelerationStructureBuildInfo& buildInfo : buildInfos) {
+        auto& asImpl = AccelerationStructureImpl::getAccelerationStructureImpl(buildInfo.dstView);
+        uint64_t scratchBufferSize = asImpl.getBuilder().getScratchBufferSize(buildInfo.mode);
+
+        auto scratchBufferSetup = BufferSetup(
+            scratchBufferSize, BufferUsage::StorageBuffer | BufferUsage::DeviceAddress, 0, 256);
+        BufferView scratchBuffer = jobData->resources.localBuffers.acquireNewBuffer(scratchBufferSetup, nullptr);
+        scratchBuffers.push_back(scratchBuffer);
+    }
+
     // Mark all buffers as used
     for (const AccelerationStructureBuildInfo& buildInfo : buildInfos) {
         markResourceUsage(jobData, buildInfo.dstView.getBackingBufferView());
@@ -440,19 +453,8 @@ void Job::cmdBuildAccelerationStructures(ArrayParameter<const AccelerationStruct
             markResourceUsage(jobData, aabbs.aabbBuffer);
         }
     }
-
-    // Also allocate scratch buffers for the build operations and also mark them as used
-    ScratchVector<BufferView> scratchBuffers;
-    scratchBuffers.reserve(buildInfos.size());
-    for (const AccelerationStructureBuildInfo& buildInfo : buildInfos) {
-        auto& asImpl = AccelerationStructureImpl::getAccelerationStructureImpl(buildInfo.dstView);
-        uint64_t scratchBufferSize = asImpl.getScratchBufferSize(buildInfo.mode);
-
-        auto scratchBufferSetup = BufferSetup(
-            scratchBufferSize, BufferUsage::StorageBuffer | BufferUsage::DeviceAddress, 0, 256);
-        BufferView scratchBuffer = jobData->resources.localBuffers.acquireNewBuffer(scratchBufferSetup, nullptr);
+    for (const BufferView& scratchBuffer : scratchBuffers) {
         markResourceUsage(jobData, scratchBuffer);
-        scratchBuffers.push_back(scratchBuffer);
     }
 
     // Make a deep copy of the buildInfos array inside the command buffer

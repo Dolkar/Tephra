@@ -361,13 +361,11 @@ OwningPtr<AccelerationStructure> Device::allocateAccelerationStructure(
     auto deviceImpl = static_cast<DeviceContainer*>(this);
     TEPHRA_DEBUG_SET_CONTEXT(deviceImpl->getDebugTarget(), "allocateAccelerationStructure", debugName);
 
-    auto asInfo = AccelerationStructureImpl::prepareInfoForSizeQuery(setup);
-    auto vkBuildSizes = deviceImpl->getLogicalDevice()->getAccelerationStructureBuildSizes(
-        asInfo.geomInfo, asInfo.maxPrimitiveCounts.data());
+    auto asBuilder = AccelerationStructureBuilder(deviceImpl, setup);
 
     // Create backing buffer to hold the AS
     auto backingBufferSetup = BufferSetup(
-        vkBuildSizes.accelerationStructureSize,
+        asBuilder.getStorageSize(),
         BufferUsageMask::None(),
         VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR,
         256);
@@ -387,9 +385,7 @@ OwningPtr<AccelerationStructure> Device::allocateAccelerationStructure(
     BufferView backingBufferView = backingBuffer->getDefaultView();
     auto accelerationStructure = OwningPtr<AccelerationStructure>(new AccelerationStructureImpl(
         deviceImpl,
-        setup,
-        std::move(asInfo),
-        vkBuildSizes,
+        std::move(asBuilder),
         std::move(accelerationStructureLifeguard),
         backingBufferView,
         std::move(backingBuffer),

@@ -19,7 +19,7 @@ public:
 
     BufferView getBackingBufferView() const;
 
-    VkAccelerationStructureHandleKHR vkResolveAccelerationStructureHandle() const;
+    VkAccelerationStructureHandleKHR vkGetAccelerationStructureHandle() const;
 
 private:
     friend bool operator==(const AccelerationStructureView&, const AccelerationStructureView&);

@@ -3,61 +3,126 @@
 #include "device/device_container.hpp"
 
 namespace tp {
-AccelerationStructureImpl::AccelerationStructureImpl(
-    DeviceContainer* deviceImpl,
-    const AccelerationStructureSetup& setup,
-    AccelerationStructureInfo info,
-    const VkAccelerationStructureBuildSizesInfoKHR& vkBuildSizes,
-    Lifeguard<VkAccelerationStructureHandleKHR> accelerationStructureHandle,
-    BufferView backingBufferView,
-    OwningPtr<Buffer> backingBufferOwningPtr,
-    DebugTarget debugTarget)
-    : debugTarget(std::move(debugTarget)),
-      deviceImpl(deviceImpl),
-      accelerationStructureHandle(std::move(accelerationStructureHandle)),
-      backingBufferView(backingBufferView),
-      backingBufferOwningPtr(std::move(backingBufferOwningPtr)) {}
 
-AccelerationStructureInfo AccelerationStructureImpl::prepareInfoForSizeQuery(const AccelerationStructureSetup& setup) {
+AccelerationStructureBuilder::AccelerationStructureBuilder(
+    DeviceContainer* deviceImpl,
+    const AccelerationStructureSetup& setup)
+    : type(setup.type), buildFlags(setup.buildFlags) {
+    initGeometries(setup);
+
+    // Query acceleration structure sizes
+    VkAccelerationStructureBuildGeometryInfoKHR vkBuildInfo = makeVkBuildInfo();
+    vkBuildSizes = deviceImpl->getLogicalDevice()->getAccelerationStructureBuildSizes(
+        vkBuildInfo, maxPrimitiveCounts.data());
+}
+
+std::pair<VkAccelerationStructureBuildGeometryInfoKHR, const VkAccelerationStructureBuildRangeInfoKHR*>
+AccelerationStructureBuilder::prepareBuild(
+    const AccelerationStructureBuildInfo& buildInfo,
+    const BufferView& scratchBuffer) {
+    VkAccelerationStructureBuildGeometryInfoKHR vkBuildInfo = makeVkBuildInfo(buildInfo.mode);
+
+    if (!buildInfo.srcView.isNull())
+        vkBuildInfo.srcAccelerationStructure =
+            AccelerationStructureImpl::getAccelerationStructureImpl(buildInfo.srcView).vkGetHandle();
+    vkBuildInfo.dstAccelerationStructure = AccelerationStructureImpl::getAccelerationStructureImpl(buildInfo.dstView)
+                                               .vkGetHandle();
+    vkBuildInfo.scratchData = { scratchBuffer.getDeviceAddress() };
+
+    if (type == AccelerationStructureType::TopLevel) {
+        // Instance geometry
+        TEPHRA_ASSERT(vkGeometries.size() == 1);
+        TEPHRA_ASSERT(vkGeometries[0].geometryType = VK_GEOMETRY_TYPE_INSTANCES_KHR);
+        auto& instanceGeom = vkGeometries[0].geometry.instances;
+
+        instanceGeom.arrayOfPointers = buildInfo.instanceGeometry.arrayOfPointers;
+        const BufferView& instanceData = buildInfo.instanceGeometry.instanceBuffer;
+        std::size_t instanceSize = buildInfo.instanceGeometry.arrayOfPointers ?
+            sizeof(DeviceAddress) :
+            sizeof(VkAccelerationStructureInstanceKHR);
+
+        instanceGeom.data = { instanceData.getDeviceAddress() };
+        std::size_t instanceCount = instanceData.getSize() / instanceSize;
+
+        // We never set the offsets in build ranges to anything other than 0
+        vkBuildRanges[0].primitiveCount = static_cast<uint32_t>(instanceCount);
+    } else {
+        std::size_t geometryCount = buildInfo.triangleGeometries.size() + buildInfo.aabbGeometries.size();
+        TEPHRA_ASSERT(vkGeometries.size() == geometryCount);
+
+        std::size_t geomIndex = 0;
+        for (const TriangleGeometryBuildInfo& triInfo : buildInfo.triangleGeometries) {
+            TEPHRA_ASSERT(vkGeometries[geomIndex].geometryType == VK_GEOMETRY_TYPE_TRIANGLES_KHR);
+            auto& triangleGeom = vkGeometries[geomIndex].geometry.triangles;
+
+            triangleGeom.vertexData = { triInfo.vertexBuffer.getDeviceAddress() };
+            triangleGeom.vertexStride = triInfo.vertexStride;
+
+            // Optional buffer views, but getDeviceAddress on a null view returns 0
+            triangleGeom.indexData = { triInfo.indexBuffer.getDeviceAddress() };
+            triangleGeom.transformData = { triInfo.transformBuffer.getDeviceAddress() };
+
+            std::size_t triangleCount;
+            if (!triInfo.indexBuffer.isNull()) {
+                TEPHRA_ASSERT(triangleGeom.indexType != VK_INDEX_TYPE_NONE_KHR);
+                uint32_t indexSize = triangleGeom.indexType == VK_INDEX_TYPE_UINT16 ? 2 : 4;
+                triangleCount = triInfo.indexBuffer.getSize() / (3 * indexSize);
+            } else {
+                triangleCount = (triInfo.vertexBuffer.getSize() - triInfo.firstVertex) / (3 * triInfo.vertexStride);
+            }
+
+            vkBuildRanges[geomIndex].primitiveCount = static_cast<uint32_t>(triangleCount);
+            vkBuildRanges[geomIndex].firstVertex = triInfo.firstVertex;
+            geomIndex++;
+        }
+
+        for (const AABBGeometryBuildInfo& aabbInfo : buildInfo.aabbGeometries) {
+            TEPHRA_ASSERT(vkGeometries[geomIndex].geometryType == VK_GEOMETRY_TYPE_AABBS_KHR);
+            auto& aabbGeom = vkGeometries[geomIndex].geometry.aabbs;
+
+            aabbGeom.data = { aabbInfo.aabbBuffer.getDeviceAddress() };
+            aabbGeom.stride = aabbInfo.stride;
+
+            std::size_t aabbCount = aabbInfo.aabbBuffer.getSize() / aabbInfo.stride;
+            vkBuildRanges[geomIndex].primitiveCount = static_cast<uint32_t>(aabbCount);
+            geomIndex++;
+        }
+    }
+
+    return { vkBuildInfo, vkBuildRanges.data() };
+}
+
+void AccelerationStructureBuilder::initGeometries(const AccelerationStructureSetup& setup) {
+    TEPHRA_ASSERT(vkGeometries.empty());
+    TEPHRA_ASSERT(maxPrimitiveCounts.empty());
+
     // Prepare geometry template
     VkAccelerationStructureGeometryKHR geomTemplate;
     geomTemplate.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR;
     geomTemplate.pNext = nullptr;
 
-    AccelerationStructureInfo info;
-    info.geomInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_GEOMETRY_INFO_KHR;
-    info.geomInfo.pNext = nullptr;
-    info.geomInfo.type = vkCastConvertibleEnum(setup.type);
-    info.geomInfo.flags = vkCastConvertibleEnumMask(setup.buildFlags);
-    info.geomInfo.mode = VK_BUILD_ACCELERATION_STRUCTURE_MODE_BUILD_KHR;
-    info.geomInfo.srcAccelerationStructure = VK_NULL_HANDLE;
-    info.geomInfo.dstAccelerationStructure = VK_NULL_HANDLE;
-
     if (setup.type == AccelerationStructureType::TopLevel) {
-        info.geomInfo.geometryCount = 1;
-
-        VkAccelerationStructureGeometryKHR& geom = info.geoms.emplace_back(geomTemplate);
+        VkAccelerationStructureGeometryKHR& geom = vkGeometries.emplace_back(geomTemplate);
         geom.geometryType = VK_GEOMETRY_TYPE_INSTANCES_KHR;
         geom.flags = vkCastConvertibleEnumMask(setup.instanceGeometry.flags);
         geom.geometry.instances.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_INSTANCES_DATA_KHR;
         geom.geometry.instances.pNext = nullptr;
+
+        // Not set yet:
         geom.geometry.instances.arrayOfPointers = false;
+        geom.geometry.instances.data = { VkDeviceAddress(0) };
 
-        // Not required:
-        geom.geometry.instances.data = MakeConstDeviceAddress();
-
-        info.maxPrimitiveCounts.emplace_back(setup.instanceGeometry.maxInstanceCount);
+        maxPrimitiveCounts.emplace_back(setup.instanceGeometry.maxInstanceCount);
     } else {
         TEPHRA_ASSERT(setup.type == AccelerationStructureType::BottomLevel);
 
-        info.geomInfo.geometryCount = static_cast<uint32_t>(setup.triangleGeometries.size()) +
-            static_cast<uint32_t>(setup.aabbGeometries.size());
-        info.geoms.reserve(info.geomInfo.geometryCount);
-        info.maxPrimitiveCounts.reserve(info.geomInfo.geometryCount);
+        std::size_t geometryCount = setup.triangleGeometries.size() + setup.aabbGeometries.size();
+        vkGeometries.reserve(geometryCount);
+        maxPrimitiveCounts.reserve(geometryCount);
 
         // Triangles, then AABBs
         for (const TriangleGeometrySetup& triSetup : setup.triangleGeometries) {
-            VkAccelerationStructureGeometryKHR& geom = info.geoms.emplace_back(geomTemplate);
+            VkAccelerationStructureGeometryKHR& geom = vkGeometries.emplace_back(geomTemplate);
             geom.geometryType = VK_GEOMETRY_TYPE_TRIANGLES_KHR;
             geom.flags = vkCastConvertibleEnumMask(triSetup.flags);
             geom.geometry.triangles.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_TRIANGLES_DATA_KHR;
@@ -70,42 +135,76 @@ AccelerationStructureInfo AccelerationStructureImpl::prepareInfoForSizeQuery(con
             if (triSetup.useTransform)
                 geom.geometry.triangles.transformData.hostAddress = reinterpret_cast<void*>(~0ull);
             else
-                geom.geometry.triangles.transformData = MakeConstDeviceAddress();
+                geom.geometry.triangles.transformData = { VkDeviceAddress(0) };
 
-            // Not required:
-            geom.geometry.triangles.vertexData = MakeConstDeviceAddress();
+            // Not set yet:
+            geom.geometry.triangles.vertexData = { VkDeviceAddress(0) };
             geom.geometry.triangles.vertexStride = 0;
-            geom.geometry.triangles.indexData = MakeConstDeviceAddress();
+            geom.geometry.triangles.indexData = { VkDeviceAddress(0) };
 
-            info.maxPrimitiveCounts.emplace_back(triSetup.maxTriangleCount);
+            maxPrimitiveCounts.emplace_back(triSetup.maxTriangleCount);
         }
 
         for (const AABBGeometrySetup& aabbSetup : setup.aabbGeometries) {
-            VkAccelerationStructureGeometryKHR& geom = info.geoms.emplace_back(geomTemplate);
+            VkAccelerationStructureGeometryKHR& geom = vkGeometries.emplace_back(geomTemplate);
             geom.geometryType = VK_GEOMETRY_TYPE_AABBS_NV;
             geom.flags = vkCastConvertibleEnumMask(aabbSetup.flags);
             geom.geometry.aabbs.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_AABBS_DATA_KHR;
             geom.geometry.aabbs.pNext = nullptr;
 
-            // Not required:
+            // Not set yet:
+            geom.geometry.aabbs.data = { VkDeviceAddress(0) };
             geom.geometry.aabbs.stride = 0;
-            geom.geometry.aabbs.data = MakeConstDeviceAddress();
 
-            info.maxPrimitiveCounts.emplace_back(aabbSetup.maxAABBCount);
+            maxPrimitiveCounts.emplace_back(aabbSetup.maxAABBCount);
         }
     }
 
-    info.geomInfo.pGeometries = info.geoms.data();
-    info.geomInfo.ppGeometries = nullptr;
-    info.geomInfo.scratchData = MakeDeviceAddress();
-
-    return info;
+    VkAccelerationStructureBuildRangeInfoKHR buildRangeTemplate;
+    buildRangeTemplate.primitiveCount = 0;
+    buildRangeTemplate.primitiveOffset = 0;
+    buildRangeTemplate.firstVertex = 0;
+    buildRangeTemplate.transformOffset = 0;
+    vkBuildRanges.resize(vkGeometries.size(), buildRangeTemplate);
 }
+
+VkAccelerationStructureBuildGeometryInfoKHR AccelerationStructureBuilder::makeVkBuildInfo(
+    AccelerationStructureBuildMode buildMode) const {
+    VkAccelerationStructureBuildGeometryInfoKHR vkBuildInfo;
+    vkBuildInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_GEOMETRY_INFO_KHR;
+    vkBuildInfo.pNext = nullptr;
+    vkBuildInfo.type = vkCastConvertibleEnum(type);
+    vkBuildInfo.flags = vkCastConvertibleEnumMask(buildFlags);
+    vkBuildInfo.mode = vkCastConvertibleEnum(buildMode);
+    vkBuildInfo.geometryCount = static_cast<uint32_t>(vkGeometries.size());
+    vkBuildInfo.pGeometries = vkGeometries.data();
+    vkBuildInfo.ppGeometries = nullptr;
+
+    // Not set yet:
+    vkBuildInfo.srcAccelerationStructure = VK_NULL_HANDLE;
+    vkBuildInfo.dstAccelerationStructure = VK_NULL_HANDLE;
+    vkBuildInfo.scratchData = { VkDeviceAddress(0) };
+
+    return vkBuildInfo;
+}
+
+AccelerationStructureImpl::AccelerationStructureImpl(
+    DeviceContainer* deviceImpl,
+    AccelerationStructureBuilder builder,
+    Lifeguard<VkAccelerationStructureHandleKHR> accelerationStructureHandle,
+    OwningPtr<Buffer> backingBuffer,
+    DebugTarget debugTarget)
+    : debugTarget(std::move(debugTarget)),
+      deviceImpl(deviceImpl),
+      builder(std::move(builder)),
+      accelerationStructureHandle(std::move(accelerationStructureHandle)),
+      backingBuffer(std::move(backingBuffer)),
+      deviceAddress(deviceImpl->getLogicalDevice()->getAccelerationStructureDeviceAddress(
+          this->accelerationStructureHandle.vkGetHandle())) {}
 
 AccelerationStructureImpl& AccelerationStructureImpl::getAccelerationStructureImpl(
     const AccelerationStructureView& asView) {
     TEPHRA_ASSERT(asView.accelerationStructure != nullptr);
     return *asView.accelerationStructure;
 }
-
 }

@@ -780,6 +780,16 @@ VkAccelerationStructureBuildSizesInfoKHR LogicalDevice::getAccelerationStructure
     return sizeInfo;
 }
 
+DeviceAddress LogicalDevice::getAccelerationStructureDeviceAddress(
+    VkAccelerationStructureHandleKHR vkAccelerationStructureHandle) const {
+    VkAccelerationStructureDeviceAddressInfoKHR addressInfo;
+    addressInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_DEVICE_ADDRESS_INFO_KHR;
+    addressInfo.pNext = nullptr;
+    addressInfo.accelerationStructure = vkAccelerationStructureHandle;
+
+    return vkiDevice.getAccelerationStructureDeviceAddressKHR(vkDeviceHandle, &addressInfo);
+}
+
 LogicalDevice::~LogicalDevice() {
     if (!vkDeviceHandle.isNull()) {
         throwRetcodeErrors(vkiDevice.deviceWaitIdle(vkDeviceHandle));
