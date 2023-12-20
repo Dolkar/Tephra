@@ -49,7 +49,7 @@ BufferView PreinitializedBufferAllocator::allocateJobBuffer(
 
     bool dontSuballocate = poolFlags.contains(JobResourcePoolFlag::DisableSuballocation);
     std::pair<BufferView, uint32_t> allocation = allocateBufferFromGroup(
-        backingBufferGroups[backingGroupIndex], jobId, bufferSetup, debugName, dontSuballocate);
+        backingBufferGroups[backingGroupIndex], jobId, bufferSetup, dontSuballocate);
 
     if (dontSuballocate) {
         // Without suballocation we can name the buffer
@@ -153,7 +153,6 @@ std::pair<BufferView, uint32_t> PreinitializedBufferAllocator::allocateBufferFro
     BackingBufferGroup& backingGroup,
     uint64_t jobId,
     const BufferSetup& bufferSetup,
-    const char* debugName,
     bool dontSuballocate) {
     // Claim the backing group for this job
     backingGroup.recordingJobId = jobId;

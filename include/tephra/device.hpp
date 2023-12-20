@@ -257,7 +257,7 @@ public:
     ///     The debug name identifier for the object.
     OwningPtr<Image> allocateImage(const ImageSetup& setup, const char* debugName = nullptr);
 
-    OwningPtr<AccelerationStructure> allocateAccelerationStructure(
+    OwningPtr<AccelerationStructure> allocateAccelerationStructureKHR(
         const AccelerationStructureSetup& setup,
         const char* debugName = nullptr);
 

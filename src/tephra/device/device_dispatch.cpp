@@ -355,11 +355,11 @@ OwningPtr<Image> Device::allocateImage(const ImageSetup& setup, const char* debu
     return image;
 }
 
-OwningPtr<AccelerationStructure> Device::allocateAccelerationStructure(
+OwningPtr<AccelerationStructure> Device::allocateAccelerationStructureKHR(
     const AccelerationStructureSetup& setup,
     const char* debugName) {
     auto deviceImpl = static_cast<DeviceContainer*>(this);
-    TEPHRA_DEBUG_SET_CONTEXT(deviceImpl->getDebugTarget(), "allocateAccelerationStructure", debugName);
+    TEPHRA_DEBUG_SET_CONTEXT(deviceImpl->getDebugTarget(), "allocateAccelerationStructureKHR", debugName);
 
     auto asBuilder = AccelerationStructureBuilder(deviceImpl, setup);
 
@@ -382,12 +382,10 @@ OwningPtr<AccelerationStructure> Device::allocateAccelerationStructure(
         deviceImpl->getLogicalDevice()->createAccelerationStructureKHR(backingBuffer->getDefaultView(), setup.type));
     auto debugTarget = DebugTarget(deviceImpl->getDebugTarget(), AccelerationStructureTypeName, debugName);
 
-    BufferView backingBufferView = backingBuffer->getDefaultView();
     auto accelerationStructure = OwningPtr<AccelerationStructure>(new AccelerationStructureImpl(
         deviceImpl,
         std::move(asBuilder),
         std::move(accelerationStructureLifeguard),
-        backingBufferView,
         std::move(backingBuffer),
         std::move(debugTarget)));
 

@@ -82,7 +82,7 @@ class JobLocalImages {
 public:
     explicit JobLocalImages(JobResourcePoolContainer* resourcePoolImpl) : resourcePoolImpl(resourcePoolImpl) {}
 
-    ImageView acquireNewImage(ImageSetup setup, const char* debugName);
+    ImageView acquireNewImage(ImageSetup setup, DebugTarget debugTarget);
 
     void createPendingImageViews();
 

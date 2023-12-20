@@ -11,6 +11,8 @@ namespace tp {
 
 constexpr const char* ComputeListTypeName = "ComputeList";
 constexpr const char* RenderListTypeName = "RenderList";
+constexpr const char* JobLocalBufferTypeName = "JobLocalBuffer";
+constexpr const char* JobLocalImageTypeName = "JobLocalImage";
 
 JobSemaphore::JobSemaphore() : queue(QueueType::Undefined), timestamp(0) {}
 
@@ -77,13 +79,17 @@ void Job::finalize() {
 BufferView Job::allocateLocalBuffer(const BufferSetup& setup, const char* debugName) {
     TEPHRA_DEBUG_SET_CONTEXT(debugTarget.get(), "allocateLocalBuffer", debugName);
 
-    return jobData->resources.localBuffers.acquireNewBuffer(setup, debugName);
+    DebugTarget debugTarget = DebugTarget(
+        jobData->resourcePoolImpl->getDebugTarget(), JobLocalBufferTypeName, debugName);
+    return jobData->resources.localBuffers.acquireNewBuffer(setup, std::move(debugTarget));
 }
 
 ImageView Job::allocateLocalImage(const ImageSetup& setup, const char* debugName) {
     TEPHRA_DEBUG_SET_CONTEXT(debugTarget.get(), "allocateLocalImage", debugName);
 
-    return jobData->resources.localImages.acquireNewImage(setup, debugName);
+    DebugTarget debugTarget = DebugTarget(
+        jobData->resourcePoolImpl->getDebugTarget(), JobLocalImageTypeName, debugName);
+    return jobData->resources.localImages.acquireNewImage(setup, std::move(debugTarget));
 }
 
 BufferView Job::allocatePreinitializedBuffer(
@@ -102,6 +108,26 @@ DescriptorSetView Job::allocateLocalDescriptorSet(
     const char* debugName) {
     TEPHRA_DEBUG_SET_CONTEXT(debugTarget.get(), "allocateLocalDescriptorSet", debugName);
     return jobData->resources.localDescriptorSets.prepareNewDescriptorSet(descriptorSetLayout, descriptors, debugName);
+}
+
+AccelerationStructureView Job::allocateLocalAccelerationStructureKHR(
+    const AccelerationStructureSetup& setup,
+    const char* debugName) {
+    TEPHRA_DEBUG_SET_CONTEXT(debugTarget.get(), "allocateLocalAccelerationStructureKHR", debugName);
+
+    DeviceContainer* deviceImpl = jobData->resourcePoolImpl->getParentDeviceImpl();
+    auto asBuilder = AccelerationStructureBuilder(deviceImpl, setup);
+
+    // Create a local backing buffer to hold the AS
+    auto backingBufferSetup = BufferSetup(
+        asBuilder.getStorageSize(),
+        BufferUsageMask::None(),
+        VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR,
+        256);
+    auto backingBuffer = jobData->resources.localBuffers.acquireNewBuffer(
+        backingBufferSetup, DebugTarget::makeSilent());
+
+    return;
 }
 
 CommandPool* Job::createCommandPool(const char* debugName) {
@@ -222,7 +248,7 @@ void Job::cmdCopyBufferToImage(
     TEPHRA_DEBUG_SET_CONTEXT(debugTarget.get(), "cmdCopyBufferToImage", nullptr);
 
     if constexpr (TephraValidationEnabled) {
-        // check buffer usage for ImageTransfer
+        // Check buffer usage for ImageTransfer
         const tp::BufferSetup* bufSetup;
         if (srcBuffer.viewsJobLocalBuffer()) {
             bufSetup = &JobLocalBufferImpl::getBufferImpl(srcBuffer).getBufferSetup();
@@ -252,7 +278,7 @@ void Job::cmdCopyImageToBuffer(
     TEPHRA_DEBUG_SET_CONTEXT(debugTarget.get(), "cmdCopyImageToBuffer", nullptr);
 
     if constexpr (TephraValidationEnabled) {
-        // check buffer usage for ImageTransfer
+        // Check buffer usage for ImageTransfer
         const tp::BufferSetup* bufSetup;
         if (dstBuffer.viewsJobLocalBuffer()) {
             bufSetup = &JobLocalBufferImpl::getBufferImpl(dstBuffer).getBufferSetup();
@@ -415,8 +441,8 @@ void Job::cmdEndDebugLabel() {
         recordCommand<JobRecordStorage::DebugLabelData>(jobData->record, JobCommandTypes::EndDebugLabel, nullptr);
 }
 
-void Job::cmdBuildAccelerationStructures(ArrayParameter<const AccelerationStructureBuildInfo> buildInfos) {
-    TEPHRA_DEBUG_SET_CONTEXT(debugTarget.get(), "cmdBuildAccelerationStructures", nullptr);
+void Job::cmdBuildAccelerationStructuresKHR(ArrayParameter<const AccelerationStructureBuildInfo> buildInfos) {
+    TEPHRA_DEBUG_SET_CONTEXT(debugTarget.get(), "cmdBuildAccelerationStructuresKHR", nullptr);
 
     // Allocate scratch buffers for the build operations
     ScratchVector<BufferView> scratchBuffers;
@@ -427,7 +453,8 @@ void Job::cmdBuildAccelerationStructures(ArrayParameter<const AccelerationStruct
 
         auto scratchBufferSetup = BufferSetup(
             scratchBufferSize, BufferUsage::StorageBuffer | BufferUsage::DeviceAddress, 0, 256);
-        BufferView scratchBuffer = jobData->resources.localBuffers.acquireNewBuffer(scratchBufferSetup, nullptr);
+        BufferView scratchBuffer = jobData->resources.localBuffers.acquireNewBuffer(
+            scratchBufferSetup, DebugTarget::makeSilent());
         scratchBuffers.push_back(scratchBuffer);
     }
 

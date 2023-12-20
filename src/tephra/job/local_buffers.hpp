@@ -81,7 +81,7 @@ class JobLocalBuffers {
 public:
     explicit JobLocalBuffers(JobResourcePoolContainer* resourcePoolImpl) : resourcePoolImpl(resourcePoolImpl) {}
 
-    BufferView acquireNewBuffer(BufferSetup setup, const char* debugName);
+    BufferView acquireNewBuffer(BufferSetup setup, DebugTarget debugTarget);
 
     void createPendingBufferViews();
 

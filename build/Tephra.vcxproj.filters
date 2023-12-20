@@ -160,6 +160,9 @@
     <ClCompile Include="..\src\tephra\acceleration_structure_impl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\tephra\job\local_acceleration_structures.cpp">
+      <Filter>Source Files\Job</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\tephra\application.hpp">
@@ -401,6 +404,9 @@
     </ClInclude>
     <ClInclude Include="..\src\tephra\acceleration_structure_impl.hpp">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\tephra\job\local_acceleration_structures.hpp">
+      <Filter>Source Files\Job</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

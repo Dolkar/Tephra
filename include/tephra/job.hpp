@@ -226,6 +226,10 @@ public:
         ArrayParameter<const FutureDescriptor> descriptors,
         const char* debugName = nullptr);
 
+    AccelerationStructureView allocateLocalAccelerationStructureKHR(
+        const AccelerationStructureSetup& setup,
+        const char* debugName = nullptr);
+
     /// Creates a command pool for use with tp::ComputeList and tp::RenderList within this job.
     /// @param debugName
     ///     The debug name identifier for the object.
@@ -539,7 +543,7 @@ public:
     ///     The call will have no effect when tp::ApplicationExtension::EXT_DebugUtils is not enabled.
     void cmdEndDebugLabel();
 
-    void cmdBuildAccelerationStructures(ArrayParameter<const AccelerationStructureBuildInfo> buildInfos);
+    void cmdBuildAccelerationStructuresKHR(ArrayParameter<const AccelerationStructureBuildInfo> buildInfos);
 
     /// Updates the internal synchronization state for the buffer view to the given external access.
     ///

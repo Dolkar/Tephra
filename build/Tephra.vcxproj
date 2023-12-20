@@ -41,6 +41,7 @@
     <ClCompile Include="..\src\tephra\job\compute_pass.cpp" />
     <ClCompile Include="..\src\tephra\job\job.cpp" />
     <ClCompile Include="..\src\tephra\job\job_data.cpp" />
+    <ClCompile Include="..\src\tephra\job\local_acceleration_structures.cpp" />
     <ClCompile Include="..\src\tephra\job\local_buffers.cpp" />
     <ClCompile Include="..\src\tephra\job\local_buffer_allocator.cpp" />
     <ClCompile Include="..\src\tephra\job\local_descriptor_sets.cpp" />
@@ -99,6 +100,7 @@
     <ClInclude Include="..\src\tephra\job\barriers.hpp" />
     <ClInclude Include="..\src\tephra\job\command_recording.hpp" />
     <ClInclude Include="..\src\tephra\job\compute_pass.hpp" />
+    <ClInclude Include="..\src\tephra\job\local_acceleration_structures.hpp" />
     <ClInclude Include="..\src\tephra\job\local_buffers.hpp" />
     <ClInclude Include="..\src\tephra\job\local_buffer_allocator.hpp" />
     <ClInclude Include="..\src\tephra\job\local_descriptor_sets.hpp" />

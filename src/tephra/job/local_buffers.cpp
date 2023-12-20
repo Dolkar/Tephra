@@ -72,9 +72,9 @@ JobLocalBufferImpl& JobLocalBufferImpl::getBufferImpl(const BufferView& bufferVi
     return *bufferView.jobLocalBuffer;
 }
 
-BufferView JobLocalBuffers::acquireNewBuffer(BufferSetup setup, const char* debugName) {
+BufferView JobLocalBuffers::acquireNewBuffer(BufferSetup setup, DebugTarget debugTarget) {
     DeviceContainer* deviceImpl = resourcePoolImpl->getParentDeviceImpl();
-    DebugTarget debugTarget = DebugTarget(resourcePoolImpl->getDebugTarget(), "JobLocalBuffer", debugName);
+
     buffers.emplace_back(std::move(debugTarget), deviceImpl, setup, buffers.size(), &pendingBufferViews);
     usageRanges.emplace_back();
     return buffers.back().getDefaultView();

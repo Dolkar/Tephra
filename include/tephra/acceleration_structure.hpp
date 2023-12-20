@@ -6,14 +6,19 @@
 namespace tp {
 
 class AccelerationStructureImpl;
+class JobLocalAccelerationStructureImpl;
 
 class AccelerationStructureView {
 public:
     AccelerationStructureView();
 
-    bool isNull() const;
+    bool isNull() const {
+        return persistentAccelerationStructure == nullptr;
+    }
 
-    bool viewsJobLocalAccelerationStructure() const;
+    bool viewsJobLocalAccelerationStructure() const {
+        return viewsJobLocalAccelerationStructure_;
+    }
 
     DeviceAddress getDeviceAddress() const;
 
@@ -25,8 +30,11 @@ private:
     friend bool operator==(const AccelerationStructureView&, const AccelerationStructureView&);
     friend class AccelerationStructureImpl;
 
-    AccelerationStructureImpl* accelerationStructure;
-    BufferView backingBufferView;
+    union {
+        AccelerationStructureImpl* persistentAccelerationStructure;
+        JobLocalAccelerationStructureImpl* jobLocalAccelerationStructure;
+    };
+    bool viewsJobLocalAccelerationStructure_;
 };
 
 bool operator==(const AccelerationStructureView& lhs, const AccelerationStructureView& rhs);

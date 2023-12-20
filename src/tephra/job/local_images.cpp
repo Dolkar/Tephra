@@ -87,8 +87,7 @@ JobLocalImageImpl* JobLocalImageImpl::getImageImpl(const ImageView& imageView) {
     return imageView.jobLocalImage;
 }
 
-ImageView JobLocalImages::acquireNewImage(ImageSetup setup, const char* debugName) {
-    DebugTarget debugTarget = DebugTarget(resourcePoolImpl->getDebugTarget(), "JobLocalImage", debugName);
+ImageView JobLocalImages::acquireNewImage(ImageSetup setup, DebugTarget debugTarget) {
     images.emplace_back(std::move(debugTarget), setup, images.size(), &pendingImageViews);
     usageRanges.emplace_back();
     return images.back().createDefaultView();
