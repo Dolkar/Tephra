@@ -53,7 +53,7 @@ const T* getCommandData(const JobRecordStorage::CommandMetadata* command) {
 }
 
 void identifyCommandResourceAccesses(
-    const JobRecordStorage::CommandMetadata* command,
+    JobRecordStorage::CommandMetadata* command,
     ScratchVector<NewBufferAccess>& bufferAccesses,
     ScratchVector<NewImageAccess>& imageAccesses);
 

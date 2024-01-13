@@ -84,19 +84,19 @@ void ImageImpl::destroyHandles(bool immediately) {
 }
 
 VkImageViewHandle ImageImpl::vkGetImageViewHandle(const ImageView& imageView) {
-    TEPHRA_ASSERT(!imageView.viewsJobLocalImage());
-
-    auto mapHit = imageView.persistentImage->viewHandleMap.find(imageView.setup);
-    if (mapHit != imageView.persistentImage->viewHandleMap.end()) {
+    ImageImpl& image = getImageImpl(imageView);
+    auto mapHit = image.viewHandleMap.find(imageView.setup);
+    if (mapHit != image.viewHandleMap.end()) {
         return mapHit->second;
     } else {
         return VkImageViewHandle();
     }
 }
 
-ImageImpl* ImageImpl::getImageImpl(const ImageView& imageView) {
+ImageImpl& ImageImpl::getImageImpl(const ImageView& imageView) {
+    TEPHRA_ASSERT(!imageView.isNull());
     TEPHRA_ASSERT(!imageView.viewsJobLocalImage());
-    return imageView.persistentImage;
+    return *std::get<ImageImpl*>(imageView.image);
 }
 
 ImageViewSetup ImageImpl::getDefaultViewSetup(const ImageSetup& imageSetup) {

@@ -6,10 +6,10 @@
 namespace tp {
 
 JobLocalImageImpl::JobLocalImageImpl(
-    DebugTarget debugTarget,
     ImageSetup setup,
     uint64_t localImageIndex,
-    std::deque<ImageView>* jobPendingImageViews)
+    std::deque<ImageView>* jobPendingImageViews,
+    DebugTarget debugTarget)
     : debugTarget(std::move(debugTarget)),
       localImageIndex(localImageIndex),
       setup(setup),
@@ -55,14 +55,14 @@ ImageView JobLocalImageImpl::createView(ImageViewSetup viewSetup) {
 
 void JobLocalImageImpl::createPendingImageViews(std::deque<ImageView>& jobPendingImageViews) {
     for (ImageView& imageView : jobPendingImageViews) {
-        JobLocalImageImpl* localImage = imageView.jobLocalImage;
+        JobLocalImageImpl& localImage = getImageImpl(imageView);
         // It not have been assigned an underlying image if it's never used
-        if (!localImage->hasUnderlyingImage())
+        if (!localImage.hasUnderlyingImage())
             continue;
 
         ImageViewSetup underlyingViewSetup = imageView.setup;
-        underlyingViewSetup.subresourceRange.baseArrayLayer += localImage->underlyingImageLayerOffset;
-        static_cast<ImageImpl*>(localImage->underlyingImage)->createView_(std::move(underlyingViewSetup));
+        underlyingViewSetup.subresourceRange.baseArrayLayer += localImage.underlyingImageLayerOffset;
+        static_cast<ImageImpl*>(localImage.underlyingImage)->createView_(std::move(underlyingViewSetup));
     }
 }
 
@@ -71,25 +71,24 @@ VkImageViewHandle JobLocalImageImpl::vkGetImageViewHandle(const ImageView& image
 }
 
 ImageView JobLocalImageImpl::getViewToUnderlyingImage(const ImageView& imageView) {
-    TEPHRA_ASSERT(imageView.viewsJobLocalImage());
-    JobLocalImageImpl* localImage = imageView.jobLocalImage;
-    TEPHRA_ASSERT(localImage->hasUnderlyingImage());
+    JobLocalImageImpl& localImage = getImageImpl(imageView);
+    TEPHRA_ASSERT(localImage.hasUnderlyingImage());
 
     ImageViewSetup underlyingViewSetup = imageView.setup;
-    underlyingViewSetup.subresourceRange.baseArrayLayer += localImage->underlyingImageLayerOffset;
+    underlyingViewSetup.subresourceRange.baseArrayLayer += localImage.underlyingImageLayerOffset;
 
-    ImageImpl* underlyingImage = static_cast<ImageImpl*>(localImage->underlyingImage);
+    ImageImpl* underlyingImage = static_cast<ImageImpl*>(localImage.underlyingImage);
     return ImageView(underlyingImage, underlyingViewSetup);
 }
 
-JobLocalImageImpl* JobLocalImageImpl::getImageImpl(const ImageView& imageView) {
+JobLocalImageImpl& JobLocalImageImpl::getImageImpl(const ImageView& imageView) {
     TEPHRA_ASSERT(imageView.viewsJobLocalImage());
-    return imageView.jobLocalImage;
+    return *std::get<JobLocalImageImpl*>(imageView.image);
 }
 
 ImageView JobLocalImages::acquireNewImage(ImageSetup setup, const char* debugName) {
     DebugTarget debugTarget = DebugTarget(resourcePoolImpl->getDebugTarget(), "JobLocalImage", debugName);
-    images.emplace_back(std::move(debugTarget), setup, images.size(), &pendingImageViews);
+    images.emplace_back(setup, images.size(), &pendingImageViews, std::move(debugTarget));
     usageRanges.emplace_back();
     return images.back().createDefaultView();
 }
@@ -105,7 +104,7 @@ void JobLocalImages::markImageUsage(const ImageView& imageView, uint64_t usageNu
 }
 
 uint64_t JobLocalImages::getLocalImageIndex(const ImageView& imageView) const {
-    return JobLocalImageImpl::getImageImpl(imageView)->getLocalIndex();
+    return JobLocalImageImpl::getImageImpl(imageView).getLocalIndex();
 }
 
 const ResourceUsageRange& JobLocalImages::getImageUsage(const ImageView& imageView) const {

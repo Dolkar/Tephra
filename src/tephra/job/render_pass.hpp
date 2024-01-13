@@ -9,12 +9,28 @@ namespace tp {
 
 class PrimaryBufferRecorder;
 
+struct StoredBufferRenderAccess {
+    StoredBufferView buffer;
+    RenderAccessMask accessMask;
+
+    StoredBufferRenderAccess(const BufferRenderAccess& access) : buffer(access.buffer), accessMask(access.accessMask) {}
+};
+
+struct StoredImageRenderAccess {
+    StoredImageView image;
+    ImageSubresourceRange range;
+    RenderAccessMask accessMask;
+
+    StoredImageRenderAccess(const ImageRenderAccess& access)
+        : image(access.image), range(access.range), accessMask(access.accessMask) {}
+};
+
 // Represents access of a render attachment and stores unresolved image view
 struct AttachmentAccess {
-    ImageView imageView;
+    StoredImageView imageView;
     VkImageLayout layout;
 
-    void convertToVkAccess(ImageAccessRange* rangePtr, ResourceAccess* accessPtr, VkImageLayout* layoutPtr) const;
+    void convertToVkAccess(ImageAccessRange* rangePtr, ResourceAccess* accessPtr, VkImageLayout* layoutPtr);
 };
 
 class RenderPass {
@@ -26,15 +42,15 @@ public:
         return deviceImpl;
     }
 
-    ArrayView<const BufferRenderAccess> getBufferAccesses() const {
+    ArrayView<StoredBufferRenderAccess> getBufferAccesses() {
         return view(bufferAccesses);
     }
 
-    ArrayView<const ImageRenderAccess> getImageAccesses() const {
+    ArrayView<StoredImageRenderAccess> getImageAccesses() {
         return view(imageAccesses);
     }
 
-    ArrayView<const AttachmentAccess> getAttachmentAccesses() const {
+    ArrayView<AttachmentAccess> getAttachmentAccesses() {
         return view(attachmentAccesses);
     }
 
@@ -59,8 +75,8 @@ public:
 private:
     DeviceContainer* deviceImpl = nullptr;
 
-    std::vector<BufferRenderAccess> bufferAccesses;
-    std::vector<ImageRenderAccess> imageAccesses;
+    std::vector<StoredBufferRenderAccess> bufferAccesses;
+    std::vector<StoredImageRenderAccess> imageAccesses;
     // Every two entries here correspond to one entry in vkRenderingAttachments (imageView and resolveImageView)
     // Entries can be null
     std::vector<AttachmentAccess> attachmentAccesses;

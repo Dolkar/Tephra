@@ -90,7 +90,7 @@ public:
 
     static VkImageViewHandle vkGetImageViewHandle(const ImageView& imageView);
 
-    static ImageImpl* getImageImpl(const ImageView& imageView);
+    static ImageImpl& getImageImpl(const ImageView& imageView);
 
     static ImageViewSetup getDefaultViewSetup(const ImageSetup& imageSetup);
 

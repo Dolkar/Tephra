@@ -42,7 +42,7 @@ public:
     DebugTarget* getDebugTarget() {
         return &debugTarget;
     }
-    
+
     const BufferSetup& getBufferSetup() const {
         return bufferSetup;
     }
@@ -87,7 +87,7 @@ public:
 
     static HostMappedMemory mapViewForHostAccess(const BufferView& bufferView, MemoryAccess accessType);
 
-    static BufferImpl* getBufferImpl(const BufferView& bufferView);
+    static BufferImpl& getBufferImpl(const BufferView& bufferView);
 
     static uint64_t getRequiredViewAlignment_(const DeviceContainer* deviceImpl, BufferUsageMask usage);
 

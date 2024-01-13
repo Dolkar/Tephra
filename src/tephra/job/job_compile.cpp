@@ -15,7 +15,7 @@ public:
     ResourceExportHandler(BarrierList* barriers, QueueSyncState* queueSyncState, uint32_t currentQueueFamilyIndex)
         : barriers(barriers), queueSyncState(queueSyncState), currentQueueFamilyIndex(currentQueueFamilyIndex) {}
 
-    void addExport(const JobRecordStorage::ExportBufferData& exportData) {
+    void addExport(JobRecordStorage::ExportBufferData& exportData) {
         auto [vkBufferHandle, range] = resolveBufferAccess(exportData.buffer);
         ResourceAccess access;
         convertReadAccessToVkAccess(exportData.readAccessMask, &access.stageMask, &access.accessMask);
@@ -29,7 +29,7 @@ public:
         }
     }
 
-    void addExport(const JobRecordStorage::ExportImageData& exportData) {
+    void addExport(JobRecordStorage::ExportImageData& exportData) {
         ImageAccessRange range = exportData.range;
         VkImageHandle vkImageHandle = resolveImageAccess(exportData.image, &range);
         ResourceAccess access;

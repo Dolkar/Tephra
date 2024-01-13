@@ -56,26 +56,26 @@ void PrimaryBufferRecorder::endRecording() {
     }
 }
 
-void addBufferAccess(
+inline void addBufferAccess(
     ScratchVector<NewBufferAccess>& bufferAccesses,
-    const BufferView& bufferView,
+    StoredBufferView& bufferView,
     ResourceAccess access) {
     auto [vkBufferHandle, range] = resolveBufferAccess(bufferView);
     bufferAccesses.emplace_back(vkBufferHandle, std::move(range), std::move(access));
 }
 
-void addBufferAccess(
+inline void addBufferAccess(
     ScratchVector<NewBufferAccess>& bufferAccesses,
-    const BufferView& bufferView,
+    StoredBufferView& bufferView,
     BufferAccessRange range,
     ResourceAccess access) {
     VkBufferHandle vkBufferHandle = resolveBufferAccess(bufferView, &range);
     bufferAccesses.emplace_back(vkBufferHandle, std::move(range), std::move(access));
 }
 
-void addImageAccess(
+inline void addImageAccess(
     ScratchVector<NewImageAccess>& imageAccesses,
-    const ImageView& imageView,
+    StoredImageView& imageView,
     ImageAccessRange range,
     ResourceAccess access,
     VkImageLayout layout) {
@@ -104,7 +104,7 @@ uint64_t getImageCopySizeBytes(const BufferImageCopyRegion& copyInfo, const Form
 }
 
 void identifyCommandResourceAccesses(
-    const JobRecordStorage::CommandMetadata* command,
+    JobRecordStorage::CommandMetadata* command,
     ScratchVector<NewBufferAccess>& bufferAccesses,
     ScratchVector<NewImageAccess>& imageAccesses) {
     bufferAccesses.clear();
@@ -228,14 +228,14 @@ void identifyCommandResourceAccesses(
     }
     case JobCommandTypes::ExecuteComputePass: {
         auto* data = getCommandData<JobRecordStorage::ExecuteComputePassData>(command);
-        for (const BufferComputeAccess& entry : data->pass->getBufferAccesses()) {
+        for (StoredBufferComputeAccess& entry : data->pass->getBufferAccesses()) {
             VkPipelineStageFlags stageMask;
             VkAccessFlags accessMask;
             bool isAtomic;
             convertComputeAccessToVkAccess(entry.accessMask, &stageMask, &accessMask, &isAtomic);
             addBufferAccess(bufferAccesses, entry.buffer, { stageMask, accessMask });
         }
-        for (const ImageComputeAccess& entry : data->pass->getImageAccesses()) {
+        for (StoredImageComputeAccess& entry : data->pass->getImageAccesses()) {
             VkPipelineStageFlags stageMask;
             VkAccessFlags accessMask;
             bool isAtomic;
@@ -247,14 +247,14 @@ void identifyCommandResourceAccesses(
     }
     case JobCommandTypes::ExecuteRenderPass: {
         auto* data = getCommandData<JobRecordStorage::ExecuteRenderPassData>(command);
-        for (const BufferRenderAccess& entry : data->pass->getBufferAccesses()) {
+        for (StoredBufferRenderAccess& entry : data->pass->getBufferAccesses()) {
             VkPipelineStageFlags stageMask;
             VkAccessFlags accessMask;
             bool isAtomic;
             convertRenderAccessToVkAccess(entry.accessMask, &stageMask, &accessMask, &isAtomic);
             addBufferAccess(bufferAccesses, entry.buffer, { stageMask, accessMask });
         }
-        for (const ImageRenderAccess& entry : data->pass->getImageAccesses()) {
+        for (StoredImageRenderAccess& entry : data->pass->getImageAccesses()) {
             VkPipelineStageFlags stageMask;
             VkAccessFlags accessMask;
             bool isAtomic;
@@ -262,7 +262,7 @@ void identifyCommandResourceAccesses(
             VkImageLayout layout = vkGetImageLayoutFromRenderAccess(entry.accessMask);
             addImageAccess(imageAccesses, entry.image, entry.range, { stageMask, accessMask }, layout);
         }
-        for (const AttachmentAccess& entry : data->pass->getAttachmentAccesses()) {
+        for (AttachmentAccess& entry : data->pass->getAttachmentAccesses()) {
             ImageAccessRange range;
             ResourceAccess access;
             VkImageLayout layout;

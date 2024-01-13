@@ -91,27 +91,25 @@ void BufferImpl::destroyHandles(bool immediately) {
 }
 
 VkBufferViewHandle BufferImpl::vkGetBufferViewHandle(const BufferView& bufferView) {
-    TEPHRA_ASSERT(!bufferView.viewsJobLocalBuffer());
-
     if (bufferView.format == Format::Undefined) {
         // No Vulkan buffer view used
         return {};
     }
 
     TexelViewSetup setup = { bufferView.offset, bufferView.size, bufferView.format };
-    VkBufferViewHandle vkBufferViewHandle = bufferView.persistentBuffer->texelViewHandleMap[setup];
+    VkBufferViewHandle vkBufferViewHandle = getBufferImpl(bufferView).texelViewHandleMap[setup];
     TEPHRA_ASSERTD(!vkBufferViewHandle.isNull(), "BufferView with format should have a Vulkan handle created");
     return vkBufferViewHandle;
 }
 
 HostMappedMemory BufferImpl::mapViewForHostAccess(const BufferView& bufferView, MemoryAccess accessType) {
-    TEPHRA_ASSERT(!bufferView.viewsJobLocalBuffer());
-    return HostMappedMemory(bufferView.persistentBuffer, bufferView.offset, bufferView.size, accessType);
+    return HostMappedMemory(&getBufferImpl(bufferView), bufferView.offset, bufferView.size, accessType);
 }
 
-BufferImpl* BufferImpl::getBufferImpl(const BufferView& bufferView) {
+BufferImpl& BufferImpl::getBufferImpl(const BufferView& bufferView) {
+    TEPHRA_ASSERT(!bufferView.isNull());
     TEPHRA_ASSERT(!bufferView.viewsJobLocalBuffer());
-    return bufferView.persistentBuffer;
+    return *std::get<BufferImpl*>(bufferView.buffer);
 }
 
 uint64_t BufferImpl::getRequiredViewAlignment_(const DeviceContainer* deviceImpl, BufferUsageMask usage) {

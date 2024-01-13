@@ -52,97 +52,101 @@ struct JobRecordStorage {
     };
 
     struct ExportBufferData {
-        BufferView buffer;
+        StoredBufferView buffer;
         ReadAccessMask readAccessMask;
         uint32_t dstQueueFamilyIndex;
 
-        ExportBufferData(BufferView buffer, ReadAccessMask readAccessMask, uint32_t dstQueueFamilyIndex)
-            : buffer(std::move(buffer)), readAccessMask(readAccessMask), dstQueueFamilyIndex(dstQueueFamilyIndex) {}
+        ExportBufferData(const BufferView& buffer, ReadAccessMask readAccessMask, uint32_t dstQueueFamilyIndex)
+            : buffer(buffer), readAccessMask(readAccessMask), dstQueueFamilyIndex(dstQueueFamilyIndex) {}
     };
 
     struct ExportImageData {
-        ImageView image;
+        StoredImageView image;
         ImageAccessRange range;
         ReadAccessMask readAccessMask;
         uint32_t dstQueueFamilyIndex;
 
         ExportImageData(
-            ImageView image,
+            const ImageView& image,
             ImageAccessRange range,
             ReadAccessMask readAccessMask,
             uint32_t dstQueueFamilyIndex)
-            : image(std::move(image)),
-              range(range),
-              readAccessMask(readAccessMask),
-              dstQueueFamilyIndex(dstQueueFamilyIndex) {}
+            : image(image), range(range), readAccessMask(readAccessMask), dstQueueFamilyIndex(dstQueueFamilyIndex) {}
     };
 
     struct DiscardImageContentsData {
-        ImageView image;
+        StoredImageView image;
         ImageAccessRange range;
 
-        explicit DiscardImageContentsData(ImageView image, ImageAccessRange range)
-            : image(std::move(image)), range(range) {}
+        explicit DiscardImageContentsData(const ImageView& image, ImageAccessRange range)
+            : image(image), range(range) {}
     };
 
     struct FillBufferData {
-        BufferView dstBuffer;
+        StoredBufferView dstBuffer;
         uint32_t value;
 
-        FillBufferData(BufferView dstBuffer, uint32_t value) : dstBuffer(std::move(dstBuffer)), value(value) {}
+        FillBufferData(const BufferView& dstBuffer, uint32_t value) : dstBuffer(dstBuffer), value(value) {}
     };
 
     struct UpdateBufferData {
-        BufferView dstBuffer;
+        StoredBufferView dstBuffer;
         const void* data;
 
-        UpdateBufferData(BufferView dstBuffer, const void* data) : dstBuffer(std::move(dstBuffer)), data(data) {}
+        UpdateBufferData(const BufferView& dstBuffer, const void* data) : dstBuffer(dstBuffer), data(data) {}
     };
 
     struct CopyBufferData {
-        BufferView srcBuffer;
-        BufferView dstBuffer;
+        StoredBufferView srcBuffer;
+        StoredBufferView dstBuffer;
         ArrayView<BufferCopyRegion> copyRegions;
 
-        CopyBufferData(BufferView srcBuffer, BufferView dstBuffer, ArrayView<BufferCopyRegion> copyRegions)
-            : srcBuffer(std::move(srcBuffer)), dstBuffer(std::move(dstBuffer)), copyRegions(copyRegions) {}
+        CopyBufferData(const BufferView& srcBuffer, const BufferView& dstBuffer, ArrayView<BufferCopyRegion> copyRegions)
+            : srcBuffer(srcBuffer), dstBuffer(dstBuffer), copyRegions(copyRegions) {}
     };
 
     struct CopyImageData {
-        ImageView srcImage;
-        ImageView dstImage;
+        StoredImageView srcImage;
+        StoredImageView dstImage;
         ArrayView<ImageCopyRegion> copyRegions;
 
-        CopyImageData(ImageView srcImage, ImageView dstImage, ArrayView<ImageCopyRegion> copyRegions)
-            : srcImage(std::move(srcImage)), dstImage(std::move(dstImage)), copyRegions(copyRegions) {}
+        CopyImageData(const ImageView& srcImage, const ImageView& dstImage, ArrayView<ImageCopyRegion> copyRegions)
+            : srcImage(srcImage), dstImage(dstImage), copyRegions(copyRegions) {}
     };
 
     struct CopyBufferImageData {
-        BufferView buffer;
-        ImageView image;
+        StoredBufferView buffer;
+        StoredImageView image;
         ArrayView<BufferImageCopyRegion> copyRegions;
 
-        CopyBufferImageData(BufferView buffer, ImageView image, ArrayView<BufferImageCopyRegion> copyRegions)
-            : buffer(std::move(buffer)), image(std::move(image)), copyRegions(copyRegions) {}
+        CopyBufferImageData(
+            const BufferView& buffer,
+            const ImageView& image,
+            ArrayView<BufferImageCopyRegion> copyRegions)
+            : buffer(buffer), image(image), copyRegions(copyRegions) {}
     };
 
     struct BlitImageData {
-        ImageView srcImage;
-        ImageView dstImage;
+        StoredImageView srcImage;
+        StoredImageView dstImage;
         ArrayView<ImageBlitRegion> blitRegions;
         Filter filter;
 
-        BlitImageData(ImageView srcImage, ImageView dstImage, ArrayView<ImageBlitRegion> blitRegions, Filter filter)
-            : srcImage(std::move(srcImage)), dstImage(std::move(dstImage)), blitRegions(blitRegions), filter(filter) {}
+        BlitImageData(
+            const ImageView& srcImage,
+            const ImageView& dstImage,
+            ArrayView<ImageBlitRegion> blitRegions,
+            Filter filter)
+            : srcImage(srcImage), dstImage(dstImage), blitRegions(blitRegions), filter(filter) {}
     };
 
     struct ClearImageData {
-        ImageView dstImage;
+        StoredImageView dstImage;
         ClearValue value;
         ArrayView<ImageSubresourceRange> ranges;
 
-        ClearImageData(ImageView dstImage, ClearValue value, ArrayView<ImageSubresourceRange> ranges)
-            : dstImage(std::move(dstImage)), value(std::move(value)), ranges(ranges) {}
+        ClearImageData(const ImageView& dstImage, ClearValue value, ArrayView<ImageSubresourceRange> ranges)
+            : dstImage(dstImage), value(std::move(value)), ranges(ranges) {}
     };
 
     struct ExecuteComputePassData {
@@ -158,25 +162,24 @@ struct JobRecordStorage {
     };
 
     struct ImportExternalBufferData {
-        BufferView buffer;
+        StoredBufferView buffer;
         ResourceAccess access;
 
-        ImportExternalBufferData(BufferView buffer, ResourceAccess access)
-            : buffer(std::move(buffer)), access(access) {}
+        ImportExternalBufferData(const BufferView& buffer, ResourceAccess access) : buffer(buffer), access(access) {}
     };
 
     struct ImportExternalImageData {
-        ImageView image;
+        StoredImageView image;
         ImageAccessRange range;
         VkImageLayout vkImageLayout;
         ResourceAccess access;
 
         ImportExternalImageData(
-            ImageView image,
+            const ImageView& image,
             ImageAccessRange range,
             VkImageLayout vkImageLayout,
             ResourceAccess access)
-            : image(std::move(image)), range(range), vkImageLayout(vkImageLayout), access(access) {}
+            : image(image), range(range), vkImageLayout(vkImageLayout), access(access) {}
     };
 
     struct DebugLabelData {

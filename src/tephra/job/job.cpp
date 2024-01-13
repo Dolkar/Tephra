@@ -41,7 +41,7 @@ T* recordCommand(JobRecordStorage& storage, JobCommandTypes type, TArgs&&... arg
     return new (cmdDataPtr) T(std::forward<TArgs>(args)...);
 }
 
-void markResourceUsage(JobData* jobData, const BufferView& buffer, bool isExport = false) {
+inline void markResourceUsage(JobData* jobData, const BufferView& buffer, bool isExport = false) {
     TEPHRA_ASSERT(!buffer.isNull());
     if (buffer.viewsJobLocalBuffer()) {
         jobData->resources.localBuffers.markBufferUsage(buffer, jobData->record.commandCount);
@@ -51,13 +51,20 @@ void markResourceUsage(JobData* jobData, const BufferView& buffer, bool isExport
     }
 }
 
-void markResourceUsage(JobData* jobData, const ImageView& image, bool isExport = false) {
+inline void markResourceUsage(JobData* jobData, const ImageView& image, bool isExport = false) {
     TEPHRA_ASSERT(!image.isNull());
     if (image.viewsJobLocalImage()) {
         jobData->resources.localImages.markImageUsage(image, jobData->record.commandCount);
         if (isExport) {
             jobData->resources.localImages.markImageUsage(image, ~0);
         }
+    }
+}
+
+inline void markResourceUsage(JobData* jobData, const StoredImageView& image, bool isExport = false) {
+    TEPHRA_ASSERT(!image.isNull());
+    if (image.getJobLocalView() != nullptr) {
+        markResourceUsage(jobData, *image.getJobLocalView());
     }
 }
 
@@ -242,9 +249,9 @@ void Job::cmdCopyBufferToImage(
         // check buffer usage for ImageTransfer
         const tp::BufferSetup* bufSetup;
         if (srcBuffer.viewsJobLocalBuffer()) {
-            bufSetup = &JobLocalBufferImpl::getBufferImpl(srcBuffer)->getBufferSetup();
+            bufSetup = &JobLocalBufferImpl::getBufferImpl(srcBuffer).getBufferSetup();
         } else {
-            bufSetup = &BufferImpl::getBufferImpl(srcBuffer)->getBufferSetup();
+            bufSetup = &BufferImpl::getBufferImpl(srcBuffer).getBufferSetup();
         }
         if (!bufSetup->usage.contains(BufferUsage::ImageTransfer)) {
             reportDebugMessage(
@@ -282,9 +289,9 @@ void Job::cmdCopyImageToBuffer(
         // check buffer usage for ImageTransfer
         const tp::BufferSetup* bufSetup;
         if (dstBuffer.viewsJobLocalBuffer()) {
-            bufSetup = &JobLocalBufferImpl::getBufferImpl(dstBuffer)->getBufferSetup();
+            bufSetup = &JobLocalBufferImpl::getBufferImpl(dstBuffer).getBufferSetup();
         } else {
-            bufSetup = &BufferImpl::getBufferImpl(dstBuffer)->getBufferSetup();
+            bufSetup = &BufferImpl::getBufferImpl(dstBuffer).getBufferSetup();
         }
         if (!bufSetup->usage.contains(BufferUsage::ImageTransfer)) {
             reportDebugMessage(
@@ -407,10 +414,10 @@ void Job::cmdExecuteComputePass(
         computePass.assignDeferred(setup, listDebugTarget, computeListsToAssign);
     }
 
-    for (const BufferComputeAccess& entry : computePass.getBufferAccesses()) {
+    for (const BufferComputeAccess& entry : setup.bufferAccesses) {
         markResourceUsage(jobData, entry.buffer);
     }
-    for (const ImageComputeAccess& entry : computePass.getImageAccesses()) {
+    for (const ImageComputeAccess& entry : setup.imageAccesses) {
         markResourceUsage(jobData, entry.image);
     }
 
@@ -441,10 +448,10 @@ void Job::cmdExecuteRenderPass(
         renderPass.assignDeferred(setup, listDebugTarget, renderListsToAssign);
     }
 
-    for (const BufferRenderAccess& entry : renderPass.getBufferAccesses()) {
+    for (const BufferRenderAccess& entry : setup.bufferAccesses) {
         markResourceUsage(jobData, entry.buffer);
     }
-    for (const ImageRenderAccess& entry : renderPass.getImageAccesses()) {
+    for (const ImageRenderAccess& entry : setup.imageAccesses) {
         markResourceUsage(jobData, entry.image);
     }
     for (const AttachmentAccess& entry : renderPass.getAttachmentAccesses()) {

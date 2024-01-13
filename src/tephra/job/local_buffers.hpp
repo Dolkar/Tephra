@@ -11,11 +11,11 @@ namespace tp {
 class JobLocalBufferImpl {
 public:
     JobLocalBufferImpl(
-        DebugTarget debugTarget,
         DeviceContainer* deviceImpl,
         BufferSetup setup,
         uint64_t localBufferIndex,
-        std::deque<BufferView>* jobPendingBufferViews);
+        std::deque<BufferView>* jobPendingBufferViews,
+        DebugTarget debugTarget);
 
     const DebugTarget* getDebugTarget() const {
         return &debugTarget;
@@ -61,7 +61,7 @@ public:
     // Translates view of the local buffer to a view of the underlying resource.
     static BufferView getViewToUnderlyingBuffer(const BufferView& bufferView);
 
-    static JobLocalBufferImpl* getBufferImpl(const BufferView& bufferView);
+    static JobLocalBufferImpl& getBufferImpl(const BufferView& bufferView);
 
 private:
     DebugTarget debugTarget;
@@ -73,6 +73,65 @@ private:
     Buffer* underlyingBuffer = nullptr;
     uint64_t underlyingBufferOffset = 0;
     std::deque<BufferView>* jobPendingBufferViews;
+};
+
+// Once stored, it is not guaranteed that the persistent parent objects (BufferImpl) of views will be kept alive,
+// so they need to be resolved immediately. But job-local resources need to be resolved later after they actually get
+// created. This class handles resolving both at the right time.
+class StoredBufferView {
+public:
+    StoredBufferView(const BufferView& view) : storedView(store(view)) {}
+
+    bool isNull() const {
+        if (std::holds_alternative<BufferView>(storedView)) {
+            return std::get<BufferView>(storedView).isNull();
+        } else {
+            return std::get<ResolvedView>(storedView).vkBufferHandle.isNull();
+        }
+    }
+
+    uint64_t getSize() {
+        resolve();
+        return std::get<ResolvedView>(storedView).size;
+    }
+
+    VkBufferHandle vkResolveBufferHandle(uint64_t* offset) {
+        resolve();
+        *offset = std::get<ResolvedView>(storedView).offset;
+        return std::get<ResolvedView>(storedView).vkBufferHandle;
+    }
+
+private:
+    struct ResolvedView {
+        uint64_t size;
+        uint64_t offset;
+        VkBufferHandle vkBufferHandle;
+
+        explicit ResolvedView(const BufferView& view) {
+            size = view.getSize();
+            offset = 0;
+            vkBufferHandle = view.vkResolveBufferHandle(&offset);
+        }
+    };
+
+    static std::variant<ResolvedView, BufferView> store(const BufferView& view) {
+        if (!view.viewsJobLocalBuffer()) {
+            return ResolvedView(view);
+        } else {
+            return view;
+        }
+    }
+
+    void resolve() {
+        if (std::holds_alternative<BufferView>(storedView)) {
+            storedView = ResolvedView(std::get<BufferView>(storedView));
+            TEPHRA_ASSERTD(
+                !std::get<ResolvedView>(storedView).vkBufferHandle.isNull(),
+                "Job-local buffers must be resolvable at this point");
+        }
+    }
+
+    std::variant<ResolvedView, BufferView> storedView;
 };
 
 class JobResourcePoolContainer;
