@@ -44,14 +44,13 @@ private:
     VkAccelerationStructureBuildSizesInfoKHR vkBuildSizes;
 };
 
-class AccelerationStructureImpl : public AccelerationStructure {
+// Helper base class containing a common part of the implementations
+class AccelerationStructureBaseImpl {
 public:
-    AccelerationStructureImpl(
+    AccelerationStructureBaseImpl(
         DeviceContainer* deviceImpl,
         AccelerationStructureBuilder builder,
-        Lifeguard<VkAccelerationStructureHandleKHR> accelerationStructureHandle,
-        OwningPtr<Buffer> backingBuffer,
-        DebugTarget debugTarget);
+        Lifeguard<VkAccelerationStructureHandleKHR> accelerationStructureHandle);
 
     AccelerationStructureBuilder& getBuilder() {
         return builder;
@@ -61,19 +60,38 @@ public:
         return deviceAddress;
     }
 
-    VkAccelerationStructureHandleKHR vkGetHandle() const {
+    VkAccelerationStructureHandleKHR vkGetAccelerationStructureHandle_() const {
         return accelerationStructureHandle.vkGetHandle();
+    }
+
+    void assignHandle(Lifeguard<VkAccelerationStructureHandleKHR> accelerationStructureHandle);
+
+protected:
+    DeviceContainer* deviceImpl;
+    AccelerationStructureBuilder builder;
+    Lifeguard<VkAccelerationStructureHandleKHR> accelerationStructureHandle;
+    DeviceAddress deviceAddress = 0;
+};
+
+// Acceleration structure that manages its own backing buffer
+class AccelerationStructureImpl : public AccelerationStructure, public AccelerationStructureBaseImpl {
+public:
+    AccelerationStructureImpl(
+        DeviceContainer* deviceImpl,
+        AccelerationStructureBuilder builder,
+        Lifeguard<VkAccelerationStructureHandleKHR> accelerationStructureHandle,
+        OwningPtr<Buffer> backingBuffer,
+        DebugTarget debugTarget);
+
+    BufferView getBackingBufferView_() const {
+        return backingBuffer->getDefaultView();
     }
 
     static AccelerationStructureImpl& getAccelerationStructureImpl(const AccelerationStructureView& asView);
 
 private:
     DebugTarget debugTarget;
-    DeviceContainer* deviceImpl;
-    AccelerationStructureBuilder builder;
-    Lifeguard<VkAccelerationStructureHandleKHR> accelerationStructureHandle;
     OwningPtr<Buffer> backingBuffer;
-    DeviceAddress deviceAddress;
 };
 
 }

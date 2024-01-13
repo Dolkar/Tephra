@@ -2,6 +2,7 @@
 
 #include <tephra/buffer.hpp>
 #include <tephra/common.hpp>
+#include <variant>
 
 namespace tp {
 
@@ -10,14 +11,14 @@ class JobLocalAccelerationStructureImpl;
 
 class AccelerationStructureView {
 public:
-    AccelerationStructureView();
+    AccelerationStructureView() = default;
 
     bool isNull() const {
-        return persistentAccelerationStructure == nullptr;
+        return std::holds_alternative<std::monostate>(accelerationStructure);
     }
 
     bool viewsJobLocalAccelerationStructure() const {
-        return viewsJobLocalAccelerationStructure_;
+        return std::holds_alternative<JobLocalAccelerationStructureImpl*>(accelerationStructure);
     }
 
     DeviceAddress getDeviceAddress() const;
@@ -27,14 +28,14 @@ public:
     VkAccelerationStructureHandleKHR vkGetAccelerationStructureHandle() const;
 
 private:
-    friend bool operator==(const AccelerationStructureView&, const AccelerationStructureView&);
     friend class AccelerationStructureImpl;
+    friend class JobLocalAccelerationStructureImpl;
+    friend bool operator==(const AccelerationStructureView&, const AccelerationStructureView&);
 
-    union {
-        AccelerationStructureImpl* persistentAccelerationStructure;
-        JobLocalAccelerationStructureImpl* jobLocalAccelerationStructure;
-    };
-    bool viewsJobLocalAccelerationStructure_;
+    AccelerationStructureView(AccelerationStructureImpl* persistentAccelerationStructure);
+    AccelerationStructureView(JobLocalAccelerationStructureImpl* jobLocalAccelerationStructure);
+
+    std::variant<std::monostate, AccelerationStructureImpl*, JobLocalAccelerationStructureImpl*> accelerationStructure;
 };
 
 bool operator==(const AccelerationStructureView& lhs, const AccelerationStructureView& rhs);

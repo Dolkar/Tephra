@@ -1,7 +1,50 @@
 #include "common_impl.hpp"
 #include <tephra/acceleration_structure.hpp>
 
+#include "acceleration_structure_impl.hpp"
+#include "job/local_acceleration_structures.hpp"
+
 namespace tp {
+
+AccelerationStructureView::AccelerationStructureView(AccelerationStructureImpl* persistentAccelerationStructure)
+    : accelerationStructure(persistentAccelerationStructure) {}
+
+AccelerationStructureView::AccelerationStructureView(JobLocalAccelerationStructureImpl* jobLocalAccelerationStructure)
+    : accelerationStructure(jobLocalAccelerationStructure) {}
+
+DeviceAddress AccelerationStructureView::getDeviceAddress() const {
+    if (viewsJobLocalAccelerationStructure()) {
+        return std::get<JobLocalAccelerationStructureImpl*>(accelerationStructure)->getDeviceAddress_();
+    } else if (!isNull()) {
+        return std::get<AccelerationStructureImpl*>(accelerationStructure)->getDeviceAddress_();
+    } else {
+        return {};
+    }
+}
+
+BufferView AccelerationStructureView::getBackingBufferView() const {
+    if (viewsJobLocalAccelerationStructure()) {
+        return std::get<JobLocalAccelerationStructureImpl*>(accelerationStructure)->getBackingBufferView_();
+    } else if (!isNull()) {
+        return std::get<AccelerationStructureImpl*>(accelerationStructure)->getBackingBufferView_();
+    } else {
+        return {};
+    }
+}
+
+VkAccelerationStructureHandleKHR AccelerationStructureView::vkGetAccelerationStructureHandle() const {
+    if (viewsJobLocalAccelerationStructure()) {
+        return std::get<JobLocalAccelerationStructureImpl*>(accelerationStructure)->vkGetAccelerationStructureHandle_();
+    } else if (!isNull()) {
+        return std::get<AccelerationStructureImpl*>(accelerationStructure)->vkGetAccelerationStructureHandle_();
+    } else {
+        return {};
+    }
+}
+
+bool tp::operator==(const AccelerationStructureView& lhs, const AccelerationStructureView& rhs) {
+    return lhs.accelerationStructure == rhs.accelerationStructure;
+}
 
 AccelerationStructureSetup AccelerationStructureSetup::TopLevel(
     AccelerationStructureBuildFlagMask buildFlags,

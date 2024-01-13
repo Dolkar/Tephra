@@ -23,10 +23,8 @@ AccelerationStructureBuilder::prepareBuild(
     VkAccelerationStructureBuildGeometryInfoKHR vkBuildInfo = makeVkBuildInfo(buildInfo.mode);
 
     if (!buildInfo.srcView.isNull())
-        vkBuildInfo.srcAccelerationStructure =
-            AccelerationStructureImpl::getAccelerationStructureImpl(buildInfo.srcView).vkGetHandle();
-    vkBuildInfo.dstAccelerationStructure = AccelerationStructureImpl::getAccelerationStructureImpl(buildInfo.dstView)
-                                               .vkGetHandle();
+        vkBuildInfo.srcAccelerationStructure = buildInfo.srcView.vkGetAccelerationStructureHandle();
+    vkBuildInfo.dstAccelerationStructure = buildInfo.dstView.vkGetAccelerationStructureHandle();
     vkBuildInfo.scratchData = { scratchBuffer.getDeviceAddress() };
 
     if (type == AccelerationStructureType::TopLevel) {
@@ -188,23 +186,37 @@ VkAccelerationStructureBuildGeometryInfoKHR AccelerationStructureBuilder::makeVk
     return vkBuildInfo;
 }
 
+AccelerationStructureBaseImpl::AccelerationStructureBaseImpl(
+    DeviceContainer* deviceImpl,
+    AccelerationStructureBuilder builder,
+    Lifeguard<VkAccelerationStructureHandleKHR> accelerationStructureHandle)
+    : deviceImpl(deviceImpl), builder(std::move(builder)) {
+    assignHandle(std::move(accelerationStructureHandle));
+}
+
+void AccelerationStructureBaseImpl::assignHandle(
+    Lifeguard<VkAccelerationStructureHandleKHR> accelerationStructureHandle) {
+    if (!accelerationStructureHandle.isNull()) {
+        this->accelerationStructureHandle = std::move(accelerationStructureHandle);
+        this->deviceAddress = deviceImpl->getLogicalDevice()->getAccelerationStructureDeviceAddress(
+            this->accelerationStructureHandle.vkGetHandle());
+    }
+}
+
 AccelerationStructureImpl::AccelerationStructureImpl(
     DeviceContainer* deviceImpl,
     AccelerationStructureBuilder builder,
     Lifeguard<VkAccelerationStructureHandleKHR> accelerationStructureHandle,
     OwningPtr<Buffer> backingBuffer,
     DebugTarget debugTarget)
-    : debugTarget(std::move(debugTarget)),
-      deviceImpl(deviceImpl),
-      builder(std::move(builder)),
-      accelerationStructureHandle(std::move(accelerationStructureHandle)),
-      backingBuffer(std::move(backingBuffer)),
-      deviceAddress(deviceImpl->getLogicalDevice()->getAccelerationStructureDeviceAddress(
-          this->accelerationStructureHandle.vkGetHandle())) {}
+    : AccelerationStructureBaseImpl(deviceImpl, std::move(builder), std::move(accelerationStructureHandle)),
+      debugTarget(std::move(debugTarget)),
+      backingBuffer(std::move(backingBuffer)) {}
 
 AccelerationStructureImpl& AccelerationStructureImpl::getAccelerationStructureImpl(
     const AccelerationStructureView& asView) {
-    TEPHRA_ASSERT(asView.accelerationStructure != nullptr);
-    return *asView.accelerationStructure;
+    TEPHRA_ASSERT(!asView.isNull());
+    TEPHRA_ASSERT(!asView.viewsJobLocalAccelerationStructure());
+    return *std::get<AccelerationStructureImpl*>(asView.accelerationStructure);
 }
 }
