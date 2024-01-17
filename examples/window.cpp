@@ -261,6 +261,8 @@ WindowManager::WindowManager()
       window{ nullptr },
       event_buffer{ nullptr },
 #endif
+      example{ nullptr },
+      surface{ VK_NULL_HANDLE },
       width{ 800 },
       height{ 600 },
       has_resized{ true },
