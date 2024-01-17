@@ -51,6 +51,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+
+    - uses: lukka/get-cmake@latest
       
     - name: Prepare Vulkan SDK
       uses: humbletim/setup-vulkan-sdk@v1.2.0
@@ -61,7 +63,7 @@ jobs:
         vulkan-use-cache: true
 
     - name: Configure cmake
-      run: cmake -S . -B out -DCMAKE_CXX_COMPILER='clang++'
+      run: cmake -S . -B out -G "Ninja"
             
     - name: Build release
       run: cmake --build out --parallel --config Release
