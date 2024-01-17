@@ -715,7 +715,6 @@ template Lifeguard<VkBufferViewHandle> Device::vkMakeHandleLifeguard(VkBufferVie
 template Lifeguard<VkImageHandle> Device::vkMakeHandleLifeguard(VkImageHandle vkHandle);
 template Lifeguard<VkImageViewHandle> Device::vkMakeHandleLifeguard(VkImageViewHandle vkHandle);
 template Lifeguard<VkSamplerHandle> Device::vkMakeHandleLifeguard(VkSamplerHandle vkHandle);
-template Lifeguard<VkDescriptorPoolHandle> Device::vkMakeHandleLifeguard(VkDescriptorPoolHandle vkHandle);
 template Lifeguard<VkPipelineHandle> Device::vkMakeHandleLifeguard(VkPipelineHandle vkHandle);
 template Lifeguard<VkSwapchainHandleKHR> Device::vkMakeHandleLifeguard(VkSwapchainHandleKHR vkHandle);
 template Lifeguard<VkSemaphoreHandle> Device::vkMakeHandleLifeguard(VkSemaphoreHandle vkHandle);

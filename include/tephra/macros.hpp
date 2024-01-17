@@ -23,4 +23,4 @@
 #define TEPHRA_MAKE_INTERFACE(className) \
     TEPHRA_MAKE_NONCOPYABLE(className); \
     TEPHRA_MAKE_NONMOVABLE(className); \
-    virtual ~className() = 0 {}
+    virtual ~className() {}

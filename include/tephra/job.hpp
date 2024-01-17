@@ -701,7 +701,7 @@ public:
     /// Returns the current statistics of this resource pool.
     JobResourcePoolStatistics getStatistics() const;
 
-    TEPHRA_MAKE_INTERFACE(JobResourcePool)
+    TEPHRA_MAKE_INTERFACE(JobResourcePool);
 
 protected:
     JobResourcePool() {}

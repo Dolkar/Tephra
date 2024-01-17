@@ -468,7 +468,7 @@ public:
     /// if not successful.
     void* vkLoadDeviceProcedure(const char* procedureName) const;
 
-    TEPHRA_MAKE_INTERFACE(Device)
+    TEPHRA_MAKE_INTERFACE(Device);
 
 protected:
     Device() {}

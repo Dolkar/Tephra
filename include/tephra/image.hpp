@@ -264,7 +264,7 @@ public:
         return getDefaultView();
     }
 
-    TEPHRA_MAKE_INTERFACE(Image)
+    TEPHRA_MAKE_INTERFACE(Image);
 
 protected:
     Image() {}

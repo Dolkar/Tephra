@@ -2,6 +2,7 @@
 
 #include <tephra/vulkan/structures.hpp>
 #include <tephra/macros.hpp>
+#include <type_traits>
 #include <unordered_map>
 #include <memory>
 #include <cstdint>
@@ -63,78 +64,52 @@ public:
     /// Returns `true` if the map contains the given type.
     template <typename T>
     bool contains() const {
-        VkStructureType typeValue = TStructureTypeTrait::template getVkStructureType<T>();
-        auto hit = map.find(typeValue);
-        return hit != map.end();
+        // Handle deprecated and combined structs
+        if constexpr (std::is_same_v<T, VkPhysicalDeviceFeatures>) {
+            return contains<VkPhysicalDeviceFeatures2>();
+        } else if constexpr (std::is_same_v<T, VkPhysicalDeviceProperties>) {
+            return contains<VkPhysicalDeviceProperties2>();
+        } else if constexpr (std::is_same_v<T, VkPhysicalDeviceLimits>) {
+            return contains<VkPhysicalDeviceProperties2>();
+        } else if constexpr (std::is_same_v<T, VkPhysicalDeviceSparseProperties>) {
+            return contains<VkPhysicalDeviceProperties2>();
+        } else if constexpr (std::is_same_v<T, VkPhysicalDeviceMemoryProperties>) {
+            return contains<VkPhysicalDeviceMemoryProperties2>();
+        } else {
+            VkStructureType typeValue = TStructureTypeTrait::template getVkStructureType<T>();
+            auto hit = map.find(typeValue);
+            return hit != map.end();
+        }
     }
 
     /// Returns an instance of the given type from the map. If it doesn't yet exist in the map, it is created with
     /// correct `sType` and `pNext` values. The rest of the structure gets zero initialized.
     template <typename T>
-    T& get() {
-        return *getOrMakeNew<T>();
+    auto& get() {
+        // Handle deprecated and combined structs
+        if constexpr (std::is_same_v<T, VkPhysicalDeviceFeatures>) {
+            VkPhysicalDeviceFeatures2* features2Ptr = getOrMakeNew<VkPhysicalDeviceFeatures2>();
+            return features2Ptr->features;
+        } else if constexpr (std::is_same_v<T, VkPhysicalDeviceProperties>) {
+            VkPhysicalDeviceProperties2* properties2Ptr = getOrMakeNew<VkPhysicalDeviceProperties2>();
+            return properties2Ptr->properties;
+        } else if constexpr (std::is_same_v<T, VkPhysicalDeviceLimits>) {
+            VkPhysicalDeviceProperties2* properties2Ptr = getOrMakeNew<VkPhysicalDeviceProperties2>();
+            return properties2Ptr->properties.limits;
+        } else if constexpr (std::is_same_v<T, VkPhysicalDeviceSparseProperties>) {
+            VkPhysicalDeviceProperties2* properties2Ptr = getOrMakeNew<VkPhysicalDeviceProperties2>();
+            return properties2Ptr->properties.sparseProperties;
+        } else if constexpr (std::is_same_v<T, VkPhysicalDeviceMemoryProperties>) {
+            VkPhysicalDeviceMemoryProperties2* memProperties2Ptr = getOrMakeNew<VkPhysicalDeviceMemoryProperties2>();
+            return memProperties2Ptr->memoryProperties;
+        } else {
+            return *getOrMakeNew<T>();
+        }
     }
 
     /// Removes all elements from the map.
     void clear() {
         map.clear();
-    }
-
-    // Specializations for special cases
-
-    template <>
-    bool contains<VkPhysicalDeviceFeatures>() const {
-        return contains<VkPhysicalDeviceFeatures2>();
-    }
-
-    template <>
-    VkPhysicalDeviceFeatures& get() {
-        VkPhysicalDeviceFeatures2* features2Ptr = getOrMakeNew<VkPhysicalDeviceFeatures2>();
-        return features2Ptr->features;
-    }
-
-    template <>
-    bool contains<VkPhysicalDeviceProperties>() const {
-        return contains<VkPhysicalDeviceProperties2>();
-    }
-
-    template <>
-    VkPhysicalDeviceProperties& get() {
-        VkPhysicalDeviceProperties2* properties2Ptr = getOrMakeNew<VkPhysicalDeviceProperties2>();
-        return properties2Ptr->properties;
-    }
-
-    template <>
-    bool contains<VkPhysicalDeviceLimits>() const {
-        return contains<VkPhysicalDeviceProperties2>();
-    }
-
-    template <>
-    VkPhysicalDeviceLimits& get() {
-        VkPhysicalDeviceProperties2* properties2Ptr = getOrMakeNew<VkPhysicalDeviceProperties2>();
-        return properties2Ptr->properties.limits;
-    }
-
-    template <>
-    bool contains<VkPhysicalDeviceSparseProperties>() const {
-        return contains<VkPhysicalDeviceProperties2>();
-    }
-
-    template <>
-    VkPhysicalDeviceSparseProperties& get() {
-        VkPhysicalDeviceProperties2* properties2Ptr = getOrMakeNew<VkPhysicalDeviceProperties2>();
-        return properties2Ptr->properties.sparseProperties;
-    }
-
-    template <>
-    bool contains<VkPhysicalDeviceMemoryProperties>() const {
-        return contains<VkPhysicalDeviceMemoryProperties2>();
-    }
-
-    template <>
-    VkPhysicalDeviceMemoryProperties& get() {
-        VkPhysicalDeviceMemoryProperties2* memProperties2Ptr = getOrMakeNew<VkPhysicalDeviceMemoryProperties2>();
-        return memProperties2Ptr->memoryProperties;
     }
 
     VkStructureMap(const VkStructureMap& other) noexcept : map(other.map) {

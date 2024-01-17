@@ -4,6 +4,7 @@
 #include "debugging.hpp"
 #include "utils/math.hpp"
 #include "utils/scratch_allocator.hpp"
+#include <cstring>
 
 #ifdef _MSC_VER
     #include <shared_mutex>

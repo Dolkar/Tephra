@@ -284,7 +284,7 @@ public:
     ///     The usage of the buffer.
     static uint64_t getRequiredViewAlignment(const Device* device, BufferUsageMask usage);
 
-    TEPHRA_MAKE_INTERFACE(Buffer)
+    TEPHRA_MAKE_INTERFACE(Buffer);
 
 protected:
     Buffer() {}

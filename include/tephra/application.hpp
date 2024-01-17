@@ -207,7 +207,7 @@ public:
         VkInstanceHandle vkInstanceHandle,
         DebugReportHandler* debugReportHandler);
 
-    TEPHRA_MAKE_INTERFACE(Application)
+    TEPHRA_MAKE_INTERFACE(Application);
 
 protected:
     Application() {}
