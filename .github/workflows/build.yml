@@ -60,7 +60,7 @@ jobs:
         vulkan-use-cache: true
 
     - name: Configure cmake
-      run: cmake -A x64 -S . -B out
+      run: cmake -S . -B out -DCMAKE_CXX_COMPILER='clang++'
             
     - name: Build release
       run: cmake --build out --parallel --config Release
