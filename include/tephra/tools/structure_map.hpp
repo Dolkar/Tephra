@@ -116,7 +116,7 @@ public:
         // Fix pointers
         VkStructureStub* otherPtr = other.frontPtr;
         while (otherPtr != nullptr) {
-            VkStructureStub* thisPtr = map[otherPtr->sType].get<struct VkStructureStub>();
+            VkStructureStub* thisPtr = map[otherPtr->sType].template get<VkStructureStub>();
 
             if (backPtr != nullptr) {
                 backPtr->pNext = thisPtr;
