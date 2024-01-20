@@ -1,5 +1,3 @@
-#pragma once
-
 #include "memory_allocator.hpp"
 #include "device_container.hpp"
 #include "logical_device.hpp"

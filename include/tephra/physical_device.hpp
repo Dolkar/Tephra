@@ -6,6 +6,7 @@
 #include <tephra/tools/structure_map.hpp>
 #include <tephra/common.hpp>
 #include <shared_mutex>
+#include <mutex>
 
 namespace tp {
 

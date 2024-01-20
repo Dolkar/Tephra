@@ -84,4 +84,16 @@ HostMappedMemory::~HostMappedMemory() {
     }
 }
 
+template <typename T>
+ArrayView<T> HostMappedMemory::getArrayView(uint64_t byteOffset, uint64_t count) {
+    TEPHRA_ASSERT(byteOffset + count * sizeof(T) <= getSize());
+    return ArrayView<T>(getPtr<T>(byteOffset), count);
+}
+
+template <typename T>
+ArrayView<const T> HostMappedMemory::getArrayView(uint64_t byteOffset, uint64_t count) const {
+    TEPHRA_ASSERT(byteOffset + count * sizeof(T) <= getSize());
+    return ArrayView<const T>(getPtr<T>(byteOffset), count);
+}
+
 }

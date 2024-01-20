@@ -142,17 +142,11 @@ public:
 
     /// Returns an array view of the mapped memory with a byte offset interpreted as `count` elements of the given type.
     template <typename T>
-    ArrayView<T> getArrayView(uint64_t byteOffset, uint64_t count) {
-        TEPHRA_ASSERT(byteOffset + count * sizeof(T) <= getSize());
-        return ArrayView<T>(getPtr<T>(byteOffset), count);
-    }
+    ArrayView<T> getArrayView(uint64_t byteOffset, uint64_t count);
 
     /// Returns an array view of the mapped memory with a byte offset interpreted as `count` elements of the given type.
     template <typename T>
-    ArrayView<const T> getArrayView(uint64_t byteOffset, uint64_t count) const {
-        TEPHRA_ASSERT(byteOffset + count * sizeof(T) <= getSize());
-        return ArrayView<const T>(getPtr<T>(byteOffset), count);
-    }
+    ArrayView<const T> getArrayView(uint64_t byteOffset, uint64_t count) const;
 
     /// Returns `true` if no memory is mapped.
     bool isNull() const {
