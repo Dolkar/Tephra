@@ -60,13 +60,12 @@ library within your solution. Tephra also accepts several preprocessor defines t
 see ug-general-concepts-debugging-and-validation. These are only used in the library's source files and do not
 affect binary compatibility.
 
-<a href="https://www.lunarg.com/vulkan-sdk/">Vulkan SDK</a> must be installed to build Tephra. The Visual Studio project
-uses the `VULKAN_SDK` environment variable to find the Vulkan include files. The minimum supported version of the Vulkan
-interface can be queried with tp::Version::getMaxUsedVulkanAPIVersion. The minimum supported version of Vulkan that the
-target device needs to support is then tp::Version::getMinSupportedVulkanDeviceVersion.
-
-Only Visual Studio is officially supported as the build environment, but the library does not use any Windows specific
-features and it shouldn't be difficult to get it running on other platforms.
+On Windows, the easiest way to build Tephra is to install the <a href="https://www.lunarg.com/vulkan-sdk/">Vulkan SDK</a>.
+The Visual Studio projects use the Vulkan headers and associated libraries through the `VULKAN_SDK` environment variable
+set up by the SDK. On other platforms, Tephra can be built with CMake with Vulkan as a dependency.
+The minimum supported version of the Vulkan interface can be queried with tp::Version::getMaxUsedVulkanAPIVersion.
+The minimum supported version of Vulkan that the target device needs to support is then
+tp::Version::getMinSupportedVulkanDeviceVersion.
 
 <br>
 @subsection ug-introduction-folder-structure Folder structure

@@ -6,6 +6,20 @@ version increments.
 
 @tableofcontents
 
+@section v0-4-0 In-dev version 0.4.0
+Released 2024-01-21
+- Improved resource view implementation and added internal guarantees of safe usage of resources even after their
+  the user has destroyed them.
+- Added support for the CMake build system and fixed compilation issues on Linux.
+- Included cube demo data and helpers, rather than pulling the files from the Vulkan SDK.
+
+@subsection v0-4-0-breaking Breaking changes
+@m_class{m-note m-warning}
+
+@parblock
+- Changed Vulkan function pointer types from void* to PFN_vkVoidFunction
+@endparblock
+
 @section v0-3-0 In-dev version 0.3.0
 Released 2023-11-17
 - This version cleans up some mistakes in the interface. Nothing too exciting.
