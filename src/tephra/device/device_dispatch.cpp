@@ -692,7 +692,7 @@ VkQueueHandle Device::vkGetQueueHandle(const DeviceQueue& queue) const {
     return deviceImpl->getQueueMap()->getQueueInfo(queue).vkQueueHandle;
 }
 
-void* Device::vkLoadDeviceProcedure(const char* procedureName) const {
+PFN_vkVoidFunction Device::vkLoadDeviceProcedure(const char* procedureName) const {
     auto deviceImpl = static_cast<const DeviceContainer*>(this);
     return deviceImpl->getParentAppImpl()->getInstance()->loadDeviceProcedure(vkGetDeviceHandle(), procedureName);
 }

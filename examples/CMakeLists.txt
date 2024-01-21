@@ -13,12 +13,12 @@ if(CMAKE_SYSTEM_NAME STREQUAL Windows)
     target_compile_definitions(TephraExamples PRIVATE VK_USE_PLATFORM_WIN32_KHR UNICODE)
 elseif(CMAKE_SYSTEM_NAME STREQUAL Linux)
     # Assume X over Wayland
+    find_package(X11 REQUIRED)
     target_compile_definitions(TephraExamples PRIVATE VK_USE_PLATFORM_XLIB_KHR)
+    target_link_libraries(TephraExamples PRIVATE X11)
 elseif(CMAKE_SYSTEM_NAME STREQUAL Darwin)
     target_compile_definitions(TephraExamples PRIVATE VK_USE_PLATFORM_MACOS_MVK)
 endif()
-
-target_include_directories(TephraExamples PRIVATE $ENV{VULKAN_SDK}/Demos/)
 
 target_link_libraries(TephraExamples PRIVATE Tephra)
 

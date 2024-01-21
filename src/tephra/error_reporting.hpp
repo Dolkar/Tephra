@@ -13,6 +13,10 @@ namespace tp {
 #endif
 
     error.raise();
+
+#ifdef __GNUC__
+    __builtin_unreachable();
+#endif
 }
 
 [[noreturn]] inline void throwErrorFromType(ErrorType type, const char* message = nullptr) {

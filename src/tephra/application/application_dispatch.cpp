@@ -85,7 +85,7 @@ VkInstanceHandle Application::vkGetInstanceHandle() const {
     return static_cast<const ApplicationContainer*>(this)->getInstance()->vkGetInstanceHandle();
 }
 
-void* Application::vkLoadInstanceProcedure(const char* procedureName) const {
+PFN_vkVoidFunction Application::vkLoadInstanceProcedure(const char* procedureName) const {
     const VulkanGlobals* vulkanGlobals = VulkanGlobals::get();
     return vulkanGlobals->loadInstanceProcedure(vkGetInstanceHandle(), procedureName);
 }

@@ -4,7 +4,7 @@
 
 namespace tp {
 
-void* checkLoadedProc(void* procPtr, const char* procName, const char* scope) {
+PFN_vkVoidFunction checkLoadedProc(PFN_vkVoidFunction procPtr, const char* procName, const char* scope) {
     if (procPtr == nullptr) {
         std::string errorMessage = "Unable to load " + std::string(scope) + " Vulkan procedure '" +
             std::string(procName) + "'";
@@ -14,15 +14,18 @@ void* checkLoadedProc(void* procPtr, const char* procName, const char* scope) {
 }
 
 #define LOAD_EXPORTED_PROCEDURE(fun) \
-    static_cast<PFN_##fun>(checkLoadedProc(vulkanLoader.loadExportedProcedure(#fun), #fun, "exported"))
+    reinterpret_cast<PFN_##fun>(checkLoadedProc(vulkanLoader.loadExportedProcedure(#fun), #fun, "exported"))
 #define LOAD_GLOBAL_PROCEDURE(fun) \
-    static_cast<PFN_##fun>(checkLoadedProc(loadInstanceProcedure(VkInstanceHandle(), #fun), #fun, "global"))
+    reinterpret_cast<PFN_##fun>(checkLoadedProc(loadInstanceProcedure(VkInstanceHandle(), #fun), #fun, "global"))
 #define LOAD_INSTANCE_PROCEDURE(fun) \
-    static_cast<PFN_##fun>(checkLoadedProc(vkiGlobal.loadInstanceProcedure(vkInstanceHandle, #fun), #fun, "instance"))
-#define LOAD_INSTANCE_EXT_PROCEDURE(fun) static_cast<PFN_##fun>(vkiGlobal.loadInstanceProcedure(vkInstanceHandle, #fun))
+    reinterpret_cast<PFN_##fun>( \
+        checkLoadedProc(vkiGlobal.loadInstanceProcedure(vkInstanceHandle, #fun), #fun, "instance"))
+#define LOAD_INSTANCE_EXT_PROCEDURE(fun) \
+    reinterpret_cast<PFN_##fun>(vkiGlobal.loadInstanceProcedure(vkInstanceHandle, #fun))
 #define LOAD_DEVICE_PROCEDURE(fun) \
-    static_cast<PFN_##fun>(checkLoadedProc(vkiInstance.loadDeviceProcedure(vkDeviceHandle, #fun), #fun, "device"))
-#define LOAD_DEVICE_EXT_PROCEDURE(fun) static_cast<PFN_##fun>(vkiInstance.loadDeviceProcedure(vkDeviceHandle, #fun))
+    reinterpret_cast<PFN_##fun>(checkLoadedProc(vkiInstance.loadDeviceProcedure(vkDeviceHandle, #fun), #fun, "device"))
+#define LOAD_DEVICE_EXT_PROCEDURE(fun) \
+    reinterpret_cast<PFN_##fun>(vkiInstance.loadDeviceProcedure(vkDeviceHandle, #fun))
 
 VulkanGlobalInterface::VulkanGlobalInterface() {
     static VulkanLoader vulkanLoader;
@@ -34,7 +37,8 @@ VulkanGlobalInterface::VulkanGlobalInterface() {
     createInstance = LOAD_GLOBAL_PROCEDURE(vkCreateInstance);
 }
 
-void* VulkanGlobalInterface::loadInstanceProcedure(VkInstanceHandle vkInstanceHandle, const char* procName) const {
+PFN_vkVoidFunction VulkanGlobalInterface::loadInstanceProcedure(VkInstanceHandle vkInstanceHandle, const char* procName)
+    const {
     return getInstanceProcAddr(vkInstanceHandle, procName);
 }
 
@@ -47,7 +51,8 @@ VulkanInstanceInterface::VulkanInstanceInterface(
     getDeviceProcAddr = LOAD_INSTANCE_PROCEDURE(vkGetDeviceProcAddr);
 }
 
-void* VulkanInstanceInterface::loadDeviceProcedure(VkDeviceHandle vkDeviceHandle, const char* procName) const {
+PFN_vkVoidFunction VulkanInstanceInterface::loadDeviceProcedure(VkDeviceHandle vkDeviceHandle, const char* procName)
+    const {
     return getDeviceProcAddr(vkDeviceHandle, procName);
 }
 

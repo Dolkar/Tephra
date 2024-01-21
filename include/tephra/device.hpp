@@ -466,7 +466,7 @@ public:
 
     /// Loads a Vulkan device procedure with the given name and returns a pointer to it, or `nullptr`
     /// if not successful.
-    void* vkLoadDeviceProcedure(const char* procedureName) const;
+    PFN_vkVoidFunction vkLoadDeviceProcedure(const char* procedureName) const;
 
     TEPHRA_MAKE_INTERFACE(Device);
 

@@ -15,7 +15,7 @@ namespace tp {
     #define TEPHRA_OS_UNSUPPORTED
 #endif
 
-#ifdef TEPHRA_OS_WINDOWS
+#if defined(TEPHRA_OS_WINDOWS)
     #ifndef WIN32_LEAN_AND_MEAN
         #define WIN32_LEAN_AND_MEAN
     #endif
@@ -24,9 +24,9 @@ namespace tp {
     #endif
     #include <windows.h>
     #define VULKAN_LOADER_LIBRARY_NAME TEXT("vulkan-1.dll")
-#elif TEPHRA_OS_UNIX
+#elif defined(TEPHRA_OS_UNIX)
     #include <dlfcn.h>
-    #define VULKAN_LOADER_LIBRARY_NAME "lubvulkan.so.1"
+    #define VULKAN_LOADER_LIBRARY_NAME "libvulkan.so.1"
 #endif
 
 std::string getLastError() {
@@ -62,16 +62,16 @@ std::string getLastError() {
 
     LocalFree(msgBuffer);
     return errorMessage;
-#elif TEPHRA_OS_UNIX
+#elif defined(TEPHRA_OS_UNIX)
     const char* msgBuffer = dlerror();
     return msgBuffer ? std::string(msgBuffer) : "Unknown error.";
 #endif
 }
 
 VulkanLoader::VulkanLoader() {
-#ifdef TEPHRA_OS_WINDOWS
+#if defined(TEPHRA_OS_WINDOWS)
     libHandle = LoadLibrary(VULKAN_LOADER_LIBRARY_NAME);
-#elif TEPHRA_OS_UNIX
+#elif defined(TEPHRA_OS_UNIX)
     libHandle = dlopen(VULKAN_LOADER_LIBRARY_NAME, RTLD_NOW | RTLD_LOCAL);
 #elif TEPHRA_OS_UNSUPPORTED
     throwRuntimeError(RuntimeError(ErrorType::InitializationFailed, "Unsupported operating system."));
@@ -82,19 +82,19 @@ VulkanLoader::VulkanLoader() {
     }
 }
 
-void* VulkanLoader::loadExportedProcedure(const char* procName) const {
-#ifdef TEPHRA_OS_WINDOWS
+PFN_vkVoidFunction VulkanLoader::loadExportedProcedure(const char* procName) const {
+#if defined(TEPHRA_OS_WINDOWS)
     void* procPtr = GetProcAddress(static_cast<HMODULE>(libHandle), procName);
-#elif TEPHRA_OS_UNIX
-    void* procPtr = dlsym(libHandle, name.data());
+#elif defined(TEPHRA_OS_UNIX)
+    void* procPtr = dlsym(libHandle, procName);
 #endif
-    return procPtr;
+    return reinterpret_cast<PFN_vkVoidFunction>(procPtr);
 }
 
 VulkanLoader::~VulkanLoader() {
-#ifdef TEPHRA_OS_WINDOWS
+#if defined(TEPHRA_OS_WINDOWS)
     FreeLibrary(static_cast<HMODULE>(libHandle));
-#elif TEPHRA_OS_UNIX
+#elif defined(TEPHRA_OS_UNIX)
     dlclose(libHandle);
 #endif
     libHandle = nullptr;

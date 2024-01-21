@@ -88,7 +88,7 @@ VkInstanceHandle VulkanGlobals::createVulkanInstance(
     return VkInstanceHandle(vkInstanceHandle);
 }
 
-void* VulkanGlobals::loadInstanceProcedure(VkInstanceHandle vkInstanceHandle, const char* procName) const {
+PFN_vkVoidFunction VulkanGlobals::loadInstanceProcedure(VkInstanceHandle vkInstanceHandle, const char* procName) const {
     return vkiGlobal.loadInstanceProcedure(vkInstanceHandle, procName);
 }
 

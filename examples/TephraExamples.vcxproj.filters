@@ -13,12 +13,15 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\1_Cube">
+      <UniqueIdentifier>{7fad28a5-eb11-40b7-8d4b-2e4746d8bb2f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\1_Cube">
+      <UniqueIdentifier>{52138d8b-1039-484a-beb1-35ddd7137699}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="tephra_examples.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="1_cube\cube.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="window.cpp">
@@ -26,6 +29,9 @@
     </ClCompile>
     <ClCompile Include="examples_common.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="1_cube\cube.cpp">
+      <Filter>Source Files\1_Cube</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -36,10 +42,24 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="1_cube\cube.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\1_Cube</Filter>
     </ClInclude>
     <ClInclude Include="1_cube\cube_data.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\1_Cube</Filter>
     </ClInclude>
+    <ClInclude Include="1_cube\linmath.h">
+      <Filter>Header Files\1_Cube</Filter>
+    </ClInclude>
+    <ClInclude Include="1_cube\lunarg.ppm.h">
+      <Filter>Header Files\1_Cube</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="1_cube\cube.frag.inc">
+      <Filter>Header Files\1_Cube</Filter>
+    </None>
+    <None Include="1_cube\cube.vert.inc">
+      <Filter>Header Files\1_Cube</Filter>
+    </None>
   </ItemGroup>
 </Project>

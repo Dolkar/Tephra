@@ -23,13 +23,6 @@ option(TEPHRA_COMPILE_EXAMPLES "Compile examples" ON)
 
 if(TEPHRA_COMPILE_EXAMPLES)
     add_subdirectory(examples)
-    
-    if(NOT DEFINED ENV{VULKAN_SDK})
-        message(
-            WARNING
-            "Tephra examples require the Vulkan SDK to be installed and the VULKAN_SDK envvar to be set."
-            "It depends on the data of the cube demo shipped with the SDK.")
-    endif()
 endif()
 
 # Tests are currently only set up in the Visual Studio solution

@@ -1,11 +1,13 @@
 #pragma once
 
+#include <tephra/vulkan/header.hpp>
+
 namespace tp {
 
 class VulkanLoader {
 public:
     VulkanLoader();
-    void* loadExportedProcedure(const char* procName) const;
+    PFN_vkVoidFunction loadExportedProcedure(const char* procName) const;
     ~VulkanLoader();
 
 private:

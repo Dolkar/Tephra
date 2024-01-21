@@ -36,7 +36,7 @@ namespace utils {
             descriptorIndex += binding.arraySize;
         }
 
-        vkUpdateDescriptorSets = static_cast<PFN_vkUpdateDescriptorSets>(
+        vkUpdateDescriptorSets = reinterpret_cast<PFN_vkUpdateDescriptorSets>(
             device->vkLoadDeviceProcedure("vkUpdateDescriptorSets"));
         TEPHRA_ASSERT(vkUpdateDescriptorSets != nullptr);
     }

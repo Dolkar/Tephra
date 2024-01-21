@@ -179,7 +179,7 @@ public:
 
     /// Loads a Vulkan instance procedure with the given name and returns a pointer to it, or `nullptr`
     /// if not successful.
-    void* vkLoadInstanceProcedure(const char* procedureName) const;
+    PFN_vkVoidFunction vkLoadInstanceProcedure(const char* procedureName) const;
 
     /// Returns the API version of the Vulkan runtime library (loader).
     static Version getApiVersion();

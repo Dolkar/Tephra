@@ -11,7 +11,7 @@ class VulkanLoader;
 class VulkanGlobalInterface {
 public:
     VulkanGlobalInterface();
-    void* loadInstanceProcedure(VkInstanceHandle vkInstanceHandle, const char* procName) const;
+    PFN_vkVoidFunction loadInstanceProcedure(VkInstanceHandle vkInstanceHandle, const char* procName) const;
 
     PFN_vkEnumerateInstanceExtensionProperties enumerateInstanceExtensionProperties = nullptr;
     PFN_vkEnumerateInstanceLayerProperties enumerateInstanceLayerProperties = nullptr;
@@ -26,7 +26,7 @@ class VulkanInstanceInterface {
 public:
     VulkanInstanceInterface() {}
     VulkanInstanceInterface(const VulkanGlobalInterface& vkiGlobal, VkInstanceHandle vkInstanceHandle);
-    void* loadDeviceProcedure(VkDeviceHandle vkDeviceHandle, const char* procName) const;
+    PFN_vkVoidFunction loadDeviceProcedure(VkDeviceHandle vkDeviceHandle, const char* procName) const;
 
     PFN_vkDestroyInstance destroyInstance = nullptr;
     PFN_vkEnumeratePhysicalDevices enumeratePhysicalDevices = nullptr;

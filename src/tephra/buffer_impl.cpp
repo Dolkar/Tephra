@@ -138,7 +138,8 @@ uint64_t BufferImpl::getRequiredViewAlignment_(const DeviceContainer* deviceImpl
         alignment = tp::max(alignment, deviceLimits.minStorageBufferOffsetAlignment);
     }
     if (usage.contains(BufferUsage::VertexBuffer)) {
-        alignment = tp::max(alignment, 8ull); // Conservative assumption of using 64-bit components
+        uint64_t maxVertexAlignment = 8ull; // Conservative assumption of using 64-bit components
+        alignment = tp::max(alignment, maxVertexAlignment);
     }
 
     return alignment;

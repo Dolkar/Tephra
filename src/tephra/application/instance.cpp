@@ -201,7 +201,7 @@ VkDeviceHandle Instance::createVulkanDevice(
     return VkDeviceHandle(vkDeviceHandle);
 }
 
-void* Instance::loadDeviceProcedure(VkDeviceHandle vkDeviceHandle, const char* procName) const {
+PFN_vkVoidFunction Instance::loadDeviceProcedure(VkDeviceHandle vkDeviceHandle, const char* procName) const {
     return vkiInstance.loadDeviceProcedure(vkDeviceHandle, procName);
 }
 

@@ -24,6 +24,7 @@
  */
 
 #include "lunarg.ppm.h"
+#include <cstring>
 
 #ifndef M_PI
     #define M_PI 3.14159265358979323846
@@ -149,7 +150,7 @@ bool loadLunarGTexture(uint8_t* rgba_data, uint64_t rowPitch, uint32_t* width, u
     }
     while (strncmp(cPtr++, "\n", 1))
         ;
-    sscanf_s(cPtr, "%u %u", width, height);
+    sscanf(cPtr, "%u %u", width, height);
     if (rgba_data == NULL) {
         return true;
     }
