@@ -8,7 +8,7 @@ namespace TephraIntegrationTests {
 
 // Helper functions to generate and verify data for the distance transform shader
 namespace DistanceTransformTestUtils {
-    constexpr uint32_t MarkedValueCount = 3;
+    constexpr uint32_t MarkedCellCount = 3;
 
     uint32_t getMarkedCellIndex(uint64_t cellCount, uint32_t seed, uint32_t i) {
         // Get some pseudorandom cells to mark
@@ -22,21 +22,21 @@ namespace DistanceTransformTestUtils {
         // For testing, make it mostly empty cells except for a few randomly distributed marked cells.
         memset(inputBuffer.data(), 0, inputBuffer.size() * sizeof(DistanceValueType));
 
-        for (uint32_t i = 0; i < MarkedValueCount; i++) {
+        for (uint32_t i = 0; i < MarkedCellCount; i++) {
             inputBuffer[getMarkedCellIndex(inputBuffer.size(), seed, i)] = 1;
         }
     }
 
-    void validateOutputData(tp::ArrayView < const DistanceValueType> outputBuffer, uint32_t seed) {
-        uint32_t markedCells[MarkedValueCount];
-        for (uint32_t i = 0; i < MarkedValueCount; i++) {
+    void validateOutputData(tp::ArrayView<const DistanceValueType> outputBuffer, uint32_t seed) {
+        uint32_t markedCells[MarkedCellCount];
+        for (uint32_t i = 0; i < MarkedCellCount; i++) {
             markedCells[i] = getMarkedCellIndex(outputBuffer.size(), seed, i);
         }
 
         for (uint32_t i = 0; i < outputBuffer.size(); i++) {
             // Calculate the min distance to all known marked cells
             DistanceValueType closestDistance = MaxDistanceValue;
-            for (uint32_t j = 0; j < MarkedValueCount; j++) {
+            for (uint32_t j = 0; j < MarkedCellCount; j++) {
                 DistanceValueType markDistance = markedCells[j] - i;
 
                 // In case of a tie, positive distance wins over negative
@@ -268,7 +268,7 @@ private:
 
         // Immediately enqueue and submit the job
         auto jobSemaphore = ctx->device->enqueueJob(ctx->graphicsQueueCtx.queue, std::move(job));
-        // This is when our inline lambda gets executed
+        // This is when our inline lambdas get called
         ctx->device->submitQueuedJobs(ctx->graphicsQueueCtx.queue);
         return jobSemaphore;
     }

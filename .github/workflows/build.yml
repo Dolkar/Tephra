@@ -65,8 +65,8 @@ jobs:
     - name: Configure cmake
       run: cmake -S . -B out -G "Ninja"
             
-    - name: Build release
-      run: cmake --build out --parallel --config Release
+    - name: Build targets
+      run: cmake --build out --parallel --config ${{env.BUILD_CONFIGURATION}}
       
   build_docs:
     runs-on: ubuntu-latest
