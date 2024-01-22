@@ -369,29 +369,27 @@ ResourceAccess operator|(const ResourceAccess& a, const ResourceAccess& b) {
     return ResourceAccess(a.stageMask | b.stageMask, a.accessMask | b.accessMask);
 }
 
-std::pair<VkBufferHandle, BufferAccessRange> resolveBufferAccess(const BufferView& bufferView) {
+std::pair<VkBufferHandle, BufferAccessRange> resolveBufferAccess(StoredBufferView& bufferView) {
     BufferAccessRange range = { 0, bufferView.getSize() };
     VkBufferHandle vkBufferHandle = resolveBufferAccess(bufferView, &range);
     return { vkBufferHandle, range };
 }
 
-VkBufferHandle resolveBufferAccess(const BufferView& bufferView, BufferAccessRange* range) {
+VkBufferHandle resolveBufferAccess(StoredBufferView& bufferView, BufferAccessRange* range) {
     uint64_t viewOffset;
     VkBufferHandle vkBufferHandle = bufferView.vkResolveBufferHandle(&viewOffset);
-    TEPHRA_ASSERTD(
-        !vkBufferHandle.isNull(), "All accessed buffers should have an underlying buffer assigned at this point.");
+    TEPHRA_ASSERT(!vkBufferHandle.isNull());
     TEPHRA_ASSERT(range->offset + range->size <= bufferView.getSize());
 
     range->offset += viewOffset;
     return vkBufferHandle;
 }
 
-VkImageHandle resolveImageAccess(const ImageView& imageView, ImageAccessRange* range) {
+VkImageHandle resolveImageAccess(StoredImageView& imageView, ImageAccessRange* range) {
     uint32_t viewBaseMipLevel;
     uint32_t viewBaseArrayLevel;
     VkImageHandle vkImageHandle = imageView.vkResolveImageHandle(&viewBaseMipLevel, &viewBaseArrayLevel);
-    TEPHRA_ASSERTD(
-        !vkImageHandle.isNull(), "All accessed images should have an underlying image assigned at this point.");
+    TEPHRA_ASSERT(!vkImageHandle.isNull());
     TEPHRA_ASSERT(range->baseArrayLayer + range->arrayLayerCount <= imageView.getWholeRange().arrayLayerCount);
     TEPHRA_ASSERT(tp::log2(range->mipLevelMask) <= imageView.getWholeRange().mipLevelCount);
 

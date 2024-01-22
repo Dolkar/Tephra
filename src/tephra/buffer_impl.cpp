@@ -90,28 +90,25 @@ void BufferImpl::destroyHandles(bool immediately) {
 }
 
 VkBufferViewHandle BufferImpl::vkGetBufferViewHandle(const BufferView& bufferView) {
-    TEPHRA_ASSERT(!bufferView.viewsJobLocalBuffer());
-
     if (bufferView.format == Format::Undefined) {
         // No Vulkan buffer view used
         return {};
     }
 
     TexelViewSetup setup = { bufferView.offset, bufferView.size, bufferView.format };
-    VkBufferViewHandle vkBufferViewHandle = bufferView.persistentBuffer->texelViewHandleMap[setup];
+    VkBufferViewHandle vkBufferViewHandle = getBufferImpl(bufferView).texelViewHandleMap[setup];
     TEPHRA_ASSERTD(!vkBufferViewHandle.isNull(), "BufferView with format should have a Vulkan handle created");
     return vkBufferViewHandle;
 }
 
 HostMappedMemory BufferImpl::mapViewForHostAccess(const BufferView& bufferView, MemoryAccess accessType) {
-    TEPHRA_ASSERT(!bufferView.viewsJobLocalBuffer());
-    return HostMappedMemory(bufferView.persistentBuffer, bufferView.offset, bufferView.size, accessType);
+    return HostMappedMemory(&getBufferImpl(bufferView), bufferView.offset, bufferView.size, accessType);
 }
 
 BufferImpl& BufferImpl::getBufferImpl(const BufferView& bufferView) {
+    TEPHRA_ASSERT(!bufferView.isNull());
     TEPHRA_ASSERT(!bufferView.viewsJobLocalBuffer());
-    TEPHRA_ASSERT(bufferView.persistentBuffer != nullptr);
-    return *bufferView.persistentBuffer;
+    return *std::get<BufferImpl*>(bufferView.buffer);
 }
 
 uint64_t BufferImpl::getRequiredViewAlignment_(
@@ -145,13 +142,16 @@ uint64_t BufferImpl::getRequiredViewAlignment_(
         alignment = tp::max(alignment, deviceLimits.minStorageBufferOffsetAlignment);
     }
     if (usage.contains(BufferUsage::VertexBuffer)) {
-        alignment = tp::max(alignment, 8ull); // Conservative assumption of using 64-bit components
+        uint64_t maxVertexAlignment = 8ull; // Conservative assumption of using 64-bit components
+        alignment = tp::max(alignment, maxVertexAlignment);
     }
     if (usage.contains(BufferUsage::DeviceAddress)) {
-        alignment = tp::max(alignment, 16ull); // Default buffer reference alignment
+        uint64_t maxDeviceAddressAlignment = 16ull; // Default buffer reference alignment
+        alignment = tp::max(alignment, maxDeviceAddressAlignment);
     }
     if (usage.contains(BufferUsage::AccelerationStructureInputKHR)) {
-        alignment = tp::max(alignment, 16ull);
+        uint64_t accelerationStructureInputAlignment = 16ull;
+        alignment = tp::max(alignment, accelerationStructureInputAlignment);
     }
 
     return alignment;

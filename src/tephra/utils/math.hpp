@@ -3,6 +3,7 @@
 #include "../error_reporting.hpp"
 #include <cstdint>
 #include <cstddef>
+#include <cmath>
 
 #ifdef min
     #undef min

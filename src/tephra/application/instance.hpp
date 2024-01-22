@@ -39,12 +39,12 @@ public:
         return Interface(vkiInstance, vkDeviceHandle);
     }
 
-    void* loadDeviceProcedure(VkDeviceHandle vkDeviceHandle, const char* procName) const;
+    PFN_vkVoidFunction loadDeviceProcedure(VkDeviceHandle vkDeviceHandle, const char* procName) const;
 
     const VulkanPhysicalDeviceInterface& getPhysicalDeviceInterface() const {
         return vkiPhysicalDevice;
     }
-    
+
     bool isFunctionalityAvailable(InstanceFunctionality fun) const {
         return functionalityMask.contains(fun);
     }

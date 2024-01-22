@@ -99,29 +99,54 @@ public:
     ///     The type of access.
     HostMappedMemory(Buffer* mappedBuffer, uint64_t mappingOffset, uint64_t mappingSize, MemoryAccess accessType);
 
-    /// Returns a pointer to the mapped memory interpreted as the given type.
-    template <typename T = void*>
-    T getPtr() {
-        return static_cast<T>(dataPtr);
+    /// Returns the size of the mapped memory in bytes
+    uint64_t getSize() const {
+        return mappingSize;
     }
 
     /// Returns a pointer to the mapped memory interpreted as the given type.
-    template <typename T = void*>
-    const T getPtr() const {
-        return static_cast<const T>(dataPtr);
+    template <typename T = void>
+    T* getPtr() {
+        return static_cast<T*>(dataPtr);
+    }
+
+    /// Returns a pointer to the mapped memory interpreted as the given type.
+    template <typename T = void>
+    const T* getPtr() const {
+        return static_cast<const T*>(dataPtr);
     }
 
     /// Returns a pointer to the mapped memory with a byte offset interpreted as the given type.
-    template <typename T = void*>
-    T getPtr(uint64_t byteOffset) {
-        return static_cast<T>(static_cast<void*>(static_cast<std::byte*>(dataPtr) + byteOffset));
+    template <typename T = void>
+    T* getPtr(uint64_t byteOffset) {
+        return static_cast<T*>(static_cast<void*>(static_cast<std::byte*>(dataPtr) + byteOffset));
     }
 
     /// Returns a pointer to the mapped memory with a byte offset interpreted as the given type.
-    template <typename T = void*>
-    const T getPtr(uint64_t byteOffset) const {
-        return static_cast<const T>(static_cast<const void*>(static_cast<const std::byte*>(dataPtr) + byteOffset));
+    template <typename T = void>
+    const T* getPtr(uint64_t byteOffset) const {
+        return static_cast<const T*>(static_cast<const void*>(static_cast<const std::byte*>(dataPtr) + byteOffset));
     }
+
+    /// Returns an array view of the mapped memory interpreted as the given type.
+    template <typename T>
+    ArrayView<T> getArrayView() {
+        return ArrayView<T>(getPtr<T>(), getSize() / sizeof(T));
+    }
+
+    /// Returns an array view of the mapped memory interpreted as the given type.
+    template <typename T>
+    ArrayView<const T> getArrayView() const {
+        return ArrayView<const T>(getPtr<T>(), getSize() / sizeof(T));
+    }
+
+    /// Returns an array view of the mapped memory with a byte offset interpreted as `count` elements of the given type.
+    template <typename T>
+    ArrayView<T> getArrayView(uint64_t byteOffset, uint64_t count);
+
+    /// Returns an array view of the mapped memory with a byte offset interpreted as `count` elements of the given type.
+    template <typename T>
+    ArrayView<const T> getArrayView(uint64_t byteOffset, uint64_t count) const;
 
     /// Returns `true` if no memory is mapped.
     bool isNull() const {

@@ -43,13 +43,13 @@ inline bool operator!=(const VkObjectHandle<T, Id>& lhs, const VkObjectHandle<T,
 
 template <typename TypedHandle>
 constexpr typename TypedHandle::VkHandleType* vkCastTypedHandlePtr(TypedHandle* ptr) noexcept {
-    static_assert(sizeof(TypedHandle) == sizeof(TypedHandle::VkHandleType));
+    static_assert(sizeof(TypedHandle) == sizeof(typename TypedHandle::VkHandleType));
     return reinterpret_cast<typename TypedHandle::VkHandleType*>(ptr);
 }
 
 template <typename TypedHandle>
 constexpr const typename TypedHandle::VkHandleType* vkCastTypedHandlePtr(const TypedHandle* ptr) noexcept {
-    static_assert(sizeof(TypedHandle) == sizeof(TypedHandle::VkHandleType));
+    static_assert(sizeof(TypedHandle) == sizeof(typename TypedHandle::VkHandleType));
     return reinterpret_cast<const typename TypedHandle::VkHandleType*>(ptr);
 }
 

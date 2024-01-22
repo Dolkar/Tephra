@@ -31,8 +31,7 @@ inline void validateViewOffsetSize(uint64_t viewOffset, uint64_t viewSize, uint6
     }
 }
 
-BufferView::BufferView()
-    : persistentBuffer(nullptr), offset(0), size(0), format(tp::Format::Undefined), viewsJobLocalBuffer_(false) {}
+BufferView::BufferView() : buffer(), offset(0), size(0), format(tp::Format::Undefined) {}
 
 BufferView BufferView::getView(uint64_t viewOffset, uint64_t viewSize) const {
     TEPHRA_DEBUG_SET_CONTEXT_TEMP(getDebugTarget(), BufferViewTypeName, "getView", nullptr);
@@ -50,20 +49,25 @@ BufferView BufferView::getView(uint64_t viewOffset, uint64_t viewSize) const {
 
 uint64_t BufferView::getRequiredViewAlignment() const {
     if (viewsJobLocalBuffer()) {
-        return jobLocalBuffer->getRequiredViewAlignment();
+        return std::get<JobLocalBufferImpl*>(buffer)->getRequiredViewAlignment();
+    } else if (!isNull()) {
+        return std::get<BufferImpl*>(buffer)->getRequiredViewAlignment_();
     } else {
-        return persistentBuffer->getRequiredViewAlignment_();
+        return 0;
     }
 }
 
 MemoryLocation BufferView::getMemoryLocation() const {
     if (viewsJobLocalBuffer()) {
-        if (jobLocalBuffer->hasUnderlyingBuffer())
-            return jobLocalBuffer->getUnderlyingBuffer()->getMemoryLocation();
-        else
+        if (std::get<JobLocalBufferImpl*>(buffer)->hasUnderlyingBuffer()) {
+            return std::get<JobLocalBufferImpl*>(buffer)->getUnderlyingBuffer()->getMemoryLocation();
+        } else {
             return MemoryLocation::Undefined;
+        }
+    } else if (!isNull()) {
+        return std::get<BufferImpl*>(buffer)->getMemoryLocation_();
     } else {
-        return persistentBuffer->getMemoryLocation_();
+        return MemoryLocation::Undefined;
     }
 }
 
@@ -75,14 +79,19 @@ HostMappedMemory BufferView::mapForHostAccess(MemoryAccess accessType) const {
                 DebugMessageSeverity::Error,
                 DebugMessageType::Validation,
                 "Attempt to map a job-local buffer for host access.");
+        } else if (isNull()) {
+            reportDebugMessage(
+                DebugMessageSeverity::Error,
+                DebugMessageType::Validation,
+                "Attempt to map a null buffer for host access.");
         } else {
-            if (!persistentBuffer->bufferSetup.usage.contains(BufferUsage::HostMapped)) {
+            if (!std::get<BufferImpl*>(buffer)->bufferSetup.usage.contains(BufferUsage::HostMapped)) {
                 reportDebugMessage(
                     DebugMessageSeverity::Error,
                     DebugMessageType::Validation,
                     "Buffer wasn't created with BufferUsage::HostMapped.");
             }
-            MemoryLocation location = persistentBuffer->getMemoryLocation_();
+            MemoryLocation location = std::get<BufferImpl*>(buffer)->getMemoryLocation_();
             if (location == MemoryLocation::DeviceLocal || location == MemoryLocation::Undefined) {
                 reportDebugMessage(
                     DebugMessageSeverity::Error,
@@ -100,7 +109,7 @@ HostMappedMemory BufferView::mapForHostAccess(MemoryAccess accessType) const {
         }
     }
 
-    if (viewsJobLocalBuffer()) {
+    if (isNull() || viewsJobLocalBuffer()) {
         return HostMappedMemory();
     } else {
         return BufferImpl::mapViewForHostAccess(*this, accessType);
@@ -118,76 +127,80 @@ BufferView BufferView::createTexelView(uint64_t viewOffset, uint64_t viewSize, F
     }
 
     if (viewsJobLocalBuffer()) {
-        return jobLocalBuffer->createTexelView(offset + viewOffset, viewSize, viewFormat);
+        return std::get<JobLocalBufferImpl*>(buffer)->createTexelView(offset + viewOffset, viewSize, viewFormat);
+    } else if (!isNull()) {
+        return std::get<BufferImpl*>(buffer)->createTexelView_(offset + viewOffset, viewSize, viewFormat);
     } else {
-        return persistentBuffer->createTexelView_(offset + viewOffset, viewSize, viewFormat);
+        return {};
     }
 }
 
 DeviceAddress BufferView::getDeviceAddress() const {
-    DeviceAddress parentAddress;
+    VkDeviceAddress parentAddress = 0;
     if (viewsJobLocalBuffer()) {
-        parentAddress = jobLocalBuffer->getDeviceAddress();
-    } else {
-        parentAddress = persistentBuffer->getDeviceAddress_();
+        parentAddress = std::get<JobLocalBufferImpl*>(buffer)->getDeviceAddress();
+    } else if (!isNull()) {
+        parentAddress = std::get<BufferImpl*>(buffer)->getDeviceAddress_();
     }
 
     if (parentAddress != 0) {
-        return parentAddress + offset;
-    } else {
-        return 0;
+        parentAddress += offset;
     }
+
+    return parentAddress;
 }
 
 VkBufferViewHandle BufferView::vkGetBufferViewHandle() const {
     if (viewsJobLocalBuffer()) {
-        if (jobLocalBuffer != nullptr && jobLocalBuffer->hasUnderlyingBuffer()) {
+        if (std::get<JobLocalBufferImpl*>(buffer)->hasUnderlyingBuffer()) {
             return BufferImpl::vkGetBufferViewHandle(JobLocalBufferImpl::getViewToUnderlyingBuffer(*this));
         } else {
             return {};
         }
-    } else {
+    } else if (!isNull()) {
         return BufferImpl::vkGetBufferViewHandle(*this);
-    }
-}
-
-bool operator==(const BufferView& lhs, const BufferView& rhs) {
-    if (lhs.size != rhs.size || lhs.offset != rhs.offset || lhs.format != rhs.format) {
-        return false;
-    }
-    if (lhs.viewsJobLocalBuffer() != rhs.viewsJobLocalBuffer()) {
-        return false;
-    }
-    if (lhs.viewsJobLocalBuffer()) {
-        return lhs.jobLocalBuffer == rhs.jobLocalBuffer;
     } else {
-        return lhs.persistentBuffer == rhs.persistentBuffer;
+        return {};
     }
 }
 
 VkBufferHandle BufferView::vkResolveBufferHandle(uint64_t* viewOffset) const {
     if (viewsJobLocalBuffer()) {
-        if (jobLocalBuffer != nullptr && jobLocalBuffer->hasUnderlyingBuffer()) {
+        if (std::get<JobLocalBufferImpl*>(buffer)->hasUnderlyingBuffer()) {
             BufferView underlyingView = JobLocalBufferImpl::getViewToUnderlyingBuffer(*this);
             TEPHRA_ASSERT(!underlyingView.viewsJobLocalBuffer());
             return underlyingView.vkResolveBufferHandle(viewOffset);
         } else {
             return {};
         }
-    } else {
+    } else if (!isNull()) {
         *viewOffset = offset;
-        return persistentBuffer->vkGetBufferHandle();
+        return std::get<BufferImpl*>(buffer)->vkGetBufferHandle();
+    } else {
+        return {};
     }
 }
 
 BufferView::BufferView(BufferImpl* persistentBuffer, uint64_t offset, uint64_t size, Format format)
-    : persistentBuffer(persistentBuffer), offset(offset), size(size), format(format), viewsJobLocalBuffer_(false) {}
+    : buffer(persistentBuffer), offset(offset), size(size), format(format) {}
 
 BufferView::BufferView(JobLocalBufferImpl* jobLocalBuffer, uint64_t offset, uint64_t size, Format format)
-    : jobLocalBuffer(jobLocalBuffer), offset(offset), size(size), format(format), viewsJobLocalBuffer_(true) {}
+    : buffer(jobLocalBuffer), offset(offset), size(size), format(format) {}
 
 const DebugTarget* BufferView::getDebugTarget() const {
-    return viewsJobLocalBuffer() ? jobLocalBuffer->getDebugTarget() : persistentBuffer->getDebugTarget();
+    if (viewsJobLocalBuffer())
+        return std::get<JobLocalBufferImpl*>(buffer)->getDebugTarget();
+    else if (!isNull())
+        return std::get<BufferImpl*>(buffer)->getDebugTarget();
+    else
+        return nullptr;
+}
+
+bool operator==(const BufferView& lhs, const BufferView& rhs) {
+    if (lhs.size != rhs.size || lhs.offset != rhs.offset || lhs.format != rhs.format) {
+        return false;
+    }
+    return lhs.buffer == rhs.buffer;
 }
 
 uint64_t Buffer::getSize() const {

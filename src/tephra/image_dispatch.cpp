@@ -40,7 +40,7 @@ ImageViewSetup::ImageViewSetup(
     ComponentMapping componentMapping)
     : viewType(viewType), subresourceRange(subresourceRange), format(format), componentMapping(componentMapping) {}
 
-ImageView::ImageView() : jobLocalImage(nullptr), setup(ImageViewType::View1D, {}), vkPersistentImageHandle() {}
+ImageView::ImageView() : setup(ImageViewType::View1D, {}) {}
 
 ImageSubresourceRange ImageView::getWholeRange() const {
     return ImageSubresourceRange(
@@ -53,17 +53,21 @@ ImageSubresourceRange ImageView::getWholeRange() const {
 
 Extent3D ImageView::getExtent(uint32_t mipLevel) const {
     if (viewsJobLocalImage()) {
-        return jobLocalImage->getExtent(setup.subresourceRange.baseMipLevel + mipLevel);
+        return std::get<JobLocalImageImpl*>(image)->getExtent(setup.subresourceRange.baseMipLevel + mipLevel);
+    } else if (!isNull()) {
+        return std::get<ImageImpl*>(image)->getExtent_(setup.subresourceRange.baseMipLevel + mipLevel);
     } else {
-        return persistentImage->getExtent_(setup.subresourceRange.baseMipLevel + mipLevel);
+        return {};
     }
 }
 
 MultisampleLevel ImageView::getSampleLevel() const {
     if (viewsJobLocalImage()) {
-        return jobLocalImage->getSampleLevel();
+        return std::get<JobLocalImageImpl*>(image)->getSampleLevel();
+    } else if (!isNull()) {
+        return std::get<ImageImpl*>(image)->getSampleLevel_();
     } else {
-        return persistentImage->getSampleLevel_();
+        return {};
     }
 }
 
@@ -88,9 +92,11 @@ ImageView ImageView::createView(ImageViewSetup subviewSetup) {
     subviewSetup.componentMapping = chainComponentMapping(subviewSetup.componentMapping, setup.componentMapping);
 
     if (viewsJobLocalImage()) {
-        return jobLocalImage->createView(std::move(subviewSetup));
+        return std::get<JobLocalImageImpl*>(image)->createView(std::move(subviewSetup));
+    } else if (!isNull()) {
+        return std::get<ImageImpl*>(image)->createView(std::move(subviewSetup));
     } else {
-        return persistentImage->createView(std::move(subviewSetup));
+        return {};
     }
 }
 
@@ -98,12 +104,10 @@ VkImageViewHandle ImageView::vkGetImageViewHandle() const {
     // Vulkan image views are accessed frequently, so cache them
     if (vkCachedImageViewHandle.isNull()) {
         if (viewsJobLocalImage()) {
-            if (jobLocalImage != nullptr && jobLocalImage->hasUnderlyingImage()) {
+            if (std::get<JobLocalImageImpl*>(image)->hasUnderlyingImage()) {
                 vkCachedImageViewHandle = JobLocalImageImpl::vkGetImageViewHandle(*this);
-            } else {
-                return {};
             }
-        } else {
+        } else if (!isNull()) {
             vkCachedImageViewHandle = ImageImpl::vkGetImageViewHandle(*this);
         }
     }
@@ -118,36 +122,32 @@ bool operator==(const ImageView& lhs, const ImageView& rhs) {
     if (lhs.viewsJobLocalImage() != rhs.viewsJobLocalImage()) {
         return false;
     }
-    if (lhs.viewsJobLocalImage()) {
-        return lhs.jobLocalImage == rhs.jobLocalImage;
-    } else {
-        return lhs.persistentImage == rhs.persistentImage;
-    }
+    return lhs.image == rhs.image;
 }
 
 VkImageHandle ImageView::vkResolveImageHandle(uint32_t* baseMipLevel, uint32_t* baseArrayLevel) const {
     if (viewsJobLocalImage()) {
-        if (jobLocalImage != nullptr && jobLocalImage->hasUnderlyingImage()) {
+        if (std::get<JobLocalImageImpl*>(image)->hasUnderlyingImage()) {
             ImageView underlyingView = JobLocalImageImpl::getViewToUnderlyingImage(*this);
             TEPHRA_ASSERT(!underlyingView.viewsJobLocalImage());
             return underlyingView.vkResolveImageHandle(baseMipLevel, baseArrayLevel);
         } else {
             return {};
         }
-    } else {
+    } else if (!isNull()) {
         *baseMipLevel = setup.subresourceRange.baseMipLevel;
         *baseArrayLevel = setup.subresourceRange.baseArrayLayer;
-        return vkPersistentImageHandle;
+        return std::get<ImageImpl*>(image)->vkGetImageHandle_();
+    } else {
+        return {};
     }
 }
 
 ImageView::ImageView(ImageImpl* persistentImage, ImageViewSetup setup)
-    : persistentImage(persistentImage),
-      setup(std::move(setup)),
-      vkPersistentImageHandle(persistentImage->vkGetImageHandle()) {}
+    : image(persistentImage), setup(std::move(setup)) {}
 
 ImageView::ImageView(JobLocalImageImpl* jobLocalImage, ImageViewSetup setup)
-    : jobLocalImage(jobLocalImage), setup(std::move(setup)), vkPersistentImageHandle() {}
+    : image(jobLocalImage), setup(std::move(setup)) {}
 
 ImageType Image::getType() const {
     auto imageImpl = static_cast<const ImageImpl*>(this);

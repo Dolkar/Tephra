@@ -8,12 +8,12 @@ OverallocationBehavior::OverallocationBehavior(float requestFactor, float growFa
 
 uint64_t OverallocationBehavior::apply(uint64_t requestedSize, uint64_t poolSize) const {
     uint64_t request = std::max(static_cast<uint64_t>(requestedSize * requestFactor), requestedSize);
-    uint64_t growth = static_cast<uint64_t>(poolSize * growFactor);
+    uint64_t growth = static_cast<uint64_t>(poolSize * std::max(growFactor - 1.0f, 0.0f));
     return std::max(std::max(request, growth), minAllocationSize);
 }
 
 OverallocationBehavior OverallocationBehavior::Exact() {
-    return OverallocationBehavior(1.0f, 0.0f, 0);
+    return OverallocationBehavior(1.0f, 1.0f, 0);
 }
 
 DescriptorPoolSetup::DescriptorPoolSetup(OverallocationBehavior overallocationBehavior)

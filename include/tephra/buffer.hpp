@@ -3,6 +3,7 @@
 #include <tephra/format.hpp>
 #include <tephra/memory.hpp>
 #include <tephra/common.hpp>
+#include <variant>
 
 namespace tp {
 
@@ -28,7 +29,7 @@ public:
 
     /// Returns `true` if the buffer view is null and does not view any resource.
     bool isNull() const {
-        return persistentBuffer == nullptr;
+        return std::holds_alternative<std::monostate>(buffer);
     }
 
     /// Returns the size of the buffer view in bytes.
@@ -67,7 +68,7 @@ public:
     /// Returns `false` if it views a persistent or a job preinitialized buffer and therefore
     /// can be mapped for host access.
     bool viewsJobLocalBuffer() const {
-        return viewsJobLocalBuffer_;
+        return std::holds_alternative<JobLocalBufferImpl*>(buffer);
     }
 
     /// Maps the viewed range of the buffer to visible memory, allowing it to be written
@@ -135,14 +136,10 @@ private:
 
     const DebugTarget* getDebugTarget() const;
 
-    union {
-        BufferImpl* persistentBuffer;
-        JobLocalBufferImpl* jobLocalBuffer;
-    };
+    std::variant<std::monostate, BufferImpl*, JobLocalBufferImpl*> buffer;
     uint64_t offset;
     uint64_t size;
     Format format;
-    bool viewsJobLocalBuffer_;
 };
 
 /// Equality operator for tp::BufferView.
@@ -300,7 +297,7 @@ public:
     ///     The usage of the buffer.
     static uint64_t getRequiredViewAlignment(const Device* device, BufferUsageMask usage);
 
-    TEPHRA_MAKE_INTERFACE(Buffer)
+    TEPHRA_MAKE_INTERFACE(Buffer);
 
 protected:
     Buffer() {}

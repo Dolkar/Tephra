@@ -343,15 +343,15 @@ public:
         const char* debugName = nullptr);
 
     /// Sets the bindings for the vertex input buffers to the given array.
-    GraphicsPipelineSetup& setVertexInputBindings(ArrayParameter<const VertexInputBinding> vertexInputBindings = {});
+    GraphicsPipelineSetup& setVertexInputBindings(ArrayParameter<const VertexInputBinding> vertexInputBindings);
     /// Sets the vertex shader stage.
     GraphicsPipelineSetup& setVertexStage(ShaderStageSetup vertexStageSetup);
     /// Sets the fragment shader stage.
-    GraphicsPipelineSetup& setFragmentStage(ShaderStageSetup fragmentStageSetup = {});
+    GraphicsPipelineSetup& setFragmentStage(ShaderStageSetup fragmentStageSetup);
     /// Sets the geometry shader stage.
     /// @remarks
     ///     The @vksymbol{VkPhysicalDeviceFeatures}::`geometryShader` feature must be enabled.
-    GraphicsPipelineSetup& setGeometryStage(ShaderStageSetup geometryStageSetup = {});
+    GraphicsPipelineSetup& setGeometryStage(ShaderStageSetup geometryStageSetup);
     /// Sets the tessellation control stages.
     /// @param tessellationControlStageSetup
     ///     The setup of the tessellation control shader stage.
@@ -362,8 +362,8 @@ public:
     /// @remarks
     ///     The @vksymbol{VkPhysicalDeviceFeatures}::`tessellationShader` feature must be enabled.
     GraphicsPipelineSetup& setTessellationStages(
-        ShaderStageSetup tessellationControlStageSetup = {},
-        ShaderStageSetup tessellationEvaluationStageSetup = {},
+        ShaderStageSetup tessellationControlStageSetup,
+        ShaderStageSetup tessellationEvaluationStageSetup,
         uint32_t patchControlPoints = 0);
     /// Sets the input primitive topology.
     /// @param topology
@@ -371,7 +371,7 @@ public:
     /// @param primitiveRestartEnable
     ///     When enabled, a special vertex index value (~0) in the index buffer restarts the primitive assembly.
     GraphicsPipelineSetup& setTopology(
-        PrimitiveTopology topology = PrimitiveTopology::TriangleList,
+        PrimitiveTopology topology,
         bool primitiveRestartEnable = false);
     /// Sets the format of the depth stencil attachment that will be bound along with this pipeline.
     /// @param depthStencilAttachmentFormat
@@ -383,31 +383,31 @@ public:
     ///     tp::RenderPassSetup of the active render pass when this pipeline is bound. If the attachment will be
     ///     unbound, the format must be set to tp::Format::Undefined and the aspects are ignored.
     GraphicsPipelineSetup& setDepthStencilAttachment(
-        Format depthStencilAttachmentFormat = Format::Undefined,
+        Format depthStencilAttachmentFormat,
         ImageAspectMask depthStencilAspects = ImageAspect::Depth | ImageAspect::Stencil);
     /// Sets the number and format of color attachments that will be bound along with this pipeline.
     /// @remarks
     ///     The formats must match the image views assigned to the corresponding attachments in tp::RenderPassSetup
     ///     of the active render pass when this pipeline is bound. If an attachment will be unbound,
     ///     the corresponding format must be set to tp::Format::Undefined.
-    GraphicsPipelineSetup& setColorAttachments(ArrayParameter<const Format> colorAttachmentFormats = {});
+    GraphicsPipelineSetup& setColorAttachments(ArrayParameter<const Format> colorAttachmentFormats);
     /// Sets the number of viewports.
     /// @remarks
     ///     The @vksymbol{VkPhysicalDeviceFeatures}::`multiViewport` feature must be enabled for `viewportCount != 1`.
-    GraphicsPipelineSetup& setViewportCount(uint32_t viewportCount = 1);
+    GraphicsPipelineSetup& setViewportCount(uint32_t viewportCount);
     /// Sets the view mask indicating the indices of attachment layers that will be rendered into when it is not 0.
     /// @remarks
     ///     The @vksymbol{VkPhysicalDeviceVulkan11Features}::`multiview` feature must be enabled for `viewMask != 0`.
-    GraphicsPipelineSetup& setMultiViewMask(uint32_t viewMask = 0);
+    GraphicsPipelineSetup& setMultiViewMask(uint32_t viewMask);
     /// Sets the rasterization mode.
     /// @remarks
     ///     The @vksymbol{VkPhysicalDeviceFeatures}::`fillModeNonSolid` feature must be enabled for
     ///     `mode == RasterizationMode::Line` or `mode == RasterizationMode::Point`.
-    GraphicsPipelineSetup& setRasterizationMode(RasterizationMode mode = RasterizationMode::Fill);
+    GraphicsPipelineSetup& setRasterizationMode(RasterizationMode mode);
     /// Sets whether or not the clockwise winding order of primitives should be considered as front facing.
-    GraphicsPipelineSetup& setFrontFace(bool frontFaceIsClockwise = false);
+    GraphicsPipelineSetup& setFrontFace(bool frontFaceIsClockwise);
     /// Sets whether front and/or back faces should be culled.
-    GraphicsPipelineSetup& setCullMode(CullModeFlagMask cullMode = CullModeFlagMask::None());
+    GraphicsPipelineSetup& setCullMode(CullModeFlagMask cullMode);
     /// Sets the depth bias functionality.
     /// @param enable
     ///     Enables depth bias if `true`.
@@ -420,7 +420,7 @@ public:
     /// @remarks
     ///     The @vksymbol{VkPhysicalDeviceFeatures}::`depthBiasClamp` feature must be enabled for `biasClamp != 0.0f`.
     GraphicsPipelineSetup& setDepthBias(
-        bool enable = false,
+        bool enable,
         float constantFactor = 0.0f,
         float slopeFactor = 0.0f,
         float biasClamp = 0.0f);
@@ -437,7 +437,7 @@ public:
     ///     The @vksymbol{VkPhysicalDeviceFeatures}::`sampleRateShading` feature must be enabled for
     ///     `sampleShadingEnable == true`.
     GraphicsPipelineSetup& setMultisampling(
-        MultisampleLevel level = MultisampleLevel::x1,
+        MultisampleLevel level,
         uint64_t sampleMask = ~0,
         bool sampleShadingEnable = false,
         float minSampleShading = 1.0f);
@@ -450,7 +450,7 @@ public:
     /// @remarks
     ///     The @vksymbol{VkPhysicalDeviceFeatures}::`alphaToOne` feature must be enabled for
     ///     `alphaToOneEnable == true`.
-    GraphicsPipelineSetup& setAlphaToCoverage(bool enable = false, bool alphaToOneEnable = false);
+    GraphicsPipelineSetup& setAlphaToCoverage(bool enable, bool alphaToOneEnable = false);
     /// Sets the depth testing functionality.
     /// @param enable
     ///     Enables depth operations if `true`.
@@ -459,7 +459,7 @@ public:
     /// @param enableWrite
     ///     If `true` and depth testing is enabled, also enables depth writes.
     GraphicsPipelineSetup& setDepthTest(
-        bool enable = false,
+        bool enable,
         CompareOp compareOp = CompareOp::Always,
         bool enableWrite = false);
     /// Sets the depth bounds testing functionality.
@@ -475,7 +475,7 @@ public:
     /// @remarks
     ///     The @vksymbol{VkPhysicalDeviceFeatures}::`depthBounds` feature must be enabled.
     GraphicsPipelineSetup& setDepthBoundsTest(
-        bool enable = false,
+        bool enable,
         float minDepthBounds = 0.0f,
         float maxDepthBounds = 1.0f);
     /// Sets the depth clamp funcionality.
@@ -484,13 +484,13 @@ public:
     ///     set by tp::RenderList::cmdSetViewport.
     /// @remarks
     ///     The @vksymbol{VkPhysicalDeviceFeatures}::`depthClamp` feature must be enabled.
-    GraphicsPipelineSetup& setDepthClamp(bool enable = false);
+    GraphicsPipelineSetup& setDepthClamp(bool enable);
     /// Sets the stencil testing functionality.
     /// @param enable
     ///     Enables stencil testing if `true`.
     /// @param stencilState
     ///     The stencil state to use for both front faces and back faces.
-    GraphicsPipelineSetup& setStencilTest(bool enable = false, StencilState stencilState = {});
+    GraphicsPipelineSetup& setStencilTest(bool enable, StencilState stencilState = {});
     /// Sets the stencil testing functionality.
     /// @param enable
     ///     Enables stencil testing if `true`.
@@ -499,7 +499,7 @@ public:
     /// @param backFaceStencilState
     ///     The stencil state to use for back faces.
     GraphicsPipelineSetup& setStencilTest(
-        bool enable = false,
+        bool enable,
         StencilState frontFaceStencilState = {},
         StencilState backFaceStencilState = {});
     /// Sets the logic blend operation functinality.
@@ -509,19 +509,19 @@ public:
     ///     The logical operator to use.
     /// @remarks
     ///     The @vksymbol{VkPhysicalDeviceFeatures}::`logicOp` feature must be enabled.
-    GraphicsPipelineSetup& setLogicBlendOp(bool enable = false, LogicOp logicOp = LogicOp::And);
+    GraphicsPipelineSetup& setLogicBlendOp(bool enable, LogicOp logicOp = LogicOp::And);
     /// Sets the width of rasterized line segments.
     /// @param width
     ///     The width of the rasterized line segments in pixels.
     /// @remarks
     ///     The @vksymbol{VkPhysicalDeviceFeatures}::`wideLines` feature must be enabled for `width != 1.0`.
-    GraphicsPipelineSetup& setLineWidth(float width = 1.0f);
+    GraphicsPipelineSetup& setLineWidth(float width);
     /// Sets the attachment blending functionality.
     /// @param enable
     ///     Enables blending operations on color attachments if `true`.
     /// @param blendState
     ///     The blend state used for all color attachments.
-    GraphicsPipelineSetup& setBlending(bool enable = false, AttachmentBlendState blendState = {});
+    GraphicsPipelineSetup& setBlending(bool enable, AttachmentBlendState blendState = {});
     /// Sets the attachment blending functionality with an independent blend state for each attachment.
     /// @param enable
     ///     Enables blending operations on color attachments if `true`.
@@ -532,7 +532,7 @@ public:
     /// @remarks
     ///     The @vksymbol{VkPhysicalDeviceFeatures}::`independentBlend` feature must be enabled.
     GraphicsPipelineSetup& setIndependentBlending(
-        bool enable = false,
+        bool enable,
         ArrayParameter<const AttachmentBlendState> blendStates = {});
     /// Sets the constants used for certain blend factors during blending operations.
     GraphicsPipelineSetup& setBlendConstants(float blendConstants[4]);
@@ -546,7 +546,7 @@ public:
     /// Clears all pipeline flags.
     GraphicsPipelineSetup& clearFlags();
     /// Sets a debug name identifier for the object.
-    GraphicsPipelineSetup& setDebugName(const char* debugName = nullptr);
+    GraphicsPipelineSetup& setDebugName(const char* debugName);
     // TODO: Accept extending structures for contained CreateInfos, re-route them based on their sType.
     /// Sets the pointer to additional Vulkan structures to be passed in `pNext` of
     /// @vksymbol{VkGraphicsPipelineCreateInfo}.

@@ -2,6 +2,8 @@
 
 #include <tephra/job.hpp>
 #include "../common_impl.hpp"
+#include "local_buffers.hpp"
+#include "local_images.hpp"
 #include <map>
 
 namespace tp {
@@ -97,8 +99,8 @@ struct BufferAccessRange {
     }
 };
 
-VkBufferHandle resolveBufferAccess(const BufferView& bufferView, BufferAccessRange* range);
-std::pair<VkBufferHandle, BufferAccessRange> resolveBufferAccess(const BufferView& bufferView);
+VkBufferHandle resolveBufferAccess(StoredBufferView& bufferView, BufferAccessRange* range);
+std::pair<VkBufferHandle, BufferAccessRange> resolveBufferAccess(StoredBufferView& bufferView);
 
 // Structure representing the extent of an access to an image resource
 // For reduced storage requirements and complexity, mip levels accessed is stored as a mask rather than a range
@@ -136,7 +138,7 @@ struct ImageAccessRange {
     }
 };
 
-VkImageHandle resolveImageAccess(const ImageView& imageView, ImageAccessRange* range);
+VkImageHandle resolveImageAccess(StoredImageView& imageView, ImageAccessRange* range);
 
 // Returns true when any part of the access ranges is overlapping
 inline bool areAccessRangesOverlapping(const BufferAccessRange& a, const BufferAccessRange& b) {

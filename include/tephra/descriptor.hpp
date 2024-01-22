@@ -482,14 +482,14 @@ struct OverallocationBehavior {
     ///
     /// Given a new allocation request, the size of the actual allocation to be made is calculated with
     /// the following formula:
-    /// `max(floor(requestedSize * requestFactor), floor(poolSize * growFactor), minAllocationSize)`
+    /// `max(floor(requestedSize * requestFactor), floor(poolSize * (growFactor - 1.0)), minAllocationSize)`
     /// where `requestedSize` is the size of the requested allocation and `poolSize` is the sum of all
     /// allocations made by the pool.
     ///
     /// @param requestFactor
     ///     The factor applied to requested allocation sizes. Must be greater or equal to 1.
     /// @param growFactor
-    ///     The factor applied to the total size of all allocations. Must be greater or equal to 0.
+    ///     The factor applied to the total size of all allocations. Must be greater or equal to 1.
     /// @param minAllocationSize
     ///     The size of the smallest allocation allowed to be made. The units are dependent on the
     ///     specific pool.
@@ -516,7 +516,7 @@ struct DescriptorPoolSetup {
     /// @param overallocationBehavior
     ///     Specifies the overallocation behavior of the descriptor pool. The units used represent
     ///     the number of descriptors.
-    explicit DescriptorPoolSetup(OverallocationBehavior overallocationBehavior = { 1.0f, 0.5f, 256 });
+    explicit DescriptorPoolSetup(OverallocationBehavior overallocationBehavior = { 1.0f, 1.5f, 256 });
 };
 
 /// Enables efficient creation, storage and reuse of tp::DescriptorSet objects.

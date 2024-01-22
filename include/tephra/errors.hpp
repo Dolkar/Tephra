@@ -57,7 +57,7 @@ enum class ErrorType : int32_t {
 class RuntimeError : public std::runtime_error {
 public:
     RuntimeError(ErrorType type, const std::string& what) : runtime_error(what), type(type) {}
-    RuntimeError(ErrorType type, const char* what) : runtime_error(what), type(type) {}
+    RuntimeError(ErrorType type, const char* what) : runtime_error(what == nullptr ? "" : what), type(type) {}
 
     /// Returns the type of the error.
     ErrorType getErrorType() const noexcept {

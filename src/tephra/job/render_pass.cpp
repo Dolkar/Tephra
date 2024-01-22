@@ -9,7 +9,7 @@ namespace tp {
 void AttachmentAccess::convertToVkAccess(
     ImageAccessRange* rangePtr,
     ResourceAccess* accessPtr,
-    VkImageLayout* layoutPtr) const {
+    VkImageLayout* layoutPtr) {
     TEPHRA_ASSERT(!imageView.isNull());
     *rangePtr = imageView.getWholeRange();
     *layoutPtr = layout;

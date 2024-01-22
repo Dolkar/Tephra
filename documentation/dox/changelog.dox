@@ -6,6 +6,41 @@ version increments.
 
 @tableofcontents
 
+@section v0-4-0 In-dev version 0.4.0
+Released 2024-01-21
+- Improved resource view implementation and added internal guarantees of safe usage of resources even after their
+  the user has destroyed them.
+- Added support for the CMake build system and fixed compilation issues on Linux.
+- Included cube demo data and helpers, rather than pulling the files from the Vulkan SDK.
+
+@subsection v0-4-0-breaking Breaking changes
+@m_class{m-note m-warning}
+
+@parblock
+- Changed Vulkan function pointer types from void* to PFN_vkVoidFunction
+@endparblock
+
+@section v0-3-0 In-dev version 0.3.0
+Released 2023-11-17
+- This version cleans up some mistakes in the interface. Nothing too exciting.
+- Added tp::HostMappedMemory::getArrayView methods for easier interpretation of mapped memory as an array.
+- Added a new "Streaming compute test" that shows off and validates streaming data to the gpu, processing it there
+  and then streaming it back.
+
+@subsection v0-3-0-breaking Breaking changes
+@m_class{m-note m-warning}
+
+@parblock
+- Most methods of tp::GraphicsPipelineSetup had their first default parameter removed. This was to avoid confusing
+  calls like `pipeline.setMultisampling()` actually disabling multisampling.
+- tp::OverallocationBehavior `growFactor` now more intuitively relates to how much the pool will grow after an
+  allocation. For example `growFactor = 2.0` will try to at least double the size of the pool. Before this change
+  to get the same behavior you needed a `growFactor` of 1.0.
+- Template parameter of tp::HostMappedMemory::getPtr now accepts a type of the pointed-to element, rather than the
+  type of the pointer itself. I feel like this is less surprising and consistent with the new
+  tp::HostMappedMemory::getArrayView methods.
+@endparblock
+
 @section v0-2-1 In-dev version 0.2.1
 Released 2023-11-08
 - Added optional parameters to tp::Device::submitQueuedJobs to allow inserting additional wait operations that will

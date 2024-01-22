@@ -24,7 +24,7 @@ permissions:
   contents: read
 
 jobs:
-  build:
+  build_windows:
     runs-on: windows-latest
 
     steps:
@@ -45,6 +45,28 @@ jobs:
       # Add additional options to the MSBuild command line here (like platform or verbosity level).
       # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
       run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} /t:Tephra:Rebuild ${{env.SOLUTION_FILE_PATH}}
+      
+  build_linux:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - uses: lukka/get-cmake@latest
+      
+    - name: Prepare Vulkan SDK
+      uses: humbletim/setup-vulkan-sdk@v1.2.0
+      with:
+        vulkan-query-version: latest
+        # Vulkan-Loader is not actually needed, but cmake cannot include the Vulkan library as just headers
+        vulkan-components: Vulkan-Headers, Vulkan-Loader
+        vulkan-use-cache: true
+
+    - name: Configure cmake
+      run: cmake -S . -B out -G "Ninja"
+            
+    - name: Build targets
+      run: cmake --build out --parallel --config ${{env.BUILD_CONFIGURATION}}
       
   build_docs:
     runs-on: ubuntu-latest

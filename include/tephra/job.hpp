@@ -656,9 +656,9 @@ struct JobResourcePoolSetup {
     JobResourcePoolSetup(
         DeviceQueue queue,
         JobResourcePoolFlagMask flags = {},
-        OverallocationBehavior bufferOverallocationBehavior = { 1.25f, 0.5f, 65536 },
-        OverallocationBehavior preinitBufferOverallocationBehavior = { 3.0f, 0.5f, 65536 },
-        OverallocationBehavior descriptorOverallocationBehavior = { 3.0f, 0.5f, 128 });
+        OverallocationBehavior bufferOverallocationBehavior = { 1.25f, 1.5f, 65536 },
+        OverallocationBehavior preinitBufferOverallocationBehavior = { 3.0f, 1.5f, 65536 },
+        OverallocationBehavior descriptorOverallocationBehavior = { 3.0f, 1.5f, 128 });
 };
 
 /// Contains statistics about the current allocations of a tp::JobResourcePool.
@@ -708,7 +708,7 @@ public:
     /// Returns the current statistics of this resource pool.
     JobResourcePoolStatistics getStatistics() const;
 
-    TEPHRA_MAKE_INTERFACE(JobResourcePool)
+    TEPHRA_MAKE_INTERFACE(JobResourcePool);
 
 protected:
     JobResourcePool() {}

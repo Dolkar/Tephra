@@ -26,7 +26,7 @@ public:
         return Interface(vkiGlobal, vkInstanceHandle);
     }
 
-    void* loadInstanceProcedure(VkInstanceHandle vkInstanceHandle, const char* procName) const;
+    PFN_vkVoidFunction loadInstanceProcedure(VkInstanceHandle vkInstanceHandle, const char* procName) const;
 
     static const VulkanGlobals* get();
 

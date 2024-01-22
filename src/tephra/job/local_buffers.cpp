@@ -5,11 +5,11 @@
 namespace tp {
 
 JobLocalBufferImpl::JobLocalBufferImpl(
-    DebugTarget debugTarget,
     DeviceContainer* deviceImpl,
     BufferSetup setup,
     uint64_t localBufferIndex,
-    std::deque<BufferView>* jobPendingBufferViews)
+    std::deque<BufferView>* jobPendingBufferViews,
+    DebugTarget debugTarget)
     : debugTarget(std::move(debugTarget)),
       deviceImpl(deviceImpl),
       localBufferIndex(localBufferIndex),
@@ -44,38 +44,36 @@ uint64_t JobLocalBufferImpl::getRequiredViewAlignment() const {
 
 void JobLocalBufferImpl::createPendingBufferViews(std::deque<BufferView>& jobPendingBufferViews) {
     for (BufferView& bufferView : jobPendingBufferViews) {
-        JobLocalBufferImpl* localBuffer = bufferView.jobLocalBuffer;
-        // It not have been assigned an underlying buffer if it's never used
-        if (!localBuffer->hasUnderlyingBuffer())
+        JobLocalBufferImpl& localBuffer = getBufferImpl(bufferView);
+        // It may not have been assigned an underlying buffer if it's never used
+        if (!localBuffer.hasUnderlyingBuffer())
             continue;
 
-        uint64_t finalOffset = localBuffer->underlyingBufferOffset + bufferView.offset;
-        TEPHRA_ASSERT(localBuffer->underlyingBuffer != nullptr);
-        static_cast<BufferImpl*>(localBuffer->underlyingBuffer)
+        uint64_t finalOffset = localBuffer.underlyingBufferOffset + bufferView.offset;
+        static_cast<BufferImpl*>(localBuffer.underlyingBuffer)
             ->createTexelView_(finalOffset, bufferView.size, bufferView.format);
     }
 }
 
 BufferView JobLocalBufferImpl::getViewToUnderlyingBuffer(const BufferView& bufferView) {
     TEPHRA_ASSERT(bufferView.viewsJobLocalBuffer());
-    JobLocalBufferImpl* localBuffer = bufferView.jobLocalBuffer;
-    TEPHRA_ASSERT(localBuffer->hasUnderlyingBuffer());
+    JobLocalBufferImpl& localBuffer = getBufferImpl(bufferView);
+    TEPHRA_ASSERT(localBuffer.hasUnderlyingBuffer());
 
-    BufferImpl* underlyingBuffer = static_cast<BufferImpl*>(localBuffer->underlyingBuffer);
-    uint64_t finalOffset = localBuffer->underlyingBufferOffset + bufferView.offset;
+    BufferImpl* underlyingBuffer = static_cast<BufferImpl*>(localBuffer.underlyingBuffer);
+    uint64_t finalOffset = localBuffer.underlyingBufferOffset + bufferView.offset;
     return BufferView(underlyingBuffer, finalOffset, bufferView.size, bufferView.format);
 }
 
 JobLocalBufferImpl& JobLocalBufferImpl::getBufferImpl(const BufferView& bufferView) {
     TEPHRA_ASSERT(bufferView.viewsJobLocalBuffer());
-    TEPHRA_ASSERT(bufferView.jobLocalBuffer != nullptr);
-    return *bufferView.jobLocalBuffer;
+    return *std::get<JobLocalBufferImpl*>(bufferView.buffer);
 }
 
 BufferView JobLocalBuffers::acquireNewBuffer(BufferSetup setup, DebugTarget debugTarget) {
     DeviceContainer* deviceImpl = resourcePoolImpl->getParentDeviceImpl();
 
-    buffers.emplace_back(std::move(debugTarget), deviceImpl, setup, buffers.size(), &pendingBufferViews);
+    buffers.emplace_back(deviceImpl, setup, buffers.size(), &pendingBufferViews, std::move(debugTarget));
     usageRanges.emplace_back();
     return buffers.back().getDefaultView();
 }

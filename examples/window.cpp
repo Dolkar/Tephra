@@ -261,6 +261,8 @@ WindowManager::WindowManager()
       window{ nullptr },
       event_buffer{ nullptr },
 #endif
+      example{ nullptr },
+      surface{ VK_NULL_HANDLE },
       width{ 800 },
       height{ 600 },
       has_resized{ true },
@@ -325,7 +327,7 @@ void WindowManager::create_surface() {
     VkInstance instance = application->vkGetInstanceHandle();
 
     if (surface != VK_NULL_HANDLE) {
-        auto destroySurfacePfn = static_cast<PFN_vkDestroySurfaceKHR>(
+        auto destroySurfacePfn = reinterpret_cast<PFN_vkDestroySurfaceKHR>(
             application->vkLoadInstanceProcedure("vkDestroySurfaceKHR"));
         destroySurfacePfn(application->vkGetInstanceHandle(), surface, nullptr);
     }
@@ -334,7 +336,7 @@ void WindowManager::create_surface() {
 
     // Create a WSI surface for the window:
 #if defined(VK_USE_PLATFORM_WIN32_KHR)
-    auto createSurfacePfn = static_cast<PFN_vkCreateWin32SurfaceKHR>(
+    auto createSurfacePfn = reinterpret_cast<PFN_vkCreateWin32SurfaceKHR>(
         application->vkLoadInstanceProcedure("vkCreateWin32SurfaceKHR"));
 
     VkWin32SurfaceCreateInfoKHR createInfo;
@@ -346,7 +348,7 @@ void WindowManager::create_surface() {
 
     err = createSurfacePfn(instance, &createInfo, NULL, &surface);
 #elif defined(VK_USE_PLATFORM_WAYLAND_KHR)
-    auto createSurfacePfn = static_cast<PFN_vkCreateWaylandSurfaceKHR>(
+    auto createSurfacePfn = reinterpret_cast<PFN_vkCreateWaylandSurfaceKHR>(
         application->vkLoadInstanceProcedure("vkCreateWaylandSurfaceKHR"));
 
     VkWaylandSurfaceCreateInfoKHR createInfo;
@@ -358,7 +360,7 @@ void WindowManager::create_surface() {
 
     err = createSurfacePfn(instance, &createInfo, NULL, &surface);
 #elif defined(VK_USE_PLATFORM_ANDROID_KHR)
-    auto createSurfacePfn = static_cast<PFN_vkCreateAndroidSurfaceKHR>(
+    auto createSurfacePfn = reinterpret_cast<PFN_vkCreateAndroidSurfaceKHR>(
         application->vkLoadInstanceProcedure("vkCreateAndroidSurfaceKHR"));
 
     VkAndroidSurfaceCreateInfoKHR createInfo;
@@ -369,7 +371,7 @@ void WindowManager::create_surface() {
 
     err = createSurfacePfn(instance, &createInfo, NULL, &surface);
 #elif defined(VK_USE_PLATFORM_XLIB_KHR)
-    auto createSurfacePfn = static_cast<PFN_vkCreateXlibSurfaceKHR>(
+    auto createSurfacePfn = reinterpret_cast<PFN_vkCreateXlibSurfaceKHR>(
         application->vkLoadInstanceProcedure("vkCreateXlibSurfaceKHR"));
 
     VkXlibSurfaceCreateInfoKHR createInfo;
@@ -381,7 +383,7 @@ void WindowManager::create_surface() {
 
     err = createSurfacePfn(instance, &createInfo, NULL, &surface);
 #elif defined(VK_USE_PLATFORM_XCB_KHR)
-    auto createSurfacePfn = static_cast<PFN_vkCreateXcbSurfaceKHR>(
+    auto createSurfacePfn = reinterpret_cast<PFN_vkCreateXcbSurfaceKHR>(
         application->vkLoadInstanceProcedure("vkCreateXcbSurfaceKHR"));
 
     VkXcbSurfaceCreateInfoKHR createInfo;
@@ -393,7 +395,7 @@ void WindowManager::create_surface() {
 
     err = createSurfacePfn(instance, &createInfo, NULL, &surface);
 #elif defined(VK_USE_PLATFORM_DIRECTFB_EXT)
-    auto createSurfacePfn = static_cast<PFN_vkCreateDirectFBSurfaceEXT>(
+    auto createSurfacePfn = reinterpret_cast<PFN_vkCreateDirectFBSurfaceEXT>(
         application->vkLoadInstanceProcedure("vkCreateDirectFBSurfaceEXT"));
 
     VkDirectFBSurfaceCreateInfoEXT createInfo;
@@ -405,7 +407,7 @@ void WindowManager::create_surface() {
 
     err = createSurfacePfn(instance, &createInfo, NULL, &surface);
 #elif defined(VK_USE_PLATFORM_METAL_EXT)
-    auto createSurfacePfn = static_cast<PFN_vkCreateMetalSurfaceEXT>(
+    auto createSurfacePfn = reinterpret_cast<PFN_vkCreateMetalSurfaceEXT>(
         application->vkLoadInstanceProcedure("vkCreateMetalSurfaceEXT"));
 
     VkMetalSurfaceCreateInfoEXT surface;
@@ -539,7 +541,7 @@ void WindowManager::run(Example* example, uint32_t frameCount) {
 
 void WindowManager::cleanup() {
     if (surface != VK_NULL_HANDLE) {
-        auto destroySurfacePfn = static_cast<PFN_vkDestroySurfaceKHR>(
+        auto destroySurfacePfn = reinterpret_cast<PFN_vkDestroySurfaceKHR>(
             example->getApplication()->vkLoadInstanceProcedure("vkDestroySurfaceKHR"));
         destroySurfacePfn(example->getApplication()->vkGetInstanceHandle(), surface, nullptr);
     }

@@ -1,9 +1,9 @@
 # Tephra
-**_A high-level C++17 graphics and computing library based on [Vulkan](https://www.vulkan.org/)_**
+**_A modern C++17 graphics and compute library filling the gap between [Vulkan](https://www.vulkan.org/) and high-level APIs such as OpenGL._**
 
 **License**: [MIT](https://github.com/Dolkar/Tephra/blob/main/LICENSE)
 
-**Current version**: [v0.2.1](https://dolkar.github.io/Tephra/changelog.html)
+**Current version**: [v0.4.0](https://dolkar.github.io/Tephra/changelog.html)
 
 **Links**: [User guide](https://dolkar.github.io/Tephra/user-guide.html) | [API Documentation](https://dolkar.github.io/Tephra/annotated.html) |
            [Discussions](https://github.com/Dolkar/Tephra/discussions)
@@ -19,8 +19,8 @@ and relevance. To that end, Tephra provides:
   API)
 - Low-level command lists that can be recorded in parallel and with minimal overhead
 - An easy and efficient way to create temporary images, staging buffers and scratch memory
-- A simple, general-purpose interface that tries not to force architectural decisions upon the user (such as recording
-  callbacks, the concept of frames or a bindless resource model)
+- A simple, general-purpose interface that tries not to force architectural decisions upon the user (such as the concept
+  of frames, requiring recording callbacks or a bindless resource model)
 - The ability to use bleeding-edge features of graphics hardware through direct interoperability with the Vulkan API
 - An introductory [user guide](https://dolkar.github.io/Tephra/user-guide.html), extensive
   [documentation](https://dolkar.github.io/Tephra/annotated.html) and [examples](https://dolkar.github.io/Tephra/examples.html)
@@ -38,7 +38,7 @@ full control over the execution of workloads. Recording commands is usually done
 high-level commands such as:
 - Allocation of temporary job-local resources
 - Clears, copies, blits and resolves
-- Render and compute passes specifying target resources and a set of command lists to execute
+- Render and compute passes specifying target resources and forming a set of command lists to execute
 - Resource export commands and Vulkan interop commands
 
 The actual draw and dispatch commands then get recorded into the command lists of each pass after the job itself has
@@ -46,12 +46,12 @@ been finalized. For convenience, a callback function can be optionally used to r
 help with code organization.
 
 While Tephra handles most of the Vulkan-mandated synchronization automatically from the list of job commands,
-analyzing commands recorded into command lists would have unacceptable performance overhead. Instead, this ordinarily
-needs to be handled by specifying all the resource accesses of each render / compute pass, but for the majority of
+analyzing commands recorded into command lists would have unacceptable performance overhead. This could ordinarily be
+circumvented by manually specifying all the resource accesses of each render / compute pass, but for the majority of
 read-only accesses, the library offers the much more convenient "export" mechanism. Once an image or buffer is written
 to by a prior command or pass, it can be exported for all future accesses of a certain type, for example as a sampled
-texture. In effect, this means that you generally need to specify if and how a resource is going to be read from inside
-your shaders in the future, after each time you write into it.
+texture. In effect, for a resource used inside shaders, this means that you generally only need to specify how it is
+going to be read in the future after each time you write into it. In most cases that only needs to be done once.
 
 Another system inherited from Vulkan is its binding model. By default, resources get bound as descriptors in sets,
 rather than individually. You can think of a material's textures - the albedo map, normal map, roughness map, etc -
@@ -87,7 +87,7 @@ a thread safe manner.
 
 Many other Vulkan abstractions opt for
 [render graphs](https://themaister.net/blog/2017/08/15/render-graphs-and-vulkan-a-deep-dive/) to manage synchronization
-and resource aliasing. Tephra's approach is similar to a render graph that does not reorder passes, but has a smaller
+and resource aliasing. Tephra's approach works the same as a render graph that does not reorder passes, but has a smaller
 API footprint, does not force resource virtualization and is already familiar to users of last-gen graphics APIs. A
 render graph solution can be easily implemented on top of Tephra, if desired.
 
@@ -135,13 +135,13 @@ runnable showcase.
 
 ## Prerequisities
 
-- Tephra is a C++ library. It makes use of C++17 features, the standard library and C++ exceptions.
-- Only the Visual Studio build path for the Windows platform is maintained, but the library itself is written to be
-  platform independent.
-- Vulkan headers version 1.3.239 or newer, provided with the SDK [here](https://www.lunarg.com/vulkan-sdk/).
-- Compatible devices must support Vulkan 1.3 or newer.
+- Tephra is a C++ library. It makes use of C++17 features, the standard library and C++ exceptions
+- Visual Studio 2022 (see build/Tephra.sln) or CMake 3.15
+- Vulkan headers version 1.3.239 or newer, provided with the SDK [here](https://www.lunarg.com/vulkan-sdk/)
+- Compatible devices must support Vulkan 1.3 or newer
+- While any x64 platform is supported, Tephra is being used and tested mainly on Windows
 
-Building the documentation
+Building the documentation:
 - Python 3.6 or newer
 - Doxygen 1.8.15 or newer
 - The [Jinja2](https://palletsprojects.com/p/jinja/) and [Pygments](https://pygments.org/) Python packages

@@ -3,6 +3,7 @@
 #include <tephra/format.hpp>
 #include <tephra/memory.hpp>
 #include <tephra/common.hpp>
+#include <variant>
 
 namespace tp {
 
@@ -72,7 +73,7 @@ public:
 
     /// Returns `true` if the image view is null and does not view any resource.
     bool isNull() const {
-        return persistentImage == nullptr;
+        return std::holds_alternative<std::monostate>(image);
     }
 
     /// Returns the type of the image view.
@@ -84,7 +85,7 @@ public:
     /// @remarks
     ///     The returned range is relative to the view, therefore tp::ImageSubresourceRange::baseMipLevel
     ///     and tp::ImageSubresourceRange::baseArrayLevel are always 0. To resolve the
-    ///     actual offsets to the underlying image, see tp::ImageView::resolveUnderlyingImage.
+    ///     actual offsets to the underlying image, see tp::ImageView::vkResolveImageHandle.
     ImageSubresourceRange getWholeRange() const;
 
     /// Returns the format of the image view.
@@ -101,7 +102,7 @@ public:
     /// Returns `true` if the instance views a job-local image.
     /// Returns `false` if it views a persistent one.
     bool viewsJobLocalImage() const {
-        return vkPersistentImageHandle.isNull();
+        return std::holds_alternative<JobLocalImageImpl*>(image);
     }
 
     /// Creates another view of the viewed image relative to this view.
@@ -144,12 +145,8 @@ private:
 
     ImageView(JobLocalImageImpl* jobLocalImage, ImageViewSetup setup);
 
-    union {
-        ImageImpl* persistentImage;
-        JobLocalImageImpl* jobLocalImage;
-    };
+    std::variant<std::monostate, ImageImpl*, JobLocalImageImpl*> image;
     ImageViewSetup setup;
-    VkImageHandle vkPersistentImageHandle;
     mutable VkImageViewHandle vkCachedImageViewHandle = {};
 };
 
@@ -267,7 +264,7 @@ public:
         return getDefaultView();
     }
 
-    TEPHRA_MAKE_INTERFACE(Image)
+    TEPHRA_MAKE_INTERFACE(Image);
 
 protected:
     Image() {}

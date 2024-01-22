@@ -1,5 +1,6 @@
 #pragma once
 
+#include "accesses.hpp"
 #include "../common_impl.hpp"
 #include <tephra/compute.hpp>
 #include <deque>
@@ -7,6 +8,23 @@
 namespace tp {
 
 class PrimaryBufferRecorder;
+
+struct StoredBufferComputeAccess {
+    StoredBufferView buffer;
+    ComputeAccessMask accessMask;
+
+    StoredBufferComputeAccess(const BufferComputeAccess& access)
+        : buffer(access.buffer), accessMask(access.accessMask) {}
+};
+
+struct StoredImageComputeAccess {
+    StoredImageView image;
+    ImageSubresourceRange range;
+    ComputeAccessMask accessMask;
+
+    StoredImageComputeAccess(const ImageComputeAccess& access)
+        : image(access.image), range(access.range), accessMask(access.accessMask) {}
+};
 
 class ComputePass {
 public:
@@ -17,11 +35,11 @@ public:
         return deviceImpl;
     }
 
-    ArrayView<const BufferComputeAccess> getBufferAccesses() const {
+    ArrayView<StoredBufferComputeAccess> getBufferAccesses() {
         return view(bufferAccesses);
     }
 
-    ArrayView<const ImageComputeAccess> getImageAccesses() const {
+    ArrayView<StoredImageComputeAccess> getImageAccesses() {
         return view(imageAccesses);
     }
 
@@ -44,8 +62,8 @@ public:
 private:
     DeviceContainer* deviceImpl = nullptr;
 
-    std::vector<BufferComputeAccess> bufferAccesses;
-    std::vector<ImageComputeAccess> imageAccesses;
+    std::vector<StoredBufferComputeAccess> bufferAccesses;
+    std::vector<StoredImageComputeAccess> imageAccesses;
 
     bool isInline = false;
     ComputeInlineCallback inlineRecordingCallback;
