@@ -1,14 +1,15 @@
 
 #include "acceleration_structure_impl.hpp"
 #include "device/device_container.hpp"
+#include "job/local_acceleration_structures.hpp"
+#include "job/local_buffers.hpp"
 
 namespace tp {
 
 AccelerationStructureBuilder::AccelerationStructureBuilder(
     DeviceContainer* deviceImpl,
-    const AccelerationStructureSetup& setup)
-    : type(setup.type), buildFlags(setup.buildFlags) {
-    initGeometries(setup);
+    const AccelerationStructureSetup& setup) {
+    reset(setup);
 
     // Query acceleration structure sizes
     VkAccelerationStructureBuildGeometryInfoKHR vkBuildInfo = makeVkBuildInfo();
@@ -18,28 +19,34 @@ AccelerationStructureBuilder::AccelerationStructureBuilder(
 
 std::pair<VkAccelerationStructureBuildGeometryInfoKHR, const VkAccelerationStructureBuildRangeInfoKHR*>
 AccelerationStructureBuilder::prepareBuild(
-    const AccelerationStructureBuildInfo& buildInfo,
-    const BufferView& scratchBuffer) {
+    StoredAccelerationStructureBuildInfo& buildInfo,
+    StoredBufferView& scratchBuffer) {
+    auto getCheckedDeviceAddress = [](StoredBufferView& buffer) {
+        DeviceAddress address = { buffer.getDeviceAddress() };
+        TEPHRA_ASSERT(address != 0 || buffer.isNull());
+        return address;
+    };
+
     VkAccelerationStructureBuildGeometryInfoKHR vkBuildInfo = makeVkBuildInfo(buildInfo.mode);
 
     if (!buildInfo.srcView.isNull())
         vkBuildInfo.srcAccelerationStructure = buildInfo.srcView.vkGetAccelerationStructureHandle();
     vkBuildInfo.dstAccelerationStructure = buildInfo.dstView.vkGetAccelerationStructureHandle();
-    vkBuildInfo.scratchData = { scratchBuffer.getDeviceAddress() };
+    vkBuildInfo.scratchData = { getCheckedDeviceAddress(scratchBuffer) };
 
     if (type == AccelerationStructureType::TopLevel) {
         // Instance geometry
         TEPHRA_ASSERT(vkGeometries.size() == 1);
-        TEPHRA_ASSERT(vkGeometries[0].geometryType = VK_GEOMETRY_TYPE_INSTANCES_KHR);
+        TEPHRA_ASSERT(vkGeometries[0].geometryType == VK_GEOMETRY_TYPE_INSTANCES_KHR);
         auto& instanceGeom = vkGeometries[0].geometry.instances;
 
         instanceGeom.arrayOfPointers = buildInfo.instanceGeometry.arrayOfPointers;
-        const BufferView& instanceData = buildInfo.instanceGeometry.instanceBuffer;
+        StoredBufferView& instanceData = buildInfo.instanceGeometry.instanceBuffer;
         std::size_t instanceSize = buildInfo.instanceGeometry.arrayOfPointers ?
             sizeof(DeviceAddress) :
             sizeof(VkAccelerationStructureInstanceKHR);
 
-        instanceGeom.data = { instanceData.getDeviceAddress() };
+        instanceGeom.data = { getCheckedDeviceAddress(instanceData) };
         std::size_t instanceCount = instanceData.getSize() / instanceSize;
 
         // We never set the offsets in build ranges to anything other than 0
@@ -49,16 +56,16 @@ AccelerationStructureBuilder::prepareBuild(
         TEPHRA_ASSERT(vkGeometries.size() == geometryCount);
 
         std::size_t geomIndex = 0;
-        for (const TriangleGeometryBuildInfo& triInfo : buildInfo.triangleGeometries) {
+        for (StoredTriangleGeometryBuildInfo& triInfo : buildInfo.triangleGeometries) {
             TEPHRA_ASSERT(vkGeometries[geomIndex].geometryType == VK_GEOMETRY_TYPE_TRIANGLES_KHR);
             auto& triangleGeom = vkGeometries[geomIndex].geometry.triangles;
 
-            triangleGeom.vertexData = { triInfo.vertexBuffer.getDeviceAddress() };
+            triangleGeom.vertexData = { getCheckedDeviceAddress(triInfo.vertexBuffer) };
             triangleGeom.vertexStride = triInfo.vertexStride;
 
             // Optional buffer views, but getDeviceAddress on a null view returns 0
-            triangleGeom.indexData = { triInfo.indexBuffer.getDeviceAddress() };
-            triangleGeom.transformData = { triInfo.transformBuffer.getDeviceAddress() };
+            triangleGeom.indexData = { getCheckedDeviceAddress(triInfo.indexBuffer) };
+            triangleGeom.transformData = { getCheckedDeviceAddress(triInfo.transformBuffer) };
 
             std::size_t triangleCount;
             if (!triInfo.indexBuffer.isNull()) {
@@ -74,11 +81,11 @@ AccelerationStructureBuilder::prepareBuild(
             geomIndex++;
         }
 
-        for (const AABBGeometryBuildInfo& aabbInfo : buildInfo.aabbGeometries) {
+        for (StoredAABBGeometryBuildInfo& aabbInfo : buildInfo.aabbGeometries) {
             TEPHRA_ASSERT(vkGeometries[geomIndex].geometryType == VK_GEOMETRY_TYPE_AABBS_KHR);
             auto& aabbGeom = vkGeometries[geomIndex].geometry.aabbs;
 
-            aabbGeom.data = { aabbInfo.aabbBuffer.getDeviceAddress() };
+            aabbGeom.data = { getCheckedDeviceAddress(aabbInfo.aabbBuffer) };
             aabbGeom.stride = aabbInfo.stride;
 
             std::size_t aabbCount = aabbInfo.aabbBuffer.getSize() / aabbInfo.stride;
@@ -90,9 +97,13 @@ AccelerationStructureBuilder::prepareBuild(
     return { vkBuildInfo, vkBuildRanges.data() };
 }
 
-void AccelerationStructureBuilder::initGeometries(const AccelerationStructureSetup& setup) {
-    TEPHRA_ASSERT(vkGeometries.empty());
-    TEPHRA_ASSERT(maxPrimitiveCounts.empty());
+void AccelerationStructureBuilder::reset(const AccelerationStructureSetup& setup) {
+    type = setup.type;
+    buildFlags = setup.buildFlags;
+
+    // Initialize the geometries and maxPrimitiveCounts array with null resources according to the setup
+    vkGeometries.clear();
+    maxPrimitiveCounts.clear();
 
     // Prepare geometry template
     VkAccelerationStructureGeometryKHR geomTemplate;
@@ -188,9 +199,8 @@ VkAccelerationStructureBuildGeometryInfoKHR AccelerationStructureBuilder::makeVk
 
 AccelerationStructureBaseImpl::AccelerationStructureBaseImpl(
     DeviceContainer* deviceImpl,
-    AccelerationStructureBuilder builder,
     Lifeguard<VkAccelerationStructureHandleKHR> accelerationStructureHandle)
-    : deviceImpl(deviceImpl), builder(std::move(builder)) {
+    : deviceImpl(deviceImpl) {
     assignHandle(std::move(accelerationStructureHandle));
 }
 
@@ -205,13 +215,14 @@ void AccelerationStructureBaseImpl::assignHandle(
 
 AccelerationStructureImpl::AccelerationStructureImpl(
     DeviceContainer* deviceImpl,
-    AccelerationStructureBuilder builder,
+    std::shared_ptr<AccelerationStructureBuilder> builder,
     Lifeguard<VkAccelerationStructureHandleKHR> accelerationStructureHandle,
     OwningPtr<Buffer> backingBuffer,
     DebugTarget debugTarget)
-    : AccelerationStructureBaseImpl(deviceImpl, std::move(builder), std::move(accelerationStructureHandle)),
+    : AccelerationStructureBaseImpl(deviceImpl, std::move(accelerationStructureHandle)),
       debugTarget(std::move(debugTarget)),
-      backingBuffer(std::move(backingBuffer)) {}
+      backingBuffer(std::move(backingBuffer)),
+      builder(std::move(builder)) {}
 
 AccelerationStructureImpl& AccelerationStructureImpl::getAccelerationStructureImpl(
     const AccelerationStructureView& asView) {

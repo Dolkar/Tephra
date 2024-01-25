@@ -5,13 +5,14 @@
 namespace tp {
 
 JobResourceStorage::JobResourceStorage(JobResourcePoolContainer* resourcePoolImpl)
-    : localBuffers(resourcePoolImpl),
-      localImages(resourcePoolImpl),
+    : localBuffers(resourcePoolImpl->getParentDeviceImpl()),
+      localImages(),
       localDescriptorSets(resourcePoolImpl->getLocalDescriptorPool()) {}
 
 void JobResourceStorage::clear() {
     localBuffers.clear();
     localImages.clear();
+    localAccelerationStructures.clear();
     localDescriptorSets.clear();
     // Command pools must be released explicitly back to their pool, a clear won't do
     TEPHRA_ASSERT(commandPools.empty());
@@ -25,6 +26,7 @@ void JobRecordStorage::clear() {
 
     computePassCount = 0;
     renderPassCount = 0;
+    usedASBuilders.clear();
 }
 
 JobData::JobData(JobResourcePoolContainer* resourcePoolImpl)

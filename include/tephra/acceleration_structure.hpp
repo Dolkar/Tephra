@@ -100,6 +100,14 @@ struct AccelerationStructureSetup {
 
 class AccelerationStructure : public Ownable {
 public:
+    const AccelerationStructureView getView() const;
+
+    DeviceAddress getDeviceAddress() const;
+
+    const BufferView getBackingBufferView() const;
+
+    VkAccelerationStructureHandleKHR vkGetAccelerationStructureHandle() const;
+
     TEPHRA_MAKE_INTERFACE(AccelerationStructure);
 
 protected:

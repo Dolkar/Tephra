@@ -1,6 +1,7 @@
 #pragma once
 
 #include "accesses.hpp"
+#include "local_acceleration_structures.hpp"
 #include "local_buffers.hpp"
 #include "local_images.hpp"
 #include "local_descriptor_sets.hpp"
@@ -38,6 +39,7 @@ enum class JobCommandTypes {
 struct JobResourceStorage {
     JobLocalBuffers localBuffers;
     JobLocalImages localImages;
+    JobLocalAccelerationStructures localAccelerationStructures;
     JobLocalDescriptorSets localDescriptorSets;
     std::vector<CommandPool*> commandPools;
 
@@ -197,13 +199,21 @@ struct JobRecordStorage {
     };
 
     struct BuildAccelerationStructuresData {
-        ArrayView<AccelerationStructureBuildInfo> buildInfos;
-        ArrayView<BufferView> scratchBuffers;
+        struct SingleBuild {
+            AccelerationStructureBuilder* builder;
+            StoredAccelerationStructureBuildInfo buildInfo;
+            StoredBufferView scratchBuffer;
 
-        BuildAccelerationStructuresData(
-            ArrayView<AccelerationStructureBuildInfo> buildInfos,
-            ArrayView<BufferView> scratchBuffers)
-            : buildInfos(buildInfos), scratchBuffers(scratchBuffers) {}
+            SingleBuild(
+                AccelerationStructureBuilder* builder,
+                StoredAccelerationStructureBuildInfo buildInfo,
+                StoredBufferView scratchBuffer)
+                : builder(builder), buildInfo(buildInfo), scratchBuffer(scratchBuffer) {}
+        };
+
+        ArrayView<SingleBuild> builds;
+
+        BuildAccelerationStructuresData(ArrayView<SingleBuild> builds) : builds(builds) {}
     };
 
     void clear();
@@ -217,6 +227,9 @@ struct JobRecordStorage {
     std::deque<ComputePass> computePassStorage;
     std::size_t renderPassCount = 0;
     std::deque<RenderPass> renderPassStorage;
+    // TODO: We need to extend the lifetime of AS builders used in this job, but DataBlockAllocator currently
+    // doesn't call destructors of the type-erased blocks
+    std::vector<std::shared_ptr<AccelerationStructureBuilder>> usedASBuilders;
 };
 
 struct JobSemaphoreStorage {

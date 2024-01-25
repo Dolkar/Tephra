@@ -22,6 +22,8 @@ set(TEPHRA_SOURCES
     ${SOURCE_PATH}/tephra/job/job.cpp
     ${SOURCE_PATH}/tephra/job/job_compile.cpp
     ${SOURCE_PATH}/tephra/job/job_data.cpp
+    ${SOURCE_PATH}/tephra/job/local_acceleration_structures.cpp
+    ${SOURCE_PATH}/tephra/job/local_acceleration_structure_allocator.hpp
     ${SOURCE_PATH}/tephra/job/local_buffers.cpp
     ${SOURCE_PATH}/tephra/job/local_buffer_allocator.cpp
     ${SOURCE_PATH}/tephra/job/local_descriptor_sets.cpp
@@ -38,6 +40,8 @@ set(TEPHRA_SOURCES
     ${SOURCE_PATH}/tephra/vulkan/interface.cpp
     ${SOURCE_PATH}/tephra/vulkan/loader.cpp
 
+    ${SOURCE_PATH}/tephra/acceleration_structure_dispatch.cpp
+    ${SOURCE_PATH}/tephra/acceleration_structure_impl.cpp
     ${SOURCE_PATH}/tephra/buffer_dispatch.cpp
     ${SOURCE_PATH}/tephra/buffer_impl.cpp
     ${SOURCE_PATH}/tephra/command_list.cpp

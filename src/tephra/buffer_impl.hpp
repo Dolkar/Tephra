@@ -72,7 +72,6 @@ public:
     BufferView createTexelView_(uint64_t offset, uint64_t size, Format format);
 
     DeviceAddress getDeviceAddress_() const {
-        TEPHRA_ASSERTD(deviceAddress != 0, "Device address queried for a buffer without appropriate usage flag!");
         return deviceAddress;
     }
 

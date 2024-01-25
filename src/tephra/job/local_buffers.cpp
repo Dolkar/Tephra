@@ -71,8 +71,6 @@ JobLocalBufferImpl& JobLocalBufferImpl::getBufferImpl(const BufferView& bufferVi
 }
 
 BufferView JobLocalBuffers::acquireNewBuffer(BufferSetup setup, DebugTarget debugTarget) {
-    DeviceContainer* deviceImpl = resourcePoolImpl->getParentDeviceImpl();
-
     buffers.emplace_back(deviceImpl, setup, buffers.size(), &pendingBufferViews, std::move(debugTarget));
     usageRanges.emplace_back();
     return buffers.back().getDefaultView();

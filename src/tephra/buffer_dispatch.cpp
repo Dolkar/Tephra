@@ -136,7 +136,7 @@ BufferView BufferView::createTexelView(uint64_t viewOffset, uint64_t viewSize, F
 }
 
 DeviceAddress BufferView::getDeviceAddress() const {
-    VkDeviceAddress parentAddress = 0;
+    DeviceAddress parentAddress = 0;
     if (viewsJobLocalBuffer()) {
         parentAddress = std::get<JobLocalBufferImpl*>(buffer)->getDeviceAddress();
     } else if (!isNull()) {
@@ -237,8 +237,7 @@ BufferView Buffer::createTexelView(uint64_t offset, uint64_t size, Format format
 }
 
 DeviceAddress Buffer::getDeviceAddress() const {
-    auto bufferImpl = static_cast<const BufferImpl*>(this);
-    return bufferImpl->getDeviceAddress_();
+    return getDefaultView().getDeviceAddress();
 }
 
 VmaAllocationHandle Buffer::vmaGetMemoryAllocationHandle() const {

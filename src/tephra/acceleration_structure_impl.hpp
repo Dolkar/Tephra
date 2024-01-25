@@ -3,9 +3,14 @@
 #include "common_impl.hpp"
 #include <tephra/acceleration_structure.hpp>
 #include <tephra/buffer.hpp>
+#include <memory.h>
 
 namespace tp {
 
+struct StoredAccelerationStructureBuildInfo;
+class StoredBufferView;
+
+// Stores information needed to build or update an acceleration structure
 class AccelerationStructureBuilder {
 public:
     AccelerationStructureBuilder() = default;
@@ -26,12 +31,12 @@ public:
     }
 
     std::pair<VkAccelerationStructureBuildGeometryInfoKHR, const VkAccelerationStructureBuildRangeInfoKHR*> prepareBuild(
-        const AccelerationStructureBuildInfo& buildInfo,
-        const BufferView& scratchBuffer);
+        StoredAccelerationStructureBuildInfo& buildInfo,
+        StoredBufferView& scratchBuffer);
+
+    void reset(const AccelerationStructureSetup& setup);
 
 private:
-    // Initializes the geometries and maxPrimitiveCounts array with null resources from setup structure
-    void initGeometries(const AccelerationStructureSetup& setup);
     // Makes the Vulkan build info structure with null resources from setup structure
     VkAccelerationStructureBuildGeometryInfoKHR makeVkBuildInfo(
         AccelerationStructureBuildMode buildMode = AccelerationStructureBuildMode::Build) const;
@@ -49,12 +54,7 @@ class AccelerationStructureBaseImpl {
 public:
     AccelerationStructureBaseImpl(
         DeviceContainer* deviceImpl,
-        AccelerationStructureBuilder builder,
         Lifeguard<VkAccelerationStructureHandleKHR> accelerationStructureHandle);
-
-    AccelerationStructureBuilder& getBuilder() {
-        return builder;
-    }
 
     DeviceAddress getDeviceAddress_() const {
         return deviceAddress;
@@ -68,7 +68,6 @@ public:
 
 protected:
     DeviceContainer* deviceImpl;
-    AccelerationStructureBuilder builder;
     Lifeguard<VkAccelerationStructureHandleKHR> accelerationStructureHandle;
     DeviceAddress deviceAddress = 0;
 };
@@ -78,13 +77,25 @@ class AccelerationStructureImpl : public AccelerationStructure, public Accelerat
 public:
     AccelerationStructureImpl(
         DeviceContainer* deviceImpl,
-        AccelerationStructureBuilder builder,
+        std::shared_ptr<AccelerationStructureBuilder> builder,
         Lifeguard<VkAccelerationStructureHandleKHR> accelerationStructureHandle,
         OwningPtr<Buffer> backingBuffer,
         DebugTarget debugTarget);
 
-    BufferView getBackingBufferView_() const {
+    AccelerationStructureView getView_() {
+        return AccelerationStructureView(this);
+    }
+
+    const AccelerationStructureView getView_() const {
+        return const_cast<AccelerationStructureImpl*>(this)->getView_();
+    }
+
+    const BufferView getBackingBufferView_() const {
         return backingBuffer->getDefaultView();
+    }
+
+    std::shared_ptr<AccelerationStructureBuilder>& getBuilder() {
+        return builder;
     }
 
     static AccelerationStructureImpl& getAccelerationStructureImpl(const AccelerationStructureView& asView);
@@ -92,6 +103,8 @@ public:
 private:
     DebugTarget debugTarget;
     OwningPtr<Buffer> backingBuffer;
+    // Shared ptr because jobs need temporary ownership of the builder
+    std::shared_ptr<AccelerationStructureBuilder> builder;
 };
 
 }

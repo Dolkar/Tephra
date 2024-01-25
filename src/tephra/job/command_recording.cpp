@@ -279,8 +279,9 @@ void identifyCommandResourceAccesses(
         const auto asBuildStage = VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR;
         const auto asBuildInput = ResourceAccess(asBuildStage, VK_ACCESS_SHADER_READ_BIT);
 
-        for (const AccelerationStructureBuildInfo& buildInfo : data->buildInfos) {
-            const BufferView& dstBuffer = buildInfo.dstView.getBackingBufferView();
+        for (auto& buildData : data->builds) {
+            StoredAccelerationStructureBuildInfo& buildInfo = buildData.buildInfo;
+            StoredBufferView& dstBuffer = buildInfo.dstView.getBackingBufferView();
 
             VkAccessFlags dstAccess = VK_ACCESS_ACCELERATION_STRUCTURE_WRITE_BIT_KHR;
             // Destination structure could also be read from in case of an in-place update
@@ -289,7 +290,7 @@ void identifyCommandResourceAccesses(
             addBufferAccess(bufferAccesses, dstBuffer, { asBuildStage, dstAccess });
 
             if (!buildInfo.srcView.isNull()) {
-                const BufferView& srcBuffer = buildInfo.srcView.getBackingBufferView();
+                StoredBufferView& srcBuffer = buildInfo.srcView.getBackingBufferView();
                 addBufferAccess(
                     bufferAccesses, srcBuffer, { asBuildStage, VK_ACCESS_ACCELERATION_STRUCTURE_READ_BIT_KHR });
             }
@@ -297,7 +298,7 @@ void identifyCommandResourceAccesses(
             if (!buildInfo.instanceGeometry.instanceBuffer.isNull())
                 addBufferAccess(bufferAccesses, buildInfo.instanceGeometry.instanceBuffer, asBuildInput);
 
-            for (const TriangleGeometryBuildInfo& triangles : buildInfo.triangleGeometries) {
+            for (StoredTriangleGeometryBuildInfo& triangles : buildInfo.triangleGeometries) {
                 addBufferAccess(bufferAccesses, triangles.vertexBuffer, asBuildInput);
                 if (!triangles.indexBuffer.isNull())
                     addBufferAccess(bufferAccesses, triangles.indexBuffer, asBuildInput);
@@ -305,15 +306,13 @@ void identifyCommandResourceAccesses(
                     addBufferAccess(bufferAccesses, triangles.transformBuffer, asBuildInput);
             }
 
-            for (const AABBGeometryBuildInfo& aabbs : buildInfo.aabbGeometries) {
+            const auto scratchAccess = VK_ACCESS_ACCELERATION_STRUCTURE_READ_BIT_KHR |
+                VK_ACCESS_ACCELERATION_STRUCTURE_WRITE_BIT_KHR;
+            for (StoredAABBGeometryBuildInfo& aabbs : buildInfo.aabbGeometries) {
                 addBufferAccess(bufferAccesses, aabbs.aabbBuffer, asBuildInput);
             }
-        }
 
-        const auto scratchAccess = VK_ACCESS_ACCELERATION_STRUCTURE_READ_BIT_KHR |
-            VK_ACCESS_ACCELERATION_STRUCTURE_WRITE_BIT_KHR;
-        for (const BufferView& scratchBuffer : data->scratchBuffers) {
-            addBufferAccess(bufferAccesses, scratchBuffer, { asBuildStage, scratchAccess });
+            addBufferAccess(bufferAccesses, buildData.scratchBuffer, { asBuildStage, scratchAccess });
         }
         break;
     }
@@ -563,15 +562,13 @@ void recordCommand(PrimaryBufferRecorder& recorder, JobRecordStorage::CommandMet
         // Prepare and aggregate vulkan structures for all builds
         ScratchVector<VkAccelerationStructureBuildGeometryInfoKHR> vkBuildInfos;
         ScratchVector<const VkAccelerationStructureBuildRangeInfoKHR*> vkRangeInfosPtrs;
-        vkBuildInfos.reserve(data->buildInfos.size());
-        vkRangeInfosPtrs.reserve(data->buildInfos.size());
+        vkBuildInfos.reserve(data->builds.size());
+        vkRangeInfosPtrs.reserve(data->builds.size());
 
-        for (std::size_t i = 0; i < data->buildInfos.size(); i++) {
-            AccelerationStructureImpl& asImpl = AccelerationStructureImpl::getAccelerationStructureImpl(
-                data->buildInfos[i].dstView);
-
-            auto [vkBuildInfo, vkRangeInfos] = asImpl.getBuilder().prepareBuild(
-                data->buildInfos[i], data->scratchBuffers[i]);
+        for (std::size_t i = 0; i < data->builds.size(); i++) {
+            auto& buildData = data->builds[i];
+            auto [vkBuildInfo, vkRangeInfos] = buildData.builder->prepareBuild(
+                buildData.buildInfo, buildData.scratchBuffer);
 
             vkBuildInfos.push_back(vkBuildInfo);
             vkRangeInfosPtrs.push_back(vkRangeInfos);

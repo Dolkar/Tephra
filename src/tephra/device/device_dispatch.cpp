@@ -361,11 +361,11 @@ OwningPtr<AccelerationStructure> Device::allocateAccelerationStructureKHR(
     auto deviceImpl = static_cast<DeviceContainer*>(this);
     TEPHRA_DEBUG_SET_CONTEXT(deviceImpl->getDebugTarget(), "allocateAccelerationStructureKHR", debugName);
 
-    auto asBuilder = AccelerationStructureBuilder(deviceImpl, setup);
+    auto asBuilder = std::make_shared<AccelerationStructureBuilder>(deviceImpl, setup);
 
     // Create backing buffer to hold the AS
     auto backingBufferSetup = BufferSetup(
-        asBuilder.getStorageSize(),
+        asBuilder->getStorageSize(),
         BufferUsageMask::None(),
         VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR,
         256);

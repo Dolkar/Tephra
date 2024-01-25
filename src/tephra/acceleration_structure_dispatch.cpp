@@ -24,7 +24,7 @@ DeviceAddress AccelerationStructureView::getDeviceAddress() const {
 
 BufferView AccelerationStructureView::getBackingBufferView() const {
     if (viewsJobLocalAccelerationStructure()) {
-        return std::get<JobLocalAccelerationStructureImpl*>(accelerationStructure)->getBackingBufferView_();
+        return std::get<JobLocalAccelerationStructureImpl*>(accelerationStructure)->getBackingBufferView();
     } else if (!isNull()) {
         return std::get<AccelerationStructureImpl*>(accelerationStructure)->getBackingBufferView_();
     } else {
@@ -44,6 +44,26 @@ VkAccelerationStructureHandleKHR AccelerationStructureView::vkGetAccelerationStr
 
 bool tp::operator==(const AccelerationStructureView& lhs, const AccelerationStructureView& rhs) {
     return lhs.accelerationStructure == rhs.accelerationStructure;
+}
+
+const AccelerationStructureView AccelerationStructure::getView() const {
+    auto asImpl = static_cast<const AccelerationStructureImpl*>(this);
+    return asImpl->getView_();
+}
+
+DeviceAddress AccelerationStructure::getDeviceAddress() const {
+    auto asImpl = static_cast<const AccelerationStructureImpl*>(this);
+    return asImpl->getDeviceAddress_();
+}
+
+const BufferView AccelerationStructure::getBackingBufferView() const {
+    auto asImpl = static_cast<const AccelerationStructureImpl*>(this);
+    return asImpl->getBackingBufferView_();
+}
+
+VkAccelerationStructureHandleKHR AccelerationStructure::vkGetAccelerationStructureHandle() const {
+    auto asImpl = static_cast<const AccelerationStructureImpl*>(this);
+    return asImpl->vkGetAccelerationStructureHandle_();
 }
 
 AccelerationStructureSetup AccelerationStructureSetup::TopLevel(

@@ -12,7 +12,7 @@ class DataBlockAllocator {
 public:
     // Allocates memory for count number of T sized objects. The memory is not initialized.
     template <typename T = std::byte>
-    T* allocate(std::size_t count) {
+    ArrayView<T> allocate(std::size_t count) {
         std::size_t requiredSize = count * sizeof(T);
 
         if (requiredSize > BlockSize) {
@@ -43,12 +43,12 @@ public:
         T* ptr = reinterpret_cast<T*>(reinterpret_cast<std::byte*>(blocks[tailBlock].get()) + tailOffset);
         tailOffset += requiredSize;
 
-        return ptr;
+        return ArrayView<T>(ptr, count);
     }
 
     // Helper that copies the given array to the allocator and returns a view to it
-    template <typename T>
-    ArrayView<T> copyArray(ArrayParameter<const T> data) {
+    template <typename T, typename TSrc>
+    ArrayView<T> allocate(ArrayParameter<const TSrc> data) {
         if (data.empty())
             return {};
 
@@ -60,6 +60,11 @@ public:
         }
 
         return copyView;
+    }
+
+    template <typename T, typename TSrc>
+    ArrayView<T> allocate(ArrayView<TSrc> data) {
+        return allocate(ArrayParameter<const T>(data));
     }
 
     // Makes the allocator start anew, overwriting the previously allocated memory
