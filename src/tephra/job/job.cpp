@@ -25,9 +25,9 @@ ExternalSemaphore::ExternalSemaphore(VkSemaphoreHandle vkSemaphoreHandle, uint64
 template <typename T, typename... TArgs>
 T* recordCommand(JobRecordStorage& storage, JobCommandTypes type, TArgs&&... args) {
     std::size_t allocSize = sizeof(JobRecordStorage::CommandMetadata) + sizeof(T);
-    std::byte* ptr = storage.cmdBuffer.allocate(allocSize);
+    ArrayView<std::byte> bytes = storage.cmdBuffer.allocate(allocSize);
 
-    auto metadataPtr = new (ptr) JobRecordStorage::CommandMetadata;
+    auto metadataPtr = new (bytes.data()) JobRecordStorage::CommandMetadata;
     metadataPtr->commandType = type;
     metadataPtr->nextCommand = nullptr;
 
@@ -41,7 +41,7 @@ T* recordCommand(JobRecordStorage& storage, JobCommandTypes type, TArgs&&... arg
     }
     storage.commandCount++;
 
-    auto cmdDataPtr = ptr + sizeof(JobRecordStorage::CommandMetadata);
+    auto cmdDataPtr = bytes.data() + sizeof(JobRecordStorage::CommandMetadata);
     return new (cmdDataPtr) T(std::forward<TArgs>(args)...);
 }
 
@@ -124,7 +124,8 @@ AccelerationStructureView Job::allocateLocalAccelerationStructureKHR(
     TEPHRA_DEBUG_SET_CONTEXT(debugTarget.get(), "allocateLocalAccelerationStructureKHR", debugName);
 
     DeviceContainer* deviceImpl = jobData->resourcePoolImpl->getParentDeviceImpl();
-    auto asBuilder = std::make_shared<AccelerationStructureBuilder>(deviceImpl, setup);
+    AccelerationStructureBuilder* asBuilder = jobData->resourcePoolImpl->getAccelerationStructurePool()->acquireBuilder(
+        setup, jobData->jobIdInPool);
 
     // Create a local backing buffer to hold the AS
     auto backingBufferSetup = BufferSetup(
@@ -137,8 +138,7 @@ AccelerationStructureView Job::allocateLocalAccelerationStructureKHR(
 
     DebugTarget debugTarget = DebugTarget(
         jobData->resourcePoolImpl->getDebugTarget(), JobLocalAccelerationStructureTypeName, debugName);
-    return jobData->resources.localAccelerationStructures.acquireNew(
-        asBuilder.get(), backingBuffer, std::move(debugTarget));
+    return jobData->resources.localAccelerationStructures.acquireNew(asBuilder, backingBuffer, std::move(debugTarget));
 }
 
 CommandPool* Job::createCommandPool(const char* debugName) {
@@ -505,21 +505,33 @@ void Job::cmdBuildAccelerationStructuresKHR(ArrayParameter<const AccelerationStr
         markResourceUsage(jobData, scratchBuffer);
 
         // Copy the data as stored resources
-        BuildData& data = builds.emplace_back();
-        data.builder = builder;
         auto triangleGeometriesData = jobData->record.cmdBuffer.allocate<StoredTriangleGeometryBuildInfo>(
             buildInfo.triangleGeometries);
         auto aabbGeometriesData = jobData->record.cmdBuffer.allocate<StoredAABBGeometryBuildInfo>(
             buildInfo.aabbGeometries);
 
-        data.buildInfo = StoredAccelerationStructureBuildInfo(buildInfo, triangleGeometriesData, aabbGeometriesData);
-        data.scratchBuffer = scratchBuffer;
+        builds.emplace_back(
+            builder,
+            StoredAccelerationStructureBuildInfo(buildInfo, triangleGeometriesData, aabbGeometriesData),
+            scratchBuffer);
     }
 
     auto buildsData = jobData->record.cmdBuffer.allocate<BuildData>(view(builds));
 
     recordCommand<JobRecordStorage::BuildAccelerationStructuresData>(
         jobData->record, JobCommandTypes::BuildAccelerationStructures, buildsData);
+}
+
+void Job::cmdCopyAccelerationStructureKHR(
+    const AccelerationStructureView& srcView,
+    const AccelerationStructureView& dstView) {
+    TEPHRA_DEBUG_SET_CONTEXT(debugTarget.get(), "cmdCopyAccelerationStructureKHR", nullptr);
+
+    markResourceUsage(jobData, srcView.getBackingBufferView());
+    markResourceUsage(jobData, dstView.getBackingBufferView());
+
+    recordCommand<JobRecordStorage::CopyAccelerationStructureData>(
+        jobData->record, JobCommandTypes::CopyAccelerationStructure, srcView, dstView);
 }
 
 void Job::vkCmdImportExternalResource(

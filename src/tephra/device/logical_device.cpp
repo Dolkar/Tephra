@@ -739,8 +739,8 @@ void LogicalDevice::queuePresentKHR(
 }
 
 VkAccelerationStructureHandleKHR LogicalDevice::createAccelerationStructureKHR(
-    const BufferView& buffer,
-    AccelerationStructureType type) {
+    AccelerationStructureType type,
+    const BufferView& buffer) {
     if (vkiDevice.createAccelerationStructureKHR == nullptr) {
         throw UnsupportedOperationError(
             "Functionality of the KHR_AccelerationStructure extension is being used, but its interface could not be "

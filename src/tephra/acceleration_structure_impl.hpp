@@ -19,6 +19,10 @@ public:
     TEPHRA_MAKE_NONCOPYABLE(AccelerationStructureBuilder);
     TEPHRA_MAKE_MOVABLE_DEFAULT(AccelerationStructureBuilder);
 
+    AccelerationStructureType getType() const {
+        return type;
+    }
+
     uint64_t getStorageSize() const {
         return vkBuildSizes.accelerationStructureSize;
     }

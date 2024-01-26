@@ -545,6 +545,10 @@ public:
 
     void cmdBuildAccelerationStructuresKHR(ArrayParameter<const AccelerationStructureBuildInfo> buildInfos);
 
+    void cmdCopyAccelerationStructureKHR(
+        const AccelerationStructureView& srcView,
+        const AccelerationStructureView& dstView);
+
     /// Updates the internal synchronization state for the buffer view to the given external access.
     ///
     /// This should be used after a resource has been accessed by an operation done outside of Tephra and before it

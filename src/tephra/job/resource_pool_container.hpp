@@ -4,6 +4,7 @@
 #include "local_buffer_allocator.hpp"
 #include "preinit_buffer_allocator.hpp"
 #include "local_image_allocator.hpp"
+#include "local_acceleration_structure_allocator.hpp"
 #include "../descriptor_pool_impl.hpp"
 #include "../utils/object_pool.hpp"
 #include "../common_impl.hpp"
@@ -37,6 +38,10 @@ public:
 
     PreinitializedBufferAllocator* getPreinitializedBufferPool() {
         return &preinitBufferPool;
+    }
+
+    JobLocalAccelerationStructureAllocator* getAccelerationStructurePool() {
+        return &localAccelerationStructurePool;
     }
 
     DescriptorPoolImpl* getLocalDescriptorPool() {
@@ -76,6 +81,7 @@ private:
 
     JobLocalBufferAllocator localBufferPool;
     JobLocalImageAllocator localImagePool;
+    JobLocalAccelerationStructureAllocator localAccelerationStructurePool;
     PreinitializedBufferAllocator preinitBufferPool;
     DescriptorPoolImpl localDescriptorPool;
 

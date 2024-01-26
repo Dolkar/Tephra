@@ -233,7 +233,6 @@ VulkanCommandInterface::VulkanCommandInterface(
     cmdEndRendering = LOAD_DEVICE_PROCEDURE(vkCmdEndRendering);
 
     cmdBuildAccelerationStructuresKHR = LOAD_DEVICE_EXT_PROCEDURE(vkCmdBuildAccelerationStructuresKHR);
-    cmdBuildAccelerationStructuresIndirectKHR = LOAD_DEVICE_EXT_PROCEDURE(vkCmdBuildAccelerationStructuresIndirectKHR);
     cmdCopyAccelerationStructureKHR = LOAD_DEVICE_EXT_PROCEDURE(vkCmdCopyAccelerationStructureKHR);
     cmdWriteAccelerationStructuresPropertiesKHR = LOAD_DEVICE_EXT_PROCEDURE(
         vkCmdWriteAccelerationStructuresPropertiesKHR);

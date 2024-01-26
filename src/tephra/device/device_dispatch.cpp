@@ -379,7 +379,7 @@ OwningPtr<AccelerationStructure> Device::allocateAccelerationStructureKHR(
         DebugTarget::makeSilent()));
 
     auto accelerationStructureLifeguard = vkMakeHandleLifeguard(
-        deviceImpl->getLogicalDevice()->createAccelerationStructureKHR(backingBuffer->getDefaultView(), setup.type));
+        deviceImpl->getLogicalDevice()->createAccelerationStructureKHR(setup.type, backingBuffer->getDefaultView()));
     auto debugTarget = DebugTarget(deviceImpl->getDebugTarget(), AccelerationStructureTypeName, debugName);
 
     auto accelerationStructure = OwningPtr<AccelerationStructure>(new AccelerationStructureImpl(

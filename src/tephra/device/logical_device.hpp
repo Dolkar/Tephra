@@ -183,8 +183,8 @@ public:
         ArrayView<VkResult> vkResults);
 
     VkAccelerationStructureHandleKHR createAccelerationStructureKHR(
-        const BufferView& buffer,
-        AccelerationStructureType type);
+        AccelerationStructureType type,
+        const BufferView& buffer);
 
     void destroyAccelerationStructureKHR(VkAccelerationStructureHandleKHR vkAccelerationStructureHandle) noexcept;
 

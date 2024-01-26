@@ -78,13 +78,15 @@ void QueueState::submitQueuedJobs(
     consumeAwaitingForgets();
     submitJobs(view(jobsToSubmit));
 
+    for (Job* job : jobsToSubmit) {
+        JobResourcePoolContainer::queueReleaseSubmittedJob(std::move(*job));
+    }
+
     {
         std::lock_guard<Mutex> mutexLock(queuedJobsMutex);
         for (Job* job : jobsToSubmit) {
             TEPHRA_ASSERT(!queuedJobs.empty());
             TEPHRA_ASSERT(job == &queuedJobs.front());
-
-            JobResourcePoolContainer::queueReleaseSubmittedJob(std::move(*job));
             queuedJobs.pop_front();
         }
     }

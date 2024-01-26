@@ -27,6 +27,11 @@ public:
         return !accelerationStructureHandle.isNull();
     }
 
+    void assignHandle(VkAccelerationStructureHandleKHR vkAccelerationStructureHandle) {
+        accelerationStructureHandle = Lifeguard<VkAccelerationStructureHandleKHR>::NonOwning(
+            vkAccelerationStructureHandle);
+    }
+
     AccelerationStructureBuilder* getBuilder() {
         return builder;
     }

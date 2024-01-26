@@ -6,29 +6,11 @@
 
 namespace tp {
 
+template <typename T, typename = int>
+struct HasClearMethod : std::false_type {};
+
 template <typename T>
-struct CallClearIfPresent { // Based on https://stackoverflow.com/a/12069785/2044117
-    template <typename A>
-    static std::true_type test(decltype(&A::clear)) {
-        return std::true_type();
-    }
-
-    template <typename A>
-    static std::false_type test(...) {
-        return std::false_type();
-    }
-
-    static void eval(T& obj, std::true_type) {
-        obj.clear();
-    }
-
-    static void eval(...) {}
-
-    static void eval(T& obj) {
-        using type = decltype(test<T>(nullptr));
-        eval(obj, type());
-    }
-};
+struct HasClearMethod<T, decltype(&T::clear, 0)> : std::true_type {};
 
 template <typename T>
 class ObjectPool {
@@ -52,7 +34,9 @@ public:
     }
 
     void release(T* objPtr) {
-        CallClearIfPresent<T>::eval(*objPtr); // If objPtr->clear() exists, call it
+        if constexpr (HasClearMethod<T>::value) { // If objPtr->clear() exists, call it
+            objPtr->clear();
+        }
 
         freeList.push_back(objPtr);
     }

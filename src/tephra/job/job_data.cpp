@@ -7,6 +7,7 @@ namespace tp {
 JobResourceStorage::JobResourceStorage(JobResourcePoolContainer* resourcePoolImpl)
     : localBuffers(resourcePoolImpl->getParentDeviceImpl()),
       localImages(),
+      localAccelerationStructures(resourcePoolImpl->getParentDeviceImpl()),
       localDescriptorSets(resourcePoolImpl->getLocalDescriptorPool()) {}
 
 void JobResourceStorage::clear() {

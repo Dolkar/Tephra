@@ -316,6 +316,19 @@ void identifyCommandResourceAccesses(
         }
         break;
     }
+    case JobCommandTypes::CopyAccelerationStructure: {
+        auto* data = getCommandData<JobRecordStorage::CopyAccelerationStructureData>(command);
+        addBufferAccess(
+            bufferAccesses,
+            data->srcView.getBackingBufferView(),
+            { VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR, VK_ACCESS_ACCELERATION_STRUCTURE_READ_BIT_KHR });
+
+        addBufferAccess(
+            bufferAccesses,
+            data->dstView.getBackingBufferView(),
+            { VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR, VK_ACCESS_ACCELERATION_STRUCTURE_WRITE_BIT_KHR });
+        break;
+    }
     case JobCommandTypes::BeginDebugLabel:
     case JobCommandTypes::InsertDebugLabel:
     case JobCommandTypes::EndDebugLabel:
@@ -343,7 +356,11 @@ void recordCommand(PrimaryBufferRecorder& recorder, JobRecordStorage::CommandMet
         uint64_t dstOffset;
         VkBufferHandle vkDstBufferHandle = data->dstBuffer.vkResolveBufferHandle(&dstOffset);
         vkiCommands.cmdUpdateBuffer(
-            recorder.requestBuffer(), vkDstBufferHandle, dstOffset, data->dstBuffer.getSize(), data->data);
+            recorder.requestBuffer(),
+            vkDstBufferHandle,
+            dstOffset,
+            data->dstBuffer.getSize(),
+            data->data.data()); // mmmmm data
         break;
     }
     case JobCommandTypes::CopyBuffer: {
@@ -579,6 +596,20 @@ void recordCommand(PrimaryBufferRecorder& recorder, JobRecordStorage::CommandMet
             static_cast<uint32_t>(vkBuildInfos.size()),
             vkBuildInfos.data(),
             vkRangeInfosPtrs.data());
+        break;
+    }
+    case JobCommandTypes::CopyAccelerationStructure: {
+        TEPHRA_ASSERT(vkiCommands.cmdCopyAccelerationStructureKHR != nullptr);
+        auto* data = getCommandData<JobRecordStorage::CopyAccelerationStructureData>(command);
+
+        VkCopyAccelerationStructureInfoKHR copyInfo;
+        copyInfo.sType = VK_STRUCTURE_TYPE_COPY_ACCELERATION_STRUCTURE_INFO_KHR;
+        copyInfo.pNext = nullptr;
+        copyInfo.src = data->srcView.vkGetAccelerationStructureHandle();
+        copyInfo.dst = data->dstView.vkGetAccelerationStructureHandle();
+        copyInfo.mode = VK_COPY_ACCELERATION_STRUCTURE_MODE_CLONE_KHR;
+
+        vkiCommands.cmdCopyAccelerationStructureKHR(recorder.requestBuffer(), &copyInfo);
         break;
     }
     case JobCommandTypes::ExportBuffer:

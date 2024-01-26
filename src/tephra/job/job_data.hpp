@@ -33,7 +33,8 @@ enum class JobCommandTypes {
     BeginDebugLabel,
     InsertDebugLabel,
     EndDebugLabel,
-    BuildAccelerationStructures
+    BuildAccelerationStructures,
+    CopyAccelerationStructure,
 };
 
 struct JobResourceStorage {
@@ -94,9 +95,10 @@ struct JobRecordStorage {
 
     struct UpdateBufferData {
         StoredBufferView dstBuffer;
-        const void* data;
+        ArrayView<const std::byte> data;
 
-        UpdateBufferData(const BufferView& dstBuffer, const void* data) : dstBuffer(dstBuffer), data(data) {}
+        UpdateBufferData(const BufferView& dstBuffer, ArrayView<const std::byte> data)
+            : dstBuffer(dstBuffer), data(data) {}
     };
 
     struct CopyBufferData {
@@ -214,6 +216,14 @@ struct JobRecordStorage {
         ArrayView<SingleBuild> builds;
 
         BuildAccelerationStructuresData(ArrayView<SingleBuild> builds) : builds(builds) {}
+    };
+
+    struct CopyAccelerationStructureData {
+        StoredAccelerationStructureView srcView;
+        StoredAccelerationStructureView dstView;
+
+        CopyAccelerationStructureData(const AccelerationStructureView& srcView, const AccelerationStructureView& dstView)
+            : srcView(srcView), dstView(dstView) {}
     };
 
     void clear();
