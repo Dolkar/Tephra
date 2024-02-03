@@ -2,6 +2,7 @@
 
 #include <tephra/buffer.hpp>
 #include <tephra/image.hpp>
+#include <tephra/acceleration_structure.hpp>
 #include <tephra/sampler.hpp>
 #include <tephra/common.hpp>
 
@@ -107,6 +108,8 @@ public:
     Descriptor(const ImageView& imageView, const Sampler& sampler);
     /// Creates a sampler descriptor binding to tp::DescriptorType::Sampler.
     Descriptor(const Sampler& sampler);
+    /// Creates an acceleration structure descriptor.
+    Descriptor(const AccelerationStructureView& accelerationStructureView);
 
     /// Returns `true` if the descriptor is null and does not refer to any resource.
     bool isNull() const;
@@ -114,6 +117,7 @@ public:
     const VkDescriptorImageInfo* vkResolveDescriptorImageInfo() const;
     const VkDescriptorBufferInfo* vkResolveDescriptorBufferInfo() const;
     const VkBufferView* vkResolveDescriptorBufferViewHandle() const;
+    const VkAccelerationStructureKHR* vkResolveAccelerationStructureHandle() const;
     void debugValidateAgainstBinding(
         const DescriptorBinding& binding,
         std::size_t descriptorIndex,
@@ -127,6 +131,7 @@ private:
         mutable VkDescriptorImageInfo vkDescriptorImageInfo;
         VkDescriptorBufferInfo vkDescriptorBufferInfo;
         VkBufferViewHandle vkDescriptorBufferViewHandle;
+        VkAccelerationStructureHandleKHR vkDescriptorAccelerationStructureHandle;
     };
 
     ResourceType resourceType;
@@ -162,6 +167,8 @@ public:
     FutureDescriptor(ImageView imageView, const Sampler* sampler);
     /// Creates a sampler descriptor binding to tp::DescriptorType::Sampler.
     FutureDescriptor(const Sampler* sampler);
+    /// Creates an acceleration structure descriptor.
+    FutureDescriptor(AccelerationStructureView accelerationStructureView);
 
     /// Resolves the descriptor. The resource referenced by this descriptor must be ready. For job-local resources
     /// it means this can only be called after the tp::Job has been enqueued.
@@ -177,6 +184,7 @@ private:
     union {
         BufferView descriptorBufferView;
         ImageView descriptorImageView;
+        AccelerationStructureView descriptorAccelerationStructureView;
     };
 
     const Sampler* descriptorSampler = nullptr;

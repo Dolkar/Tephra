@@ -18,6 +18,7 @@ enum class Functionality {
     DebugUtilsEXT = 1 << 0,
     MemoryBudgetEXT = 1 << 1,
     BufferDeviceAddress = 1 << 2,
+    AccelerationStructureKHR = 1 << 3,
 };
 TEPHRA_MAKE_ENUM_BIT_MASK(FunctionalityMask, Functionality)
 

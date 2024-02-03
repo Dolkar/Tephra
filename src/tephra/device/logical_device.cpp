@@ -32,6 +32,8 @@ inline FunctionalityMask processExtensions(
         functionalityMask |= Functionality::DebugUtilsEXT;
     if (containsString(view(vkExtensions), DeviceExtension::EXT_MemoryBudget))
         functionalityMask |= Functionality::MemoryBudgetEXT;
+    if (containsString(view(vkExtensions), DeviceExtension::KHR_AccelerationStructure))
+        functionalityMask |= Functionality::AccelerationStructureKHR;
     if (vkFeatureMap.get<VkPhysicalDeviceVulkan12Features>().bufferDeviceAddress)
         functionalityMask |= Functionality::BufferDeviceAddress;
 
@@ -253,6 +255,7 @@ void LogicalDevice::updateDescriptorSet(
     ArrayParameter<const Descriptor> descriptors) {
     ScratchVector<VkWriteDescriptorSet> descriptorWrites;
     descriptorWrites.reserve(descriptors.size());
+    ScratchDeque<VkWriteDescriptorSetAccelerationStructureKHR> descriptorAsWrites;
 
     int descriptorIndex = 0;
     for (const DescriptorBinding& binding : bindings) {
@@ -265,17 +268,37 @@ void LogicalDevice::updateDescriptorSet(
         // TODO: Currently one descriptor per write - is this any slower?
         descWrite.descriptorCount = 1;
         descWrite.descriptorType = vkCastConvertibleEnum(binding.descriptorType);
-
         TEPHRA_ASSERT(descriptors.size() >= descriptorIndex + binding.arraySize);
-        for (uint32_t i = 0; i < binding.arraySize; i++) {
-            descWrite.dstArrayElement = i;
-            const Descriptor& descriptor = descriptors[descriptorIndex++];
 
-            if (!descriptor.isNull()) {
-                descWrite.pImageInfo = descriptor.vkResolveDescriptorImageInfo();
-                descWrite.pBufferInfo = descriptor.vkResolveDescriptorBufferInfo();
-                descWrite.pTexelBufferView = descriptor.vkResolveDescriptorBufferViewHandle();
-                descriptorWrites.push_back(descWrite);
+        if (binding.descriptorType == DescriptorType::AccelerationStructureKHR) {
+            VkWriteDescriptorSetAccelerationStructureKHR descAsWrite;
+            descAsWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_KHR;
+            descAsWrite.pNext = nullptr;
+            descAsWrite.accelerationStructureCount = descWrite.descriptorCount;
+
+            for (uint32_t i = 0; i < binding.arraySize; i++) {
+                descWrite.dstArrayElement = i;
+                const Descriptor& descriptor = descriptors[descriptorIndex++];
+
+                if (!descriptor.isNull()) {
+                    descAsWrite.pAccelerationStructures = descriptor.vkResolveAccelerationStructureHandle();
+
+                    descriptorAsWrites.push_back(descAsWrite);
+                    descWrite.pNext = &descriptorAsWrites.back();
+                    descriptorWrites.push_back(descWrite);
+                }
+            }
+        } else {
+            for (uint32_t i = 0; i < binding.arraySize; i++) {
+                descWrite.dstArrayElement = i;
+                const Descriptor& descriptor = descriptors[descriptorIndex++];
+
+                if (!descriptor.isNull()) {
+                    descWrite.pImageInfo = descriptor.vkResolveDescriptorImageInfo();
+                    descWrite.pBufferInfo = descriptor.vkResolveDescriptorBufferInfo();
+                    descWrite.pTexelBufferView = descriptor.vkResolveDescriptorBufferViewHandle();
+                    descriptorWrites.push_back(descWrite);
+                }
             }
         }
     }

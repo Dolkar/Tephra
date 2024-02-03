@@ -90,9 +90,11 @@ std::unique_ptr<Buffer> JobLocalBufferAllocator::allocateBackingBuffer(
     // provided that the allocated buffers are large enough.
     BufferUsageMask usageMask = BufferUsage::ImageTransfer | BufferUsage::HostMapped | BufferUsage::TexelBuffer |
         BufferUsage::UniformBuffer | BufferUsage::StorageBuffer | BufferUsage::IndexBuffer | BufferUsage::VertexBuffer |
-        BufferUsage::IndirectBuffer | BufferUsage::AccelerationStructureInputKHR;
+        BufferUsage::IndirectBuffer;
     if (deviceImpl->getLogicalDevice()->isFunctionalityAvailable(tp::Functionality::BufferDeviceAddress))
         usageMask |= BufferUsage::DeviceAddress;
+    if (deviceImpl->getLogicalDevice()->isFunctionalityAvailable(tp::Functionality::AccelerationStructureKHR))
+        usageMask |= BufferUsage::AccelerationStructureInputKHR;
 
     BufferSetup backingBufferSetup = BufferSetup(sizeToAllocate, usageMask);
     auto [bufferHandleLifeguard, allocationHandleLifeguard] = deviceImpl->getMemoryAllocator()->allocateBuffer(
