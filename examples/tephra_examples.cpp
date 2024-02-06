@@ -22,7 +22,7 @@ std::unique_ptr<Example> createExample(std::ofstream& logFile) {
 
     for (int i = 0; i < 100; i++) {
         // Buffer memory allocated through VMA, then released back to it along with the VkBuffer handle once the
-        // timeline semaphore gets signalled by the job after the end of this scope
+        // timeline semaphore signalled by the job after the end of this scope
         auto bufferSetup = tp::BufferSetup(0x1000, tp::BufferUsageMask::None());
         std::unique_ptr<tp::Buffer> buffer = device->allocateBuffer(bufferSetup, tp::MemoryPreference::Device);
 
@@ -34,7 +34,9 @@ std::unique_ptr<Example> createExample(std::ofstream& logFile) {
         device->submitQueuedJobs(mainQueue);
 
         // Not necessary for repro, but makes it appear sooner:
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        buffer.reset();
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        device->updateSemaphores();
         // Meanwhile this fixes the issue:
         // device->waitForIdle();
     }
