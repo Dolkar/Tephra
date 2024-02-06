@@ -23,7 +23,7 @@ enum class RenderAccess : uint64_t {
     VertexShaderStorageRead = 1 << 3,
     /// Vertex shader write access through storage descriptors.
     VertexShaderStorageWrite = 1 << 4,
-    /// Vertex shader atomic write access through storage descriptors.
+    /// Vertex shader atomic read/write access through storage descriptors.
     VertexShaderStorageAtomic = 1 << 5,
     /// Vertex shader read access through sampled descriptors.
     VertexShaderSampledRead = 1 << 6,
@@ -34,7 +34,7 @@ enum class RenderAccess : uint64_t {
     TessellationControlShaderStorageRead = 1 << 8,
     /// Tessellation control shader write access through storage descriptors.
     TessellationControlShaderStorageWrite = 1 << 9,
-    /// Tessellation control shader atomic write access through storage descriptors.
+    /// Tessellation control shader atomic read/write access through storage descriptors.
     TessellationControlShaderStorageAtomic = 1 << 10,
     /// Tessellation control shader read access through sampled descriptors.
     TessellationControlShaderSampledRead = 1 << 11,
@@ -45,7 +45,7 @@ enum class RenderAccess : uint64_t {
     TessellationEvaluationShaderStorageRead = 1 << 13,
     /// Tessellation evaluation shader write access through storage descriptors.
     TessellationEvaluationShaderStorageWrite = 1 << 14,
-    /// Tessellation evaluation shader atomic write access through storage descriptors.
+    /// Tessellation evaluation shader atomic read/write access through storage descriptors.
     TessellationEvaluationShaderStorageAtomic = 1 << 15,
     /// Tessellation evaluation shader read access through sampled descriptors.
     TessellationEvaluationShaderSampledRead = 1 << 16,
@@ -56,7 +56,7 @@ enum class RenderAccess : uint64_t {
     GeometryShaderStorageRead = 1 << 18,
     /// Geometry shader write access through storage descriptors.
     GeometryShaderStorageWrite = 1 << 19,
-    /// Geometry shader atomic write access through storage descriptors.
+    /// Geometry shader atomic read/write access through storage descriptors.
     GeometryShaderStorageAtomic = 1 << 20,
     /// Geometry shader read access through sampled descriptors.
     GeometryShaderSampledRead = 1 << 21,
@@ -67,7 +67,7 @@ enum class RenderAccess : uint64_t {
     FragmentShaderStorageRead = 1 << 23,
     /// Fragment shader write access through storage descriptors.
     FragmentShaderStorageWrite = 1 << 24,
-    /// Fragment shader atomic write access through storage descriptors.
+    /// Fragment shader atomic read/write access through storage descriptors.
     FragmentShaderStorageAtomic = 1 << 25,
     /// Fragment shader read access through sampled descriptors.
     FragmentShaderSampledRead = 1 << 26,

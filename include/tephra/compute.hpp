@@ -15,7 +15,7 @@ enum class ComputeAccess : uint64_t {
     ComputeShaderStorageRead = 1 << 0,
     /// Compute shader write access through storage descriptors.
     ComputeShaderStorageWrite = 1 << 1,
-    /// Compute shader atomic write access through storage descriptors.
+    /// Compute shader atomic read/write access through storage descriptors.
     ComputeShaderStorageAtomic = 1 << 2,
     /// Compute shader read access through sampled descriptors.
     ComputeShaderSampledRead = 1 << 3,
