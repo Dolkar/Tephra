@@ -20,7 +20,7 @@ std::unique_ptr<Example> createExample(std::ofstream& logFile) {
     auto device = application->createDevice(deviceSetup);
     auto jobResourcePool = device->createJobResourcePool(tp::JobResourcePoolSetup(mainQueue));
 
-    for (int i = 0; i < 100; i++) {
+    for (int i = 0; i < 10; i++) {
         // Buffer memory allocated through VMA, then released back to it along with the VkBuffer handle once the
         // timeline semaphore signalled by the job after the end of this scope
         auto bufferSetup = tp::BufferSetup(0x1000, tp::BufferUsageMask::None());
