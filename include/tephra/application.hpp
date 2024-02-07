@@ -63,30 +63,46 @@ struct ApplicationIdentifier {
         Version engineVersion = {});
 };
 
-/// Optional validation features that may additionally be enabled.
+/// Set of toggleable validation features.
 /// @see tp::VulkanValidationSetup
-/// @see @vksymbol{VkValidationFeatureEnableEXT}
-enum class ValidationFeatureEnable : uint32_t {
-    GPUAssisted = 1 << VK_VALIDATION_FEATURE_ENABLE_GPU_ASSISTED_EXT,
-    GPUAssistedReserveBindingSlot = 1 << VK_VALIDATION_FEATURE_ENABLE_GPU_ASSISTED_RESERVE_BINDING_SLOT_EXT,
-    BestPractices = 1 << VK_VALIDATION_FEATURE_ENABLE_BEST_PRACTICES_EXT,
-    DebugPrintf = 1 << VK_VALIDATION_FEATURE_ENABLE_DEBUG_PRINTF_EXT,
-    Synchronization = 1 << VK_VALIDATION_FEATURE_ENABLE_SYNCHRONIZATION_VALIDATION_EXT
+/// @see https://vulkan.lunarg.com/doc/sdk/1.3.275.0/windows/khronos_validation_layer.html
+enum class ValidationFeature : uint32_t {
+    /// The main, heavy-duty validation checks. This may be valuable early in the development cycle to reduce validation
+    /// output while correcting parameter/object usage errors.
+    Core = 1 << 0,
+    /// Object tracking checks. This may not always be necessary late in a development cycle.
+    ObjectLifetime = 1 << 1,
+    /// Stateless parameter checks. This may not always be necessary late in a development cycle.
+    StatelessParameter = 1 << 2,
+    /// Thread checks. In order to not degrade performance, it might be best to run your program with thread-checking
+    /// disabled most of the time, enabling it occasionally for a quick sanity check or when debugging difficult
+    /// application behaviors.
+    ThreadSafety = 1 << 3,
+    /// Check for API usage errors at shader execution time.
+    GPUAssisted = 1 << 4,
+    /// Enables processing of debug printf instructions in shaders and sending debug strings to the debug callback.
+    /// Cannot be enabled at the same time as GPU assisted validation.
+    DebugPrintf = 1 << 5,
+    /// Enable synchronization validation during command buffers recording. This feature reports resource access
+    /// conflicts due to missing or incorrect synchronization operations between actions (Draw, Copy, Dispatch, Blit)
+    /// reading or writing the same regions of memory.
+    Synchronization = 1 << 6,
+    /// Enable synchronization validation between submitted command buffers when Synchronization Validation is enabled.
+    /// This option will increase the synchronization performance cost.
+    QueueSubmitSynchronization = 1 << 7,
+    /// Outputs warnings related to common misuse of the API, but which are not explicitly prohibited by the
+    /// specification.
+    BestPractices = 1 << 8,
+    /// Outputs warnings for spec-conforming but non-ideal code on NVIDIA GPUs.
+    BestPracticesNvidia = 1 << 9,
+    /// Outputs warnings for spec-conforming but non-ideal code on AMD GPUs.
+    BestPracticesAMD = 1 << 10,
+    /// Outputs warnings for spec-conforming but non-ideal code on ARM GPUs.
+    BestPracticesARM = 1 << 11,
+    /// Outputs warnings for spec-conforming but non-ideal code on Imagination GPUs.
+    BestPracticesIMG = 1 << 12
 };
-TEPHRA_MAKE_ENUM_BIT_MASK(ValidationFeatureEnableMask, ValidationFeatureEnable);
-
-/// Validation features part of the standard set that may be optionally disabled.
-/// @see tp::VulkanValidationSetup
-/// @see @vksymbol{VkValidationFeatureDisableEXT}
-enum class ValidationFeatureDisable : uint32_t {
-    Shaders = 1 << VK_VALIDATION_FEATURE_DISABLE_SHADERS_EXT,
-    ThreadSafety = 1 << VK_VALIDATION_FEATURE_DISABLE_THREAD_SAFETY_EXT,
-    APIParameters = 1 << VK_VALIDATION_FEATURE_DISABLE_API_PARAMETERS_EXT,
-    ObjectLifetimes = 1 << VK_VALIDATION_FEATURE_DISABLE_OBJECT_LIFETIMES_EXT,
-    CoreChecks = 1 << VK_VALIDATION_FEATURE_DISABLE_CORE_CHECKS_EXT,
-    UniqueHandles = 1 << VK_VALIDATION_FEATURE_DISABLE_UNIQUE_HANDLES_EXT
-};
-TEPHRA_MAKE_ENUM_BIT_MASK(ValidationFeatureDisableMask, ValidationFeatureDisable);
+TEPHRA_MAKE_ENUM_BIT_MASK(ValidationFeatureMask, ValidationFeature);
 
 /// Describes whether Vulkan validation should be enabled, optionally with control over its specific features.
 /// @remarks
@@ -98,19 +114,16 @@ TEPHRA_MAKE_ENUM_BIT_MASK(ValidationFeatureDisableMask, ValidationFeatureDisable
 /// @see tp::ApplicationSetup
 struct VulkanValidationSetup {
     bool enable;
-    ValidationFeatureEnableMask enabledFeatures;
-    ValidationFeatureDisableMask disabledFeatures;
+    ValidationFeatureMask features;
 
     /// @param enable
     ///     Enables Vulkan validation features by adding the standard validation layer.
-    /// @param enabledFeatures
-    ///     A mask of tp::ValidationFeatureEnable that enables additional validation features.
-    /// @param disabledFeatures
-    ///     A mask of tp::ValidationFeatureDisable that disables parts of the standard validation feature set.
+    /// @param features
+    ///     A mask of tp::ValidationFeature that toggles various validation features.
     VulkanValidationSetup(
         bool enable = false,
-        ValidationFeatureEnableMask enabledFeatures = ValidationFeatureEnableMask::None(),
-        ValidationFeatureDisableMask disabledFeatures = ValidationFeatureDisableMask::None());
+        ValidationFeatureMask features = ValidationFeature::Core | ValidationFeature::ObjectLifetime |
+            ValidationFeature::StatelessParameter | ValidationFeature::ThreadSafety);
 };
 
 /// Used as configuration for creating a new tp::Application object.

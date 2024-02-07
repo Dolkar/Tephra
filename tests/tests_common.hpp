@@ -92,10 +92,9 @@ struct TephraContext {
             appExtensions.push_back(tp::ApplicationExtension::KHR_Surface);
         }
 
-        auto validationSetup = tp::VulkanValidationSetup(
-            true,
-            tp::ValidationFeatureEnable::BestPractices | tp::ValidationFeatureEnable::Synchronization |
-                tp::ValidationFeatureEnable::GPUAssisted | tp::ValidationFeatureEnable::GPUAssistedReserveBindingSlot);
+        auto validationSetup = tp::VulkanValidationSetup(true);
+        validationSetup.features |= tp::ValidationFeature::BestPractices | tp::ValidationFeature::Synchronization |
+            tp::ValidationFeature::GPUAssisted;
 
         auto appSetup = tp::ApplicationSetup(
             { "TephraIntegrationTests", tp::Version(0, 1, 0) },

@@ -8,11 +8,8 @@ namespace tp {
 
 constexpr const char* ApplicationTypeName = "Application";
 
-VulkanValidationSetup::VulkanValidationSetup(
-    bool enable,
-    ValidationFeatureEnableMask enabledFeatures,
-    ValidationFeatureDisableMask disabledFeatures)
-    : enable(enable), enabledFeatures(enabledFeatures), disabledFeatures(disabledFeatures) {}
+VulkanValidationSetup::VulkanValidationSetup(bool enable, ValidationFeatureMask features)
+    : enable(enable), features(features) {}
 
 ApplicationIdentifier::ApplicationIdentifier(
     const char* applicationName,

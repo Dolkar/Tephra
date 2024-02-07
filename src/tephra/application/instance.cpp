@@ -5,7 +5,7 @@
 
 namespace tp {
 
-constexpr const char* StandardValidationLayerName = "VK_LAYER_KHRONOS_validation";
+constexpr const char* ValidationLayerName = "VK_LAYER_KHRONOS_validation";
 
 std::vector<const char*> initPrepareExtensions(const ApplicationSetup& appSetup, const VulkanGlobals* vulkanGlobals) {
     // At least one of the platform specific extensions needs to be available for surface support
@@ -39,9 +39,9 @@ std::vector<const char*> initPrepareExtensions(const ApplicationSetup& appSetup,
 std::vector<const char*> initPrepareLayers(const ApplicationSetup& appSetup, const VulkanGlobals* vulkanGlobals) {
     std::vector<const char*> enabledLayers{ appSetup.instanceLayers.begin(), appSetup.instanceLayers.end() };
 
-    if (appSetup.vulkanValidation.enable && !containsString(appSetup.instanceLayers, StandardValidationLayerName)) {
-        if (vulkanGlobals->isInstanceLayerAvailable(StandardValidationLayerName)) {
-            enabledLayers.push_back(StandardValidationLayerName);
+    if (appSetup.vulkanValidation.enable && !containsString(appSetup.instanceLayers, ValidationLayerName)) {
+        if (vulkanGlobals->isInstanceLayerAvailable(ValidationLayerName)) {
+            enabledLayers.push_back(ValidationLayerName);
         } else {
             reportDebugMessage(
                 DebugMessageSeverity::Warning,
@@ -53,41 +53,52 @@ std::vector<const char*> initPrepareLayers(const ApplicationSetup& appSetup, con
     return enabledLayers;
 }
 
-struct ValidationFeaturesSetup {
-    VkValidationFeaturesEXT vkValidationFeatures;
-    std::vector<VkValidationFeatureEnableEXT> enableSet;
-    std::vector<VkValidationFeatureDisableEXT> disableSet;
+struct LayerSettingsEXT {
+    std::vector<VkLayerSettingEXT> vkSettings;
+    VkLayerSettingsCreateInfoEXT vkCreateInfo;
 };
 
-void initPrepareValidationFeatures(const VulkanValidationSetup& vulkanValidation, ValidationFeaturesSetup* setup) {
-    // Convert Tephra bitmasks to an array of features. They aren't directly convertible, but (for now) the indices of
-    // the bits used are convertible (see definition of ValidationFeatureEnable)
-    uint32_t mask = static_cast<uint32_t>(vulkanValidation.enabledFeatures);
-    uint32_t bitIndex = 0;
-    while (mask) {
-        if ((mask & 1) == 1) {
-            setup->enableSet.push_back(static_cast<VkValidationFeatureEnableEXT>(bitIndex));
-        }
-        mask >>= 1;
-        bitIndex++;
-    }
+void initPrepareValidationFeatures(const VulkanValidationSetup& setup, LayerSettingsEXT* settings) {
+    static const VkBool32 falseValue = VK_TRUE;
+    static const VkBool32 trueValue = VK_TRUE;
+    static const char* gpuBasedNone = "GPU_BASED_NONE";
+    static const char* gpuBasedDebugPrintf = "GPU_BASED_DEBUG_PRINTF";
+    static const char* gpuBasedAssisted = "GPU_BASED_GPU_ASSISTED";
 
-    mask = static_cast<uint32_t>(vulkanValidation.disabledFeatures);
-    bitIndex = 0;
-    while (mask) {
-        if ((mask & 1) == 1) {
-            setup->disableSet.push_back(static_cast<VkValidationFeatureDisableEXT>(bitIndex));
-        }
-        mask >>= 1;
-        bitIndex++;
-    }
+    auto setBool = [settings](const char* name, bool value) {
+        const VkBool32* valuePtr = value ? &trueValue : &falseValue;
+        settings->vkSettings.push_back({ ValidationLayerName, name, VK_LAYER_SETTING_TYPE_BOOL32_EXT, 1, valuePtr });
+    };
 
-    setup->vkValidationFeatures.sType = VK_STRUCTURE_TYPE_VALIDATION_FEATURES_EXT;
-    setup->vkValidationFeatures.pNext = nullptr;
-    setup->vkValidationFeatures.enabledValidationFeatureCount = static_cast<uint32_t>(setup->enableSet.size());
-    setup->vkValidationFeatures.pEnabledValidationFeatures = setup->enableSet.data();
-    setup->vkValidationFeatures.disabledValidationFeatureCount = static_cast<uint32_t>(setup->disableSet.size());
-    setup->vkValidationFeatures.pDisabledValidationFeatures = setup->disableSet.data();
+    auto setString = [settings](const char* name, const char* value) {
+        settings->vkSettings.push_back({ ValidationLayerName, name, VK_LAYER_SETTING_TYPE_STRING_EXT, 1, value });
+    };
+
+    // Set bool toggles
+    setBool("validate_core", setup.features.contains(ValidationFeature::Core));
+    setBool("object_lifetime", setup.features.contains(ValidationFeature::ObjectLifetime));
+    setBool("stateless_param", setup.features.contains(ValidationFeature::StatelessParameter));
+    setBool("thread_safety", setup.features.contains(ValidationFeature::ThreadSafety));
+    setBool("validate_sync", setup.features.contains(ValidationFeature::Synchronization));
+    setBool("sync_queue_submit", setup.features.contains(ValidationFeature::QueueSubmitSynchronization));
+    setBool("validate_best_practices", setup.features.contains(ValidationFeature::BestPractices));
+    setBool("validate_best_practices_nvidia", setup.features.contains(ValidationFeature::BestPracticesNvidia));
+    setBool("validate_best_practices_amd", setup.features.contains(ValidationFeature::BestPracticesAMD));
+    setBool("validate_best_practices_arm", setup.features.contains(ValidationFeature::BestPracticesARM));
+    setBool("validate_best_practices_img", setup.features.contains(ValidationFeature::BestPracticesIMG));
+
+    // Set gpu based enum
+    const char* gpuBased = gpuBasedNone;
+    if (setup.features.contains(ValidationFeature::DebugPrintf))
+        gpuBased = gpuBasedDebugPrintf;
+    else if (setup.features.contains(ValidationFeature::GPUAssisted))
+        gpuBased = gpuBasedAssisted;
+    setString("validate_gpu_based", gpuBased);
+
+    settings->vkCreateInfo.sType = VK_STRUCTURE_TYPE_LAYER_SETTINGS_CREATE_INFO_EXT;
+    settings->vkCreateInfo.pNext = nullptr;
+    settings->vkCreateInfo.settingCount = static_cast<uint32_t>(settings->vkSettings.size());
+    settings->vkCreateInfo.pSettings = settings->vkSettings.data();
 }
 
 VkInstanceHandle initCreateVulkanInstance(const VulkanGlobals* vulkanGlobals, const ApplicationSetup& appSetup) {
@@ -104,24 +115,21 @@ VkInstanceHandle initCreateVulkanInstance(const VulkanGlobals* vulkanGlobals, co
 
     void* vkCreateInfoExtPtr = appSetup.vkCreateInfoExtPtr;
 
-    ValidationFeaturesSetup validationFeaturesSetup;
-    if (appSetup.vulkanValidation.enable &&
-        (appSetup.vulkanValidation.enabledFeatures != ValidationFeatureEnableMask::None() ||
-         appSetup.vulkanValidation.disabledFeatures != ValidationFeatureDisableMask::None())) {
-        // Need to enable the validation feature extension and set it up through the extension pointer
-        if (vulkanGlobals->queryLayerExtension(
-                StandardValidationLayerName, VK_EXT_VALIDATION_FEATURES_EXTENSION_NAME)) {
-            extensions.push_back(VK_EXT_VALIDATION_FEATURES_EXTENSION_NAME);
+    LayerSettingsEXT layerSettings;
+    if (appSetup.vulkanValidation.enable) {
+        // Need to enable the layer settings extension and set it up through the extension pointer
+        if (vulkanGlobals->queryLayerExtension(ValidationLayerName, VK_EXT_LAYER_SETTINGS_EXTENSION_NAME)) {
+            extensions.push_back(VK_EXT_LAYER_SETTINGS_EXTENSION_NAME);
 
-            initPrepareValidationFeatures(appSetup.vulkanValidation, &validationFeaturesSetup);
-            validationFeaturesSetup.vkValidationFeatures.pNext = appSetup.vkCreateInfoExtPtr;
-            vkCreateInfoExtPtr = &validationFeaturesSetup.vkValidationFeatures;
+            initPrepareValidationFeatures(appSetup.vulkanValidation, &layerSettings);
+            layerSettings.vkCreateInfo.pNext = appSetup.vkCreateInfoExtPtr;
+            vkCreateInfoExtPtr = &layerSettings.vkCreateInfo;
         } else {
             reportDebugMessage(
                 DebugMessageSeverity::Warning,
                 DebugMessageType::General,
-                "Specific validation features were requested, but Vulkan instance does not support "
-                "the " VK_EXT_VALIDATION_FEATURES_EXTENSION_NAME " extension.");
+                "Vulkan instance does not support the " VK_EXT_LAYER_SETTINGS_EXTENSION_NAME
+                " extension. Configuration of validation features is disabled and the defaults will be used.");
         }
     }
 
