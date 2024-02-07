@@ -49,7 +49,7 @@ struct Version {
 
     /// Returns the highest Vulkan API version that Tephra will make use of.
     static constexpr Version getMaxUsedVulkanAPIVersion() {
-        return Version(1, 3, 0);
+        return Version(1, 3, 239);
     }
 };
 
