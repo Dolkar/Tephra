@@ -100,6 +100,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="1_cube\cube.cpp" />
+    <ClCompile Include="2_cornell_pt\cornell.cpp" />
     <ClCompile Include="examples_common.cpp" />
     <ClCompile Include="tephra_examples.cpp" />
     <ClCompile Include="window.cpp" />
@@ -109,6 +110,8 @@
     <ClInclude Include="1_cube\cube_data.hpp" />
     <ClInclude Include="1_cube\linmath.h" />
     <ClInclude Include="1_cube\lunarg.ppm.h" />
+    <ClInclude Include="2_cornell_pt\cornell.hpp" />
+    <ClInclude Include="2_cornell_pt\cornell_data.hpp" />
     <ClInclude Include="examples_common.hpp" />
     <ClInclude Include="window.hpp" />
   </ItemGroup>

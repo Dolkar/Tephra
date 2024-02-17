@@ -15,6 +15,9 @@
     <ClCompile Include="examples_common.cpp" />
     <ClCompile Include="tephra_examples.cpp" />
     <ClCompile Include="window.cpp" />
+    <ClCompile Include="2_cornell_pt\cornell.cpp">
+      <Filter>2_Cornell_Pt</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="1_cube\cube.hpp">
@@ -31,6 +34,12 @@
     </ClInclude>
     <ClInclude Include="examples_common.hpp" />
     <ClInclude Include="window.hpp" />
+    <ClInclude Include="2_cornell_pt\cornell.hpp">
+      <Filter>2_Cornell_Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="2_cornell_pt\cornell_data.hpp">
+      <Filter>2_Cornell_Pt</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="1_cube\cube.frag.inc">

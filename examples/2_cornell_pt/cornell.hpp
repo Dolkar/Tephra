@@ -4,12 +4,14 @@
 #include <tephra/utils/standard_report_handler.hpp>
 #include <deque>
 
-struct vktexcube_vs_uniform;
+enum class RenderingMethod {
+    RayQuery,
+    RayTracingPipeline,
+};
 
-// Reimplementation of https://github.com/KhronosGroup/Vulkan-LoaderAndValidationLayers/blob/master/demos/cube.cpp
-class CubeExample : public Example {
+class CornellExample : public Example {
 public:
-    CubeExample(std::ostream& debugStream, bool debugMode);
+    CornellExample(std::ostream& debugStream, RenderingMethod method, bool debugMode);
 
     virtual const tp::Application* getApplication() const override {
         return application.get();
@@ -25,27 +27,22 @@ public:
 
 private:
     tp::utils::StandardReportHandler debugHandler;
+    RenderingMethod method;
     tp::DeviceQueue mainQueue;
 
-    // tp::OwningPtr is by default just an alias for std::unique_ptr
     tp::OwningPtr<tp::Application> application;
     const tp::PhysicalDevice* physicalDevice;
     tp::OwningPtr<tp::Device> device;
     tp::OwningPtr<tp::JobResourcePool> jobResourcePool;
 
-    tp::OwningPtr<tp::Image> cubeTexture;
-    tp::Sampler sampler;
-
-    tp::DescriptorSetLayout descriptorSetLayout;
     tp::PipelineLayout pipelineLayout;
     tp::Pipeline pipeline;
 
+    tp::OwningPtr<tp::AccelerationStructure> accelerationStructure;
+
     std::deque<tp::JobSemaphore> frameSemaphores;
 
-    float cubeRotation;
-
-    void prepareTexture();
-    void preparePipeline();
-
-    void fillUniformBufferData(vktexcube_vs_uniform* data);
+    void prepareBLAS();
+    void prepareRayQueryPipeline();
+    void prepareRayTracingPipeline();
 };
