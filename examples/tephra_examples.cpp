@@ -1,4 +1,5 @@
 #include "1_cube/cube.hpp"
+#include "2_cornell_pt/cornell.hpp"
 #include "window.hpp"
 
 #include <fstream>
@@ -16,7 +17,8 @@ std::unique_ptr<Example> createExample(std::ofstream& logFile, int exampleNumber
     }
 
     bool debug = true;
-    return std::make_unique<CubeExample>(logFile, debug);
+    // return std::make_unique<CubeExample>(logFile, debug);
+    return std::make_unique<CornellExample>(logFile, RenderingMethod::RayQuery, debug);
 }
 
 #if _WIN32

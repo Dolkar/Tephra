@@ -38,7 +38,7 @@ private:
     tp::PipelineLayout pipelineLayout;
     tp::Pipeline pipeline;
 
-    tp::OwningPtr<tp::AccelerationStructure> accelerationStructure;
+    std::vector<tp::OwningPtr<tp::AccelerationStructure>> blasList;
 
     std::deque<tp::JobSemaphore> frameSemaphores;
 

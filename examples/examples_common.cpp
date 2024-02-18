@@ -3,13 +3,7 @@
 #include <string>
 #include <cstdlib>
 
-void Example::resize(VkSurfaceKHR surface, uint32_t width, uint32_t height) {
-    this->surface = surface;
-    this->windowWidth = width;
-    this->windowHeight = height;
-}
-
-void Example::showErrorAndExit(std::string errorType, std::string errorDetail) {
+void showErrorAndExit(std::string errorType, std::string errorDetail) {
     std::string errorBody = errorDetail + "\nSee \"examples_log.txt\" for additional details.";
     std::cerr << errorType << ": " << errorBody << std::endl;
 
@@ -22,6 +16,12 @@ void Example::showErrorAndExit(std::string errorType, std::string errorDetail) {
 #endif
 
     std::abort();
+}
+
+void Example::resize(VkSurfaceKHR surface, uint32_t width, uint32_t height) {
+    this->surface = surface;
+    this->windowWidth = width;
+    this->windowHeight = height;
 }
 
 void Example::prepareSwapchain(

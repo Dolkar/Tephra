@@ -76,6 +76,8 @@ CornellExample::CornellExample(std::ostream& debugStream, RenderingMethod method
         prepareRayTracingPipeline();
         break;
     }
+
+    prepareBLAS();
 }
 
 void CornellExample::update() {}
@@ -100,15 +102,68 @@ void CornellExample::releaseSurface() {
 void CornellExample::prepareBLAS() {
     std::vector<std::vector<Point>> geometry;
 
-    auto triSetup = tp::TriangleGeometrySetup(
-        triCount,
-        tp::Format::COL96_R32G32B32_SFLOAT,
-        vertCount,
-        tp::IndexType::NoneKHR,
-        false,
-        tp::GeometryFlag::Opaque);
-    auto blasSetup = tp::AccelerationStructureSetup::BottomLevel(
-        tp::AccelerationStructureBuildFlag::PreferFastTrace, tp::viewOne(triSetup), {});
+    // Form a list of triangles for each object
+    geometry.resize(static_cast<std::size_t>(CornellObject::NObjects));
 
-    device->allocateAccelerationStructureKHR
+    for (const Plane& plane : cornellBox) {
+        std::vector<Point>& vertices = geometry[static_cast<std::size_t>(plane.objectId)];
+
+        // Split each plane into two triangles
+        vertices.push_back(plane.p0);
+        vertices.push_back(plane.p1);
+        vertices.push_back(plane.p2);
+
+        vertices.push_back(plane.p0);
+        vertices.push_back(plane.p3);
+        vertices.push_back(plane.p2);
+    }
+
+    // Create and build a BLAS for each object
+    tp::Job buildJob = jobResourcePool->createJob();
+
+    std::vector<tp::TriangleGeometryBuildInfo> geomInfos;
+    geomInfos.reserve(geometry.size());
+    std::vector<tp::AccelerationStructureBuildInfo> buildInfos;
+
+    for (int i = 0; i < geometry.size(); i++) {
+        const std::vector<Point>& vertices = geometry[i];
+        auto triSetup = tp::TriangleGeometrySetup(
+            vertices.size() / 3,
+            tp::Format::COL96_R32G32B32_SFLOAT,
+            vertices.size(),
+            tp::IndexType::NoneKHR,
+            false,
+            tp::GeometryFlag::Opaque);
+
+        auto blasSetup = tp::AccelerationStructureSetup::BottomLevel(
+            tp::AccelerationStructureBuildFlag::PreferFastTrace, tp::viewOne(triSetup), {});
+
+        std::string name = "geom" + std::to_string(i);
+        auto blas = device->allocateAccelerationStructureKHR(blasSetup, name.c_str());
+
+        // Upload vertex data. It's very small so we can use cmdUpdateBuffer into a device local buffer
+        std::size_t verticesBytes = vertices.size() * sizeof(Point);
+        auto vertexBuffer = buildJob.allocateLocalBuffer(
+            tp::BufferSetup(verticesBytes, tp::BufferUsage::AccelerationStructureInputKHR));
+        buildJob.cmdUpdateBuffer(
+            vertexBuffer, tp::view(reinterpret_cast<const std::byte*>(vertices.data()), verticesBytes));
+
+        // Setup building the BLAS for this object
+        auto& geomInfo = geomInfos.emplace_back(tp::TriangleGeometryBuildInfo(vertexBuffer));
+        buildInfos.push_back(tp::AccelerationStructureBuildInfo::BottomLevel(
+            tp::AccelerationStructureBuildMode::Build, *blas, tp::viewOne(geomInfo), {}));
+
+        // And store it for use later
+        blasList.push_back(std::move(blas));
+    }
+
+    // Build and submit
+    buildJob.cmdBuildAccelerationStructuresKHR(tp::view(buildInfos));
+
+    device->enqueueJob(mainQueue, std::move(buildJob));
+    device->submitQueuedJobs(mainQueue);
 }
+
+void CornellExample::prepareRayQueryPipeline() {}
+
+void CornellExample::prepareRayTracingPipeline() {}

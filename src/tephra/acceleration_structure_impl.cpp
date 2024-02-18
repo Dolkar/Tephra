@@ -62,6 +62,10 @@ AccelerationStructureBuilder::prepareBuild(
 
             triangleGeom.vertexData = { getCheckedDeviceAddress(triInfo.vertexBuffer) };
             triangleGeom.vertexStride = triInfo.vertexStride;
+            if (triangleGeom.vertexStride == 0) {
+                Format vertexFormat = vkCastConvertibleEnum(triangleGeom.vertexFormat);
+                triangleGeom.vertexStride = getFormatClassProperties(vertexFormat).texelBlockBytes;
+            }
 
             // Optional buffer views, but getDeviceAddress on a null view returns 0
             triangleGeom.indexData = { getCheckedDeviceAddress(triInfo.indexBuffer) };
@@ -73,7 +77,8 @@ AccelerationStructureBuilder::prepareBuild(
                 uint32_t indexSize = triangleGeom.indexType == VK_INDEX_TYPE_UINT16 ? 2 : 4;
                 triangleCount = triInfo.indexBuffer.getSize() / (3 * indexSize);
             } else {
-                triangleCount = (triInfo.vertexBuffer.getSize() - triInfo.firstVertex) / (3 * triInfo.vertexStride);
+                triangleCount = (triInfo.vertexBuffer.getSize() - triInfo.firstVertex) /
+                    (3 * triangleGeom.vertexStride);
             }
 
             vkBuildRanges[geomIndex].primitiveCount = static_cast<uint32_t>(triangleCount);

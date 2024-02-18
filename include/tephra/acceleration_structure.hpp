@@ -108,6 +108,12 @@ public:
 
     VkAccelerationStructureHandleKHR vkGetAccelerationStructureHandle() const;
 
+    /// Casting operator returning the associated tp::AccelerationStructureView object
+    /// @see tp::AccelerationStructure::getView
+    operator const AccelerationStructureView() const {
+        return getView();
+    }
+
     TEPHRA_MAKE_INTERFACE(AccelerationStructure);
 
 protected:

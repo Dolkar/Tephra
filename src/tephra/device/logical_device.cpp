@@ -17,9 +17,13 @@ inline FunctionalityMask processExtensions(
     auto& vk13Features = vkFeatureMap.get<VkPhysicalDeviceVulkan13Features>();
     vk13Features.dynamicRendering = VK_TRUE;
 
-    // Add implied features and extensions
+    // Add required features and extensions
     if (containsString(view(vkExtensions), DeviceExtension::KHR_AccelerationStructure)) {
         vkFeatureMap.get<VkPhysicalDeviceAccelerationStructureFeaturesKHR>().accelerationStructure = true;
+        vkFeatureMap.get<VkPhysicalDeviceVulkan12Features>().bufferDeviceAddress = true;
+
+        if (!containsString(view(vkExtensions), VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME))
+            vkExtensions.push_back(VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME);
     }
 
     if (containsString(view(vkExtensions), DeviceExtension::KHR_RayTracingPipeline) &&
@@ -798,6 +802,9 @@ VkAccelerationStructureBuildSizesInfoKHR LogicalDevice::getAccelerationStructure
     VkAccelerationStructureBuildTypeKHR buildType = VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR;
 
     VkAccelerationStructureBuildSizesInfoKHR sizeInfo;
+    sizeInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_SIZES_INFO_KHR;
+    sizeInfo.pNext = nullptr;
+
     vkiDevice.getAccelerationStructureBuildSizesKHR(
         vkDeviceHandle, buildType, &vkBuildInfo, pMaxPrimitiveCounts, &sizeInfo);
     return sizeInfo;
