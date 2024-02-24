@@ -112,12 +112,18 @@
     <ClInclude Include="1_cube\lunarg.ppm.h" />
     <ClInclude Include="2_cornell_pt\cornell.hpp" />
     <ClInclude Include="2_cornell_pt\cornell_data.hpp" />
+    <ClInclude Include="2_cornell_pt\trace_shared.h" />
     <ClInclude Include="examples_common.hpp" />
     <ClInclude Include="window.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="1_cube\cube.frag.inc" />
     <None Include="1_cube\cube.vert.inc" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="2_cornell_pt\trace_ray_query.hlsl">
+      <FileType>Document</FileType>
+    </None>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

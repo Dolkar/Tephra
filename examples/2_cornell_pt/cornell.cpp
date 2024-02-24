@@ -128,9 +128,9 @@ void CornellExample::prepareBLAS() {
     for (int i = 0; i < geometry.size(); i++) {
         const std::vector<Point>& vertices = geometry[i];
         auto triSetup = tp::TriangleGeometrySetup(
-            vertices.size() / 3,
+            static_cast<uint32_t>(vertices.size() / 3),
             tp::Format::COL96_R32G32B32_SFLOAT,
-            vertices.size(),
+            static_cast<uint32_t>(vertices.size()),
             tp::IndexType::NoneKHR,
             false,
             tp::GeometryFlag::Opaque);

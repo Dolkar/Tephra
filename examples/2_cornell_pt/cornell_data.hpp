@@ -1,20 +1,7 @@
 #pragma once
 // Data from https://www.graphics.cornell.edu/online/box/data.html
 
-#include <cstdint>
-
-struct Point {
-    float x;
-    float y;
-    float z;
-};
-
-// Linear sRGB color, simply sampled from the spectral data at 612, 548 and 464 nm
-struct Color {
-    float r;
-    float g;
-    float b;
-};
+#include "trace_shared.h"
 
 // Identification for purposes of merging planes under the same AS
 enum class CornellObject : uint32_t {
@@ -37,6 +24,7 @@ struct Plane {
     Point p1;
     Point p2;
     Point p3;
+    // Linearized sRGB color sampled from the spectral data at 612, 548 and 464 nm
     Color reflectance;
     Color emission;
 };

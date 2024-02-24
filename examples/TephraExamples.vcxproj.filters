@@ -40,6 +40,9 @@
     <ClInclude Include="2_cornell_pt\cornell_data.hpp">
       <Filter>2_Cornell_Pt</Filter>
     </ClInclude>
+    <ClInclude Include="2_cornell_pt\trace_shared.h">
+      <Filter>2_Cornell_Pt</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="1_cube\cube.frag.inc">
@@ -47,6 +50,9 @@
     </None>
     <None Include="1_cube\cube.vert.inc">
       <Filter>1_Cube</Filter>
+    </None>
+    <None Include="2_cornell_pt\trace_ray_query.hlsl">
+      <Filter>2_Cornell_Pt</Filter>
     </None>
   </ItemGroup>
 </Project>
