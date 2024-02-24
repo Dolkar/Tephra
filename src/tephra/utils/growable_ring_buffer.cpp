@@ -72,29 +72,18 @@ namespace utils {
             return {};
         TEPHRA_ASSERT(headRegionIndex < regions.size());
 
+        // Forget about the ring topology and simply find the smallest empty region that fits the request
+        uint64_t bestRegionIndex = ~0ull;
+        uint64_t bestRegionSize = ~0ull;
         uint64_t regionIndex = headRegionIndex;
         do {
             RegionInfo& region = regions[regionIndex];
 
-            // If buffer exists, is big enough and empty, allocate
             if (region.buffer != nullptr && region.buffer->getSize() >= allocationSize && region.headOffset == 0 &&
-                region.tailOffset == region.buffer->getSize()) {
-                AllocationInfo allocInfo;
-                allocInfo.bufferView = region.buffer->getDefaultView();
-                allocInfo.regionIndex = regionIndex;
-                allocInfo.allocationOffset = 0;
-                allocations.push_back(allocInfo);
-
-                region.headOffset = region.tailOffset;
-                region.allocationCount++;
-                totalAllocationSize += region.buffer->getSize();
-
-                // Next time start searching in the next region
-                headRegionIndex = regionIndex + 1;
-                if (headRegionIndex >= regions.size())
-                    headRegionIndex = 0;
-
-                return allocInfo.bufferView;
+                region.tailOffset == region.buffer->getSize() && region.buffer->getSize() < bestRegionSize) {
+                // Buffer exists, is big enough, is empty and is better than best one found so far
+                bestRegionIndex = regionIndex;
+                bestRegionSize = region.buffer->getSize();
             }
 
             regionIndex++;
@@ -102,8 +91,30 @@ namespace utils {
                 regionIndex = 0;
         } while (regionIndex != headRegionIndex);
 
-        // No free regions
-        return {};
+        if (bestRegionIndex < regions.size()) {
+            // Allocate
+            RegionInfo& region = regions[bestRegionIndex];
+
+            AllocationInfo allocInfo;
+            allocInfo.bufferView = region.buffer->getDefaultView();
+            allocInfo.regionIndex = bestRegionIndex;
+            allocInfo.allocationOffset = 0;
+            allocations.push_back(allocInfo);
+
+            region.headOffset = region.tailOffset;
+            region.allocationCount++;
+            totalAllocationSize += region.buffer->getSize();
+
+            // Next time start searching in the next region (if suballocating)
+            headRegionIndex = bestRegionIndex + 1;
+            if (headRegionIndex >= regions.size())
+                headRegionIndex = 0;
+
+            return allocInfo.bufferView.getView(0, allocationSize);
+        } else {
+            // No free regions
+            return {};
+        }
     }
 
     void GrowableRingBuffer::pop() {
