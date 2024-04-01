@@ -73,7 +73,7 @@ void Example::prepareSwapchain(
         surface,
         presentMode,
         minImageCount,
-        tp::ImageUsage::ColorAttachment,
+        tp::ImageUsage::ColorAttachment | tp::ImageUsage::TransferDst,
         swapchainFormat,
         { windowWidth, windowHeight });
 

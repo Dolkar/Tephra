@@ -21,6 +21,7 @@ struct Color {
 
 #elif defined(__HLSL_VERSION)
 
+using uint32_t = uint;
 using Vector = float3;
 using Point = float3;
 using Color = float3;
@@ -35,7 +36,8 @@ struct PlaneMaterialData {
 
 struct PushConstantData {
     Vector cameraPosition;
+    uint32_t imageWidth;
+    uint32_t imageHeight;
 };
 
 static const uint32_t WorkgroupSizeDim = 8;
-static const Vector CameraPosition = { 278.0f, 273.0f, -800.0f };

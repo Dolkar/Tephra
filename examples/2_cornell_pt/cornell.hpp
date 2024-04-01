@@ -35,14 +35,18 @@ private:
     tp::OwningPtr<tp::Device> device;
     tp::OwningPtr<tp::JobResourcePool> jobResourcePool;
 
+    tp::DescriptorSetLayout descSetLayout;
     tp::PipelineLayout pipelineLayout;
     tp::Pipeline pipeline;
 
+    tp::OwningPtr<tp::Buffer> planeMaterialBuffer;
+    tp::OwningPtr<tp::Image> accumImage;
     std::vector<tp::OwningPtr<tp::AccelerationStructure>> blasList;
 
     std::deque<tp::JobSemaphore> frameSemaphores;
 
     void prepareBLAS();
+    void preparePipelineLayout();
     void prepareRayQueryPipeline();
     void prepareRayTracingPipeline();
 };

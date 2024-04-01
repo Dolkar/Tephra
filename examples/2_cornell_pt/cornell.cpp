@@ -1,6 +1,29 @@
 #include "cornell.hpp"
 #include "cornell_data.hpp"
 
+#include <iostream>
+#include <fstream>
+
+inline tp::ShaderModule loadShader(tp::Device* device, std::string path) {
+    std::ifstream fileStream{ path, std::ios::binary | std::ios::in | std::ios::ate };
+
+    if (!fileStream.is_open()) {
+        throw std::runtime_error("Shader '" + path + "' not found.");
+    }
+
+    auto byteSize = fileStream.tellg();
+    if (byteSize % sizeof(uint32_t) != 0) {
+        throw std::runtime_error("Shader '" + path + "' has incorrect size.");
+    }
+    std::vector<uint32_t> shaderCode;
+    shaderCode.resize(byteSize / sizeof(uint32_t));
+
+    fileStream.seekg(0);
+    fileStream.read(reinterpret_cast<char*>(shaderCode.data()), byteSize);
+
+    return device->createShaderModule(tp::view(shaderCode));
+}
+
 CornellExample::CornellExample(std::ostream& debugStream, RenderingMethod method, bool debugMode)
     : debugHandler(debugStream, debugSeverity), method(method), mainQueue(tp::QueueType::Graphics) {
     // Initialize Tephra Application
@@ -29,15 +52,8 @@ CornellExample::CornellExample(std::ostream& debugStream, RenderingMethod method
 
     // Choose and initialize the rendering device
     std::vector<const char*> deviceExtensions = { tp::DeviceExtension::KHR_Swapchain,
-                                                  tp::DeviceExtension::KHR_AccelerationStructure };
-    switch (method) {
-    case RenderingMethod::RayQuery:
-        deviceExtensions.push_back(tp::DeviceExtension::KHR_RayQuery);
-        break;
-    case RenderingMethod::RayTracingPipeline:
-        deviceExtensions.push_back(tp::DeviceExtension::KHR_RayTracingPipeline);
-        break;
-    }
+                                                  tp::DeviceExtension::KHR_AccelerationStructure,
+                                                  "VK_EXT_scalar_block_layout" };
 
     if (method == RenderingMethod::RayQuery)
         deviceExtensions.push_back(tp::DeviceExtension::KHR_RayQuery);
@@ -68,6 +84,8 @@ CornellExample::CornellExample(std::ostream& debugStream, RenderingMethod method
     // Also create a Job Resource Pool that temporary resources will be allocated from
     jobResourcePool = device->createJobResourcePool(tp::JobResourcePoolSetup(mainQueue));
 
+    preparePipelineLayout();
+
     switch (method) {
     case RenderingMethod::RayQuery:
         prepareRayQueryPipeline();
@@ -78,11 +96,93 @@ CornellExample::CornellExample(std::ostream& debugStream, RenderingMethod method
     }
 
     prepareBLAS();
+
+    auto bufferSetup = tp::BufferSetup(16, tp::BufferUsage::StorageBuffer);
+    planeMaterialBuffer = device->allocateBuffer(bufferSetup, tp::MemoryPreference::Device, "Plane Material Data");
 }
 
 void CornellExample::update() {}
 
-void CornellExample::drawFrame() {}
+void CornellExample::drawFrame() {
+    // Limit the number of outstanding frames being rendered
+    if (frameSemaphores.size() >= 2) {
+        device->waitForJobSemaphores({ frameSemaphores.front() });
+        frameSemaphores.pop_front();
+    }
+
+    if (swapchain->getStatus() != tp::SwapchainStatus::Optimal) {
+        // Recreate out of date or suboptimal swapchain
+        prepareSwapchain(physicalDevice, device.get(), mainQueue);
+    }
+
+    // Acquire a swapchain image to draw the frame to
+    tp::AcquiredImageInfo acquiredImage;
+    try {
+        acquiredImage = swapchain->acquireNextImage().value();
+    } catch (const tp::OutOfDateError&) {
+        return;
+    }
+
+    tp::Job renderJob = jobResourcePool->createJob();
+
+    if (accumImage == nullptr || accumImage->getExtent() != acquiredImage.image->getExtent()) {
+        // Create an image to accumulate our renders to
+        auto imageSetup = tp::ImageSetup(
+            tp::ImageType::Image2D,
+            tp::ImageUsage::StorageImage | tp::ImageUsage::TransferSrc | tp::ImageUsage::TransferDst,
+            tp::Format::COL64_R16G16B16A16_SFLOAT,
+            acquiredImage.image->getExtent());
+        accumImage = device->allocateImage(imageSetup);
+
+        // Also clear it for the first pass
+        renderJob.cmdClearImage(*accumImage, tp::ClearValue::ColorFloat(0.0f, 0.0f, 0.0f, 0.0f));
+    }
+
+    tp::DescriptorSetView descriptorSet = renderJob.allocateLocalDescriptorSet(
+        &descSetLayout, { planeMaterialBuffer->getDefaultView(), accumImage->getDefaultView() });
+
+    // Run a single inline compute pass
+    auto imageAccess = tp::ImageComputeAccess(
+        *accumImage, tp::ComputeAccess::ComputeShaderStorageRead | tp::ComputeAccess::ComputeShaderStorageWrite);
+    renderJob.cmdExecuteComputePass(
+        tp::ComputePassSetup({}, tp::viewOne(imageAccess)), [&](tp::ComputeList& inlineList) {
+            inlineList.cmdBindComputePipeline(pipeline);
+            inlineList.cmdBindDescriptorSets(pipelineLayout, { descriptorSet });
+
+            Vector cameraPosition = { 278.0f, 273.0f, -800.0f };
+            PushConstantData data = { cameraPosition, accumImage->getExtent().width, accumImage->getExtent().height };
+            inlineList.cmdPushConstants<PushConstantData>(pipelineLayout, tp::ShaderStage::Compute, data);
+
+            inlineList.cmdDispatch(
+                roundUpToMultiple(accumImage->getExtent().width, WorkgroupSizeDim) / WorkgroupSizeDim,
+                roundUpToMultiple(accumImage->getExtent().height, WorkgroupSizeDim) / WorkgroupSizeDim);
+        });
+
+    // Blit the image to the swapchain one
+    auto blitRegion = tp::ImageBlitRegion(
+        accumImage->getWholeRange().pickMipLevel(0),
+        { 0, 0, 0 },
+        accumImage->getExtent(),
+        acquiredImage.image->getWholeRange().pickMipLevel(0),
+        { 0, 0, 0 },
+        acquiredImage.image->getExtent());
+    renderJob.cmdBlitImage(*accumImage, *acquiredImage.image, { blitRegion });
+    renderJob.cmdExportResource(*acquiredImage.image, tp::ReadAccess::ImagePresentKHR);
+
+    // Enqueue the job, synchronizing it with the presentation engine's semaphores
+    tp::JobSemaphore jobSemaphore = device->enqueueJob(
+        mainQueue, std::move(renderJob), {}, { acquiredImage.acquireSemaphore }, { acquiredImage.presentSemaphore });
+
+    frameSemaphores.push_back(jobSemaphore);
+
+    // Submit and present
+    device->submitQueuedJobs(mainQueue);
+    try {
+        device->submitPresentImagesKHR(mainQueue, { swapchain.get() }, { acquiredImage.imageIndex });
+    } catch (const tp::OutOfDateError&) {
+        // Let the swapchain be recreated next frame
+    }
+}
 
 void CornellExample::resize(VkSurfaceKHR surface, uint32_t width, uint32_t height) {
     Example::resize(surface, width, height);
@@ -164,6 +264,20 @@ void CornellExample::prepareBLAS() {
     device->submitQueuedJobs(mainQueue);
 }
 
-void CornellExample::prepareRayQueryPipeline() {}
+void CornellExample::preparePipelineLayout() {
+    descSetLayout = device->createDescriptorSetLayout(
+        { tp::DescriptorBinding(0, tp::DescriptorType::StorageBuffer, tp::ShaderStage::Compute),
+          tp::DescriptorBinding(1, tp::DescriptorType::StorageImage, tp::ShaderStage::Compute) });
+
+    pipelineLayout = device->createPipelineLayout(
+        { &descSetLayout }, { tp::PushConstantRange(tp::ShaderStage::Compute, 0, sizeof(PushConstantData)) });
+}
+
+void CornellExample::prepareRayQueryPipeline() {
+    auto shader = loadShader(device.get(), "trace_ray_query.spv");
+
+    auto pipelineSetup = tp::ComputePipelineSetup(&pipelineLayout, tp::ShaderStageSetup(&shader, "main"));
+    device->compileComputePipelines({ &pipelineSetup }, nullptr, { &pipeline });
+}
 
 void CornellExample::prepareRayTracingPipeline() {}

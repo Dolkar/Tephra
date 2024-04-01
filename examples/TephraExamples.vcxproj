@@ -121,9 +121,15 @@
     <None Include="1_cube\cube.vert.inc" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="2_cornell_pt\trace_ray_query.hlsl">
+    <CustomBuild Include="2_cornell_pt\trace_ray_query.hlsl">
       <FileType>Document</FileType>
-    </None>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(VULKAN_SDK)\Bin\dxc.exe -spirv -HV 2021 -fvk-use-scalar-layout -T cs_6_0 -E main -Fo "$(ProjectDir)\$(Platform)\$(Configuration)\%(Filename).spv" "%(FullPath)"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(VULKAN_SDK)\Bin\dxc.exe -spirv -HV 2021 -fvk-use-scalar-layout -T cs_6_0 -E main -Fo "$(ProjectDir)\$(Platform)\$(Configuration)\%(Filename).spv" "%(FullPath)"</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute HLSL to SPIR-V compilation</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute HLSL to SPIR-V compilation</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)\$(Platform)\$(Configuration)\%(Filename).spv</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)\$(Platform)\$(Configuration)\%(Filename).spv</Outputs>
+    </CustomBuild>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

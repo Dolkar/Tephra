@@ -367,7 +367,7 @@ OwningPtr<AccelerationStructure> Device::allocateAccelerationStructureKHR(
     auto backingBufferSetup = BufferSetup(
         asBuilder->getStorageSize(),
         BufferUsageMask::None(),
-        VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR,
+        VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT,
         256);
     auto [bufferHandleLifeguard, allocationHandleLifeguard] = deviceImpl->getMemoryAllocator()->allocateBuffer(
         backingBufferSetup, MemoryPreference::Device);

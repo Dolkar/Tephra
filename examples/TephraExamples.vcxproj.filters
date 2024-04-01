@@ -51,8 +51,10 @@
     <None Include="1_cube\cube.vert.inc">
       <Filter>1_Cube</Filter>
     </None>
-    <None Include="2_cornell_pt\trace_ray_query.hlsl">
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="2_cornell_pt\trace_ray_query.hlsl">
       <Filter>2_Cornell_Pt</Filter>
-    </None>
+    </CustomBuild>
   </ItemGroup>
 </Project>

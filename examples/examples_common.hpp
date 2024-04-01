@@ -3,6 +3,11 @@
 #include <tephra/tephra.hpp>
 #include <iostream>
 
+template <typename T>
+constexpr T roundUpToMultiple(T v, T m) {
+    return ((v + m - 1) / m) * m;
+}
+
 // Helper function for presenting errors to the user
 void showErrorAndExit(std::string errorType, std::string errorDetail);
 
