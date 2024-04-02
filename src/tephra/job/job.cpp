@@ -2,6 +2,7 @@
 #include "resource_pool_container.hpp"
 #include "compute_pass.hpp"
 #include "render_pass.hpp"
+#include "accesses.hpp"
 #include "../device/device_container.hpp"
 #include "../swapchain_impl.hpp"
 #include "../acceleration_structure_impl.hpp"
@@ -166,8 +167,9 @@ void Job::cmdExportResource(const BufferView& buffer, ReadAccessMask readAccessM
 
     markResourceUsage(jobData, buffer, true);
 
+    ResourceAccess access = convertReadAccessToVkAccess(readAccessMask);
     recordCommand<JobRecordStorage::ExportBufferData>(
-        jobData->record, JobCommandTypes::ExportBuffer, buffer, readAccessMask, queueFamilyIndex);
+        jobData->record, JobCommandTypes::ExportBuffer, buffer, access, queueFamilyIndex);
 }
 
 void Job::cmdExportResource(const ImageView& image, ReadAccessMask readAccessMask, QueueType targetQueueType) {
@@ -189,8 +191,40 @@ void Job::cmdExportResource(
 
     markResourceUsage(jobData, image, true);
 
+    ResourceAccess access = convertReadAccessToVkAccess(readAccessMask);
+    VkImageLayout vkImageLayout = vkGetImageLayoutFromReadAccess(readAccessMask);
     recordCommand<JobRecordStorage::ExportImageData>(
-        jobData->record, JobCommandTypes::ExportImage, image, range, readAccessMask, queueFamilyIndex);
+        jobData->record, JobCommandTypes::ExportImage, image, range, access, vkImageLayout, queueFamilyIndex);
+}
+
+void Job::cmdExportResource(
+    const AccelerationStructureView& accelerationStructure,
+    ReadAccessMask readAccessMask,
+    QueueType targetQueueType) {
+    TEPHRA_DEBUG_SET_CONTEXT(debugTarget.get(), "cmdExportResource", nullptr);
+
+    uint32_t queueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    if (targetQueueType != QueueType::Undefined) {
+        const DeviceContainer* deviceImpl = jobData->resourcePoolImpl->getParentDeviceImpl();
+        queueFamilyIndex = deviceImpl->getPhysicalDevice()->getQueueTypeInfo(targetQueueType).queueFamilyIndex;
+    }
+
+    markResourceUsage(jobData, accelerationStructure.getBackingBufferView(), true);
+
+    ResourceAccess access = convertReadAccessToVkAccess(readAccessMask);
+    // To avoid adding extra read access flags, we treat acceleration structure accesses like uniform accesses
+    if (containsAllBits(access.accessMask, VK_ACCESS_UNIFORM_READ_BIT)) {
+        access.accessMask &= ~VK_ACCESS_UNIFORM_READ_BIT;
+        access.accessMask |= VK_ACCESS_ACCELERATION_STRUCTURE_READ_BIT_KHR;
+    }
+
+    // There is no need for a separate "export acceleration structure" command, we can just export its backing buffer
+    recordCommand<JobRecordStorage::ExportBufferData>(
+        jobData->record,
+        JobCommandTypes::ExportBuffer,
+        accelerationStructure.getBackingBufferView(),
+        access,
+        queueFamilyIndex);
 }
 
 void Job::cmdDiscardContents(const ImageView& image) {
@@ -569,8 +603,8 @@ void Job::vkCmdImportExternalResource(
         JobCommandTypes::ImportExternalImage,
         image,
         range,
-        vkImageLayout,
-        ResourceAccess(vkStageMask, vkAccessMask));
+        ResourceAccess(vkStageMask, vkAccessMask),
+        vkImageLayout);
 }
 
 Job::Job(Job&& other) noexcept : debugTarget(std::move(other.debugTarget)), jobData(other.jobData) {

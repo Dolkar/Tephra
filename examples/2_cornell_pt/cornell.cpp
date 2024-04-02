@@ -138,8 +138,9 @@ void CornellExample::drawFrame() {
         renderJob.cmdClearImage(*accumImage, tp::ClearValue::ColorFloat(0.0f, 0.0f, 0.0f, 0.0f));
     }
 
+    tp::AccelerationStructureView tlasView = prepareTLAS(renderJob);
     tp::DescriptorSetView descriptorSet = renderJob.allocateLocalDescriptorSet(
-        &descSetLayout, { planeMaterialBuffer->getDefaultView(), accumImage->getDefaultView() });
+        &descSetLayout, { tlasView, planeMaterialBuffer->getDefaultView(), accumImage->getDefaultView() });
 
     // Run a single inline compute pass
     auto imageAccess = tp::ImageComputeAccess(
@@ -266,8 +267,9 @@ void CornellExample::prepareBLAS() {
 
 void CornellExample::preparePipelineLayout() {
     descSetLayout = device->createDescriptorSetLayout(
-        { tp::DescriptorBinding(0, tp::DescriptorType::StorageBuffer, tp::ShaderStage::Compute),
-          tp::DescriptorBinding(1, tp::DescriptorType::StorageImage, tp::ShaderStage::Compute) });
+        { tp::DescriptorBinding(0, tp::DescriptorType::AccelerationStructureKHR, tp::ShaderStage::Compute),
+          tp::DescriptorBinding(1, tp::DescriptorType::StorageBuffer, tp::ShaderStage::Compute),
+          tp::DescriptorBinding(2, tp::DescriptorType::StorageImage, tp::ShaderStage::Compute) });
 
     pipelineLayout = device->createPipelineLayout(
         { &descSetLayout }, { tp::PushConstantRange(tp::ShaderStage::Compute, 0, sizeof(PushConstantData)) });
@@ -280,4 +282,50 @@ void CornellExample::prepareRayQueryPipeline() {
     device->compileComputePipelines({ &pipelineSetup }, nullptr, { &pipeline });
 }
 
-void CornellExample::prepareRayTracingPipeline() {}
+void CornellExample::prepareRayTracingPipeline() {
+    showErrorAndExit("Ray tracing pipeline demo not implemented yet", "");
+}
+
+tp::AccelerationStructureView CornellExample::prepareTLAS(tp::Job& renderJob) {
+    // Form a list of instances. One instance = one BLAS
+    int instanceCount = blasList.size();
+    std::vector<VkAccelerationStructureInstanceKHR> vkInstances;
+
+    for (int i = 0; i < instanceCount; i++) {
+        // Identity matrix - the geometry is pre-transformed
+        VkTransformMatrixKHR transform = {
+            { { 1.0f, 0.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 1.0f, 0.0f } }
+        };
+
+        VkAccelerationStructureInstanceKHR vkInstance;
+        vkInstance.transform = transform;
+        vkInstance.instanceCustomIndex = i; // objectId
+        vkInstance.mask = 0xff;
+        vkInstance.instanceShaderBindingTableRecordOffset = 0;
+        vkInstance.flags = 0;
+        vkInstance.accelerationStructureReference = blasList[i]->getDeviceAddress();
+
+        vkInstances.push_back(vkInstance);
+    }
+
+    auto instanceSetup = tp::InstanceGeometrySetup(instanceCount, tp::GeometryFlag::Opaque);
+    auto tlasSetup = tp::AccelerationStructureSetup::TopLevel(
+        tp::AccelerationStructureBuildFlag::PreferFastTrace, instanceSetup);
+    auto tlas = renderJob.allocateLocalAccelerationStructureKHR(tlasSetup, "tlas");
+
+    // Upload instance data. Again, very small, so cmdUpdateBuffer suffices
+    std::size_t instancesBytes = instanceCount * sizeof(VkAccelerationStructureInstanceKHR);
+    auto instanceBuffer = renderJob.allocateLocalBuffer(
+        tp::BufferSetup(instancesBytes, tp::BufferUsage::AccelerationStructureInputKHR));
+    renderJob.cmdUpdateBuffer(
+        instanceBuffer, tp::view(reinterpret_cast<const std::byte*>(vkInstances.data()), instancesBytes));
+
+    auto buildInfo = tp::AccelerationStructureBuildInfo::TopLevel(
+        tp::AccelerationStructureBuildMode::Build, tlas, tp::InstanceGeometryBuildInfo(instanceBuffer));
+    renderJob.cmdBuildAccelerationStructuresKHR({ buildInfo });
+
+    // Export for reading it from inside the compute shader - treated as uniform
+    renderJob.cmdExportResource(tlas, tp::ReadAccess::ComputeShaderUniform);
+
+    return tlas;
+}

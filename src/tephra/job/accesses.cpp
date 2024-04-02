@@ -17,100 +17,102 @@ VkImageLayout vkGetImageLayoutForDescriptor(DescriptorType descriptorType, bool 
     case DescriptorType::UniformBufferDynamic:
     case DescriptorType::StorageBufferDynamic:
     case DescriptorType::Sampler:
+    case DescriptorType::AccelerationStructureKHR:
     default:
         return VK_IMAGE_LAYOUT_UNDEFINED;
     }
 }
 
-void convertReadAccessToVkAccess(ReadAccessMask readMask, VkPipelineStageFlags* stageMask, VkAccessFlags* accessMask) {
-    *stageMask = 0;
-    *accessMask = 0;
+ResourceAccess convertReadAccessToVkAccess(ReadAccessMask readMask) {
+    ResourceAccess access;
 
     if (readMask.contains(ReadAccess::DrawIndirect)) {
-        *stageMask |= VK_PIPELINE_STAGE_DRAW_INDIRECT_BIT;
-        *accessMask |= VK_ACCESS_INDIRECT_COMMAND_READ_BIT;
+        access.stageMask |= VK_PIPELINE_STAGE_DRAW_INDIRECT_BIT;
+        access.accessMask |= VK_ACCESS_INDIRECT_COMMAND_READ_BIT;
     }
     if (readMask.contains(ReadAccess::DrawIndex)) {
-        *stageMask |= VK_PIPELINE_STAGE_VERTEX_INPUT_BIT;
-        *accessMask |= VK_ACCESS_INDEX_READ_BIT;
+        access.stageMask |= VK_PIPELINE_STAGE_VERTEX_INPUT_BIT;
+        access.accessMask |= VK_ACCESS_INDEX_READ_BIT;
     }
     if (readMask.contains(ReadAccess::DrawVertex)) {
-        *stageMask |= VK_PIPELINE_STAGE_VERTEX_INPUT_BIT;
-        *accessMask |= VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT;
+        access.stageMask |= VK_PIPELINE_STAGE_VERTEX_INPUT_BIT;
+        access.accessMask |= VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT;
     }
     if (readMask.contains(ReadAccess::Transfer)) {
-        *stageMask |= VK_PIPELINE_STAGE_TRANSFER_BIT;
-        *accessMask |= VK_ACCESS_TRANSFER_READ_BIT;
+        access.stageMask |= VK_PIPELINE_STAGE_TRANSFER_BIT;
+        access.accessMask |= VK_ACCESS_TRANSFER_READ_BIT;
     }
     if (readMask.contains(ReadAccess::Host)) {
-        *stageMask |= VK_PIPELINE_STAGE_HOST_BIT;
-        *accessMask |= VK_ACCESS_HOST_READ_BIT;
+        access.stageMask |= VK_PIPELINE_STAGE_HOST_BIT;
+        access.accessMask |= VK_ACCESS_HOST_READ_BIT;
     }
     if (readMask.contains(ReadAccess::DepthStencilAttachment)) {
-        *stageMask |= VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-        *stageMask |= VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
-        *accessMask |= VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
+        access.stageMask |= VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+        access.stageMask |= VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+        access.accessMask |= VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
     }
 
     if (readMask.containsAny(ReadAccess::VertexShaderStorage | ReadAccess::VertexShaderSampled)) {
-        *stageMask |= VK_PIPELINE_STAGE_VERTEX_SHADER_BIT;
-        *accessMask |= VK_ACCESS_SHADER_READ_BIT;
+        access.stageMask |= VK_PIPELINE_STAGE_VERTEX_SHADER_BIT;
+        access.accessMask |= VK_ACCESS_SHADER_READ_BIT;
     }
     if (readMask.containsAny(
             ReadAccess::TessellationControlShaderStorage | ReadAccess::TessellationControlShaderSampled)) {
-        *stageMask |= VK_PIPELINE_STAGE_TESSELLATION_CONTROL_SHADER_BIT;
-        *accessMask |= VK_ACCESS_SHADER_READ_BIT;
+        access.stageMask |= VK_PIPELINE_STAGE_TESSELLATION_CONTROL_SHADER_BIT;
+        access.accessMask |= VK_ACCESS_SHADER_READ_BIT;
     }
     if (readMask.containsAny(
             ReadAccess::TessellationEvaluationShaderStorage | ReadAccess::TessellationEvaluationShaderSampled)) {
-        *stageMask |= VK_PIPELINE_STAGE_TESSELLATION_EVALUATION_SHADER_BIT;
-        *accessMask |= VK_ACCESS_SHADER_READ_BIT;
+        access.stageMask |= VK_PIPELINE_STAGE_TESSELLATION_EVALUATION_SHADER_BIT;
+        access.accessMask |= VK_ACCESS_SHADER_READ_BIT;
     }
     if (readMask.containsAny(ReadAccess::GeometryShaderStorage | ReadAccess::GeometryShaderSampled)) {
-        *stageMask |= VK_PIPELINE_STAGE_GEOMETRY_SHADER_BIT;
-        *accessMask |= VK_ACCESS_SHADER_READ_BIT;
+        access.stageMask |= VK_PIPELINE_STAGE_GEOMETRY_SHADER_BIT;
+        access.accessMask |= VK_ACCESS_SHADER_READ_BIT;
     }
     if (readMask.containsAny(ReadAccess::FragmentShaderStorage | ReadAccess::FragmentShaderSampled)) {
-        *stageMask |= VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
-        *accessMask |= VK_ACCESS_SHADER_READ_BIT;
+        access.stageMask |= VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+        access.accessMask |= VK_ACCESS_SHADER_READ_BIT;
     }
     if (readMask.containsAny(ReadAccess::ComputeShaderStorage | ReadAccess::ComputeShaderSampled)) {
-        *stageMask |= VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
-        *accessMask |= VK_ACCESS_SHADER_READ_BIT;
+        access.stageMask |= VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
+        access.accessMask |= VK_ACCESS_SHADER_READ_BIT;
     }
 
     if (readMask.contains(ReadAccess::VertexShaderUniform)) {
-        *stageMask |= VK_PIPELINE_STAGE_VERTEX_SHADER_BIT;
-        *accessMask |= VK_ACCESS_UNIFORM_READ_BIT;
+        access.stageMask |= VK_PIPELINE_STAGE_VERTEX_SHADER_BIT;
+        access.accessMask |= VK_ACCESS_UNIFORM_READ_BIT;
     }
     if (readMask.contains(ReadAccess::TessellationControlShaderUniform)) {
-        *stageMask |= VK_PIPELINE_STAGE_TESSELLATION_CONTROL_SHADER_BIT;
-        *accessMask |= VK_ACCESS_UNIFORM_READ_BIT;
+        access.stageMask |= VK_PIPELINE_STAGE_TESSELLATION_CONTROL_SHADER_BIT;
+        access.accessMask |= VK_ACCESS_UNIFORM_READ_BIT;
     }
     if (readMask.contains(ReadAccess::TessellationEvaluationShaderUniform)) {
-        *stageMask |= VK_PIPELINE_STAGE_TESSELLATION_EVALUATION_SHADER_BIT;
-        *accessMask |= VK_ACCESS_UNIFORM_READ_BIT;
+        access.stageMask |= VK_PIPELINE_STAGE_TESSELLATION_EVALUATION_SHADER_BIT;
+        access.accessMask |= VK_ACCESS_UNIFORM_READ_BIT;
     }
     if (readMask.contains(ReadAccess::GeometryShaderUniform)) {
-        *stageMask |= VK_PIPELINE_STAGE_GEOMETRY_SHADER_BIT;
-        *accessMask |= VK_ACCESS_UNIFORM_READ_BIT;
+        access.stageMask |= VK_PIPELINE_STAGE_GEOMETRY_SHADER_BIT;
+        access.accessMask |= VK_ACCESS_UNIFORM_READ_BIT;
     }
     if (readMask.contains(ReadAccess::FragmentShaderUniform)) {
-        *stageMask |= VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
-        *accessMask |= VK_ACCESS_UNIFORM_READ_BIT;
+        access.stageMask |= VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+        access.accessMask |= VK_ACCESS_UNIFORM_READ_BIT;
     }
     if (readMask.contains(ReadAccess::ComputeShaderUniform)) {
-        *stageMask |= VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
-        *accessMask |= VK_ACCESS_UNIFORM_READ_BIT;
+        access.stageMask |= VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
+        access.accessMask |= VK_ACCESS_UNIFORM_READ_BIT;
     }
     if (readMask.contains(ReadAccess::ImagePresentKHR)) {
-        *stageMask |= VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
-        *accessMask |= 0;
+        access.stageMask |= VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+        access.accessMask |= 0;
     }
     if (readMask.contains(ReadAccess::Unknown)) {
-        *stageMask |= VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
-        *accessMask |= VK_ACCESS_MEMORY_READ_BIT;
+        access.stageMask |= VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
+        access.accessMask |= VK_ACCESS_MEMORY_READ_BIT;
     }
+
+    return access;
 }
 
 VkImageLayout vkGetImageLayoutFromReadAccess(ReadAccessMask readMask) {

@@ -44,13 +44,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     switch (uMsg) {
     case WM_CLOSE: PostQuitMessage(0); break;
     case WM_PAINT:
-        if (globalWindow->example != nullptr) {
+        if (globalWindow->example != nullptr && !globalWindow->quit) {
             try {
                 globalWindow->example->drawFrame();
             } catch (const tp::SurfaceLostError&) {
                 globalWindow->example->releaseSurface();
                 globalWindow->create_surface();
             } catch (const tp::RuntimeError& e) {
+                globalWindow->quit = true;
                 showErrorAndExit("Frame draw failed", e.what());
             }
         }

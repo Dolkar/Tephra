@@ -36,35 +36,35 @@ enum class ReadAccess : uint64_t {
     TessellationControlShaderStorage = 1 << 9,
     /// Tessellation control shader read access through sampled descriptors.
     TessellationControlShaderSampled = 1 << 10,
-    /// Tessellation control shader read access through uniform buffer descriptors.
+    /// Tessellation control shader read access through uniform descriptors.
     TessellationControlShaderUniform = 1 << 11,
 
     /// Tessellation evaluation shader read access through storage descriptors.
     TessellationEvaluationShaderStorage = 1 << 12,
     /// Tessellation evaluation shader read access through sampled descriptors.
     TessellationEvaluationShaderSampled = 1 << 13,
-    /// Tessellation evaluation shader read access through uniform buffer descriptors.
+    /// Tessellation evaluation shader read access through uniform descriptors.
     TessellationEvaluationShaderUniform = 1 << 14,
 
     /// Geometry shader read access through storage descriptors.
     GeometryShaderStorage = 1 << 15,
     /// Geometry shader read access through sampled descriptors.
     GeometryShaderSampled = 1 << 16,
-    /// Geometry shader read access through uniform buffer descriptors.
+    /// Geometry shader read access through uniform descriptors.
     GeometryShaderUniform = 1 << 17,
 
     /// Fragment shader read access through storage descriptors.
     FragmentShaderStorage = 1 << 18,
     /// Fragment shader read access through sampled descriptors.
     FragmentShaderSampled = 1 << 19,
-    /// Fragment shader read access through uniform buffer descriptors.
+    /// Fragment shader read access through uniform descriptors.
     FragmentShaderUniform = 1 << 20,
 
     /// Compute shader read access through storage descriptors.
     ComputeShaderStorage = 1 << 21,
     /// Compute shader read access through sampled descriptors.
     ComputeShaderSampled = 1 << 22,
-    /// Compute shader read access through uniform buffer descriptors.
+    /// Compute shader read access through uniform descriptors.
     ComputeShaderUniform = 1 << 23,
 
     /// Image present operation access through tp::Device::submitPresentImagesKHR.

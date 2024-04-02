@@ -34,7 +34,7 @@ enum class JobCommandTypes {
     InsertDebugLabel,
     EndDebugLabel,
     BuildAccelerationStructures,
-    CopyAccelerationStructure,
+    CopyAccelerationStructure
 };
 
 struct JobResourceStorage {
@@ -57,25 +57,31 @@ struct JobRecordStorage {
 
     struct ExportBufferData {
         StoredBufferView buffer;
-        ReadAccessMask readAccessMask;
+        ResourceAccess access;
         uint32_t dstQueueFamilyIndex;
 
-        ExportBufferData(const BufferView& buffer, ReadAccessMask readAccessMask, uint32_t dstQueueFamilyIndex)
-            : buffer(buffer), readAccessMask(readAccessMask), dstQueueFamilyIndex(dstQueueFamilyIndex) {}
+        ExportBufferData(const BufferView& buffer, ResourceAccess access, uint32_t dstQueueFamilyIndex)
+            : buffer(buffer), access(access), dstQueueFamilyIndex(dstQueueFamilyIndex) {}
     };
 
     struct ExportImageData {
         StoredImageView image;
         ImageAccessRange range;
-        ReadAccessMask readAccessMask;
+        ResourceAccess access;
+        VkImageLayout vkImageLayout;
         uint32_t dstQueueFamilyIndex;
 
         ExportImageData(
             const ImageView& image,
             ImageAccessRange range,
-            ReadAccessMask readAccessMask,
+            ResourceAccess access,
+            VkImageLayout vkImageLayout,
             uint32_t dstQueueFamilyIndex)
-            : image(image), range(range), readAccessMask(readAccessMask), dstQueueFamilyIndex(dstQueueFamilyIndex) {}
+            : image(image),
+              range(range),
+              access(access),
+              vkImageLayout(vkImageLayout),
+              dstQueueFamilyIndex(dstQueueFamilyIndex) {}
     };
 
     struct DiscardImageContentsData {
@@ -176,15 +182,15 @@ struct JobRecordStorage {
     struct ImportExternalImageData {
         StoredImageView image;
         ImageAccessRange range;
-        VkImageLayout vkImageLayout;
         ResourceAccess access;
+        VkImageLayout vkImageLayout;
 
         ImportExternalImageData(
             const ImageView& image,
             ImageAccessRange range,
-            VkImageLayout vkImageLayout,
-            ResourceAccess access)
-            : image(image), range(range), vkImageLayout(vkImageLayout), access(access) {}
+            ResourceAccess access,
+            VkImageLayout vkImageLayout)
+            : image(image), range(range), access(access), vkImageLayout(vkImageLayout) {}
     };
 
     struct DebugLabelData {

@@ -101,9 +101,10 @@ TEPHRA_VULKAN_COMPATIBLE_ENUM(DeviceType, VkPhysicalDeviceType);
 ///     - tp::DescriptorType::StorageBufferDynamic
 ///     - tp::DescriptorType::StorageTexelBuffer
 ///
-/// Uniform buffer descriptors, providing read-only access to uniform buffers:
+/// Uniform descriptors, providing read-only access to uniform buffers and acceleration structures:
 ///     - tp::DescriptorType::UniformBuffer
 ///     - tp::DescriptorType::UniformBufferDynamic
+///     - tp::DescriptorType::AccelerationStructureKHR
 ///
 /// Sampler descriptors:
 ///     - tp::DescriptorType::Sampler

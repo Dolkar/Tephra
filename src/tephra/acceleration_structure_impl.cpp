@@ -9,12 +9,7 @@ namespace tp {
 AccelerationStructureBuilder::AccelerationStructureBuilder(
     DeviceContainer* deviceImpl,
     const AccelerationStructureSetup& setup) {
-    reset(setup);
-
-    // Query acceleration structure sizes
-    VkAccelerationStructureBuildGeometryInfoKHR vkBuildInfo = makeVkBuildInfo();
-    vkBuildSizes = deviceImpl->getLogicalDevice()->getAccelerationStructureBuildSizes(
-        vkBuildInfo, maxPrimitiveCounts.data());
+    reset(deviceImpl, setup);
 }
 
 std::pair<VkAccelerationStructureBuildGeometryInfoKHR, const VkAccelerationStructureBuildRangeInfoKHR*>
@@ -102,7 +97,7 @@ AccelerationStructureBuilder::prepareBuild(
     return { vkBuildInfo, vkBuildRanges.data() };
 }
 
-void AccelerationStructureBuilder::reset(const AccelerationStructureSetup& setup) {
+void AccelerationStructureBuilder::reset(DeviceContainer* deviceImpl, const AccelerationStructureSetup& setup) {
     type = setup.type;
     buildFlags = setup.buildFlags;
 
@@ -180,6 +175,11 @@ void AccelerationStructureBuilder::reset(const AccelerationStructureSetup& setup
     buildRangeTemplate.firstVertex = 0;
     buildRangeTemplate.transformOffset = 0;
     vkBuildRanges.resize(vkGeometries.size(), buildRangeTemplate);
+
+    // Query acceleration structure sizes
+    VkAccelerationStructureBuildGeometryInfoKHR vkBuildInfo = makeVkBuildInfo();
+    vkBuildSizes = deviceImpl->getLogicalDevice()->getAccelerationStructureBuildSizes(
+        vkBuildInfo, maxPrimitiveCounts.data());
 }
 
 VkAccelerationStructureBuildGeometryInfoKHR AccelerationStructureBuilder::makeVkBuildInfo(

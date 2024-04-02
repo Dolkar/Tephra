@@ -10,7 +10,7 @@ AccelerationStructureBuilder* JobLocalAccelerationStructureAllocator::acquireBui
     AccelerationStructureBuilder* builder = builderPool.acquireExisting();
     if (builder == nullptr)
         builder = builderPool.acquireNew();
-    builder->reset(setup);
+    builder->reset(deviceImpl, setup);
 
     acquiredBuilders.push_back({ jobId, builder });
     return builder;

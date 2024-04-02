@@ -38,7 +38,7 @@ public:
         StoredAccelerationStructureBuildInfo& buildInfo,
         StoredBufferView& scratchBuffer);
 
-    void reset(const AccelerationStructureSetup& setup);
+    void reset(DeviceContainer* deviceImpl, const AccelerationStructureSetup& setup);
 
 private:
     // Makes the Vulkan build info structure with null resources from setup structure

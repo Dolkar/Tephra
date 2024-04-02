@@ -182,11 +182,9 @@ void QueueState::broadcastResourceExports(const JobRecordStorage& jobRecord, con
                 break;
 
             auto [vkBufferHandle, range] = resolveBufferAccess(data->buffer);
-            ResourceAccess access;
-            convertReadAccessToVkAccess(data->readAccessMask, &access.stageMask, &access.accessMask);
 
             deviceImpl->getCrossQueueSync()->broadcastResourceExport(
-                srcSemaphore, NewBufferAccess(vkBufferHandle, range, access), data->dstQueueFamilyIndex);
+                srcSemaphore, NewBufferAccess(vkBufferHandle, range, data->access), data->dstQueueFamilyIndex);
             break;
         }
         case JobCommandTypes::ExportImage: {
@@ -197,12 +195,11 @@ void QueueState::broadcastResourceExports(const JobRecordStorage& jobRecord, con
 
             ImageAccessRange range = data->range;
             VkImageHandle vkImageHandle = resolveImageAccess(data->image, &range);
-            ResourceAccess access;
-            convertReadAccessToVkAccess(data->readAccessMask, &access.stageMask, &access.accessMask);
-            VkImageLayout layout = vkGetImageLayoutFromReadAccess(data->readAccessMask);
 
             deviceImpl->getCrossQueueSync()->broadcastResourceExport(
-                srcSemaphore, NewImageAccess(vkImageHandle, range, access, layout), data->dstQueueFamilyIndex);
+                srcSemaphore,
+                NewImageAccess(vkImageHandle, range, data->access, data->vkImageLayout),
+                data->dstQueueFamilyIndex);
             break;
         }
         default:

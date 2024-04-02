@@ -86,17 +86,20 @@ std::unique_ptr<Buffer> JobLocalBufferAllocator::allocateBackingBuffer(
     DeviceContainer* deviceImpl,
     uint64_t sizeToAllocate,
     const MemoryPreference& memoryPreference) {
+    BufferSetup backingBufferSetup = BufferSetup(sizeToAllocate, BufferUsageMask::None());
+
     // Assume that buffer usage only affects alignment, meaning it's ok to include usages that aren't actually needed,
     // provided that the allocated buffers are large enough.
-    BufferUsageMask usageMask = BufferUsage::ImageTransfer | BufferUsage::HostMapped | BufferUsage::TexelBuffer |
+    backingBufferSetup.usage = BufferUsage::ImageTransfer | BufferUsage::HostMapped | BufferUsage::TexelBuffer |
         BufferUsage::UniformBuffer | BufferUsage::StorageBuffer | BufferUsage::IndexBuffer | BufferUsage::VertexBuffer |
         BufferUsage::IndirectBuffer;
     if (deviceImpl->getLogicalDevice()->isFunctionalityAvailable(tp::Functionality::BufferDeviceAddress))
-        usageMask |= BufferUsage::DeviceAddress;
-    if (deviceImpl->getLogicalDevice()->isFunctionalityAvailable(tp::Functionality::AccelerationStructureKHR))
-        usageMask |= BufferUsage::AccelerationStructureInputKHR;
+        backingBufferSetup.usage |= BufferUsage::DeviceAddress;
+    if (deviceImpl->getLogicalDevice()->isFunctionalityAvailable(tp::Functionality::AccelerationStructureKHR)) {
+        backingBufferSetup.usage |= BufferUsage::AccelerationStructureInputKHR;
+        backingBufferSetup.vkAdditionalUsage |= VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR;
+    }
 
-    BufferSetup backingBufferSetup = BufferSetup(sizeToAllocate, usageMask);
     auto [bufferHandleLifeguard, allocationHandleLifeguard] = deviceImpl->getMemoryAllocator()->allocateBuffer(
         backingBufferSetup, memoryPreference);
 

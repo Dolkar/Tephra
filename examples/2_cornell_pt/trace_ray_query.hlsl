@@ -1,8 +1,10 @@
 #include "trace_shared.h"
 
-[[vk::binding(0)]] StructuredBuffer<PlaneMaterialData> planeData;
+[[vk::binding(0)]] RaytracingAccelerationStructure accelerationStructure;
 
-[[vk::binding(1)]] RWTexture2D<float4> outputImage;
+[[vk::binding(1)]] StructuredBuffer<PlaneMaterialData> planeData;
+
+[[vk::binding(2)]] RWTexture2D<float4> outputImage;
 
 [[vk::push_constant]] PushConstantData pushConstants;
 

@@ -305,6 +305,18 @@ public:
         ReadAccessMask readAccessMask,
         QueueType targetQueueType = QueueType::Undefined);
 
+    /// Prepares an acceleration structure for future read-only usages.
+    /// @param accelerationStructure
+    ///     The acceleration structure to be exported.
+    /// @param readAccessMask
+    ///     The mask of future read-only accesses.
+    /// @param targetQueueType
+    ///     If not tp::QueueType::Undefined, the resource is made accessible to all of the queues of the given type.
+    void cmdExportResource(
+        const AccelerationStructureView& accelerationStructure,
+        ReadAccessMask readAccessMask,
+        QueueType targetQueueType = QueueType::Undefined);
+
     /// Discards the contents of the image, making them undefined for future accesses. Doing this may potentially
     /// improve performance.
     /// @param image

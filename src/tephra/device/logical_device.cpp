@@ -26,9 +26,16 @@ inline FunctionalityMask processExtensions(
             vkExtensions.push_back(VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME);
     }
 
-    if (containsString(view(vkExtensions), DeviceExtension::KHR_RayTracingPipeline) &&
-        !containsString(view(vkExtensions), VK_KHR_PIPELINE_LIBRARY_EXTENSION_NAME))
-        vkExtensions.push_back(VK_KHR_PIPELINE_LIBRARY_EXTENSION_NAME);
+    if (containsString(view(vkExtensions), DeviceExtension::KHR_RayQuery)) {
+        vkFeatureMap.get<VkPhysicalDeviceRayQueryFeaturesKHR>().rayQuery = true;
+    }
+
+    if (containsString(view(vkExtensions), DeviceExtension::KHR_RayTracingPipeline)) {
+        vkFeatureMap.get<VkPhysicalDeviceRayTracingPipelineFeaturesKHR>().rayTracingPipeline = true;
+
+        if (!containsString(view(vkExtensions), VK_KHR_PIPELINE_LIBRARY_EXTENSION_NAME))
+            vkExtensions.push_back(VK_KHR_PIPELINE_LIBRARY_EXTENSION_NAME);
+    }
 
     // Store functionality availability for easy access
     FunctionalityMask functionalityMask = {};

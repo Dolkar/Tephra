@@ -71,6 +71,7 @@ JobLocalBufferImpl& JobLocalBufferImpl::getBufferImpl(const BufferView& bufferVi
 }
 
 BufferView JobLocalBuffers::acquireNewBuffer(BufferSetup setup, DebugTarget debugTarget) {
+    TEPHRA_ASSERT(setup.size != 0);
     buffers.emplace_back(deviceImpl, setup, buffers.size(), &pendingBufferViews, std::move(debugTarget));
     usageRanges.emplace_back();
     return buffers.back().getDefaultView();

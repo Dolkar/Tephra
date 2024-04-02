@@ -17,31 +17,27 @@ public:
 
     void addExport(JobRecordStorage::ExportBufferData& exportData) {
         auto [vkBufferHandle, range] = resolveBufferAccess(exportData.buffer);
-        ResourceAccess access;
-        convertReadAccessToVkAccess(exportData.readAccessMask, &access.stageMask, &access.accessMask);
 
         if (exportData.dstQueueFamilyIndex != VK_QUEUE_FAMILY_IGNORED &&
             exportData.dstQueueFamilyIndex != currentQueueFamilyIndex) {
             qfotBufferExports.emplace_back(
-                NewBufferAccess(vkBufferHandle, range, access), exportData.dstQueueFamilyIndex);
+                NewBufferAccess(vkBufferHandle, range, exportData.access), exportData.dstQueueFamilyIndex);
         } else {
-            queuedBufferExports.emplace_back(vkBufferHandle, range, access);
+            queuedBufferExports.emplace_back(vkBufferHandle, range, exportData.access);
         }
     }
 
     void addExport(JobRecordStorage::ExportImageData& exportData) {
         ImageAccessRange range = exportData.range;
         VkImageHandle vkImageHandle = resolveImageAccess(exportData.image, &range);
-        ResourceAccess access;
-        convertReadAccessToVkAccess(exportData.readAccessMask, &access.stageMask, &access.accessMask);
-        VkImageLayout layout = vkGetImageLayoutFromReadAccess(exportData.readAccessMask);
 
         if (exportData.dstQueueFamilyIndex != VK_QUEUE_FAMILY_IGNORED &&
             exportData.dstQueueFamilyIndex != currentQueueFamilyIndex) {
             qfotImageExports.emplace_back(
-                NewImageAccess(vkImageHandle, range, access, layout), exportData.dstQueueFamilyIndex);
+                NewImageAccess(vkImageHandle, range, exportData.access, exportData.vkImageLayout),
+                exportData.dstQueueFamilyIndex);
         } else {
-            queuedImageExports.emplace_back(vkImageHandle, range, access, layout);
+            queuedImageExports.emplace_back(vkImageHandle, range, exportData.access, exportData.vkImageLayout);
         }
     }
 
