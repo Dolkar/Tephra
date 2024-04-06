@@ -36,6 +36,7 @@ struct PlaneMaterialData {
 
 struct PushConstantData {
     Vector cameraPosition;
+    float cameraFovTan;
     uint32_t imageWidth;
     uint32_t imageHeight;
 };

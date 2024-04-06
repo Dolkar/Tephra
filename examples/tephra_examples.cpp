@@ -36,8 +36,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR pCmdLine,
     std::unique_ptr<Example> example = createExample(logFile, exampleNumber);
 
     WindowManager windowMgr;
-    windowMgr.init(hInstance);
-    windowMgr.run(example.get());
+    windowMgr.init(hInstance, example.get());
+    windowMgr.run();
     windowMgr.cleanup();
 
     return 0;
@@ -53,8 +53,8 @@ int main(int argc, char** argv) {
     std::unique_ptr<Example> example = createExample(logFile, exampleNumber);
 
     WindowManager windowMgr;
-    windowMgr.init();
-    windowMgr.run(example.get());
+    windowMgr.init(example.get());
+    windowMgr.run();
     windowMgr.cleanup();
 
     return 0;
@@ -71,8 +71,8 @@ static void demo_main(struct Demo& demo, void* caMetalLayer, int argc, const cha
     std::unique_ptr<Example> example = createExample(logFile, exampleNumber);
 
     WindowManager windowMgr;
-    windowMgr.init(caMetalLayer);
-    windowMgr.run(example.get());
+    windowMgr.init(caMetalLayer, example.get());
+    windowMgr.run();
     windowMgr.cleanup();
 
     return 0;

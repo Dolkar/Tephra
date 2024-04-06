@@ -99,6 +99,9 @@ CornellExample::CornellExample(std::ostream& debugStream, RenderingMethod method
 
     auto bufferSetup = tp::BufferSetup(16, tp::BufferUsage::StorageBuffer);
     planeMaterialBuffer = device->allocateBuffer(bufferSetup, tp::MemoryPreference::Device, "Plane Material Data");
+
+    windowWidth = 800;
+    windowHeight = 800;
 }
 
 void CornellExample::update() {}
@@ -151,7 +154,10 @@ void CornellExample::drawFrame() {
             inlineList.cmdBindDescriptorSets(pipelineLayout, { descriptorSet });
 
             Vector cameraPosition = { 278.0f, 273.0f, -800.0f };
-            PushConstantData data = { cameraPosition, accumImage->getExtent().width, accumImage->getExtent().height };
+            float cameraFovTan = 0.025f / 0.035f;
+            PushConstantData data = {
+                cameraPosition, cameraFovTan, accumImage->getExtent().width, accumImage->getExtent().height
+            };
             inlineList.cmdPushConstants<PushConstantData>(pipelineLayout, tp::ShaderStage::Compute, data);
 
             inlineList.cmdDispatch(
@@ -215,8 +221,8 @@ void CornellExample::prepareBLAS() {
         vertices.push_back(plane.p2);
 
         vertices.push_back(plane.p0);
-        vertices.push_back(plane.p3);
         vertices.push_back(plane.p2);
+        vertices.push_back(plane.p3);
     }
 
     // Create and build a BLAS for each object

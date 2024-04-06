@@ -14,6 +14,11 @@ void showErrorAndExit(std::string errorType, std::string errorDetail);
 // A base class for containing all the windowed example demos
 class Example {
 public:
+    void getWindowSize(uint32_t* width, uint32_t* height) const {
+        *width = windowWidth;
+        *height = windowHeight;
+    }
+
     // Returns the Tephra application
     virtual const tp::Application* getApplication() const = 0;
 
@@ -36,8 +41,8 @@ protected:
 
     VkSurfaceKHR surface;
     tp::OwningPtr<tp::Swapchain> swapchain;
-    uint32_t windowWidth;
-    uint32_t windowHeight;
+    uint32_t windowWidth = 800;
+    uint32_t windowHeight = 600;
 
     //! Helper method for preparing the swapchain
     void prepareSwapchain(const tp::PhysicalDevice* physicalDevice, tp::Device* device, tp::DeviceQueue presentQueue);
