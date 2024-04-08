@@ -26,6 +26,8 @@ public:
     virtual void releaseSurface() override;
 
 private:
+    static constexpr tp::Format swapchainFormat = tp::Format::COL32_B8G8R8A8_SRGB;
+
     tp::utils::StandardReportHandler debugHandler;
     RenderingMethod method;
     tp::DeviceQueue mainQueue;
@@ -39,13 +41,15 @@ private:
     tp::PipelineLayout pipelineLayout;
     tp::Pipeline pipeline;
 
-    tp::OwningPtr<tp::Buffer> planeMaterialBuffer;
+    tp::OwningPtr<tp::Buffer> planeBuffer;
     tp::OwningPtr<tp::Image> accumImage;
     std::vector<tp::OwningPtr<tp::AccelerationStructure>> blasList;
 
     std::deque<tp::JobSemaphore> frameSemaphores;
+    uint32_t frameIndex = 0;
 
     void prepareBLAS();
+    void preparePlaneBuffer();
     void preparePipelineLayout();
     void prepareRayQueryPipeline();
     void prepareRayTracingPipeline();

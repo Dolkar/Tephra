@@ -36,7 +36,6 @@ public:
 
 protected:
     static constexpr const char* vkLayerLunargMonitorName = "VK_LAYER_LUNARG_monitor";
-    static constexpr tp::Format swapchainFormat = tp::Format::COL32_B8G8R8A8_UNORM;
     static const tp::DebugMessageSeverityMask debugSeverity;
 
     VkSurfaceKHR surface;
@@ -45,5 +44,9 @@ protected:
     uint32_t windowHeight = 600;
 
     //! Helper method for preparing the swapchain
-    void prepareSwapchain(const tp::PhysicalDevice* physicalDevice, tp::Device* device, tp::DeviceQueue presentQueue);
+    void prepareSwapchain(
+        const tp::PhysicalDevice* physicalDevice,
+        tp::Device* device,
+        tp::DeviceQueue presentQueue,
+        tp::Format swapchainFormat);
 };

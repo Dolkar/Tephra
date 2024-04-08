@@ -78,7 +78,7 @@ void CubeExample::drawFrame() {
 
     if (swapchain->getStatus() != tp::SwapchainStatus::Optimal) {
         // Recreate out of date or suboptimal swapchain
-        prepareSwapchain(physicalDevice, device.get(), mainQueue);
+        prepareSwapchain(physicalDevice, device.get(), mainQueue, swapchainFormat);
     }
 
     // Acquire a swapchain image to draw the frame to
@@ -183,7 +183,7 @@ void CubeExample::resize(VkSurfaceKHR surface, uint32_t width, uint32_t height) 
     Example::resize(surface, width, height);
 
     // Recreate the swapchain
-    prepareSwapchain(physicalDevice, device.get(), mainQueue);
+    prepareSwapchain(physicalDevice, device.get(), mainQueue, swapchainFormat);
 
     // Also trim the job resource pool to free temporary resources used for the previous resolution
     jobResourcePool->trim();

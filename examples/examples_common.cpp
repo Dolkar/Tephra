@@ -27,7 +27,8 @@ void Example::resize(VkSurfaceKHR surface, uint32_t width, uint32_t height) {
 void Example::prepareSwapchain(
     const tp::PhysicalDevice* physicalDevice,
     tp::Device* device,
-    tp::DeviceQueue presentQueue) {
+    tp::DeviceQueue presentQueue,
+    tp::Format swapchainFormat) {
     tp::SurfaceCapabilities capabilities = physicalDevice->querySurfaceCapabilitiesKHR(surface);
 
     bool supportsQueue = false;

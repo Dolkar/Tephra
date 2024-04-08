@@ -24,6 +24,8 @@ public:
     virtual void releaseSurface() override;
 
 private:
+    static constexpr tp::Format swapchainFormat = tp::Format::COL32_B8G8R8A8_UNORM;
+
     tp::utils::StandardReportHandler debugHandler;
     tp::DeviceQueue mainQueue;
 

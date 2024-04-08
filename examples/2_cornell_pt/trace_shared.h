@@ -37,8 +37,11 @@ struct PlaneMaterialData {
 struct PushConstantData {
     Vector cameraPosition;
     float cameraFovTan;
+    uint32_t samplesPerPixel;
+    uint32_t frameIndex;
     uint32_t imageWidth;
     uint32_t imageHeight;
 };
 
 static const uint32_t WorkgroupSizeDim = 8;
+static const uint32_t MaxPlanesPerInstance = 8;

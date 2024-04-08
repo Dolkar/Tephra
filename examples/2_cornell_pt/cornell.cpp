@@ -1,6 +1,7 @@
 #include "cornell.hpp"
 #include "cornell_data.hpp"
 
+#include <cassert>
 #include <iostream>
 #include <fstream>
 
@@ -52,13 +53,14 @@ CornellExample::CornellExample(std::ostream& debugStream, RenderingMethod method
 
     // Choose and initialize the rendering device
     std::vector<const char*> deviceExtensions = { tp::DeviceExtension::KHR_Swapchain,
-                                                  tp::DeviceExtension::KHR_AccelerationStructure,
-                                                  "VK_EXT_scalar_block_layout" };
+                                                  tp::DeviceExtension::KHR_AccelerationStructure };
+
+    // Enable scalar block layout to simplify passing of data to shaders
+    tp::VkFeatureMap featureMap;
+    featureMap.get<VkPhysicalDeviceVulkan12Features>().scalarBlockLayout = true;
 
     if (method == RenderingMethod::RayQuery)
         deviceExtensions.push_back(tp::DeviceExtension::KHR_RayQuery);
-    else if (method == RenderingMethod::RayTracingPipeline)
-        deviceExtensions.push_back(tp::DeviceExtension::KHR_RayTracingPipeline);
 
     for (const tp::PhysicalDevice& candidateDevice : application->getPhysicalDevices()) {
         for (const char* ext : deviceExtensions) {
@@ -77,7 +79,8 @@ CornellExample::CornellExample(std::ostream& debugStream, RenderingMethod method
     auto deviceSetup = tp::DeviceSetup(
         physicalDevice,
         tp::viewOne(mainQueue), // Use one graphics queue for this example
-        tp::view(deviceExtensions));
+        tp::view(deviceExtensions),
+        &featureMap);
 
     device = application->createDevice(deviceSetup);
 
@@ -96,9 +99,7 @@ CornellExample::CornellExample(std::ostream& debugStream, RenderingMethod method
     }
 
     prepareBLAS();
-
-    auto bufferSetup = tp::BufferSetup(16, tp::BufferUsage::StorageBuffer);
-    planeMaterialBuffer = device->allocateBuffer(bufferSetup, tp::MemoryPreference::Device, "Plane Material Data");
+    preparePlaneBuffer();
 
     windowWidth = 800;
     windowHeight = 800;
@@ -115,7 +116,7 @@ void CornellExample::drawFrame() {
 
     if (swapchain->getStatus() != tp::SwapchainStatus::Optimal) {
         // Recreate out of date or suboptimal swapchain
-        prepareSwapchain(physicalDevice, device.get(), mainQueue);
+        prepareSwapchain(physicalDevice, device.get(), mainQueue, swapchainFormat);
     }
 
     // Acquire a swapchain image to draw the frame to
@@ -126,14 +127,14 @@ void CornellExample::drawFrame() {
         return;
     }
 
-    tp::Job renderJob = jobResourcePool->createJob();
+    tp::Job renderJob = jobResourcePool->createJob({}, "Render Job");
 
     if (accumImage == nullptr || accumImage->getExtent() != acquiredImage.image->getExtent()) {
         // Create an image to accumulate our renders to
         auto imageSetup = tp::ImageSetup(
             tp::ImageType::Image2D,
             tp::ImageUsage::StorageImage | tp::ImageUsage::TransferSrc | tp::ImageUsage::TransferDst,
-            tp::Format::COL64_R16G16B16A16_SFLOAT,
+            tp::Format::COL128_R32G32B32A32_SFLOAT,
             acquiredImage.image->getExtent());
         accumImage = device->allocateImage(imageSetup);
 
@@ -143,7 +144,7 @@ void CornellExample::drawFrame() {
 
     tp::AccelerationStructureView tlasView = prepareTLAS(renderJob);
     tp::DescriptorSetView descriptorSet = renderJob.allocateLocalDescriptorSet(
-        &descSetLayout, { tlasView, planeMaterialBuffer->getDefaultView(), accumImage->getDefaultView() });
+        &descSetLayout, { tlasView, planeBuffer->getDefaultView(), accumImage->getDefaultView() });
 
     // Run a single inline compute pass
     auto imageAccess = tp::ImageComputeAccess(
@@ -155,9 +156,14 @@ void CornellExample::drawFrame() {
 
             Vector cameraPosition = { 278.0f, 273.0f, -800.0f };
             float cameraFovTan = 0.025f / 0.035f;
-            PushConstantData data = {
-                cameraPosition, cameraFovTan, accumImage->getExtent().width, accumImage->getExtent().height
-            };
+            uint32_t samplesPerPixel = 16;
+
+            PushConstantData data = { cameraPosition,
+                                      cameraFovTan,
+                                      samplesPerPixel,
+                                      frameIndex,
+                                      accumImage->getExtent().width,
+                                      accumImage->getExtent().height };
             inlineList.cmdPushConstants<PushConstantData>(pipelineLayout, tp::ShaderStage::Compute, data);
 
             inlineList.cmdDispatch(
@@ -189,16 +195,21 @@ void CornellExample::drawFrame() {
     } catch (const tp::OutOfDateError&) {
         // Let the swapchain be recreated next frame
     }
+
+    frameIndex++;
 }
 
 void CornellExample::resize(VkSurfaceKHR surface, uint32_t width, uint32_t height) {
     Example::resize(surface, width, height);
 
     // Recreate the swapchain
-    prepareSwapchain(physicalDevice, device.get(), mainQueue);
+    prepareSwapchain(physicalDevice, device.get(), mainQueue, swapchainFormat);
 
     // Also trim the job resource pool to free temporary resources used for the previous resolution
     jobResourcePool->trim();
+
+    // Reset frame index so we start accumulating the result from scratch
+    frameIndex = 0;
 }
 
 void CornellExample::releaseSurface() {
@@ -268,6 +279,58 @@ void CornellExample::prepareBLAS() {
     buildJob.cmdBuildAccelerationStructuresKHR(tp::view(buildInfos));
 
     device->enqueueJob(mainQueue, std::move(buildJob));
+    device->submitQueuedJobs(mainQueue);
+}
+
+void CornellExample::preparePlaneBuffer() {
+    // Form a flat list of plane data, indexable by instanceIndex * MaxPlanesPerInstance + primitiveIndex / 2
+    std::vector<PlaneMaterialData> planesData;
+    planesData.resize(static_cast<std::size_t>(CornellObject::NObjects) * MaxPlanesPerInstance);
+
+    std::vector<std::size_t> planeCounts;
+    planeCounts.resize(static_cast<std::size_t>(CornellObject::NObjects));
+
+    for (const Plane& plane : cornellBox) {
+        // Calculate plane normal
+        Vector v01 = { plane.p1.x - plane.p0.x, plane.p1.y - plane.p0.y, plane.p1.z - plane.p0.z };
+        Vector v02 = { plane.p2.x - plane.p0.x, plane.p2.y - plane.p0.y, plane.p2.z - plane.p0.z };
+        Vector cross = { v01.y * v02.z - v01.z * v02.y, v01.z * v02.x - v01.x * v02.z, v01.x * v02.y - v01.y * v02.x };
+        float d = sqrt(cross.x * cross.x + cross.y * cross.y + cross.z * cross.z);
+        Vector n = { cross.x / d, cross.y / d, cross.z / d };
+
+        PlaneMaterialData planeData = { n, plane.reflectance, plane.emission };
+
+        std::size_t instanceIndex = static_cast<std::size_t>(plane.objectId);
+        std::size_t planeIndex = planeCounts[instanceIndex]++;
+        assert(planeIndex < MaxPlanesPerInstance);
+
+        planesData[instanceIndex * MaxPlanesPerInstance + planeIndex] = planeData;
+    }
+
+    // Create the buffer in device memory
+    auto bufferSetup = tp::BufferSetup(planesData.size() * sizeof(PlaneMaterialData), tp::BufferUsage::StorageBuffer);
+    planeBuffer = device->allocateBuffer(bufferSetup, tp::MemoryPreference::Device, "Plane Material Data");
+
+    // Now create an upload job
+    tp::Job uploadJob = jobResourcePool->createJob({}, "Plane Data Upload Job");
+
+    // Allocate a temporary staging buffer in host memory
+    auto stagingBufferSetup = tp::BufferSetup(bufferSetup.size, tp::BufferUsage::HostMapped);
+    tp::BufferView stagingBuffer = uploadJob.allocatePreinitializedBuffer(
+        stagingBufferSetup, tp::MemoryPreference::Host);
+
+    // Upload data to it
+    {
+        tp::HostMappedMemory memory = stagingBuffer.mapForHostAccess(tp::MemoryAccess::WriteOnly);
+        memcpy(memory.getPtr(), planesData.data(), bufferSetup.size);
+    }
+
+    // Record the copy and export
+    uploadJob.cmdCopyBuffer(stagingBuffer, *planeBuffer, { tp::BufferCopyRegion(0, 0, bufferSetup.size) });
+    uploadJob.cmdExportResource(*planeBuffer, tp::ReadAccess::ComputeShaderStorage);
+
+    // Submit the work
+    device->enqueueJob(mainQueue, std::move(uploadJob));
     device->submitQueuedJobs(mainQueue);
 }
 
