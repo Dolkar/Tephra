@@ -89,6 +89,7 @@ RayHit traceRay(float3 origin, float3 direction) {
 
 float3 tracePath(float3 rayOrigin, float3 rayDirection, inout PCGRand rand) {
     static const int MaxDepth = 16;
+    static const float Exposure = 2.0f;
 
     float3 radiance = 0.0f; // Accumulated radiance along the primary ray
     float3 throughput = 1.0f; // Current path throughput
@@ -113,7 +114,7 @@ float3 tracePath(float3 rayOrigin, float3 rayDirection, inout PCGRand rand) {
         }
     }
 
-    return radiance;
+    return radiance * Exposure;
 }
 
 [numthreads(WorkgroupSizeDim, WorkgroupSizeDim, 1)]
