@@ -52,6 +52,5 @@ private:
     void preparePlaneBuffer();
     void preparePipelineLayout();
     void prepareRayQueryPipeline();
-    void prepareRayTracingPipeline();
     tp::AccelerationStructureView prepareTLAS(tp::Job& renderJob);
 };

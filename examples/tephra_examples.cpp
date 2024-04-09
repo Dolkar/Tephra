@@ -17,8 +17,16 @@ std::unique_ptr<Example> createExample(std::ofstream& logFile, int exampleNumber
     }
 
     bool debug = true;
-    // return std::make_unique<CubeExample>(logFile, debug);
-    return std::make_unique<CornellExample>(logFile, RenderingMethod::RayQuery, debug);
+
+    switch (exampleNumber) {
+    case 0:
+        return std::make_unique<CubeExample>(logFile, debug);
+    case 1:
+        return std::make_unique<CornellExample>(logFile, RenderingMethod::RayQuery, debug);
+    default:
+        showErrorAndExit("Invalid example chosen", "Please provide number in range [0, 1]");
+        return nullptr;
+    }
 }
 
 #if _WIN32

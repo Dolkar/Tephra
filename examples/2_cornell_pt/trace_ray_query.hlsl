@@ -110,8 +110,6 @@ float3 tracePath(float3 rayOrigin, float3 rayDirection, inout PCGRand rand) {
             float3 hitPosition = rayOrigin + rayDirection * hit.t;
             rayOrigin = hitPosition + plane.normal * 1.0e-3f;
             rayDirection = sampleCosineHemisphere(plane.normal, rand);
-        } else {
-            break;
         }
     }
 

@@ -94,7 +94,7 @@ CornellExample::CornellExample(std::ostream& debugStream, RenderingMethod method
         prepareRayQueryPipeline();
         break;
     case RenderingMethod::RayTracingPipeline:
-        prepareRayTracingPipeline();
+        showErrorAndExit("Ray tracing pipelines not implemented yet", "");
         break;
     }
 
@@ -349,10 +349,6 @@ void CornellExample::prepareRayQueryPipeline() {
 
     auto pipelineSetup = tp::ComputePipelineSetup(&pipelineLayout, tp::ShaderStageSetup(&shader, "main"));
     device->compileComputePipelines({ &pipelineSetup }, nullptr, { &pipeline });
-}
-
-void CornellExample::prepareRayTracingPipeline() {
-    showErrorAndExit("Ray tracing pipeline demo not implemented yet", "");
 }
 
 tp::AccelerationStructureView CornellExample::prepareTLAS(tp::Job& renderJob) {

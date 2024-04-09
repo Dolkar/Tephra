@@ -24,12 +24,12 @@ struct Plane {
     Point p1;
     Point p2;
     Point p3;
-    // Linearized sRGB color sampled from the spectral data at 612, 548 and 464 nm
+    // Linearized sRGB color converted from reference spectra under the D65 illuminant
     Color reflectance;
     Color emission;
 };
 
-static const Color cornellWhite = { 0.755f, 0.748f, 0.751f };
+static const Color cornellWhite = { 0.736f, 0.736f, 0.739f };
 
 static const Plane cornellBox[] = {
     {
@@ -58,7 +58,7 @@ static const Plane cornellBox[] = {
         { 213.0f, 548.7f, 332.0f },
         { 213.0f, 548.7f, 227.0f },
         { 0.78f, 0.78f, 0.78f },
-        { 15.94f, 11.65f, 5.12f },
+        { 17.74f, 11.37f, 3.31f },
     },
     {
         CornellObject::BackWall,
@@ -75,7 +75,7 @@ static const Plane cornellBox[] = {
         { 0.0f, 0.0f, 0.0f },
         { 0.0f, 548.8f, 0.0f },
         { 0.0f, 548.8f, 559.2f },
-        { 0.136f, 0.406f, 0.107f },
+        { 0.068f, 0.398f, 0.087f },
         { 0.0f, 0.0f, 0.0f },
     },
     {
@@ -84,7 +84,7 @@ static const Plane cornellBox[] = {
         { 549.6f, 0.0f, 559.2f },
         { 556.0f, 548.8f, 559.2f },
         { 556.0f, 548.8f, 0.0f },
-        { 0.443f, 0.061f, 0.062f },
+        { 0.494f, 0.049f, 0.051f },
         { 0.0f, 0.0f, 0.0f },
     },
     {
