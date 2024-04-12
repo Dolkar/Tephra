@@ -10,10 +10,8 @@ namespace tp {
 // Manages the synchronization timeline for all of the device queues. It uses a timeline semaphore for each queue
 // with uniquely identifying timestamps. Each timestamp can be queried and waited upon.
 // The first job starts at timestamp = 1
-// Timestamp state is classified in three stages:
-// Tracked timestamp - Assigned to a job being enqueued, but the job may still fail to get enqueued
-// Pending timestamp - The job it was assigned to has been enqueued and is guaranteed to be signalled
-// Reached timestamp - The timestamp has been reached on the device
+// Timestamp is either pending execution, meaning it has been assigned to a job that will eventually finish executing,
+// or it has already been "reached", meaning its assigned job is done and its resources can be freed.
 class TimelineManager {
 public:
     explicit TimelineManager(DeviceContainer* deviceImpl);
@@ -21,16 +19,13 @@ public:
     // To be called before use once the queue count is known
     void initializeQueueSemaphores(uint32_t queueCount);
 
-    // Creates a new unique timestamp to be tracked
-    uint64_t trackNextTimestamp(uint32_t queueDeviceIndex);
+    // Creates a new unique timestamp for a job that will execute in this queue. Jobs in the same queue must be executed
+    // in the order defined by these timestamps.
+    uint64_t assignNextTimestamp(uint32_t queueDeviceIndex);
 
-    // Notifies the manager that the job associated with the given timestamp has been successfully enqueued and is
-    // guaranteed to eventually be signalled.
-    void markPendingTimestamp(uint64_t timestamp, uint32_t queueDeviceIndex);
-
-    // Returns the last timestamp that has been tracked in any queue
-    uint64_t getLastTrackedTimestamp() const {
-        return lastTrackedTimestampGlobal.load(std::memory_order_relaxed);
+    // Returns the last timestamp that has been assigned to a job awaiting execution in any queue
+    uint64_t getLastPendingTimestamp() const {
+        return lastPendingTimestampGlobal.load(std::memory_order_relaxed);
     }
 
     // Returns the last timestamp that has been reached in the given queue
@@ -54,7 +49,7 @@ public:
         bool waitAll,
         Timeout timeout);
 
-    // Registers a callback to be called when the last tracked timestamp has been reached in all queues.
+    // Registers a callback to be called when the current last pending timestamp has been reached in all queues.
     // Used for resource cleanup
     void addCleanupCallback(CleanupCallback callback);
 
@@ -85,7 +80,7 @@ private:
         VkSemaphoreHandle vkSemaphoreHandle;
         // Last timestamp value used for a job currently executing in this queue
         std::atomic<uint64_t> lastPendingTimestamp = 0;
-        // Last known reached value of the timestamp on the CPU side
+        // Last known reached value of the timestamp
         std::atomic<uint64_t> lastReachedTimestamp = 0;
 
         explicit QueueSemaphore(VkSemaphoreHandle vkSemaphoreHandle) : vkSemaphoreHandle(vkSemaphoreHandle) {}
@@ -100,12 +95,11 @@ private:
 
     DeviceContainer* deviceImpl;
 
-    // The timestamp that has been last tracked across any queue. It is incremented every time, so that timestamps
-    // are unique and ordered by call order
-    std::atomic<uint64_t> lastTrackedTimestampGlobal = 0;
-    // The last timestamp value used for a job currently executing
+    // A monotonically incrementing counter for generating unique, consecutive timestamps
+    std::atomic<uint64_t> timestampCounterGlobal = 0;
+    // The last timestamp value assigned to any job
     std::atomic<uint64_t> lastPendingTimestampGlobal = 0;
-    // The last known value of the timestamp reached in all queues on the CPU side
+    // The last known value of the timestamp reached in all queues
     std::atomic<uint64_t> lastReachedTimestampGlobal = 0;
 
     // One timeline semaphore for each queue

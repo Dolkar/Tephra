@@ -390,7 +390,7 @@ DescriptorSet& DescriptorSet::operator=(DescriptorSet&& other) noexcept {
 DescriptorSet::~DescriptorSet() noexcept {
     if (!isNull()) {
         TEPHRA_ASSERT_NOEXCEPT(parentDescriptorPoolEntry != nullptr);
-        uint64_t timestampToWaitOn = parentDescriptorPoolEntry->timelineManager->getLastTrackedTimestamp();
+        uint64_t timestampToWaitOn = parentDescriptorPoolEntry->timelineManager->getLastPendingTimestamp();
         DescriptorPoolImpl::queueFreeDescriptorSet(vkDescriptorSetHandle, parentDescriptorPoolEntry, timestampToWaitOn);
     }
 }
