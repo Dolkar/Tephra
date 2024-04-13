@@ -1,8 +1,6 @@
 #include "loader.hpp"
 #include "../common_impl.hpp"
 
-namespace tp {
-
 #if defined(_WIN32) || defined(_WIN32_WCE) || defined(_WIN64)
     #define TEPHRA_OS_WINDOWS
 #endif
@@ -28,6 +26,8 @@ namespace tp {
     #include <dlfcn.h>
     #define VULKAN_LOADER_LIBRARY_NAME "libvulkan.so.1"
 #endif
+
+namespace tp {
 
 std::string getLastError() {
 #ifdef TEPHRA_OS_WINDOWS
