@@ -195,10 +195,10 @@ private:
         VkStructureType typeValue = TStructureTypeTrait::template getVkStructureType<T>();
         StructureStorage& structStorage = map[typeValue];
 
-        T* structPtr = structStorage.get<T>();
+        T* structPtr = structStorage.template get<T>();
         if (structPtr == nullptr) {
-            structStorage.reset<T>();
-            structPtr = structStorage.get<T>();
+            structStorage.template reset<T>();
+            structPtr = structStorage.template get<T>();
 
             // Setup sType and pNext
             structPtr->sType = typeValue;

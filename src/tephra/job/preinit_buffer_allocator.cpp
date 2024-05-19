@@ -3,6 +3,7 @@
 #include "local_buffer_allocator.hpp"
 #include "resource_pool_container.hpp"
 #include "../device/device_container.hpp"
+#include <algorithm>
 
 namespace tp {
 

@@ -23,4 +23,6 @@ public:
 
     // Called when the surface last passed in resize() is about to be destroyed.
     virtual void releaseSurface() = 0;
+
+    virtual ~Example() {};
 };

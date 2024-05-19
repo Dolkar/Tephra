@@ -37,7 +37,7 @@ public:
         ArrayParameter<const ExternalSemaphore> waitExternalSemaphores);
 
     TEPHRA_MAKE_NONCOPYABLE(QueueState);
-    TEPHRA_MAKE_MOVABLE_DEFAULT(QueueState);
+    TEPHRA_MAKE_NONMOVABLE(QueueState);
     ~QueueState() = default;
 
 private:

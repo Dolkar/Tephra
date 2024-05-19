@@ -54,32 +54,4 @@ void Lifeguard<T>::destroyHandle(bool immediately) noexcept {
     }
 }
 
-template <typename T>
-Lifeguard<T>::Lifeguard(Lifeguard&& other) noexcept : deviceImpl(other.deviceImpl), vkHandle(other.vkHandle) {
-    other.releaseHandle();
-}
-
-template <typename T>
-Lifeguard<T>& Lifeguard<T>::operator=(Lifeguard&& other) noexcept {
-    destroyHandle();
-    deviceImpl = other.deviceImpl;
-    vkHandle = other.vkHandle;
-    other.releaseHandle();
-    return *this;
-}
-
-template <typename T>
-Lifeguard<T>::~Lifeguard() {
-    destroyHandle();
-}
-
-template <typename T>
-Lifeguard<T> Lifeguard<T>::NonOwning(TypedHandle vkHandle) {
-    return Lifeguard<T>(nullptr, vkHandle);
-}
-
-template <typename T>
-Lifeguard<T>::Lifeguard(DeviceContainer* deviceImpl, TypedHandle vkHandle)
-    : deviceImpl(deviceImpl), vkHandle(vkHandle) {}
-
 }

@@ -198,7 +198,7 @@ public:
         return vkPhysicalDeviceHandle;
     }
 
-    TEPHRA_MAKE_COPYABLE_DEFAULT(PhysicalDevice);
+    TEPHRA_MAKE_NONCOPYABLE(PhysicalDevice);
     TEPHRA_MAKE_MOVABLE(PhysicalDevice);
     virtual ~PhysicalDevice();
 

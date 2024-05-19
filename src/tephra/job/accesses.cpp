@@ -1,5 +1,6 @@
 #include "accesses.hpp"
 #include "barriers.hpp"
+#include <algorithm>
 
 namespace tp {
 

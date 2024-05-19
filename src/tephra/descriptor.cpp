@@ -3,6 +3,7 @@
 #include "device/device_container.hpp"
 #include <tephra/descriptor.hpp>
 #include <tephra/buffer.hpp>
+#include <algorithm>
 
 namespace tp {
 
