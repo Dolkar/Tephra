@@ -144,8 +144,13 @@ void RenderPass::prepareNonAttachmentAccesses(const RenderPassSetup& setup) {
 }
 
 void RenderPass::prepareRendering(const RenderPassSetup& setup, bool useSecondaryCmdBuffers) {
+    if (setup.vkRenderingInfoExtMap != nullptr)
+        vkRenderingInfoExtMap = *setup.vkRenderingInfoExtMap;
+    else
+        vkRenderingInfoExtMap.clear();
+
     vkRenderingInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO_KHR;
-    vkRenderingInfo.pNext = nullptr;
+    vkRenderingInfo.pNext = vkRenderingInfoExtMap.empty() ? nullptr : &vkRenderingInfoExtMap.front();
     vkRenderingInfo.flags = useSecondaryCmdBuffers ? VK_RENDERING_CONTENTS_SECONDARY_COMMAND_BUFFERS_BIT : 0;
     vkRenderingInfo.renderArea = setup.renderArea;
     vkRenderingInfo.layerCount = setup.layerCount;
@@ -250,6 +255,13 @@ void RenderPass::prepareInheritance(const RenderPassSetup& setup) {
     vkInheritanceRenderingInfo.flags = vkRenderingInfo.flags & (~VK_RENDERING_CONTENTS_SECONDARY_COMMAND_BUFFERS_BIT);
     vkInheritanceRenderingInfo.viewMask = vkRenderingInfo.viewMask;
     vkInheritanceRenderingInfo.rasterizationSamples = vkCastConvertibleEnum(MultisampleLevel::x1);
+
+    if (vkRenderingInfoExtMap.contains<VkMultiviewPerViewAttributesInfoNVX>()) {
+        // This structure needs to be present for command buffer inheritance, too
+        vkMultiviewInfoExt = vkRenderingInfoExtMap.get<VkMultiviewPerViewAttributesInfoNVX>();
+        vkMultiviewInfoExt.pNext = nullptr;
+        vkInheritanceRenderingInfo.pNext = &vkMultiviewInfoExt;
+    }
 
     // Depth and stencil attachments
     {

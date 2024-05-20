@@ -85,6 +85,9 @@ private:
     RenderInlineCallback inlineRecordingCallback;
     DebugTarget inlineListDebugTarget;
     VkRenderingInfo vkRenderingInfo = {};
+    VkRenderingInfoExtMap vkRenderingInfoExtMap;
+    // We need to pass this structure also to vkInheritanceInfo, but not as part of the whole vkRenderingInfo chain
+    VkMultiviewPerViewAttributesInfoNVX vkMultiviewInfoExt = {};
     VkCommandBufferInheritanceRenderingInfo vkInheritanceRenderingInfo = {};
     VkCommandBufferInheritanceInfo vkInheritanceInfo = {};
 

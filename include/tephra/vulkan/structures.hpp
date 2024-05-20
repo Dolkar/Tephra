@@ -19,6 +19,11 @@ constexpr VkStructureType getVkFeatureStructureType() = delete;
 template <typename T>
 constexpr VkStructureType getVkPropertyStructureType() = delete;
 
+/// Returns the @vksymbol{VkStructureType} enum value corresponding to the given Vulkan structure type.
+/// These structures extend @vksymbol{VkRenderingInfo} and can be used in tp::RenderPassSetup.
+template <typename T>
+constexpr VkStructureType getVkRenderingInfoExtStructureType() = delete;
+
 #define TP_STRUCTURE_TYPE_ENTRY_FEATURES(type, vkStructureType) \
     template <> \
     constexpr VkStructureType getVkFeatureStructureType<type>() { \
@@ -28,6 +33,12 @@ constexpr VkStructureType getVkPropertyStructureType() = delete;
 #define TP_STRUCTURE_TYPE_ENTRY_PROPERTIES(type, vkStructureType) \
     template <> \
     constexpr VkStructureType getVkPropertyStructureType<type>() { \
+        return vkStructureType; \
+    }
+
+#define TP_STRUCTURE_TYPE_ENTRY_RENDERING_INFO_EXT(type, vkStructureType) \
+    template <> \
+    constexpr VkStructureType getVkRenderingInfoExtStructureType<type>() { \
         return vkStructureType; \
     }
 
@@ -257,6 +268,19 @@ TP_STRUCTURE_TYPE_ENTRY_PROPERTIES(VkPhysicalDeviceVulkan13Properties, VK_STRUCT
 // Additional special entries that don't appear in the above source list
 TP_STRUCTURE_TYPE_ENTRY_PROPERTIES(VkPhysicalDeviceProperties2, VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2);
 TP_STRUCTURE_TYPE_ENTRY_PROPERTIES(VkPhysicalDeviceMemoryProperties2, VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MEMORY_PROPERTIES_2);
+
+// --- VkRenderingInfo extension structures ---
+
+// This list below was last updated for Vulkan version 1.3.239 from
+// https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkRenderingInfoKHR.html#VUID-VkRenderingInfo-pNext-pNext
+
+TP_STRUCTURE_TYPE_ENTRY_RENDERING_INFO_EXT(VkMultisampledRenderToSingleSampledInfoEXT, VK_STRUCTURE_TYPE_MULTISAMPLED_RENDER_TO_SINGLE_SAMPLED_INFO_EXT);
+TP_STRUCTURE_TYPE_ENTRY_RENDERING_INFO_EXT(VkMultiviewPerViewAttributesInfoNVX, VK_STRUCTURE_TYPE_MULTIVIEW_PER_VIEW_ATTRIBUTES_INFO_NVX);
+TP_STRUCTURE_TYPE_ENTRY_RENDERING_INFO_EXT(VkRenderingFragmentDensityMapAttachmentInfoEXT, VK_STRUCTURE_TYPE_RENDERING_FRAGMENT_DENSITY_MAP_ATTACHMENT_INFO_EXT);
+TP_STRUCTURE_TYPE_ENTRY_RENDERING_INFO_EXT(VkRenderingFragmentShadingRateAttachmentInfoKHR, VK_STRUCTURE_TYPE_RENDERING_FRAGMENT_SHADING_RATE_ATTACHMENT_INFO_KHR);
+
+// This one cannot be safely copied, plus device group functionality will need manual integration into tephra anyway
+//TP_STRUCTURE_TYPE_ENTRY_RENDERING_INFO_EXT(VkDeviceGroupRenderPassBeginInfo, VK_STRUCTURE_TYPE_DEVICE_GROUP_RENDER_PASS_BEGIN_INFO);
 
 // clang-format on
 

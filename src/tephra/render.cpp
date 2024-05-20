@@ -202,13 +202,15 @@ RenderPassSetup::RenderPassSetup(
     ArrayView<const BufferRenderAccess> bufferAccesses,
     ArrayView<const ImageRenderAccess> imageAccesses,
     uint32_t layerCount,
-    uint32_t viewMask)
+    uint32_t viewMask,
+    const VkRenderingInfoExtMap* vkRenderingInfoExtMap)
     : depthStencilAttachment(std::move(depthStencilAttachment)),
       colorAttachments(colorAttachments),
       bufferAccesses(bufferAccesses),
       imageAccesses(imageAccesses),
       layerCount(layerCount),
-      viewMask(viewMask) {
+      viewMask(viewMask),
+      vkRenderingInfoExtMap(vkRenderingInfoExtMap) {
     // Set default render area
     Extent3D minExtent;
     if (!depthStencilAttachment.image.isNull())

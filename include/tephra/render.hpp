@@ -516,6 +516,7 @@ struct RenderPassSetup {
     Rect2D renderArea;
     uint32_t layerCount;
     uint32_t viewMask;
+    const VkRenderingInfoExtMap* vkRenderingInfoExtMap;
 
     /// Constructs the tp::RenderPassSetup with a default render area that covers the minimum of all attachment sizes.
     /// @param depthStencilAttachment
@@ -530,6 +531,8 @@ struct RenderPassSetup {
     ///     The number of layers that may be rendered to when `viewMask` is 0.
     /// @param viewMask
     ///     The indices of attachment layers that will be rendered into when it is not 0.
+    /// @param vkRenderingInfoExtMap
+    ///     The pointer to a map of additional Vulkan structures to be passed in `pNext` of @vksymbol{VkRenderingInfo}.
     /// @remarks
     ///     There must be no overlap between image views in `depthStencilAttachment`, `colorAttachments` and
     ///     `imageAccesses`.
@@ -541,7 +544,8 @@ struct RenderPassSetup {
         ArrayView<const BufferRenderAccess> bufferAccesses,
         ArrayView<const ImageRenderAccess> imageAccesses,
         uint32_t layerCount = 1,
-        uint32_t viewMask = 0);
+        uint32_t viewMask = 0,
+        const VkRenderingInfoExtMap* vkRenderingInfoExtMap = nullptr);
 
     /// @param depthStencilAttachment
     ///     The attachment for depth and / or stencil image.
@@ -557,6 +561,8 @@ struct RenderPassSetup {
     ///     The number of layers that may be rendered to when `viewMask` is 0.
     /// @param viewMask
     ///     The indices of attachment layers that will be rendered into when it is not 0.
+    /// @param vkRenderingInfoExtMap
+    ///     The pointer to a map of additional Vulkan structures to be passed in `pNext` of @vksymbol{VkRenderingInfo}.
     /// @remarks
     ///     There must be no overlap between image views in `depthStencilAttachment`, `colorAttachments` and
     ///     `imageAccesses`.
@@ -569,14 +575,16 @@ struct RenderPassSetup {
         ArrayView<const ImageRenderAccess> imageAccesses,
         Rect2D renderArea,
         uint32_t layerCount = 1,
-        uint32_t viewMask = 0)
+        uint32_t viewMask = 0,
+        const VkRenderingInfoExtMap* vkRenderingInfoExtMap = nullptr)
         : depthStencilAttachment(std::move(depthStencilAttachment)),
           colorAttachments(colorAttachments),
           bufferAccesses(bufferAccesses),
           imageAccesses(imageAccesses),
           renderArea(renderArea),
           layerCount(layerCount),
-          viewMask(viewMask) {}
+          viewMask(viewMask),
+          vkRenderingInfoExtMap(vkRenderingInfoExtMap) {}
 };
 
 /// The type of the user-provided function callback for recording commands to a render pass inline.
