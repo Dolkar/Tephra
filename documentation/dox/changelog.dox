@@ -6,6 +6,17 @@ version increments.
 
 @tableofcontents
 
+@section v0-4-1 In-dev version 0.4.1
+Released 2024-05-20
+- Added support for passing additional Vulkan extension structures to tp::RenderPassSetup. This needed to be more
+  than a simple `pNext` pointer, since it needs to be stored internally. Instead, a variant of tp::VkStructureMap
+  was introduced for this purpose: tp::VkRenderingInfoExtMap.
+- Properly identifying atomic accesses as combined read/write operations.
+- Improved buffer memory reuse when using the tp::JobResourcePoolFlag::DisableSuballocation flag.
+- Fixed rare threading issue in assigning pending timeline values to jobs.
+- Removed VulkanHeaderPath.props from the VS solution as it wasn't really needed.
+- Fixed compilation issues on recent versions of GCC and Clang compilers
+
 @section v0-4-0 In-dev version 0.4.0
 Released 2024-01-21
 - Improved resource view implementation and added internal guarantees of safe usage of resources even after their
