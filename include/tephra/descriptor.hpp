@@ -344,6 +344,7 @@ private:
     std::vector<DescriptorBinding> descriptorBindings;
     std::vector<VkDescriptorPoolSize> vkPoolSizes;
     uint32_t descriptorCount = 0;
+    bool hasUpdateAfterBind = false;
 
     void fillVkPoolSizes();
 };

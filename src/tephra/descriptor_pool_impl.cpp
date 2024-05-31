@@ -289,7 +289,7 @@ Lifeguard<VkDescriptorPoolHandle> DescriptorPoolImpl::allocateDescriptorPool(
 
     // Create the pool
     VkDescriptorPoolHandle vkDescriptorPoolHandle = deviceImpl->getLogicalDevice()->createDescriptorPool(
-        setsToAllocate, view(poolSizes));
+        setsToAllocate, view(poolSizes), descriptorSetLayout->hasUpdateAfterBind);
 
     // Allocate the new free sets from it
     ScratchVector<VkDescriptorSetLayoutHandle> setLayouts;

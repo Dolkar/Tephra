@@ -305,9 +305,10 @@ DescriptorSetLayout::DescriptorSetLayout(
       descriptorUpdateTemplateHandle(std::move(descriptorUpdateTemplateHandle)) {
     descriptorBindings = std::vector<DescriptorBinding>(descriptorBindings_.begin(), descriptorBindings_.end());
 
-    descriptorCount = 0;
     for (DescriptorBinding& binding : descriptorBindings) {
         descriptorCount += binding.arraySize;
+        if (binding.flags.contains(tp::DescriptorBindingFlag::UpdateAfterBind))
+            hasUpdateAfterBind = true;
 
         // Also remove immutable samplers, since the array might not be valid anymore
         binding.immutableSamplers = {};
