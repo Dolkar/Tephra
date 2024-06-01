@@ -73,11 +73,6 @@ public:
         ResourceAccess bottomOfPipeAccess = { VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, 0 };
         flushExports(~0);
 
-        std::vector<int> test;
-        test.resize(1000);
-        reportDebugMessage(
-            tp::DebugMessageSeverity::Information, tp::DebugMessageType::General, std::to_string(test.size()));
-
         // Split the cross-queue exports into two barriers. The first transitions the resources to a known state, while
         // the second only does the queue family ownership transfer. This is a bit wasteful as sometimes we could have
         // combined these barriers together, but for imports in the destination queue (which may have already happened)
