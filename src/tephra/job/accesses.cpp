@@ -1,5 +1,6 @@
 #include "accesses.hpp"
 #include "barriers.hpp"
+#include <algorithm>
 
 namespace tp {
 
@@ -151,17 +152,21 @@ void convertComputeAccessToVkAccess(
     if (computeMask.containsAny(ComputeAccess::ComputeShaderSampledRead | ComputeAccess::ComputeShaderStorageRead)) {
         *stageMask |= VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
         *accessMask |= VK_ACCESS_SHADER_READ_BIT;
-        *isAtomic &= false;
+        *isAtomic = false;
     }
     if (computeMask.containsAny(ComputeAccess::ComputeShaderStorageWrite | ComputeAccess::ComputeShaderStorageAtomic)) {
         *stageMask |= VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
         *accessMask |= VK_ACCESS_SHADER_WRITE_BIT;
-        *isAtomic &= computeMask.contains(ComputeAccess::ComputeShaderStorageAtomic);
+        if (computeMask.contains(ComputeAccess::ComputeShaderStorageAtomic)) {
+            *accessMask |= VK_ACCESS_SHADER_READ_BIT;
+        } else {
+            *isAtomic = false;
+        }
     }
     if (computeMask.contains(ComputeAccess::ComputeShaderUniformRead)) {
         *stageMask |= VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
         *accessMask |= VK_ACCESS_UNIFORM_READ_BIT;
-        *isAtomic &= false;
+        *isAtomic = false;
     }
 }
 
@@ -202,20 +207,20 @@ void convertRenderAccessToVkAccess(
             RenderAccess::TessellationEvaluationShaderStorageRead | RenderAccess::FragmentShaderSampledRead |
             RenderAccess::FragmentShaderStorageRead)) {
         *accessMask |= VK_ACCESS_SHADER_READ_BIT;
-        *isAtomic &= false;
+        *isAtomic = false;
     }
 
     if (renderMask.containsAny(
             RenderAccess::VertexShaderStorageWrite | RenderAccess::TessellationControlShaderStorageWrite |
             RenderAccess::TessellationEvaluationShaderStorageWrite | RenderAccess::FragmentShaderStorageWrite)) {
         *accessMask |= VK_ACCESS_SHADER_WRITE_BIT;
-        *isAtomic &= false;
+        *isAtomic = false;
     }
 
     if (renderMask.containsAny(
             RenderAccess::VertexShaderStorageAtomic | RenderAccess::TessellationControlShaderStorageAtomic |
             RenderAccess::TessellationEvaluationShaderStorageAtomic | RenderAccess::FragmentShaderStorageAtomic)) {
-        *accessMask |= VK_ACCESS_SHADER_WRITE_BIT;
+        *accessMask |= VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
     }
 
     if (renderMask.containsAny(

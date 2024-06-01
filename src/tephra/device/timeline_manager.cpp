@@ -29,22 +29,26 @@ void TimelineManager::initializeQueueSemaphores(uint32_t queueCount) {
     }
 }
 
-uint64_t TimelineManager::trackNextTimestamp(uint32_t queueDeviceIndex) {
+uint64_t TimelineManager::assignNextTimestamp(uint32_t queueDeviceIndex) {
     TEPHRA_ASSERT(queueDeviceIndex < queueSemaphores.size());
     QueueSemaphore& queueSemaphore = queueSemaphores[queueDeviceIndex];
 
-    return lastTrackedTimestampGlobal.fetch_add(1, std::memory_order_relaxed) + 1;
-}
+    // Need to enforce these invariants:
+    // - All timestamp values are monotonically increasing
+    // - The queue's lastPendingTimestamp is always updated to a value larger than lastPendingTimestampGlobal
+    // Under the assumption that we have exclusive write access to queueSemaphore.lastPendingTimestamp, we ensure
+    // that by always updating lastPendingTimestampGlobal in order, one by one
+    uint64_t previousTimestamp = timestampCounterGlobal.fetch_add(1, std::memory_order_relaxed);
+    uint64_t newTimestamp = previousTimestamp + 1;
+    atomicStoreMax(queueSemaphore.lastPendingTimestamp, newTimestamp, std::memory_order_release);
 
-void TimelineManager::markPendingTimestamp(uint64_t timestamp, uint32_t queueDeviceIndex) {
-    TEPHRA_ASSERT(queueDeviceIndex < queueSemaphores.size());
-    TEPHRA_ASSERT(timestamp <= getLastTrackedTimestamp());
-    QueueSemaphore& queueSemaphore = queueSemaphores[queueDeviceIndex];
-
-    // Release memory order to express that the queue's lastPendingTimestamp must be updated before
-    // lastPendingTimestampGlobal
-    atomicStoreMax(queueSemaphore.lastPendingTimestamp, timestamp, std::memory_order_release);
-    atomicStoreMax(lastPendingTimestampGlobal, timestamp, std::memory_order_release);
+    while (true) {
+        uint64_t expectedTimestamp = previousTimestamp;
+        bool success = lastPendingTimestampGlobal.compare_exchange_weak(
+            expectedTimestamp, newTimestamp, std::memory_order_release, std::memory_order_relaxed);
+        if (success)
+            return newTimestamp;
+    }
 }
 
 uint64_t TimelineManager::getLastReachedTimestamp(uint32_t queueDeviceIndex) const {
@@ -99,15 +103,15 @@ bool TimelineManager::waitForTimestamps(
 }
 
 void TimelineManager::addCleanupCallback(CleanupCallback callback) {
-    uint64_t lastTrackedTimestamp = getLastTrackedTimestamp();
+    uint64_t lastPendingTimestamp = getLastPendingTimestamp();
 
-    if (wasTimestampReachedInAllQueues(lastTrackedTimestamp)) {
+    if (wasTimestampReachedInAllQueues(lastPendingTimestamp)) {
         callback();
     } else {
         std::lock_guard<Mutex> mutexLock(callbackMutex);
 
         // Timestamps are added to global callback queue lazily
-        if (!activeCallbacks.empty() && activeCallbacks.back()->timestamp >= lastTrackedTimestamp) {
+        if (!activeCallbacks.empty() && activeCallbacks.back()->timestamp >= lastPendingTimestamp) {
             // An entry already exists, we can just append the callback
             activeCallbacks.back()->cleanupCallbacks.push_back(std::move(callback));
         } else {
@@ -115,7 +119,7 @@ void TimelineManager::addCleanupCallback(CleanupCallback callback) {
             CallbackInfo* newCallbackInfo = callbackPool.acquireExisting();
             if (newCallbackInfo == nullptr)
                 newCallbackInfo = callbackPool.acquireNew();
-            newCallbackInfo->timestamp = lastTrackedTimestamp;
+            newCallbackInfo->timestamp = lastPendingTimestamp;
             newCallbackInfo->cleanupCallbacks.push_back(std::move(callback));
 
             activeCallbacks.push_back(newCallbackInfo);
@@ -153,7 +157,7 @@ uint64_t TimelineManager::updateQueue(uint32_t queueDeviceIndex) {
 
 void TimelineManager::update() {
     // Update all the queues individually, accumulating the latest timestamp value reached in all queues
-    uint64_t minReachedTimestamp = getLastTrackedTimestamp();
+    uint64_t minReachedTimestamp = getLastPendingTimestamp();
     for (int i = 0; i < queueSemaphores.size(); i++) {
         minReachedTimestamp = tp::min(minReachedTimestamp, updateQueue(i));
     }
@@ -182,9 +186,9 @@ void TimelineManager::update() {
     }
 
     if constexpr (TephraValidationEnabled) {
-        uint64_t lastTrackedTimestamp = getLastTrackedTimestamp();
-        TEPHRA_ASSERT(lastTrackedTimestamp >= minReachedTimestamp);
-        if (lastTrackedTimestamp - minReachedTimestamp >= 100) {
+        uint64_t lastPendingTimestamp = getLastPendingTimestamp();
+        TEPHRA_ASSERT(lastPendingTimestamp >= minReachedTimestamp);
+        if (lastPendingTimestamp - minReachedTimestamp >= 100) {
             reportDebugMessage(
                 DebugMessageSeverity::Warning,
                 DebugMessageType::Performance,

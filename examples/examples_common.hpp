@@ -34,6 +34,8 @@ public:
     // Called when the surface last passed in resize() is about to be destroyed.
     virtual void releaseSurface() = 0;
 
+    virtual ~Example() {};
+
 protected:
     static constexpr const char* vkLayerLunargMonitorName = "VK_LAYER_LUNARG_monitor";
     static const tp::DebugMessageSeverityMask debugSeverity;

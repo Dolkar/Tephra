@@ -97,7 +97,7 @@ public:
 
     Lifeguard() {}
 
-    Lifeguard(DeviceContainer* deviceImpl, TypedHandle vkHandle);
+    Lifeguard(DeviceContainer* deviceImpl, TypedHandle vkHandle) : deviceImpl(deviceImpl), vkHandle(vkHandle) {}
 
     /// Returns the underlying Vulkan object handle.
     TypedHandle vkGetHandle() const {
@@ -119,16 +119,28 @@ public:
 
     TEPHRA_MAKE_NONCOPYABLE(Lifeguard);
 
-    Lifeguard(Lifeguard&& other) noexcept;
+    Lifeguard(Lifeguard&& other) noexcept : deviceImpl(other.deviceImpl), vkHandle(other.vkHandle) {
+        other.releaseHandle();
+    }
 
-    Lifeguard& operator=(Lifeguard&& other) noexcept;
+    Lifeguard& operator=(Lifeguard&& other) noexcept {
+        destroyHandle();
+        deviceImpl = other.deviceImpl;
+        vkHandle = other.vkHandle;
+        other.releaseHandle();
+        return *this;
+    }
 
-    ~Lifeguard();
+    ~Lifeguard() {
+        destroyHandle();
+    }
 
     /// Creates a non-owning tp::Lifeguard instance out of a Vulkan object handle. A non-owning handle lifeguard
     /// will not delete the Vulkan object when it is destroyed. It can be useful for passing Vulkan objects to functions
     /// that expect an owning handle.
-    static Lifeguard NonOwning(TypedHandle vkHandle);
+    static Lifeguard NonOwning(TypedHandle vkHandle) {
+        return Lifeguard<T>(nullptr, vkHandle);
+    }
 
 private:
     friend class HandleLifetimeManager;

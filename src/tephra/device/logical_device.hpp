@@ -68,7 +68,10 @@ public:
 
     void destroyDescriptorUpdateTemplate(VkDescriptorUpdateTemplateHandle vkDescriptorUpdateTemplateHandle) noexcept;
 
-    VkDescriptorPoolHandle createDescriptorPool(uint32_t maxSets, ArrayParameter<const VkDescriptorPoolSize> poolSizes);
+    VkDescriptorPoolHandle createDescriptorPool(
+        uint32_t maxSets,
+        ArrayParameter<const VkDescriptorPoolSize> poolSizes,
+        bool updateAfterBind);
 
     void allocateDescriptorSets(
         VkDescriptorPoolHandle vkDescriptorPoolHandle,

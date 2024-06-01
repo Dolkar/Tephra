@@ -92,9 +92,12 @@ struct TephraContext {
             appExtensions.push_back(tp::ApplicationExtension::KHR_Surface);
         }
 
+        // TODO: Disabled sync validation because it leads to false positives.
+        // See https://github.com/KhronosGroup/Vulkan-ValidationLayers/issues/7457
+        // Re-enable after the timeline semas get implemented or VK_EXT_layer_settings becomes available.
         auto validationSetup = tp::VulkanValidationSetup(
             true,
-            tp::ValidationFeatureEnable::BestPractices | tp::ValidationFeatureEnable::Synchronization |
+            tp::ValidationFeatureEnable::BestPractices | /*tp::ValidationFeatureEnable::Synchronization |*/
                 tp::ValidationFeatureEnable::GPUAssisted | tp::ValidationFeatureEnable::GPUAssistedReserveBindingSlot);
 
         auto appSetup = tp::ApplicationSetup(

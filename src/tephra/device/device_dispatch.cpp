@@ -465,7 +465,7 @@ JobSemaphore Device::enqueueJob(
     // Acquire new unique timestamp for the job that it will signal once complete
     JobSemaphore signalSemaphore;
     signalSemaphore.queue = queue;
-    signalSemaphore.timestamp = deviceImpl->getTimelineManager()->trackNextTimestamp(queueIndex);
+    signalSemaphore.timestamp = deviceImpl->getTimelineManager()->assignNextTimestamp(queueIndex);
     jobData->semaphores.jobSignal = signalSemaphore;
 
     // Update the timeline manager to process its callbacks and free up some resources before allocating again
@@ -474,7 +474,6 @@ JobSemaphore Device::enqueueJob(
     // Enqueue the job
     QueueState* queueState = deviceImpl->getQueueState(queueIndex);
     queueState->enqueueJob(std::move(job));
-    deviceImpl->getTimelineManager()->markPendingTimestamp(signalSemaphore.timestamp, queueIndex);
 
     // Make sure deferred destructor will get updated so handles can be safely released
     deviceImpl->getTimelineManager()->addCleanupCallback([deviceImpl]() {

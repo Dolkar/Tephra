@@ -23,7 +23,7 @@ enum class RenderAccess : uint64_t {
     VertexShaderStorageRead = 1 << 3,
     /// Vertex shader write access through storage descriptors.
     VertexShaderStorageWrite = 1 << 4,
-    /// Vertex shader atomic write access through storage descriptors.
+    /// Vertex shader atomic read/write access through storage descriptors.
     VertexShaderStorageAtomic = 1 << 5,
     /// Vertex shader read access through sampled descriptors.
     VertexShaderSampledRead = 1 << 6,
@@ -34,7 +34,7 @@ enum class RenderAccess : uint64_t {
     TessellationControlShaderStorageRead = 1 << 8,
     /// Tessellation control shader write access through storage descriptors.
     TessellationControlShaderStorageWrite = 1 << 9,
-    /// Tessellation control shader atomic write access through storage descriptors.
+    /// Tessellation control shader atomic read/write access through storage descriptors.
     TessellationControlShaderStorageAtomic = 1 << 10,
     /// Tessellation control shader read access through sampled descriptors.
     TessellationControlShaderSampledRead = 1 << 11,
@@ -45,7 +45,7 @@ enum class RenderAccess : uint64_t {
     TessellationEvaluationShaderStorageRead = 1 << 13,
     /// Tessellation evaluation shader write access through storage descriptors.
     TessellationEvaluationShaderStorageWrite = 1 << 14,
-    /// Tessellation evaluation shader atomic write access through storage descriptors.
+    /// Tessellation evaluation shader atomic read/write access through storage descriptors.
     TessellationEvaluationShaderStorageAtomic = 1 << 15,
     /// Tessellation evaluation shader read access through sampled descriptors.
     TessellationEvaluationShaderSampledRead = 1 << 16,
@@ -56,7 +56,7 @@ enum class RenderAccess : uint64_t {
     GeometryShaderStorageRead = 1 << 18,
     /// Geometry shader write access through storage descriptors.
     GeometryShaderStorageWrite = 1 << 19,
-    /// Geometry shader atomic write access through storage descriptors.
+    /// Geometry shader atomic read/write access through storage descriptors.
     GeometryShaderStorageAtomic = 1 << 20,
     /// Geometry shader read access through sampled descriptors.
     GeometryShaderSampledRead = 1 << 21,
@@ -67,7 +67,7 @@ enum class RenderAccess : uint64_t {
     FragmentShaderStorageRead = 1 << 23,
     /// Fragment shader write access through storage descriptors.
     FragmentShaderStorageWrite = 1 << 24,
-    /// Fragment shader atomic write access through storage descriptors.
+    /// Fragment shader atomic read/write access through storage descriptors.
     FragmentShaderStorageAtomic = 1 << 25,
     /// Fragment shader read access through sampled descriptors.
     FragmentShaderSampledRead = 1 << 26,
@@ -516,6 +516,7 @@ struct RenderPassSetup {
     Rect2D renderArea;
     uint32_t layerCount;
     uint32_t viewMask;
+    const VkRenderingInfoExtMap* vkRenderingInfoExtMap;
 
     /// Constructs the tp::RenderPassSetup with a default render area that covers the minimum of all attachment sizes.
     /// @param depthStencilAttachment
@@ -530,6 +531,8 @@ struct RenderPassSetup {
     ///     The number of layers that may be rendered to when `viewMask` is 0.
     /// @param viewMask
     ///     The indices of attachment layers that will be rendered into when it is not 0.
+    /// @param vkRenderingInfoExtMap
+    ///     The pointer to a map of additional Vulkan structures to be passed in `pNext` of @vksymbol{VkRenderingInfo}.
     /// @remarks
     ///     There must be no overlap between image views in `depthStencilAttachment`, `colorAttachments` and
     ///     `imageAccesses`.
@@ -541,7 +544,8 @@ struct RenderPassSetup {
         ArrayView<const BufferRenderAccess> bufferAccesses,
         ArrayView<const ImageRenderAccess> imageAccesses,
         uint32_t layerCount = 1,
-        uint32_t viewMask = 0);
+        uint32_t viewMask = 0,
+        const VkRenderingInfoExtMap* vkRenderingInfoExtMap = nullptr);
 
     /// @param depthStencilAttachment
     ///     The attachment for depth and / or stencil image.
@@ -557,6 +561,8 @@ struct RenderPassSetup {
     ///     The number of layers that may be rendered to when `viewMask` is 0.
     /// @param viewMask
     ///     The indices of attachment layers that will be rendered into when it is not 0.
+    /// @param vkRenderingInfoExtMap
+    ///     The pointer to a map of additional Vulkan structures to be passed in `pNext` of @vksymbol{VkRenderingInfo}.
     /// @remarks
     ///     There must be no overlap between image views in `depthStencilAttachment`, `colorAttachments` and
     ///     `imageAccesses`.
@@ -569,14 +575,16 @@ struct RenderPassSetup {
         ArrayView<const ImageRenderAccess> imageAccesses,
         Rect2D renderArea,
         uint32_t layerCount = 1,
-        uint32_t viewMask = 0)
+        uint32_t viewMask = 0,
+        const VkRenderingInfoExtMap* vkRenderingInfoExtMap = nullptr)
         : depthStencilAttachment(std::move(depthStencilAttachment)),
           colorAttachments(colorAttachments),
           bufferAccesses(bufferAccesses),
           imageAccesses(imageAccesses),
           renderArea(renderArea),
           layerCount(layerCount),
-          viewMask(viewMask) {}
+          viewMask(viewMask),
+          vkRenderingInfoExtMap(vkRenderingInfoExtMap) {}
 };
 
 /// The type of the user-provided function callback for recording commands to a render pass inline.

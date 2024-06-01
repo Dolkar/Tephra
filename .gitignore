@@ -225,3 +225,4 @@ documentation/xml/
 *.VC.db
 /*.dat
 *.spv
+/CMakePresets.json

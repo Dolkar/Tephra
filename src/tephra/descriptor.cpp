@@ -3,6 +3,7 @@
 #include "device/device_container.hpp"
 #include <tephra/descriptor.hpp>
 #include <tephra/buffer.hpp>
+#include <algorithm>
 
 namespace tp {
 
@@ -327,9 +328,10 @@ DescriptorSetLayout::DescriptorSetLayout(
       descriptorUpdateTemplateHandle(std::move(descriptorUpdateTemplateHandle)) {
     descriptorBindings = std::vector<DescriptorBinding>(descriptorBindings_.begin(), descriptorBindings_.end());
 
-    descriptorCount = 0;
     for (DescriptorBinding& binding : descriptorBindings) {
         descriptorCount += binding.arraySize;
+        if (binding.flags.contains(tp::DescriptorBindingFlag::UpdateAfterBind))
+            hasUpdateAfterBind = true;
 
         // Also remove immutable samplers, since the array might not be valid anymore
         binding.immutableSamplers = {};
@@ -413,7 +415,7 @@ DescriptorSet& DescriptorSet::operator=(DescriptorSet&& other) noexcept {
 DescriptorSet::~DescriptorSet() noexcept {
     if (!isNull()) {
         TEPHRA_ASSERT_NOEXCEPT(parentDescriptorPoolEntry != nullptr);
-        uint64_t timestampToWaitOn = parentDescriptorPoolEntry->timelineManager->getLastTrackedTimestamp();
+        uint64_t timestampToWaitOn = parentDescriptorPoolEntry->timelineManager->getLastPendingTimestamp();
         DescriptorPoolImpl::queueFreeDescriptorSet(vkDescriptorSetHandle, parentDescriptorPoolEntry, timestampToWaitOn);
     }
 }

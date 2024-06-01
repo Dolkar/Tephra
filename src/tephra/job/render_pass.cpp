@@ -18,8 +18,8 @@ void AttachmentAccess::convertToVkAccess(
     // TODO: Sync2
     switch (layout) {
     case VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL:
-        accessPtr->accessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
         accessPtr->stageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+        accessPtr->accessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
         break;
     case VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_OPTIMAL:
         accessPtr->stageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
@@ -33,12 +33,14 @@ void AttachmentAccess::convertToVkAccess(
         break;
     case VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL:
         accessPtr->stageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
-        accessPtr->accessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+        accessPtr->accessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT |
+            VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
         rangePtr->aspectMask = ImageAspect::Depth;
         break;
     case VK_IMAGE_LAYOUT_STENCIL_ATTACHMENT_OPTIMAL:
         accessPtr->stageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
-        accessPtr->accessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+        accessPtr->accessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT |
+            VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
         rangePtr->aspectMask = ImageAspect::Stencil;
         break;
     default:
@@ -142,8 +144,13 @@ void RenderPass::prepareNonAttachmentAccesses(const RenderPassSetup& setup) {
 }
 
 void RenderPass::prepareRendering(const RenderPassSetup& setup, bool useSecondaryCmdBuffers) {
+    if (setup.vkRenderingInfoExtMap != nullptr)
+        vkRenderingInfoExtMap = *setup.vkRenderingInfoExtMap;
+    else
+        vkRenderingInfoExtMap.clear();
+
     vkRenderingInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO_KHR;
-    vkRenderingInfo.pNext = nullptr;
+    vkRenderingInfo.pNext = vkRenderingInfoExtMap.empty() ? nullptr : &vkRenderingInfoExtMap.front();
     vkRenderingInfo.flags = useSecondaryCmdBuffers ? VK_RENDERING_CONTENTS_SECONDARY_COMMAND_BUFFERS_BIT : 0;
     vkRenderingInfo.renderArea = setup.renderArea;
     vkRenderingInfo.layerCount = setup.layerCount;
@@ -248,6 +255,13 @@ void RenderPass::prepareInheritance(const RenderPassSetup& setup) {
     vkInheritanceRenderingInfo.flags = vkRenderingInfo.flags & (~VK_RENDERING_CONTENTS_SECONDARY_COMMAND_BUFFERS_BIT);
     vkInheritanceRenderingInfo.viewMask = vkRenderingInfo.viewMask;
     vkInheritanceRenderingInfo.rasterizationSamples = vkCastConvertibleEnum(MultisampleLevel::x1);
+
+    if (vkRenderingInfoExtMap.contains<VkMultiviewPerViewAttributesInfoNVX>()) {
+        // This structure needs to be present for command buffer inheritance, too
+        vkMultiviewInfoExt = vkRenderingInfoExtMap.get<VkMultiviewPerViewAttributesInfoNVX>();
+        vkMultiviewInfoExt.pNext = nullptr;
+        vkInheritanceRenderingInfo.pNext = &vkMultiviewInfoExt;
+    }
 
     // Depth and stencil attachments
     {

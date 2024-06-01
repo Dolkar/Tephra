@@ -172,6 +172,8 @@ VkDescriptorSetLayoutHandle LogicalDevice::createDescriptorSetLayout(
             }
             if (binding.flags.contains(tp::DescriptorBindingFlag::UpdateAfterBind)) {
                 flags |= VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT;
+                // also needs a descriptor set layout and pool flag
+                createInfo.flags |= VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT;
             }
             vkBindingFlags.push_back(flags);
         }
@@ -221,11 +223,12 @@ void LogicalDevice::destroyDescriptorUpdateTemplate(
 
 VkDescriptorPoolHandle LogicalDevice::createDescriptorPool(
     uint32_t maxSets,
-    ArrayParameter<const VkDescriptorPoolSize> poolSizes) {
+    ArrayParameter<const VkDescriptorPoolSize> poolSizes,
+    bool updateAfterBind) {
     VkDescriptorPoolCreateInfo createInfo;
     createInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
     createInfo.pNext = nullptr;
-    createInfo.flags = 0;
+    createInfo.flags = updateAfterBind ? VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT : 0;
     createInfo.maxSets = maxSets;
     createInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
     createInfo.pPoolSizes = poolSizes.data();

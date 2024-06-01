@@ -26,6 +26,14 @@ struct VkPropertyStructureMapTrait {
     }
 };
 
+/// Trait wrapper for tp::getVkRenderingInfoExtStructureType
+struct VkRenderingInfoExtStructureMapTrait {
+    template <typename T>
+    static constexpr VkStructureType getVkStructureType() {
+        return getVkRenderingInfoExtStructureType<T>();
+    }
+};
+
 /// A heterogenous container of unique Vulkan structure types. The structures get zero initialized with `sType` filled
 /// out appropriately and `pNext` used to chain them in the order they were added.
 /// @remarks
@@ -195,10 +203,10 @@ private:
         VkStructureType typeValue = TStructureTypeTrait::template getVkStructureType<T>();
         StructureStorage& structStorage = map[typeValue];
 
-        T* structPtr = structStorage.get<T>();
+        T* structPtr = structStorage.template get<T>();
         if (structPtr == nullptr) {
-            structStorage.reset<T>();
-            structPtr = structStorage.get<T>();
+            structStorage.template reset<T>();
+            structPtr = structStorage.template get<T>();
 
             // Setup sType and pNext
             structPtr->sType = typeValue;
@@ -225,5 +233,10 @@ using VkFeatureMap = VkStructureMap<VkFeatureStructureMapTrait>;
 
 /// tp::VkStructureMap specialization that accepts Vulkan property structures.
 using VkPropertyMap = VkStructureMap<VkPropertyStructureMapTrait>;
+
+// Unlike a simple void pNext pointer, we need to be able to store the following ext chains internally:
+
+/// tp::VkStructureMap specialization that accepts Vulkan structures extending @vksymbol{VkRenderingInfo};
+using VkRenderingInfoExtMap = VkStructureMap<VkRenderingInfoExtStructureMapTrait>;
 
 }
