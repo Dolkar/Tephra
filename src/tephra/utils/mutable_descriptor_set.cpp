@@ -16,7 +16,7 @@ namespace utils {
               static_cast<tp::DeviceContainer*>(device)->getDebugTarget(),
               "MutableDescriptorSet",
               debugName)),
-          changesPending(false),
+          changesPending(true),
           needsResolve(false) {
         TEPHRA_DEBUG_SET_CONTEXT(debugTarget.get(), "constructor", nullptr);
 
@@ -228,7 +228,7 @@ namespace utils {
         currentDescriptors.clear();
         currentDescriptors.resize(layout.getDescriptorCount());
         futureDescriptors.clear();
-        changesPending = false;
+        changesPending = true;
         needsResolve = false;
     }
 
