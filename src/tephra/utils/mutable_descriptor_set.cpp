@@ -62,7 +62,7 @@ namespace utils {
                     currentDescriptors.size(),
                     ").");
             } else {
-                auto [descriptorBinding, firstDescriptorOffset] = findDescriptorBinding(descriptorIndex);
+                auto [descriptorBinding, bindingDescriptorOffset] = findDescriptorBinding(descriptorIndex);
                 descriptor.debugValidateAgainstBinding(*descriptorBinding, descriptorIndex, true);
             }
         }
@@ -111,14 +111,15 @@ namespace utils {
             currentDescriptors[firstDescriptorIndex + i] = descriptors[i];
         }
 
-        auto [descriptorBinding, firstDescriptorOffset] = findDescriptorBinding(firstDescriptorIndex);
+        auto [descriptorBinding, bindingDescriptorOffset] = findDescriptorBinding(firstDescriptorIndex);
+        TEPHRA_ASSERT(firstDescriptorIndex >= bindingDescriptorOffset);
 
         VkWriteDescriptorSet descriptorWrite;
         descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
         descriptorWrite.pNext = nullptr;
         descriptorWrite.dstSet = allocatedSets.back().vkGetDescriptorSetHandle();
         descriptorWrite.dstBinding = descriptorBinding->bindingNumber;
-        descriptorWrite.dstArrayElement = firstDescriptorOffset;
+        descriptorWrite.dstArrayElement = firstDescriptorIndex - bindingDescriptorOffset;
         descriptorWrite.descriptorCount = static_cast<uint32_t>(descriptors.size());
         descriptorWrite.descriptorType = vkCastConvertibleEnum(descriptorBinding->descriptorType);
 
@@ -214,7 +215,7 @@ namespace utils {
                 futureDescriptors[descriptorIndex] = {};
 
                 if constexpr (TephraValidationEnabled) {
-                    auto [descriptorBinding, firstDescriptorOffset] = findDescriptorBinding(descriptorIndex);
+                    auto [descriptorBinding, bindingDescriptorOffset] = findDescriptorBinding(descriptorIndex);
                     currentDescriptors[descriptorIndex].debugValidateAgainstBinding(
                         *descriptorBinding, descriptorIndex, true);
                 }
@@ -264,9 +265,9 @@ namespace utils {
                 ").");
         }
 
-        auto [descriptorBinding, firstDescriptorOffset] = findDescriptorBinding(firstDescriptorIndex);
+        auto [descriptorBinding, bindingDescriptorOffset] = findDescriptorBinding(firstDescriptorIndex);
 
-        if (firstDescriptorIndex + descriptors.size() > firstDescriptorOffset + descriptorBinding->arraySize) {
+        if (firstDescriptorIndex + descriptors.size() > bindingDescriptorOffset + descriptorBinding->arraySize) {
             reportDebugMessage(
                 DebugMessageSeverity::Error,
                 DebugMessageType::Validation,
@@ -275,9 +276,9 @@ namespace utils {
                 " - ",
                 firstDescriptorIndex + descriptors.size() - 1,
                 ") is out of range of the associated descriptor set binding's array (",
-                firstDescriptorOffset,
+                bindingDescriptorOffset,
                 " - ",
-                firstDescriptorOffset + descriptorBinding->arraySize - 1,
+                bindingDescriptorOffset + descriptorBinding->arraySize - 1,
                 ").");
         }
 
