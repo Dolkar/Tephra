@@ -166,9 +166,15 @@ namespace utils {
         ScratchVector<VkBufferView> vkBufferViews;
 
         if (descriptors[0].vkResolveDescriptorImageInfo() != nullptr) {
+            // Deduce image layout
+            VkImageLayout imageLayout = vkGetImageLayoutForDescriptor(
+                descriptorBinding->descriptorType,
+                descriptorBinding->flags.contains(DescriptorBindingFlag::AliasStorageImage));
+
             vkImageInfos.reserve(descriptors.size());
             for (const tp::Descriptor& descriptor : descriptors) {
                 vkImageInfos.push_back(*descriptor.vkResolveDescriptorImageInfo());
+                vkImageInfos.back().imageLayout = imageLayout;
             }
             descriptorWrite.pImageInfo = vkImageInfos.data();
         } else if (descriptors[0].vkResolveDescriptorBufferInfo() != nullptr) {
