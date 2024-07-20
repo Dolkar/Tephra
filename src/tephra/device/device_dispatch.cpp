@@ -313,6 +313,12 @@ OwningPtr<Swapchain> Device::createSwapchainKHR(
     return swapchain;
 }
 
+void Device::createQueries(ArrayParameter<const QueryType> queryTypes, ArrayParameter<Query* const> queries) {
+    auto deviceImpl = static_cast<DeviceContainer*>(this);
+    TEPHRA_DEBUG_SET_CONTEXT(deviceImpl->getDebugTarget(), "createQueries", nullptr);
+    deviceImpl->createQueries(queryTypes, queries);
+}
+
 OwningPtr<Buffer> Device::allocateBuffer(
     const BufferSetup& setup,
     const MemoryPreference& memoryPreference,
@@ -588,9 +594,9 @@ void Device::addCleanupCallback(CleanupCallback callback) {
     deviceImpl->getTimelineManager()->addCleanupCallback(std::move(callback));
 }
 
-void Device::updateSemaphores() {
+void Device::checkDeviceProgress() {
     auto deviceImpl = static_cast<DeviceContainer*>(this);
-    TEPHRA_DEBUG_SET_CONTEXT(deviceImpl->getDebugTarget(), "updateSemaphores", nullptr);
+    TEPHRA_DEBUG_SET_CONTEXT(deviceImpl->getDebugTarget(), "checkDeviceProgress", nullptr);
 
     deviceImpl->getTimelineManager()->update();
 }

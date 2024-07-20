@@ -20,6 +20,7 @@ template class Lifeguard<VkObjectHandle<VkDescriptorPool, VK_OBJECT_TYPE_DESCRIP
 template class Lifeguard<VkObjectHandle<VkPipeline, VK_OBJECT_TYPE_PIPELINE>>;
 template class Lifeguard<VkObjectHandle<VkSwapchainKHR, VK_OBJECT_TYPE_SWAPCHAIN_KHR>>;
 template class Lifeguard<VkObjectHandle<VkSemaphore, VK_OBJECT_TYPE_SEMAPHORE>>;
+template class Lifeguard<VkObjectHandle<VkQueryPool, VK_OBJECT_TYPE_QUERY_POOL>>;
 
 // Helper class with value set to true if the first type is the same as at least one of the other types
 template <typename T, typename... Ts>

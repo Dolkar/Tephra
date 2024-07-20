@@ -589,6 +589,27 @@ void LogicalDevice::queueSubmit(uint32_t queueIndex, const SubmitBatch& submitBa
         queueInfo.vkQueueHandle, static_cast<uint32_t>(vkSubmitInfos.size()), vkSubmitInfos.data(), VK_NULL_HANDLE));
 }
 
+VkQueryPoolHandle LogicalDevice::createQueryPool(
+    VkQueryType queryType,
+    VkQueryPipelineStatisticFlagBits pipelineStatistics,
+    uint32_t queryCount) {
+    VkQueryPoolCreateInfo createInfo;
+    createInfo.sType = VK_STRUCTURE_TYPE_QUERY_POOL_CREATE_INFO;
+    createInfo.pNext = nullptr;
+    createInfo.flags = 0;
+    createInfo.queryType = queryType;
+    createInfo.queryCount = queryCount;
+    createInfo.pipelineStatistics = pipelineStatistics;
+
+    VkQueryPool vkQueryPoolHandle;
+    throwRetcodeErrors(vkiDevice.createQueryPool(vkDeviceHandle, &createInfo, nullptr, &vkQueryPoolHandle);
+    return VkQueryPoolHandle(vkQueryPoolHandle);
+}
+
+void LogicalDevice::destroyQueryPool(VkQueryPoolHandle vkQueryPoolHandle) noexcept {
+    vkiDevice.destroyQueryPool(vkDeviceHandle, vkQueryPoolHandle, nullptr);
+}
+
 VkSwapchainHandleKHR LogicalDevice::createSwapchainKHR(
     const SwapchainSetup& setup,
     VkSwapchainHandleKHR vkOldSwapchainHandle,

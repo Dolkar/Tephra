@@ -9,6 +9,7 @@
 #include <tephra/render.hpp>
 #include <tephra/memory.hpp>
 #include <tephra/debug_handler.hpp>
+#include <tephra/query.hpp>
 #include <tephra/common.hpp>
 #include <functional>
 
@@ -236,6 +237,8 @@ public:
         Swapchain* oldSwapchain = nullptr,
         const char* debugName = nullptr);
 
+    void createQueries(ArrayParameter<const QueryType> queryTypes, ArrayParameter<Query* const> queries);
+
     /// Creates a tp::Buffer object according to the given setup structure and allocates memory for it according
     /// to the memory preference.
     /// @param setup
@@ -375,7 +378,7 @@ public:
     /// @remarks
     ///     The function will **not** be called the moment the semaphores become signalled. Their status is only checked
     ///     occasionally as part of various other API calls. This update can be triggered explicitly through
-    ///     tp::Device::updateSemaphores.
+    ///     tp::Device::checkDeviceProgress.
     /// @remarks
     ///     Other device methods that operate on queues (e.g. enqueuing a follow-up job) must **not** be called from
     ///     within the callback function.
@@ -383,7 +386,7 @@ public:
 
     /// Updates the status of job semaphores and triggers the freeing of resources and calling cleanup callbacks if
     /// some jobs have finished executing since the last update.
-    void updateSemaphores();
+    void checkDeviceProgress();
 
     /// Creates a tp::Buffer object out of a raw Vulkan buffer handle and an optional VMA memory allocation handle.
     /// @param setup

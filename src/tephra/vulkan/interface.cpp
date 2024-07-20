@@ -140,6 +140,9 @@ VulkanDeviceInterface::VulkanDeviceInterface(const VulkanInstanceInterface& vkiI
     waitSemaphores = LOAD_DEVICE_PROCEDURE(vkWaitSemaphores);
     signalSemaphore = LOAD_DEVICE_PROCEDURE(vkSignalSemaphore);
     getBufferDeviceAddress = LOAD_DEVICE_PROCEDURE(vkGetBufferDeviceAddress);
+    createQueryPool = LOAD_DEVICE_PROCEDURE(vkCreateQueryPool);
+    destroyQueryPool = LOAD_DEVICE_PROCEDURE(vkDestroyQueryPool);
+    getQueryPoolResults = LOAD_DEVICE_PROCEDURE(vkGetQueryPoolResults);
 
     setDebugUtilsObjectNameEXT = LOAD_DEVICE_EXT_PROCEDURE(vkSetDebugUtilsObjectNameEXT);
     setDebugUtilsObjectTagEXT = LOAD_DEVICE_EXT_PROCEDURE(vkSetDebugUtilsObjectTagEXT);
@@ -220,6 +223,9 @@ VulkanCommandInterface::VulkanCommandInterface(
     cmdExecuteCommands = LOAD_DEVICE_PROCEDURE(vkCmdExecuteCommands);
     cmdBeginRendering = LOAD_DEVICE_PROCEDURE(vkCmdBeginRendering);
     cmdEndRendering = LOAD_DEVICE_PROCEDURE(vkCmdEndRendering);
+    cmdBeginQuery = LOAD_DEVICE_PROCEDURE(vkCmdBeginQuery);
+    cmdEndQuery = LOAD_DEVICE_PROCEDURE(vkCmdEndQuery);
+    cmdWriteTimestamp = LOAD_DEVICE_PROCEDURE(vkCmdWriteTimestamp);
 
     cmdBeginDebugUtilsLabelEXT = LOAD_DEVICE_EXT_PROCEDURE(vkCmdBeginDebugUtilsLabelEXT);
     cmdInsertDebugUtilsLabelEXT = LOAD_DEVICE_EXT_PROCEDURE(vkCmdInsertDebugUtilsLabelEXT);

@@ -27,6 +27,7 @@
     <ClCompile Include="..\src\tephra\device\handle_lifeguard.cpp" />
     <ClCompile Include="..\src\tephra\device\logical_device.cpp" />
     <ClCompile Include="..\src\tephra\device\memory_allocator.cpp" />
+    <ClCompile Include="..\src\tephra\device\query_manager.cpp" />
     <ClCompile Include="..\src\tephra\device\queue_map.cpp" />
     <ClCompile Include="..\src\tephra\device\queue_state.cpp" />
     <ClCompile Include="..\src\tephra\device\timeline_manager.cpp" />
@@ -66,6 +67,7 @@
   <ItemGroup>
     <ClInclude Include="..\include\debug-trap.h" />
     <ClInclude Include="..\include\tephra\command_list.hpp" />
+    <ClInclude Include="..\include\tephra\query.hpp" />
     <ClInclude Include="..\include\tephra\tools\array.hpp" />
     <ClInclude Include="..\include\tephra\tools\enum_tools.hpp" />
     <ClInclude Include="..\include\tephra\tools\structure_map.hpp" />
@@ -86,6 +88,7 @@
     <ClInclude Include="..\src\tephra\device\device_container.hpp" />
     <ClInclude Include="..\src\tephra\device\logical_device.hpp" />
     <ClInclude Include="..\src\tephra\device\memory_allocator.hpp" />
+    <ClInclude Include="..\src\tephra\device\query_manager.hpp" />
     <ClInclude Include="..\src\tephra\device\queue_map.hpp" />
     <ClInclude Include="..\src\tephra\device\queue_state.hpp" />
     <ClInclude Include="..\src\tephra\device\timeline_manager.hpp" />
