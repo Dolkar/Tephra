@@ -169,6 +169,12 @@ public:
 
     void destroyQueryPool(VkQueryPoolHandle vkQueryPoolHandle) noexcept;
 
+    void getQueryResultsAndReset(
+        VkQueryPoolHandle vkQueryPoolHandle,
+        uint32_t firstQuery,
+        uint32_t queryCount,
+        ArrayView<uint64_t> data);
+
     VkSwapchainHandleKHR createSwapchainKHR(
         const SwapchainSetup& setup,
         VkSwapchainHandleKHR vkOldSwapchainHandle,

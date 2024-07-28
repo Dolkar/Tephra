@@ -9,14 +9,33 @@
 
 namespace tp {
 
+// Represents a growing pool of Vulkan queries of the same type and properties
 class QueryPool {
 public:
-    QueryPool(LogicalDevice* device, VkQueryPoolCreateInfo createInfo) : device(device), createInfo(createInfo) {}
+    static constexpr uint32_t QueriesInPool = 64;
+
+    QueryPool(LogicalDevice* device, VkQueryType vkQueryType, VkQueryPipelineStatisticFlagBits pipelineStatistics)
+        : device(device), vkQueryType(vkQueryType), pipelineStatistics(pipelineStatistics) {}
+
+    VkQueryType getVkQueryType() const {
+        return vkQueryType;
+    }
+
+    VkQueryPipelineStatisticFlagBits getPipelineStatisticsFlags() const {
+        return pipelineStatistics;
+    }
+
+    // Allocates a range of consecutive queries (needed for multiview)
+    uint32_t allocateVkQueries(uint32_t count);
+
+    void readbackAndFreeVkQueries(uint32_t firstIndex, uint32_t count, ArrayView<uint64_t> data);
 
 private:
-    struct SubPool {};
-    VkQueryPoolCreateInfo createInfo;
+    VkQueryType vkQueryType;
+    VkQueryPipelineStatisticFlagBits pipelineStatistics;
     LogicalDevice* device;
+    std::vector<VkQueryPoolHandle> vkQueryPools;
+    std::vector<std::pair<uint32_t, uint32_t>> freeRanges;
 };
 
 class QueryManager {
@@ -34,12 +53,25 @@ private:
     struct QueryEntry {
         QueryType type;
         QueryResult result;
-        uint32_t poolIndex;
+        // Cached value to avoid pool lookup
+        uint32_t lastPoolIndex;
     };
 
+    struct QuerySample {
+        uint64_t semaphoreTimestamp;
+        uint32_t poolIndex;
+        uint32_t vkQueryIndex;
+        uint32_t vkQueryCount;
+        QueryEntry* entry;
+    };
+
+    uint32_t getOrCreatePool(VkQueryType vkQueryType, VkQueryPipelineStatisticFlagBits pipelineStatistics);
+
     LogicalDevice* device;
+    std::vector<QueryPool> queryPools;
     ObjectPool<QueryEntry> entryPool;
     std::vector<QueryEntry*> entriesToFree;
+    std::vector<QuerySample> pendingSamples;
 };
 
 }

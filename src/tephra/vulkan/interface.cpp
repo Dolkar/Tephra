@@ -143,6 +143,7 @@ VulkanDeviceInterface::VulkanDeviceInterface(const VulkanInstanceInterface& vkiI
     createQueryPool = LOAD_DEVICE_PROCEDURE(vkCreateQueryPool);
     destroyQueryPool = LOAD_DEVICE_PROCEDURE(vkDestroyQueryPool);
     getQueryPoolResults = LOAD_DEVICE_PROCEDURE(vkGetQueryPoolResults);
+    resetQueryPool = LOAD_DEVICE_PROCEDURE(vkResetQueryPool);
 
     setDebugUtilsObjectNameEXT = LOAD_DEVICE_EXT_PROCEDURE(vkSetDebugUtilsObjectNameEXT);
     setDebugUtilsObjectTagEXT = LOAD_DEVICE_EXT_PROCEDURE(vkSetDebugUtilsObjectTagEXT);

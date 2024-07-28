@@ -130,6 +130,7 @@ public:
     PFN_vkCreateQueryPool createQueryPool = nullptr;
     PFN_vkDestroyQueryPool destroyQueryPool = nullptr;
     PFN_vkGetQueryPoolResults getQueryPoolResults = nullptr;
+    PFN_vkResetQueryPool resetQueryPool = nullptr;
 
     PFN_vkSetDebugUtilsObjectNameEXT setDebugUtilsObjectNameEXT = nullptr;
     PFN_vkSetDebugUtilsObjectTagEXT setDebugUtilsObjectTagEXT = nullptr;

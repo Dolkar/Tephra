@@ -6,7 +6,6 @@ namespace tp {
 
 enum class QueryType {
     Timestamp,
-    Duration,
     // Occlusion queries
     VisibleFragmentSamples,
     // Occlusion queries with PRECISE bit
