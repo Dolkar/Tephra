@@ -6,10 +6,14 @@ namespace tp {
 
 enum class QueryType {
     Timestamp,
+    Scoped,
+};
+
+enum class ScopedQueryType {
     // Occlusion queries
-    VisibleFragmentSamples,
+    Occlusion,
     // Occlusion queries with PRECISE bit
-    VisibleFragmentSamplesPrecise,
+    OcclusionPrecise,
     // Pipeline statistics queries
     InputAssemblyVertices,
     InputAssemblyPrimitives,
@@ -21,7 +25,7 @@ enum class QueryType {
     FragmentShaderInvocations,
     TessellationControlShaderPatches,
     TessellationEvaluationShaderInvocations,
-    ComputeShaderInvocations
+    ComputeShaderInvocations,
 };
 
 struct QueryResult {
@@ -35,29 +39,41 @@ struct QueryResult {
 
 class QueryManager;
 
-class Query {
+class BaseQuery {
+    friend class QueryManager;
+
 public:
     using Handle = void*;
-
-    Query() : parentManager(nullptr), handle(nullptr) {}
-
-    Query(QueryManager* parentManager, Handle handle) : parentManager(parentManager), handle(handle) {}
 
     bool isNull() const {
         return parentManager == nullptr;
     }
 
-    QueryType getType() const;
-
     QueryResult getResult() const;
 
-    TEPHRA_MAKE_NONCOPYABLE(Query);
-    TEPHRA_MAKE_MOVABLE(Query);
-    ~Query() noexcept;
+    TEPHRA_MAKE_NONCOPYABLE(BaseQuery);
+    TEPHRA_MAKE_MOVABLE(BaseQuery);
+    ~BaseQuery() noexcept;
+
+protected:
+    BaseQuery() : parentManager(nullptr), handle(nullptr) {}
+    BaseQuery(QueryManager* parentManager, Handle handle) : parentManager(parentManager), handle(handle) {}
 
 private:
     QueryManager* parentManager;
     Handle handle;
+};
+
+class TimestampQuery : public BaseQuery {
+public:
+    TimestampQuery() : BaseQuery() {}
+    TimestampQuery(QueryManager* parentManager, Handle handle) : BaseQuery(parentManager, handle) {}
+};
+
+class ScopedQuery : public BaseQuery {
+public:
+    ScopedQuery() : BaseQuery() {}
+    ScopedQuery(QueryManager* parentManager, Handle handle) : BaseQuery(parentManager, handle) {}
 };
 
 }

@@ -237,7 +237,10 @@ public:
         Swapchain* oldSwapchain = nullptr,
         const char* debugName = nullptr);
 
-    void createQueries(ArrayParameter<const QueryType> queryTypes, ArrayParameter<Query* const> queries);
+    void createTimestampQueries(ArrayParameter<TimestampQuery* const> queries);
+    void createScopedQueries(
+        ArrayParameter<const ScopedQueryType> queryTypes,
+        ArrayParameter<ScopedQuery* const> queries);
 
     /// Creates a tp::Buffer object according to the given setup structure and allocates memory for it according
     /// to the memory preference.

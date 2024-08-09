@@ -217,16 +217,12 @@ VulkanCommandInterface::VulkanCommandInterface(
     cmdPipelineBarrier = LOAD_DEVICE_PROCEDURE(vkCmdPipelineBarrier);
     cmdBeginQuery = LOAD_DEVICE_PROCEDURE(vkCmdBeginQuery);
     cmdEndQuery = LOAD_DEVICE_PROCEDURE(vkCmdEndQuery);
-    cmdResetQueryPool = LOAD_DEVICE_PROCEDURE(vkCmdResetQueryPool);
     cmdWriteTimestamp = LOAD_DEVICE_PROCEDURE(vkCmdWriteTimestamp);
     cmdCopyQueryPoolResults = LOAD_DEVICE_PROCEDURE(vkCmdCopyQueryPoolResults);
     cmdPushConstants = LOAD_DEVICE_PROCEDURE(vkCmdPushConstants);
     cmdExecuteCommands = LOAD_DEVICE_PROCEDURE(vkCmdExecuteCommands);
     cmdBeginRendering = LOAD_DEVICE_PROCEDURE(vkCmdBeginRendering);
     cmdEndRendering = LOAD_DEVICE_PROCEDURE(vkCmdEndRendering);
-    cmdBeginQuery = LOAD_DEVICE_PROCEDURE(vkCmdBeginQuery);
-    cmdEndQuery = LOAD_DEVICE_PROCEDURE(vkCmdEndQuery);
-    cmdWriteTimestamp = LOAD_DEVICE_PROCEDURE(vkCmdWriteTimestamp);
 
     cmdBeginDebugUtilsLabelEXT = LOAD_DEVICE_EXT_PROCEDURE(vkCmdBeginDebugUtilsLabelEXT);
     cmdInsertDebugUtilsLabelEXT = LOAD_DEVICE_EXT_PROCEDURE(vkCmdInsertDebugUtilsLabelEXT);

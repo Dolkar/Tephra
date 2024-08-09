@@ -29,7 +29,7 @@ public:
           crossQueueSync(this),
           deferredDestructor(&logicalDevice, &memoryAllocator, &crossQueueSync),
           timelineManager(this),
-          queryManager(&logicalDevice) {
+          queryManager(&logicalDevice, &commandPoolPool.getVkiCommands()) {
         // Initialize queue states
         for (uint32_t queueIndex = 0; queueIndex < queueMap.getQueueInfos().size(); queueIndex++) {
             queueStates.push_back(std::make_unique<QueueState>(this, queueIndex));

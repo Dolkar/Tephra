@@ -313,10 +313,18 @@ OwningPtr<Swapchain> Device::createSwapchainKHR(
     return swapchain;
 }
 
-void Device::createQueries(ArrayParameter<const QueryType> queryTypes, ArrayParameter<Query* const> queries) {
+void Device::createTimestampQueries(ArrayParameter<TimestampQuery* const> queries) {
     auto deviceImpl = static_cast<DeviceContainer*>(this);
-    TEPHRA_DEBUG_SET_CONTEXT(deviceImpl->getDebugTarget(), "createQueries", nullptr);
-    deviceImpl->createQueries(queryTypes, queries);
+    TEPHRA_DEBUG_SET_CONTEXT(deviceImpl->getDebugTarget(), "createTimestampQueries", nullptr);
+    deviceImpl->getQueryManager()->createTimestampQueries(queries);
+}
+
+void Device::createScopedQueries(
+    ArrayParameter<const ScopedQueryType> queryTypes,
+    ArrayParameter<ScopedQuery* const> queries) {
+    auto deviceImpl = static_cast<DeviceContainer*>(this);
+    TEPHRA_DEBUG_SET_CONTEXT(deviceImpl->getDebugTarget(), "createScopedQueries", nullptr);
+    deviceImpl->getQueryManager()->createScopedQueries(queryTypes, queries);
 }
 
 OwningPtr<Buffer> Device::allocateBuffer(

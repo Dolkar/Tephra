@@ -1,6 +1,5 @@
 #pragma once
 
-#include "logical_device.hpp"
 #include "../utils/object_pool.hpp"
 #include "../common_impl.hpp"
 
@@ -14,8 +13,8 @@ class QueryPool {
 public:
     static constexpr uint32_t QueriesInPool = 64;
 
-    QueryPool(LogicalDevice* device, VkQueryType vkQueryType, VkQueryPipelineStatisticFlagBits pipelineStatistics)
-        : device(device), vkQueryType(vkQueryType), pipelineStatistics(pipelineStatistics) {}
+    QueryPool(DeviceContainer* deviceImpl, VkQueryType vkQueryType, VkQueryPipelineStatisticFlagBits pipelineStatistics)
+        : deviceImpl(deviceImpl), vkQueryType(vkQueryType), pipelineStatistics(pipelineStatistics) {}
 
     VkQueryType getVkQueryType() const {
         return vkQueryType;
@@ -25,6 +24,8 @@ public:
         return pipelineStatistics;
     }
 
+    std::pair<VkQueryPoolHandle, uint32_t> lookupQuery(uint32_t index) const;
+
     // Allocates a range of consecutive queries (needed for multiview)
     uint32_t allocateVkQueries(uint32_t count);
 
@@ -33,41 +34,89 @@ public:
 private:
     VkQueryType vkQueryType;
     VkQueryPipelineStatisticFlagBits pipelineStatistics;
-    LogicalDevice* device;
-    std::vector<VkQueryPoolHandle> vkQueryPools;
+    DeviceContainer* deviceImpl;
+    std::vector<tp::Lifeguard<VkQueryPoolHandle>> vkQueryPools;
     std::vector<std::pair<uint32_t, uint32_t>> freeRanges;
 };
 
 class QueryManager {
 public:
-    explicit QueryManager(LogicalDevice* device) : device(device) {}
+    explicit QueryManager(DeviceContainer* deviceImpl, const VulkanCommandInterface* vkiCommands)
+        : deviceImpl(deviceImpl), vkiCommands(vkiCommands) {}
 
-    void createQueries(ArrayParameter<const QueryType> queryTypes, ArrayParameter<Query* const> queries);
+    void createTimestampQueries(ArrayParameter<TimestampQuery* const> queries);
+    void createScopedQueries(
+        ArrayParameter<const ScopedQueryType> queryTypes,
+        ArrayParameter<ScopedQuery* const> queries);
 
-    QueryType getQueryType(Query::Handle handle) const;
-    QueryResult getQueryResult(Query::Handle handle) const;
+    void beginSampleScopedQueries(
+        VkCommandBufferHandle vkCommandBuffer,
+        ArrayParameter<const ScopedQuery> queries,
+        uint32_t multiviewViewCount,
+        const tp::JobSemaphore& semaphore);
 
-    void queueFreeQuery(Query::Handle handle);
+    void endSampleScopedQueries(VkCommandBufferHandle vkCommandBuffer, ArrayParameter<const ScopedQuery> queries);
+
+    void writeTimestampQuery(
+        VkCommandBufferHandle vkCommandBuffer,
+        const TimestampQuery& query,
+        PipelineStage stage,
+        uint32_t multiviewViewCount,
+        const tp::JobSemaphore& semaphore);
+
+    void update();
+
+    QueryResult getQueryResult(BaseQuery::Handle handle) const;
+
+    void queueFreeQuery(BaseQuery::Handle handle);
 
 private:
+    static constexpr uint32_t InvalidIndex = ~0u;
+
     struct QueryEntry {
         QueryType type;
+        std::variant<std::monostate, ScopedQueryType> subType;
         QueryResult result;
-        // Cached value to avoid pool lookup
-        uint32_t lastPoolIndex;
+        uint32_t poolIndex;
+        // Index of the last query in the pool for scoped queries. Cleared after the scope ends.
+        uint32_t beginVkQueryIndex;
+        // Used to allow safe freeing of entries
+        uint64_t lastPendingSampleTimestamp;
+
+        std::pair<VkQueryType, VkQueryPipelineStatisticFlagBits> decodeVkQueryType() const;
     };
 
     struct QuerySample {
-        uint64_t semaphoreTimestamp;
-        uint32_t poolIndex;
+        QuerySample(
+            QueryEntry* entry,
+            uint32_t vkQueryIndex,
+            uint32_t multiviewViewCount,
+            const tp::JobSemaphore& semaphore);
+
+        QueryEntry* entry;
         uint32_t vkQueryIndex;
         uint32_t vkQueryCount;
-        QueryEntry* entry;
+        tp::JobSemaphore semaphore;
     };
+
+    BaseQuery::Handle createQuery(QueryType type, std::variant<std::monostate, ScopedQueryType> subType);
 
     uint32_t getOrCreatePool(VkQueryType vkQueryType, VkQueryPipelineStatisticFlagBits pipelineStatistics);
 
-    LogicalDevice* device;
+    void readoutSamples(const ScratchVector<QuerySample>& samples);
+
+    void cmdBeginQuery(VkCommandBufferHandle vkCommandBuffer, uint32_t poolIndex, uint32_t vkQueryIndex, bool isPrecise);
+
+    void cmdEndQuery(VkCommandBufferHandle vkCommandBuffer, uint32_t poolIndex, uint32_t vkQueryIndex);
+
+    void cmdWriteTimestamp(
+        VkCommandBufferHandle vkCommandBuffer,
+        uint32_t poolIndex,
+        uint32_t vkQueryIndex,
+        PipelineStage stage);
+
+    DeviceContainer* deviceImpl;
+    const VulkanCommandInterface* vkiCommands;
     std::vector<QueryPool> queryPools;
     ObjectPool<QueryEntry> entryPool;
     std::vector<QueryEntry*> entriesToFree;

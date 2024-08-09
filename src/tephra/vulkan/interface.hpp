@@ -209,16 +209,12 @@ public:
     PFN_vkCmdPipelineBarrier cmdPipelineBarrier = nullptr;
     PFN_vkCmdBeginQuery cmdBeginQuery = nullptr;
     PFN_vkCmdEndQuery cmdEndQuery = nullptr;
-    PFN_vkCmdResetQueryPool cmdResetQueryPool = nullptr;
     PFN_vkCmdWriteTimestamp cmdWriteTimestamp = nullptr;
     PFN_vkCmdCopyQueryPoolResults cmdCopyQueryPoolResults = nullptr;
     PFN_vkCmdPushConstants cmdPushConstants = nullptr;
     PFN_vkCmdExecuteCommands cmdExecuteCommands = nullptr;
     PFN_vkCmdBeginRendering cmdBeginRendering = nullptr;
     PFN_vkCmdEndRendering cmdEndRendering = nullptr;
-    PFN_vkCmdBeginQuery cmdBeginQuery = nullptr;
-    PFN_vkCmdEndQuery cmdEndQuery = nullptr;
-    PFN_vkCmdWriteTimestamp cmdWriteTimestamp = nullptr;
 
     PFN_vkCmdBeginDebugUtilsLabelEXT cmdBeginDebugUtilsLabelEXT = nullptr;
     PFN_vkCmdInsertDebugUtilsLabelEXT cmdInsertDebugUtilsLabelEXT = nullptr;
