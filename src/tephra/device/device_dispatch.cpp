@@ -731,5 +731,6 @@ template Lifeguard<VkSamplerHandle> Device::vkMakeHandleLifeguard(VkSamplerHandl
 template Lifeguard<VkPipelineHandle> Device::vkMakeHandleLifeguard(VkPipelineHandle vkHandle);
 template Lifeguard<VkSwapchainHandleKHR> Device::vkMakeHandleLifeguard(VkSwapchainHandleKHR vkHandle);
 template Lifeguard<VkSemaphoreHandle> Device::vkMakeHandleLifeguard(VkSemaphoreHandle vkHandle);
+template Lifeguard<VkQueryPoolHandle> Device::vkMakeHandleLifeguard(VkQueryPoolHandle vkHandle);
 
 }

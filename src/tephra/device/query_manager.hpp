@@ -8,6 +8,11 @@
 
 namespace tp {
 
+struct QueryResult {
+    uint64_t value = 0;
+    tp::JobSemaphore jobSemaphore = {};
+};
+
 // Represents a growing pool of Vulkan queries of the same type and properties
 class QueryPool {
 public:
@@ -41,8 +46,7 @@ private:
 
 class QueryManager {
 public:
-    explicit QueryManager(DeviceContainer* deviceImpl, const VulkanCommandInterface* vkiCommands)
-        : deviceImpl(deviceImpl), vkiCommands(vkiCommands) {}
+    explicit QueryManager(DeviceContainer* deviceImpl, const VulkanCommandInterface* vkiCommands);
 
     void createTimestampQueries(ArrayParameter<TimestampQuery* const> queries);
     void createScopedQueries(
@@ -66,7 +70,8 @@ public:
 
     void update();
 
-    QueryResult getQueryResult(BaseQuery::Handle handle) const;
+    const QueryResult& getQueryResult(BaseQuery::Handle handle) const;
+    double convertTimestampToSeconds(uint64_t timestampQueryResult) const;
 
     void queueFreeQuery(BaseQuery::Handle handle);
 
@@ -84,9 +89,13 @@ private:
         uint64_t lastPendingSampleTimestamp;
 
         std::pair<VkQueryType, VkQueryPipelineStatisticFlagBits> decodeVkQueryType() const;
+
+        void updateResult(ArrayView<uint64_t> queryData, const tp::JobSemaphore& semaphore);
     };
 
     struct QuerySample {
+        static constexpr uint32_t MaxQueryCount = 8;
+
         QuerySample(
             QueryEntry* entry,
             uint32_t vkQueryIndex,
@@ -121,6 +130,7 @@ private:
     ObjectPool<QueryEntry> entryPool;
     std::vector<QueryEntry*> entriesToFree;
     std::vector<QuerySample> pendingSamples;
+    double ticksToSecondsFactor;
 };
 
 }

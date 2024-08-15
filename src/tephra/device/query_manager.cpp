@@ -1,10 +1,12 @@
 #include "query_manager.hpp"
 #include "device_container.hpp"
 
+#include <algorithm>
+
 namespace tp {
 
-QueryResult BaseQuery::getResult() const {
-    return parentManager->getQueryResult(handle);
+const tp::JobSemaphore& BaseQuery::getResultJobSemaphore() const {
+    return parentManager->getQueryResult(handle).jobSemaphore;
 }
 
 BaseQuery::BaseQuery(BaseQuery&& other) noexcept : parentManager(other.parentManager), handle(other.handle) {
@@ -23,6 +25,18 @@ BaseQuery::~BaseQuery() noexcept {
     if (!isNull()) {
         parentManager->queueFreeQuery(handle);
     }
+}
+
+uint64_t TimestampQuery::getResult() const {
+    return parentManager->getQueryResult(handle).value;
+}
+
+double TimestampQuery::getResultSeconds() const {
+    return parentManager->convertTimestampToSeconds(getResult());
+}
+
+uint64_t ScopedQuery::getResult() const {
+    return parentManager->getQueryResult(handle).value;
 }
 
 std::pair<VkQueryPoolHandle, uint32_t> QueryPool::lookupQuery(uint32_t index) const {
@@ -46,8 +60,8 @@ uint32_t QueryPool::allocateVkQueries(uint32_t count) {
 
     // Allocate a new pool
     if (fittingRange == -1) {
-        fittingRange = freeRanges.size();
-        freeRanges.push_back({ vkQueryPools.size() * QueriesInPool, QueriesInPool });
+        fittingRange = static_cast<int>(freeRanges.size());
+        freeRanges.push_back({ static_cast<uint32_t>(vkQueryPools.size()) * QueriesInPool, QueriesInPool });
 
         VkQueryPoolHandle vkQueryPool = deviceImpl->getLogicalDevice()->createQueryPool(
             vkQueryType, pipelineStatistics, QueriesInPool);
@@ -72,7 +86,7 @@ void QueryPool::readbackAndFreeVkQueries(uint32_t firstIndex, uint32_t count, Ar
     uint32_t vkPoolIndex = firstIndex / QueriesInPool;
     uint32_t firstQueryInPool = firstIndex % QueriesInPool;
 
-    // The range can span multiple pools...
+    // The range is allowed to span multiple pools
     while (true) {
         TEPHRA_ASSERT(vkPoolIndex <= vkQueryPools.size());
 
@@ -93,6 +107,13 @@ void QueryPool::readbackAndFreeVkQueries(uint32_t firstIndex, uint32_t count, Ar
         firstQueryInPool = 0;
         data = tp::viewRange(data, queryCountInPool, data.size() - queryCountInPool);
     }
+}
+
+QueryManager::QueryManager(DeviceContainer* deviceImpl, const VulkanCommandInterface* vkiCommands)
+    : deviceImpl(deviceImpl), vkiCommands(vkiCommands) {
+    const VkPhysicalDeviceLimits& limits = deviceImpl->getPhysicalDevice()->vkQueryFeatures<VkPhysicalDeviceLimits>();
+    double nanosecondsToSeconds = 1.0E-9;
+    ticksToSecondsFactor = limits.timestampPeriod * nanosecondsToSeconds;
 }
 
 void QueryManager::createTimestampQueries(ArrayParameter<TimestampQuery* const> queries) {
@@ -173,28 +194,45 @@ void QueryManager::writeTimestampQuery(
 void QueryManager::update() {
     // Find and remove all already processed samples, with simple caching of the last encountered semaphore
     ScratchVector<QuerySample> samplesToReadout;
-    JobSemaphore previousSignalledSemaphore;
-    auto removeIt = std::remove_if(
-        pendingSamples.begin(), pendingSamples.end(), [&](const QuerySample& sample) mutable {
-            if (sample.semaphore.queue == previousSignalledSemaphore.queue &&
-                sample.semaphore.timestamp <= previousSignalledSemaphore.timestamp) {
-                samplesToReadout.push_back(sample);
-                return true;
-            } else if (deviceImpl->isJobSemaphoreSignalled(sample.semaphore)) {
-                previousSignalledSemaphore = sample.semaphore;
-                samplesToReadout.push_back(sample);
-                return true;
-            }
-            return false;
-        });
-    pendingSamples.erase(removeIt, pendingSamples.end());
+    {
+        JobSemaphore previousSignalledSemaphore;
+        auto removeIt = std::remove_if(
+            pendingSamples.begin(), pendingSamples.end(), [&](const QuerySample& sample) mutable {
+                if (sample.semaphore.queue == previousSignalledSemaphore.queue &&
+                    sample.semaphore.timestamp <= previousSignalledSemaphore.timestamp) {
+                    samplesToReadout.push_back(sample);
+                    return true;
+                } else if (deviceImpl->isJobSemaphoreSignalled(sample.semaphore)) {
+                    previousSignalledSemaphore = sample.semaphore;
+                    samplesToReadout.push_back(sample);
+                    return true;
+                }
+                return false;
+            });
+        pendingSamples.erase(removeIt, pendingSamples.end());
+    }
 
     readoutSamples(samplesToReadout);
+
+    // Cleanup freed queries
+    {
+        uint64_t lastReachedTimestamp = deviceImpl->getTimelineManager()->getLastReachedTimestampInAllQueues();
+        auto removeIt = std::remove_if(entriesToFree.begin(), entriesToFree.end(), [&](QueryEntry* entry) {
+            bool doFree = entry->lastPendingSampleTimestamp <= lastReachedTimestamp;
+            entryPool.release(entry);
+            return true;
+        });
+        entriesToFree.erase(removeIt, entriesToFree.end());
+    }
 }
 
-QueryResult QueryManager::getQueryResult(BaseQuery::Handle handle) const {
+const QueryResult& QueryManager::getQueryResult(BaseQuery::Handle handle) const {
     TEPHRA_ASSERT(handle != nullptr);
-    return reinterpret_cast<QueryEntry*>(handle)->result;
+    return reinterpret_cast<const QueryEntry*>(handle)->result;
+}
+
+double QueryManager::convertTimestampToSeconds(uint64_t timestampQueryResult) const {
+    return ticksToSecondsFactor * timestampQueryResult;
 }
 
 void QueryManager::queueFreeQuery(BaseQuery::Handle handle) {
@@ -207,7 +245,9 @@ QueryManager::QuerySample::QuerySample(
     uint32_t vkQueryIndex,
     uint32_t multiviewViewCount,
     const tp::JobSemaphore& semaphore)
-    : entry(entry), vkQueryIndex(vkQueryIndex), vkQueryCount(multiviewViewCount), semaphore(semaphore) {}
+    : entry(entry), vkQueryIndex(vkQueryIndex), vkQueryCount(multiviewViewCount), semaphore(semaphore) {
+    TEPHRA_ASSERT(vkQueryCount <= MaxQueryCount);
+}
 
 BaseQuery::Handle QueryManager::createQuery(QueryType type, std::variant<std::monostate, ScopedQueryType> subType) {
     QueryEntry* entry = entryPool.acquireExisting();
@@ -240,7 +280,19 @@ uint32_t QueryManager::getOrCreatePool(VkQueryType vkQueryType, VkQueryPipelineS
     return static_cast<uint32_t>(queryPools.size() - 1);
 }
 
-void QueryManager::readoutSamples(const ScratchVector<QuerySample>& samples) {}
+void QueryManager::readoutSamples(const ScratchVector<QuerySample>& samples) {
+    // There is an optimization opportunity here to aggregate query samples from the same pool to process multiple
+    // of them with a single readbackAndFreeVkQueries call
+    for (const QuerySample& sample : samples) {
+        QueryEntry* entry = sample.entry;
+
+        uint64_t queryData[QuerySample::MaxQueryCount];
+        queryPools[entry->poolIndex].readbackAndFreeVkQueries(
+            sample.vkQueryIndex, sample.vkQueryCount, tp::viewRange(queryData, 0, sample.vkQueryCount));
+
+        entry->updateResult(tp::viewRange(queryData, 0, sample.vkQueryCount), sample.semaphore);
+    }
+}
 
 void QueryManager::cmdBeginQuery(
     VkCommandBufferHandle vkCommandBuffer,
@@ -314,6 +366,34 @@ std::pair<VkQueryType, VkQueryPipelineStatisticFlagBits> QueryManager::QueryEntr
         TEPHRA_ASSERTD(false, "Unexpected QueryType");
         return {};
     }
+}
+
+void QueryManager::QueryEntry::updateResult(ArrayView<uint64_t> queryData, const tp::JobSemaphore& semaphore) {
+    // QueryData can have multiple entries if used during multiview. Here we decide how to combine them.
+    // It's possible to expose all of them to the user, but that is rarely needed, is implementation
+    // dependent and would complicate the API.
+    TEPHRA_ASSERT(queryData.size() > 0);
+    TEPHRA_ASSERT(!semaphore.isNull());
+
+    if (semaphore.timestamp < result.jobSemaphore.timestamp)
+        return;
+
+    uint64_t newResultValue = 0;
+    switch (type) {
+    case QueryType::Timestamp:
+        // Just use the first view for timestamps
+        newResultValue = queryData[0];
+        break;
+    case QueryType::Scoped:
+        // Scoped query types should be summed together
+        for (uint64_t value : queryData)
+            newResultValue += value;
+        break;
+    default:
+        TEPHRA_ASSERTD(false, "Unexpected QueryType");
+    }
+
+    result = { newResultValue, semaphore };
 }
 
 }

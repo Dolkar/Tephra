@@ -28,15 +28,6 @@ enum class ScopedQueryType {
     ComputeShaderInvocations,
 };
 
-struct QueryResult {
-    uint64_t value = 0;
-    uint64_t jobSemaphoreTimestamp = 0;
-
-    bool isNull() const {
-        return jobSemaphoreTimestamp == 0;
-    }
-};
-
 class QueryManager;
 
 class BaseQuery {
@@ -49,17 +40,16 @@ public:
         return parentManager == nullptr;
     }
 
-    QueryResult getResult() const;
+    const tp::JobSemaphore& getResultJobSemaphore() const;
 
     TEPHRA_MAKE_NONCOPYABLE(BaseQuery);
     TEPHRA_MAKE_MOVABLE(BaseQuery);
-    ~BaseQuery() noexcept;
 
 protected:
     BaseQuery() : parentManager(nullptr), handle(nullptr) {}
     BaseQuery(QueryManager* parentManager, Handle handle) : parentManager(parentManager), handle(handle) {}
+    ~BaseQuery() noexcept;
 
-private:
     QueryManager* parentManager;
     Handle handle;
 };
@@ -68,12 +58,17 @@ class TimestampQuery : public BaseQuery {
 public:
     TimestampQuery() : BaseQuery() {}
     TimestampQuery(QueryManager* parentManager, Handle handle) : BaseQuery(parentManager, handle) {}
+
+    uint64_t getResult() const;
+    double getResultSeconds() const;
 };
 
 class ScopedQuery : public BaseQuery {
 public:
     ScopedQuery() : BaseQuery() {}
     ScopedQuery(QueryManager* parentManager, Handle handle) : BaseQuery(parentManager, handle) {}
+
+    uint64_t getResult() const;
 };
 
 }
