@@ -183,17 +183,19 @@ RenderList::~RenderList() = default;
 
 RenderList::RenderList(
     const VulkanCommandInterface* vkiCommands,
+    const JobData* jobData,
     VkCommandBufferHandle vkInlineCommandBuffer,
     DebugTarget debugTarget)
-    : CommandList(vkiCommands, VK_PIPELINE_BIND_POINT_GRAPHICS, vkInlineCommandBuffer, std::move(debugTarget)),
+    : CommandList(vkiCommands, jobData, VK_PIPELINE_BIND_POINT_GRAPHICS, vkInlineCommandBuffer, std::move(debugTarget)),
       vkInheritanceInfo(nullptr) {}
 
 RenderList::RenderList(
     const VulkanCommandInterface* vkiCommands,
+    const JobData* jobData,
     VkCommandBufferHandle* vkFutureCommandBuffer,
     const VkCommandBufferInheritanceInfo* vkInheritanceInfo,
     DebugTarget debugTarget)
-    : CommandList(vkiCommands, VK_PIPELINE_BIND_POINT_GRAPHICS, vkFutureCommandBuffer, std::move(debugTarget)),
+    : CommandList(vkiCommands, jobData, VK_PIPELINE_BIND_POINT_GRAPHICS, vkFutureCommandBuffer, std::move(debugTarget)),
       vkInheritanceInfo(vkInheritanceInfo) {}
 
 RenderPassSetup::RenderPassSetup(

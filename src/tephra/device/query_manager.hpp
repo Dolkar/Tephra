@@ -10,10 +10,11 @@ namespace tp {
 
 struct QueryResult {
     uint64_t value = 0;
-    tp::JobSemaphore jobSemaphore = {};
+    JobSemaphore jobSemaphore = {};
 };
 
 // Represents a growing pool of Vulkan queries of the same type and properties
+// Synchronized externally by QueryManager
 class QueryPool {
 public:
     static constexpr uint32_t QueriesInPool = 64;
@@ -40,59 +41,68 @@ private:
     VkQueryType vkQueryType;
     VkQueryPipelineStatisticFlagBits pipelineStatistics;
     DeviceContainer* deviceImpl;
-    std::vector<tp::Lifeguard<VkQueryPoolHandle>> vkQueryPools;
+    std::vector<Lifeguard<VkQueryPoolHandle>> vkQueryPools;
     std::vector<std::pair<uint32_t, uint32_t>> freeRanges;
 };
 
+// Represents data for a reusable Tephra Query
+struct QueryEntry {
+    // Used for beginVkQueryIndex to signify the query has not yet begun
+    static constexpr uint32_t InvalidIndex = ~0u;
+
+    QueryType type;
+    std::variant<std::monostate, RenderQueryType> subType;
+    QueryResult result;
+    uint32_t poolIndex;
+    // Index of the last query in the pool for scoped queries. Cleared after the scope ends.
+    uint32_t beginVkQueryIndex;
+    // Used to allow safe freeing of entries
+    uint64_t lastPendingSampleTimestamp;
+
+    // Translates query to Vulkan values
+    std::pair<VkQueryType, VkQueryPipelineStatisticFlagBits> decodeVkQueryType() const;
+
+    // Updates itself from Vulkan query data
+    void updateResult(ArrayView<uint64_t> queryData, const JobSemaphore& semaphore);
+};
+
+// A non-owning query handle
+using QueryHandle = QueryEntry*;
+
+// Global manager for all queries
 class QueryManager {
 public:
     explicit QueryManager(DeviceContainer* deviceImpl, const VulkanCommandInterface* vkiCommands);
 
     void createTimestampQueries(ArrayParameter<TimestampQuery* const> queries);
-    void createScopedQueries(
-        ArrayParameter<const ScopedQueryType> queryTypes,
-        ArrayParameter<ScopedQuery* const> queries);
+    void createRenderQueries(
+        ArrayParameter<const RenderQueryType> queryTypes,
+        ArrayParameter<RenderQuery* const> queries);
 
-    void beginSampleScopedQueries(
+    void beginSampleRenderQueries(
         VkCommandBufferHandle vkCommandBuffer,
-        ArrayParameter<const ScopedQuery> queries,
+        ArrayParameter<const QueryHandle> queries,
         uint32_t multiviewViewCount,
-        const tp::JobSemaphore& semaphore);
+        const JobSemaphore& semaphore);
 
-    void endSampleScopedQueries(VkCommandBufferHandle vkCommandBuffer, ArrayParameter<const ScopedQuery> queries);
+    void endSampleRenderQueries(VkCommandBufferHandle vkCommandBuffer, ArrayParameter<const QueryHandle> queries);
 
-    void writeTimestampQuery(
+    void sampleTimestampQuery(
         VkCommandBufferHandle vkCommandBuffer,
-        const TimestampQuery& query,
+        const QueryHandle& query,
         PipelineStage stage,
         uint32_t multiviewViewCount,
-        const tp::JobSemaphore& semaphore);
+        const JobSemaphore& semaphore);
 
+    void queueFreeQuery(const QueryHandle& query);
+
+    // Reads out all processed query samples and performs cleanup
     void update();
 
-    const QueryResult& getQueryResult(BaseQuery::Handle handle) const;
     double convertTimestampToSeconds(uint64_t timestampQueryResult) const;
 
-    void queueFreeQuery(BaseQuery::Handle handle);
-
 private:
-    static constexpr uint32_t InvalidIndex = ~0u;
-
-    struct QueryEntry {
-        QueryType type;
-        std::variant<std::monostate, ScopedQueryType> subType;
-        QueryResult result;
-        uint32_t poolIndex;
-        // Index of the last query in the pool for scoped queries. Cleared after the scope ends.
-        uint32_t beginVkQueryIndex;
-        // Used to allow safe freeing of entries
-        uint64_t lastPendingSampleTimestamp;
-
-        std::pair<VkQueryType, VkQueryPipelineStatisticFlagBits> decodeVkQueryType() const;
-
-        void updateResult(ArrayView<uint64_t> queryData, const tp::JobSemaphore& semaphore);
-    };
-
+    // Represents submitted one-off Vulkan queries that will update a Tephra query entry
     struct QuerySample {
         static constexpr uint32_t MaxQueryCount = 8;
 
@@ -100,15 +110,16 @@ private:
             QueryEntry* entry,
             uint32_t vkQueryIndex,
             uint32_t multiviewViewCount,
-            const tp::JobSemaphore& semaphore);
+            const JobSemaphore& semaphore);
 
         QueryEntry* entry;
         uint32_t vkQueryIndex;
         uint32_t vkQueryCount;
-        tp::JobSemaphore semaphore;
+        JobSemaphore semaphore;
     };
 
-    BaseQuery::Handle createQuery(QueryType type, std::variant<std::monostate, ScopedQueryType> subType);
+    // All the private methods assume globalMutex is locked
+    QueryHandle createQuery(QueryType type, std::variant<std::monostate, RenderQueryType> subType);
 
     uint32_t getOrCreatePool(VkQueryType vkQueryType, VkQueryPipelineStatisticFlagBits pipelineStatistics);
 
@@ -130,6 +141,8 @@ private:
     ObjectPool<QueryEntry> entryPool;
     std::vector<QueryEntry*> entriesToFree;
     std::vector<QuerySample> pendingSamples;
+    // For now we just use this global mutex to sync all query operations
+    Mutex globalMutex;
     double ticksToSecondsFactor;
 };
 

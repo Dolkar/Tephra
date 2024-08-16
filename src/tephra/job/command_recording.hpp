@@ -58,6 +58,6 @@ void identifyCommandResourceAccesses(
     ScratchVector<NewImageAccess>& imageAccesses);
 
 // Records a Tephra command to primary Vulkan command buffers. The command data may be consumed by this operation
-void recordCommand(PrimaryBufferRecorder& recorder, JobRecordStorage::CommandMetadata* command);
+void recordCommand(const JobData* job, PrimaryBufferRecorder& recorder, JobRecordStorage::CommandMetadata* command);
 
 }

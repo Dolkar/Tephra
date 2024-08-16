@@ -6,6 +6,7 @@ namespace tp {
 
 void ComputePass::assignDeferred(
     const ComputePassSetup& setup,
+    const JobData* jobData,
     const DebugTarget& listDebugTarget,
     ArrayView<ComputeList>& listsToAssign) {
     prepareAccesses(setup);
@@ -22,7 +23,7 @@ void ComputePass::assignDeferred(
 
     for (std::size_t i = 0; i < listsToAssign.size(); i++) {
         listsToAssign[i] = ComputeList(
-            &deviceImpl->getCommandPoolPool()->getVkiCommands(), &vkDeferredCommandBuffers[i], listDebugTarget);
+            &deviceImpl->getCommandPoolPool()->getVkiCommands(), jobData, &vkDeferredCommandBuffers[i], listDebugTarget);
     }
 }
 
@@ -38,11 +39,11 @@ void ComputePass::assignInline(
     vkDeferredCommandBuffers.clear();
 }
 
-void ComputePass::recordPass(PrimaryBufferRecorder& recorder) {
+void ComputePass::recordPass(const JobData* jobData, PrimaryBufferRecorder& recorder) {
     if (isInline) {
         // Call the inline command recorder callback
         ComputeList inlineList = ComputeList(
-            &recorder.getVkiCommands(), recorder.requestBuffer(), std::move(inlineListDebugTarget));
+            &recorder.getVkiCommands(), jobData, recorder.requestBuffer(), std::move(inlineListDebugTarget));
         inlineRecordingCallback(inlineList);
     } else {
         for (VkCommandBufferHandle vkCommandBuffer : vkDeferredCommandBuffers) {

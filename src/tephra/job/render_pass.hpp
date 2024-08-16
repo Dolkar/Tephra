@@ -56,6 +56,7 @@ public:
 
     void assignDeferred(
         const RenderPassSetup& setup,
+        const JobData* jobData,
         const DebugTarget& listDebugTarget,
         ArrayView<RenderList>& listsToAssign);
 
@@ -66,7 +67,7 @@ public:
     // attachmentAccesses.
     void resolveAttachmentViews();
 
-    void recordPass(PrimaryBufferRecorder& recorder);
+    void recordPass(const JobData* jobData, PrimaryBufferRecorder& recorder);
 
     TEPHRA_MAKE_NONCOPYABLE(RenderPass);
     TEPHRA_MAKE_NONMOVABLE(RenderPass);

@@ -319,12 +319,12 @@ void Device::createTimestampQueries(ArrayParameter<TimestampQuery* const> querie
     deviceImpl->getQueryManager()->createTimestampQueries(queries);
 }
 
-void Device::createScopedQueries(
-    ArrayParameter<const ScopedQueryType> queryTypes,
-    ArrayParameter<ScopedQuery* const> queries) {
+void Device::createRenderQueries(
+    ArrayParameter<const RenderQueryType> queryTypes,
+    ArrayParameter<RenderQuery* const> queries) {
     auto deviceImpl = static_cast<DeviceContainer*>(this);
-    TEPHRA_DEBUG_SET_CONTEXT(deviceImpl->getDebugTarget(), "createScopedQueries", nullptr);
-    deviceImpl->getQueryManager()->createScopedQueries(queryTypes, queries);
+    TEPHRA_DEBUG_SET_CONTEXT(deviceImpl->getDebugTarget(), "createRenderQueries", nullptr);
+    deviceImpl->getQueryManager()->createRenderQueries(queryTypes, queries);
 }
 
 OwningPtr<Buffer> Device::allocateBuffer(

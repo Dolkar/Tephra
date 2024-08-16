@@ -50,6 +50,7 @@ void AttachmentAccess::convertToVkAccess(
 
 void RenderPass::assignDeferred(
     const RenderPassSetup& setup,
+    const JobData* jobData,
     const DebugTarget& listDebugTarget,
     ArrayView<RenderList>& listsToAssign) {
     prepareNonAttachmentAccesses(setup);
@@ -71,6 +72,7 @@ void RenderPass::assignDeferred(
     for (std::size_t i = 0; i < listsToAssign.size(); i++) {
         listsToAssign[i] = RenderList(
             &deviceImpl->getCommandPoolPool()->getVkiCommands(),
+            jobData,
             &vkDeferredCommandBuffers[i],
             &vkInheritanceInfo,
             listDebugTarget);
@@ -105,7 +107,7 @@ void RenderPass::resolveAttachmentViews() {
     }
 }
 
-void RenderPass::recordPass(PrimaryBufferRecorder& recorder) {
+void RenderPass::recordPass(const JobData* jobData, PrimaryBufferRecorder& recorder) {
     // Begin and end rendering here
     VkCommandBufferHandle vkPrimaryCommandBufferHandle = recorder.requestBuffer();
     recorder.getVkiCommands().cmdBeginRendering(vkPrimaryCommandBufferHandle, &vkRenderingInfo);
@@ -113,7 +115,7 @@ void RenderPass::recordPass(PrimaryBufferRecorder& recorder) {
     if (isInline) {
         // Call the inline command recorder callback
         RenderList inlineList = RenderList(
-            &recorder.getVkiCommands(), vkPrimaryCommandBufferHandle, std::move(inlineListDebugTarget));
+            &recorder.getVkiCommands(), jobData, vkPrimaryCommandBufferHandle, std::move(inlineListDebugTarget));
         inlineRecordingCallback(inlineList);
 
     } else {

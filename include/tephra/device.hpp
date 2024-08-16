@@ -238,9 +238,9 @@ public:
         const char* debugName = nullptr);
 
     void createTimestampQueries(ArrayParameter<TimestampQuery* const> queries);
-    void createScopedQueries(
-        ArrayParameter<const ScopedQueryType> queryTypes,
-        ArrayParameter<ScopedQuery* const> queries);
+    void createRenderQueries(
+        ArrayParameter<const RenderQueryType> queryTypes,
+        ArrayParameter<RenderQuery* const> queries);
 
     /// Creates a tp::Buffer object according to the given setup structure and allocates memory for it according
     /// to the memory preference.

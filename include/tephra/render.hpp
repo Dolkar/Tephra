@@ -2,6 +2,7 @@
 
 #include <tephra/command_list.hpp>
 #include <tephra/descriptor.hpp>
+#include <tephra/query.hpp>
 #include <tephra/common.hpp>
 #include <functional>
 
@@ -320,11 +321,13 @@ private:
 
     RenderList(
         const VulkanCommandInterface* vkiCommands,
+        const JobData* jobData,
         VkCommandBufferHandle vkInlineCommandBuffer,
         DebugTarget debugTarget);
 
     RenderList(
         const VulkanCommandInterface* vkiCommands,
+        const JobData* jobData,
         VkCommandBufferHandle* vkFutureCommandBuffer,
         const VkCommandBufferInheritanceInfo* vkInheritanceInfo,
         DebugTarget debugTarget);

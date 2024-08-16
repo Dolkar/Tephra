@@ -6,10 +6,10 @@ namespace tp {
 
 enum class QueryType {
     Timestamp,
-    Scoped,
+    Render,
 };
 
-enum class ScopedQueryType {
+enum class RenderQueryType {
     // Occlusion queries
     Occlusion,
     // Occlusion queries with PRECISE bit
@@ -25,22 +25,22 @@ enum class ScopedQueryType {
     FragmentShaderInvocations,
     TessellationControlShaderPatches,
     TessellationEvaluationShaderInvocations,
-    ComputeShaderInvocations,
 };
 
+struct QueryEntry;
 class QueryManager;
 
 class BaseQuery {
     friend class QueryManager;
 
 public:
-    using Handle = void*;
+    using Handle = QueryEntry*;
 
     bool isNull() const {
         return parentManager == nullptr;
     }
 
-    const tp::JobSemaphore& getResultJobSemaphore() const;
+    const JobSemaphore& getResultJobSemaphore() const;
 
     TEPHRA_MAKE_NONCOPYABLE(BaseQuery);
     TEPHRA_MAKE_MOVABLE(BaseQuery);
@@ -63,10 +63,10 @@ public:
     double getResultSeconds() const;
 };
 
-class ScopedQuery : public BaseQuery {
+class RenderQuery : public BaseQuery {
 public:
-    ScopedQuery() : BaseQuery() {}
-    ScopedQuery(QueryManager* parentManager, Handle handle) : BaseQuery(parentManager, handle) {}
+    RenderQuery() : BaseQuery() {}
+    RenderQuery(QueryManager* parentManager, Handle handle) : BaseQuery(parentManager, handle) {}
 
     uint64_t getResult() const;
 };

@@ -7,6 +7,7 @@
 #include <tephra/memory.hpp>
 #include <tephra/compute.hpp>
 #include <tephra/render.hpp>
+#include <tephra/query.hpp>
 #include <tephra/common.hpp>
 #include <variant>
 
@@ -537,6 +538,8 @@ public:
     /// @remarks
     ///     The call will have no effect when tp::ApplicationExtension::EXT_DebugUtils is not enabled.
     void cmdEndDebugLabel();
+
+    void cmdWriteTimestamp(const TimestampQuery& query, PipelineStage stage = PipelineStage::BottomOfPipe);
 
     /// Updates the internal synchronization state for the buffer view to the given external access.
     ///

@@ -107,11 +107,13 @@ private:
 
     ComputeList(
         const VulkanCommandInterface* vkiCommands,
+        const JobData* jobData,
         VkCommandBufferHandle vkInlineCommandBuffer,
         DebugTarget debugTarget);
 
     ComputeList(
         const VulkanCommandInterface* vkiCommands,
+        const JobData* jobData,
         VkCommandBufferHandle* vkFutureCommandBuffer,
         DebugTarget debugTarget);
 };

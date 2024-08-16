@@ -6,7 +6,8 @@
 namespace tp {
 
 const tp::JobSemaphore& BaseQuery::getResultJobSemaphore() const {
-    return parentManager->getQueryResult(handle).jobSemaphore;
+    TEPHRA_ASSERT(handle != nullptr);
+    return handle->result.jobSemaphore;
 }
 
 BaseQuery::BaseQuery(BaseQuery&& other) noexcept : parentManager(other.parentManager), handle(other.handle) {
@@ -28,15 +29,18 @@ BaseQuery::~BaseQuery() noexcept {
 }
 
 uint64_t TimestampQuery::getResult() const {
-    return parentManager->getQueryResult(handle).value;
+    TEPHRA_ASSERT(handle != nullptr);
+    return handle->result.value;
 }
 
 double TimestampQuery::getResultSeconds() const {
+    TEPHRA_ASSERT(!isNull());
     return parentManager->convertTimestampToSeconds(getResult());
 }
 
-uint64_t ScopedQuery::getResult() const {
-    return parentManager->getQueryResult(handle).value;
+uint64_t RenderQuery::getResult() const {
+    TEPHRA_ASSERT(handle != nullptr);
+    return handle->result.value;
 }
 
 std::pair<VkQueryPoolHandle, uint32_t> QueryPool::lookupQuery(uint32_t index) const {
@@ -109,6 +113,77 @@ void QueryPool::readbackAndFreeVkQueries(uint32_t firstIndex, uint32_t count, Ar
     }
 }
 
+std::pair<VkQueryType, VkQueryPipelineStatisticFlagBits> QueryEntry::decodeVkQueryType() const {
+    switch (type) {
+    case QueryType::Timestamp:
+        return { VK_QUERY_TYPE_TIMESTAMP, VkQueryPipelineStatisticFlagBits() };
+    case QueryType::Render: {
+        RenderQueryType renderQueryType = std::get<RenderQueryType>(subType);
+        switch (renderQueryType) {
+        case RenderQueryType::Occlusion:
+        case RenderQueryType::OcclusionPrecise:
+            return { VK_QUERY_TYPE_OCCLUSION, VkQueryPipelineStatisticFlagBits() };
+        case RenderQueryType::InputAssemblyVertices:
+            return { VK_QUERY_TYPE_PIPELINE_STATISTICS, VK_QUERY_PIPELINE_STATISTIC_INPUT_ASSEMBLY_VERTICES_BIT };
+        case RenderQueryType::InputAssemblyPrimitives:
+            return { VK_QUERY_TYPE_PIPELINE_STATISTICS, VK_QUERY_PIPELINE_STATISTIC_INPUT_ASSEMBLY_PRIMITIVES_BIT };
+        case RenderQueryType::VertexShaderInvocations:
+            return { VK_QUERY_TYPE_PIPELINE_STATISTICS, VK_QUERY_PIPELINE_STATISTIC_VERTEX_SHADER_INVOCATIONS_BIT };
+        case RenderQueryType::GeometryShaderInvocations:
+            return { VK_QUERY_TYPE_PIPELINE_STATISTICS, VK_QUERY_PIPELINE_STATISTIC_GEOMETRY_SHADER_INVOCATIONS_BIT };
+        case RenderQueryType::GeometryShaderPrimitives:
+            return { VK_QUERY_TYPE_PIPELINE_STATISTICS, VK_QUERY_PIPELINE_STATISTIC_GEOMETRY_SHADER_PRIMITIVES_BIT };
+        case RenderQueryType::ClippingInvocations:
+            return { VK_QUERY_TYPE_PIPELINE_STATISTICS, VK_QUERY_PIPELINE_STATISTIC_CLIPPING_INVOCATIONS_BIT };
+        case RenderQueryType::ClippingPrimitives:
+            return { VK_QUERY_TYPE_PIPELINE_STATISTICS, VK_QUERY_PIPELINE_STATISTIC_CLIPPING_PRIMITIVES_BIT };
+        case RenderQueryType::FragmentShaderInvocations:
+            return { VK_QUERY_TYPE_PIPELINE_STATISTICS, VK_QUERY_PIPELINE_STATISTIC_FRAGMENT_SHADER_INVOCATIONS_BIT };
+        case RenderQueryType::TessellationControlShaderPatches:
+            return { VK_QUERY_TYPE_PIPELINE_STATISTICS,
+                     VK_QUERY_PIPELINE_STATISTIC_TESSELLATION_CONTROL_SHADER_PATCHES_BIT };
+        case RenderQueryType::TessellationEvaluationShaderInvocations:
+            return { VK_QUERY_TYPE_PIPELINE_STATISTICS,
+                     VK_QUERY_PIPELINE_STATISTIC_TESSELLATION_EVALUATION_SHADER_INVOCATIONS_BIT };
+        default:
+            TEPHRA_ASSERTD(false, "Unexpected RenderQueryType");
+            return {};
+        }
+    }
+    default:
+        TEPHRA_ASSERTD(false, "Unexpected QueryType");
+        return {};
+    }
+}
+
+void QueryEntry::updateResult(ArrayView<uint64_t> queryData, const tp::JobSemaphore& semaphore) {
+    // QueryData can have multiple entries if used during multiview. Here we decide how to combine them.
+    // It's possible to expose all of them to the user, but that is rarely needed, is implementation
+    // dependent and would complicate the API.
+    TEPHRA_ASSERT(queryData.size() > 0);
+    TEPHRA_ASSERT(!semaphore.isNull());
+
+    if (semaphore.timestamp < result.jobSemaphore.timestamp)
+        return;
+
+    uint64_t newResultValue = 0;
+    switch (type) {
+    case QueryType::Timestamp:
+        // Just use the first view for timestamps
+        newResultValue = queryData[0];
+        break;
+    case QueryType::Render:
+        // Render query types should be summed together
+        for (uint64_t value : queryData)
+            newResultValue += value;
+        break;
+    default:
+        TEPHRA_ASSERTD(false, "Unexpected QueryType");
+    }
+
+    result = { newResultValue, semaphore };
+}
+
 QueryManager::QueryManager(DeviceContainer* deviceImpl, const VulkanCommandInterface* vkiCommands)
     : deviceImpl(deviceImpl), vkiCommands(vkiCommands) {
     const VkPhysicalDeviceLimits& limits = deviceImpl->getPhysicalDevice()->vkQueryFeatures<VkPhysicalDeviceLimits>();
@@ -117,82 +192,98 @@ QueryManager::QueryManager(DeviceContainer* deviceImpl, const VulkanCommandInter
 }
 
 void QueryManager::createTimestampQueries(ArrayParameter<TimestampQuery* const> queries) {
+    std::lock_guard<Mutex> lock(globalMutex);
+
     for (std::size_t i = 0; i < queries.size(); i++) {
-        QueryType type = QueryType::Scoped;
+        QueryType type = QueryType::Render;
         *queries[i] = TimestampQuery(this, createQuery(type, {}));
     }
 }
 
-void QueryManager::createScopedQueries(
-    ArrayParameter<const ScopedQueryType> queryTypes,
-    ArrayParameter<ScopedQuery* const> queries) {
+void QueryManager::createRenderQueries(
+    ArrayParameter<const RenderQueryType> queryTypes,
+    ArrayParameter<RenderQuery* const> queries) {
     TEPHRA_ASSERT(queryTypes.size() == queries.size());
+    std::lock_guard<Mutex> lock(globalMutex);
+
     for (std::size_t i = 0; i < queryTypes.size(); i++) {
-        QueryType type = QueryType::Scoped;
-        ScopedQueryType subType = queryTypes[i];
-        *queries[i] = ScopedQuery(this, createQuery(type, subType));
+        QueryType type = QueryType::Render;
+        RenderQueryType subType = queryTypes[i];
+        *queries[i] = RenderQuery(this, createQuery(type, subType));
     }
 }
 
-void QueryManager::beginSampleScopedQueries(
+void QueryManager::beginSampleRenderQueries(
     VkCommandBufferHandle vkCommandBuffer,
-    ArrayParameter<const ScopedQuery> queries,
+    ArrayParameter<const QueryHandle> queries,
     uint32_t multiviewViewCount,
-    const tp::JobSemaphore& semaphore) {
+    const JobSemaphore& semaphore) {
     // TODO: We might want to aggregate pipeline statistics queries in the future.
     // We'll need to delay pool creation for them until this point, where we combine them together.
     // This means we'll have multiple QuerySamples backed by a single Vulkan query.
     // QuerySample will need to store its own poolIndex as well, as the entries will only cache the last one.
+    std::lock_guard<Mutex> lock(globalMutex);
 
-    for (const ScopedQuery& query : queries) {
-        QueryEntry* entry = reinterpret_cast<QueryEntry*>(query.handle);
-        TEPHRA_ASSERTD(entry->beginVkQueryIndex == InvalidIndex, "Scoped query is already in a begun state.");
+    for (QueryEntry* query : queries) {
+        TEPHRA_ASSERT(query->type == QueryType::Render);
+        TEPHRA_ASSERTD(
+            query->beginVkQueryIndex == QueryEntry::InvalidIndex, "Render query is already in a begun state.");
 
         // Allocate and record sample
-        uint32_t vkQueryIndex = queryPools[entry->poolIndex].allocateVkQueries(multiviewViewCount);
-        pendingSamples.push_back(QuerySample(entry, vkQueryIndex, multiviewViewCount, semaphore));
+        uint32_t vkQueryIndex = queryPools[query->poolIndex].allocateVkQueries(multiviewViewCount);
+        pendingSamples.push_back(QuerySample(query, vkQueryIndex, multiviewViewCount, semaphore));
 
-        bool isPrecise = entry->type == QueryType::Scoped &&
-            std::get<ScopedQueryType>(entry->subType) == ScopedQueryType::OcclusionPrecise;
-        cmdBeginQuery(vkCommandBuffer, entry->poolIndex, vkQueryIndex, isPrecise);
+        bool isPrecise = query->type == QueryType::Render &&
+            std::get<RenderQueryType>(query->subType) == RenderQueryType::OcclusionPrecise;
+        cmdBeginQuery(vkCommandBuffer, query->poolIndex, vkQueryIndex, isPrecise);
 
         // Record the query index for the matching ending command
-        entry->beginVkQueryIndex = vkQueryIndex;
-        entry->lastPendingSampleTimestamp = semaphore.timestamp;
+        query->beginVkQueryIndex = vkQueryIndex;
+        query->lastPendingSampleTimestamp = semaphore.timestamp;
     }
 }
 
-void QueryManager::endSampleScopedQueries(
+void QueryManager::endSampleRenderQueries(
     VkCommandBufferHandle vkCommandBuffer,
-    ArrayParameter<const ScopedQuery> queries) {
-    for (const ScopedQuery& query : queries) {
-        QueryEntry* entry = reinterpret_cast<QueryEntry*>(query.handle);
-        TEPHRA_ASSERTD(entry->beginVkQueryIndex != InvalidIndex, "Scoped query expected to be in a begun state.");
+    ArrayParameter<const QueryHandle> queries) {
+    std::lock_guard<Mutex> lock(globalMutex);
 
-        cmdEndQuery(vkCommandBuffer, entry->poolIndex, entry->beginVkQueryIndex);
-        entry->beginVkQueryIndex = InvalidIndex;
+    for (QueryEntry* query : queries) {
+        TEPHRA_ASSERTD(
+            query->beginVkQueryIndex != QueryEntry::InvalidIndex, "Render query expected to be in a begun state.");
+
+        cmdEndQuery(vkCommandBuffer, query->poolIndex, query->beginVkQueryIndex);
+        query->beginVkQueryIndex = QueryEntry::InvalidIndex;
     }
 }
 
-void QueryManager::writeTimestampQuery(
+void QueryManager::sampleTimestampQuery(
     VkCommandBufferHandle vkCommandBuffer,
-    const TimestampQuery& query,
+    const QueryHandle& query,
     PipelineStage stage,
     uint32_t multiviewViewCount,
-    const tp::JobSemaphore& semaphore) {
-    QueryEntry* entry = reinterpret_cast<QueryEntry*>(query.handle);
+    const JobSemaphore& semaphore) {
+    std::lock_guard<Mutex> lock(globalMutex);
 
     // Allocate and record sample
-    uint32_t vkQueryIndex = queryPools[entry->poolIndex].allocateVkQueries(multiviewViewCount);
-    pendingSamples.push_back(QuerySample(entry, vkQueryIndex, multiviewViewCount, semaphore));
+    uint32_t vkQueryIndex = queryPools[query->poolIndex].allocateVkQueries(multiviewViewCount);
+    pendingSamples.push_back(QuerySample(query, vkQueryIndex, multiviewViewCount, semaphore));
 
-    cmdWriteTimestamp(vkCommandBuffer, entry->poolIndex, vkQueryIndex, stage);
+    cmdWriteTimestamp(vkCommandBuffer, query->poolIndex, vkQueryIndex, stage);
 
-    entry->lastPendingSampleTimestamp = semaphore.timestamp;
+    query->lastPendingSampleTimestamp = semaphore.timestamp;
+}
+
+void QueryManager::queueFreeQuery(const QueryHandle& query) {
+    TEPHRA_ASSERT(query != nullptr);
+    std::lock_guard<Mutex> lock(globalMutex);
+    return entriesToFree.push_back(query);
 }
 
 void QueryManager::update() {
-    // Find and remove all already processed samples, with simple caching of the last encountered semaphore
+    std::lock_guard<Mutex> lock(globalMutex);
+
+    // Find and readout all already processed samples, with simple caching of the last encountered semaphore
     ScratchVector<QuerySample> samplesToReadout;
     {
         JobSemaphore previousSignalledSemaphore;
@@ -226,44 +317,34 @@ void QueryManager::update() {
     }
 }
 
-const QueryResult& QueryManager::getQueryResult(BaseQuery::Handle handle) const {
-    TEPHRA_ASSERT(handle != nullptr);
-    return reinterpret_cast<const QueryEntry*>(handle)->result;
-}
-
 double QueryManager::convertTimestampToSeconds(uint64_t timestampQueryResult) const {
     return ticksToSecondsFactor * timestampQueryResult;
-}
-
-void QueryManager::queueFreeQuery(BaseQuery::Handle handle) {
-    TEPHRA_ASSERT(handle != nullptr);
-    return entriesToFree.push_back(reinterpret_cast<QueryEntry*>(handle));
 }
 
 QueryManager::QuerySample::QuerySample(
     QueryEntry* entry,
     uint32_t vkQueryIndex,
     uint32_t multiviewViewCount,
-    const tp::JobSemaphore& semaphore)
+    const JobSemaphore& semaphore)
     : entry(entry), vkQueryIndex(vkQueryIndex), vkQueryCount(multiviewViewCount), semaphore(semaphore) {
     TEPHRA_ASSERT(vkQueryCount <= MaxQueryCount);
 }
 
-BaseQuery::Handle QueryManager::createQuery(QueryType type, std::variant<std::monostate, ScopedQueryType> subType) {
-    QueryEntry* entry = entryPool.acquireExisting();
-    if (entry == nullptr)
-        entry = entryPool.acquireNew();
+QueryHandle QueryManager::createQuery(QueryType type, std::variant<std::monostate, RenderQueryType> subType) {
+    QueryEntry* query = entryPool.acquireExisting();
+    if (query == nullptr)
+        query = entryPool.acquireNew();
 
-    entry->type = type;
-    entry->subType = subType;
-    entry->result = {};
+    query->type = type;
+    query->subType = subType;
+    query->result = {};
 
-    auto [vkType, pipelineStatistics] = entry->decodeVkQueryType();
-    entry->poolIndex = getOrCreatePool(vkType, pipelineStatistics);
-    entry->beginVkQueryIndex = InvalidIndex;
-    entry->lastPendingSampleTimestamp = 0;
+    auto [vkType, pipelineStatistics] = query->decodeVkQueryType();
+    query->poolIndex = getOrCreatePool(vkType, pipelineStatistics);
+    query->beginVkQueryIndex = QueryEntry::InvalidIndex;
+    query->lastPendingSampleTimestamp = 0;
 
-    return reinterpret_cast<BaseQuery::Handle>(entry);
+    return query;
 }
 
 uint32_t QueryManager::getOrCreatePool(VkQueryType vkQueryType, VkQueryPipelineStatisticFlagBits pipelineStatistics) {
@@ -321,79 +402,6 @@ void QueryManager::cmdWriteTimestamp(
     auto [vkPool, query] = queryPools[poolIndex].lookupQuery(vkQueryIndex);
 
     vkiCommands->cmdWriteTimestamp(vkCommandBuffer, vkCastConvertibleEnum(stage), vkPool, query);
-}
-
-std::pair<VkQueryType, VkQueryPipelineStatisticFlagBits> QueryManager::QueryEntry::decodeVkQueryType() const {
-    switch (type) {
-    case QueryType::Timestamp:
-        return { VK_QUERY_TYPE_TIMESTAMP, VkQueryPipelineStatisticFlagBits() };
-    case QueryType::Scoped: {
-        ScopedQueryType scopedType = std::get<ScopedQueryType>(subType);
-        switch (scopedType) {
-        case ScopedQueryType::Occlusion:
-        case ScopedQueryType::OcclusionPrecise:
-            return { VK_QUERY_TYPE_OCCLUSION, VkQueryPipelineStatisticFlagBits() };
-        case ScopedQueryType::InputAssemblyVertices:
-            return { VK_QUERY_TYPE_PIPELINE_STATISTICS, VK_QUERY_PIPELINE_STATISTIC_INPUT_ASSEMBLY_VERTICES_BIT };
-        case ScopedQueryType::InputAssemblyPrimitives:
-            return { VK_QUERY_TYPE_PIPELINE_STATISTICS, VK_QUERY_PIPELINE_STATISTIC_INPUT_ASSEMBLY_PRIMITIVES_BIT };
-        case ScopedQueryType::VertexShaderInvocations:
-            return { VK_QUERY_TYPE_PIPELINE_STATISTICS, VK_QUERY_PIPELINE_STATISTIC_VERTEX_SHADER_INVOCATIONS_BIT };
-        case ScopedQueryType::GeometryShaderInvocations:
-            return { VK_QUERY_TYPE_PIPELINE_STATISTICS, VK_QUERY_PIPELINE_STATISTIC_GEOMETRY_SHADER_INVOCATIONS_BIT };
-        case ScopedQueryType::GeometryShaderPrimitives:
-            return { VK_QUERY_TYPE_PIPELINE_STATISTICS, VK_QUERY_PIPELINE_STATISTIC_GEOMETRY_SHADER_PRIMITIVES_BIT };
-        case ScopedQueryType::ClippingInvocations:
-            return { VK_QUERY_TYPE_PIPELINE_STATISTICS, VK_QUERY_PIPELINE_STATISTIC_CLIPPING_INVOCATIONS_BIT };
-        case ScopedQueryType::ClippingPrimitives:
-            return { VK_QUERY_TYPE_PIPELINE_STATISTICS, VK_QUERY_PIPELINE_STATISTIC_CLIPPING_PRIMITIVES_BIT };
-        case ScopedQueryType::FragmentShaderInvocations:
-            return { VK_QUERY_TYPE_PIPELINE_STATISTICS, VK_QUERY_PIPELINE_STATISTIC_FRAGMENT_SHADER_INVOCATIONS_BIT };
-        case ScopedQueryType::TessellationControlShaderPatches:
-            return { VK_QUERY_TYPE_PIPELINE_STATISTICS,
-                     VK_QUERY_PIPELINE_STATISTIC_TESSELLATION_CONTROL_SHADER_PATCHES_BIT };
-        case ScopedQueryType::TessellationEvaluationShaderInvocations:
-            return { VK_QUERY_TYPE_PIPELINE_STATISTICS,
-                     VK_QUERY_PIPELINE_STATISTIC_TESSELLATION_EVALUATION_SHADER_INVOCATIONS_BIT };
-        case ScopedQueryType::ComputeShaderInvocations:
-            return { VK_QUERY_TYPE_PIPELINE_STATISTICS, VK_QUERY_PIPELINE_STATISTIC_COMPUTE_SHADER_INVOCATIONS_BIT };
-        default:
-            TEPHRA_ASSERTD(false, "Unexpected ScopedQueryType");
-            return {};
-        }
-    }
-    default:
-        TEPHRA_ASSERTD(false, "Unexpected QueryType");
-        return {};
-    }
-}
-
-void QueryManager::QueryEntry::updateResult(ArrayView<uint64_t> queryData, const tp::JobSemaphore& semaphore) {
-    // QueryData can have multiple entries if used during multiview. Here we decide how to combine them.
-    // It's possible to expose all of them to the user, but that is rarely needed, is implementation
-    // dependent and would complicate the API.
-    TEPHRA_ASSERT(queryData.size() > 0);
-    TEPHRA_ASSERT(!semaphore.isNull());
-
-    if (semaphore.timestamp < result.jobSemaphore.timestamp)
-        return;
-
-    uint64_t newResultValue = 0;
-    switch (type) {
-    case QueryType::Timestamp:
-        // Just use the first view for timestamps
-        newResultValue = queryData[0];
-        break;
-    case QueryType::Scoped:
-        // Scoped query types should be summed together
-        for (uint64_t value : queryData)
-            newResultValue += value;
-        break;
-    default:
-        TEPHRA_ASSERTD(false, "Unexpected QueryType");
-    }
-
-    result = { newResultValue, semaphore };
 }
 
 }
