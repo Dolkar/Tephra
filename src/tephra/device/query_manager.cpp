@@ -186,7 +186,7 @@ void QueryEntry::updateResult(ArrayView<uint64_t> queryData, const tp::JobSemaph
 
 QueryManager::QueryManager(DeviceContainer* deviceImpl, const VulkanCommandInterface* vkiCommands)
     : deviceImpl(deviceImpl), vkiCommands(vkiCommands) {
-    const VkPhysicalDeviceLimits& limits = deviceImpl->getPhysicalDevice()->vkQueryFeatures<VkPhysicalDeviceLimits>();
+    const VkPhysicalDeviceLimits& limits = deviceImpl->getPhysicalDevice()->vkQueryProperties<VkPhysicalDeviceLimits>();
     double nanosecondsToSeconds = 1.0E-9;
     ticksToSecondsFactor = limits.timestampPeriod * nanosecondsToSeconds;
 }
@@ -215,7 +215,7 @@ void QueryManager::createRenderQueries(
 
 void QueryManager::beginSampleRenderQueries(
     VkCommandBufferHandle vkCommandBuffer,
-    ArrayParameter<const QueryHandle> queries,
+    ArrayParameter<const RenderQuery* const> queries,
     uint32_t multiviewViewCount,
     const JobSemaphore& semaphore) {
     // TODO: We might want to aggregate pipeline statistics queries in the future.
@@ -224,7 +224,8 @@ void QueryManager::beginSampleRenderQueries(
     // QuerySample will need to store its own poolIndex as well, as the entries will only cache the last one.
     std::lock_guard<Mutex> lock(globalMutex);
 
-    for (QueryEntry* query : queries) {
+    for (const RenderQuery* queryPtr : queries) {
+        QueryHandle query = getQueryHandle(*queryPtr);
         TEPHRA_ASSERT(query->type == QueryType::Render);
         TEPHRA_ASSERTD(
             query->beginVkQueryIndex == QueryEntry::InvalidIndex, "Render query is already in a begun state.");
@@ -245,10 +246,11 @@ void QueryManager::beginSampleRenderQueries(
 
 void QueryManager::endSampleRenderQueries(
     VkCommandBufferHandle vkCommandBuffer,
-    ArrayParameter<const QueryHandle> queries) {
+    ArrayParameter<const RenderQuery* const> queries) {
     std::lock_guard<Mutex> lock(globalMutex);
 
-    for (QueryEntry* query : queries) {
+    for (const RenderQuery* queryPtr : queries) {
+        QueryHandle query = getQueryHandle(*queryPtr);
         TEPHRA_ASSERTD(
             query->beginVkQueryIndex != QueryEntry::InvalidIndex, "Render query expected to be in a begun state.");
 
@@ -315,10 +317,6 @@ void QueryManager::update() {
         });
         entriesToFree.erase(removeIt, entriesToFree.end());
     }
-}
-
-double QueryManager::convertTimestampToSeconds(uint64_t timestampQueryResult) const {
-    return ticksToSecondsFactor * timestampQueryResult;
 }
 
 QueryManager::QuerySample::QuerySample(

@@ -81,11 +81,11 @@ public:
 
     void beginSampleRenderQueries(
         VkCommandBufferHandle vkCommandBuffer,
-        ArrayParameter<const QueryHandle> queries,
+        ArrayParameter<const RenderQuery* const> queries,
         uint32_t multiviewViewCount,
         const JobSemaphore& semaphore);
 
-    void endSampleRenderQueries(VkCommandBufferHandle vkCommandBuffer, ArrayParameter<const QueryHandle> queries);
+    void endSampleRenderQueries(VkCommandBufferHandle vkCommandBuffer, ArrayParameter<const RenderQuery* const> queries);
 
     void sampleTimestampQuery(
         VkCommandBufferHandle vkCommandBuffer,
@@ -99,7 +99,13 @@ public:
     // Reads out all processed query samples and performs cleanup
     void update();
 
-    double convertTimestampToSeconds(uint64_t timestampQueryResult) const;
+    double convertTimestampToSeconds(uint64_t timestampQueryResult) const {
+        return ticksToSecondsFactor * timestampQueryResult;
+    }
+
+    static QueryHandle getQueryHandle(const BaseQuery& query) {
+        return query.handle;
+    }
 
 private:
     // Represents submitted one-off Vulkan queries that will update a Tephra query entry

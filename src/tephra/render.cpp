@@ -1,6 +1,7 @@
 #include "vulkan/interface.hpp"
 #include "device/device_container.hpp"
 #include "job/render_pass.hpp"
+#include "job/resource_pool_container.hpp"
 #include "common_impl.hpp"
 #include <tephra/render.hpp>
 #include <tephra/pipeline.hpp>
@@ -175,6 +176,28 @@ void RenderList::cmdSetDepthBounds(float minDepthBounds, float maxDepthBounds) {
     vkiCommands->cmdSetDepthBounds(vkCommandBufferHandle, minDepthBounds, maxDepthBounds);
 }
 
+void RenderList::cmdWriteTimestamp(const TimestampQuery& query, PipelineStage stage) {
+    TEPHRA_DEBUG_SET_CONTEXT(debugTarget.get(), "cmdWriteTimestamp", nullptr);
+    jobData->resourcePoolImpl->getParentDeviceImpl()->getQueryManager()->sampleTimestampQuery(
+        vkCommandBufferHandle,
+        QueryManager::getQueryHandle(query),
+        stage,
+        multiviewViewCount,
+        jobData->semaphores.jobSignal);
+}
+
+void RenderList::cmdBeginQueries(ArrayParameter<const RenderQuery* const> queries) {
+    TEPHRA_DEBUG_SET_CONTEXT(debugTarget.get(), "cmdBeginQueries", nullptr);
+    jobData->resourcePoolImpl->getParentDeviceImpl()->getQueryManager()->beginSampleRenderQueries(
+        vkCommandBufferHandle, queries, multiviewViewCount, jobData->semaphores.jobSignal);
+}
+
+void RenderList::cmdEndQueries(ArrayParameter<const RenderQuery* const> queries) {
+    TEPHRA_DEBUG_SET_CONTEXT(debugTarget.get(), "cmdEndQueries", nullptr);
+    jobData->resourcePoolImpl->getParentDeviceImpl()->getQueryManager()->endSampleRenderQueries(
+        vkCommandBufferHandle, queries);
+}
+
 RenderList::RenderList(RenderList&&) noexcept = default;
 
 RenderList& RenderList::operator=(RenderList&&) noexcept = default;
@@ -185,18 +208,22 @@ RenderList::RenderList(
     const VulkanCommandInterface* vkiCommands,
     const JobData* jobData,
     VkCommandBufferHandle vkInlineCommandBuffer,
+    uint32_t multiviewViewCount,
     DebugTarget debugTarget)
     : CommandList(vkiCommands, jobData, VK_PIPELINE_BIND_POINT_GRAPHICS, vkInlineCommandBuffer, std::move(debugTarget)),
-      vkInheritanceInfo(nullptr) {}
+      vkInheritanceInfo(nullptr),
+      multiviewViewCount(multiviewViewCount) {}
 
 RenderList::RenderList(
     const VulkanCommandInterface* vkiCommands,
     const JobData* jobData,
     VkCommandBufferHandle* vkFutureCommandBuffer,
     const VkCommandBufferInheritanceInfo* vkInheritanceInfo,
+    uint32_t multiviewViewCount,
     DebugTarget debugTarget)
     : CommandList(vkiCommands, jobData, VK_PIPELINE_BIND_POINT_GRAPHICS, vkFutureCommandBuffer, std::move(debugTarget)),
-      vkInheritanceInfo(vkInheritanceInfo) {}
+      vkInheritanceInfo(vkInheritanceInfo),
+      multiviewViewCount(multiviewViewCount) {}
 
 RenderPassSetup::RenderPassSetup(
     DepthStencilAttachment depthStencilAttachment,

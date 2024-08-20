@@ -309,6 +309,12 @@ public:
     /// @see @vksymbol{vkCmdSetDepthBounds}
     void cmdSetDepthBounds(float minDepthBounds = 0.0f, float maxDepthBounds = 1.0f);
 
+    void cmdWriteTimestamp(const TimestampQuery& query, PipelineStage stage = PipelineStage::BottomOfPipe);
+
+    void cmdBeginQueries(ArrayParameter<const RenderQuery* const> queries);
+
+    void cmdEndQueries(ArrayParameter<const RenderQuery* const> queries);
+
     TEPHRA_MAKE_NONCOPYABLE(RenderList);
     TEPHRA_MAKE_MOVABLE(RenderList);
     virtual ~RenderList();
@@ -318,11 +324,13 @@ private:
     friend class RenderPass;
 
     const VkCommandBufferInheritanceInfo* vkInheritanceInfo = nullptr;
+    uint32_t multiviewViewCount;
 
     RenderList(
         const VulkanCommandInterface* vkiCommands,
         const JobData* jobData,
         VkCommandBufferHandle vkInlineCommandBuffer,
+        uint32_t multiviewViewCount,
         DebugTarget debugTarget);
 
     RenderList(
@@ -330,6 +338,7 @@ private:
         const JobData* jobData,
         VkCommandBufferHandle* vkFutureCommandBuffer,
         const VkCommandBufferInheritanceInfo* vkInheritanceInfo,
+        uint32_t multiviewViewCount,
         DebugTarget debugTarget);
 };
 

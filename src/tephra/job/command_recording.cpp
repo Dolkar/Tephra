@@ -488,12 +488,12 @@ void recordCommand(const JobData* job, PrimaryBufferRecorder& recorder, JobRecor
     }
     case JobCommandTypes::ExecuteComputePass: {
         auto* data = getCommandData<JobRecordStorage::ExecuteComputePassData>(command);
-        data->pass->recordPass(recorder);
+        data->pass->recordPass(job, recorder);
         break;
     }
     case JobCommandTypes::ExecuteRenderPass: {
         auto* data = getCommandData<JobRecordStorage::ExecuteRenderPassData>(command);
-        data->pass->recordPass(recorder);
+        data->pass->recordPass(job, recorder);
         break;
     }
     case JobCommandTypes::BeginDebugLabel: {

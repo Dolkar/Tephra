@@ -488,7 +488,8 @@ void Job::cmdEndDebugLabel() {
 
 void Job::cmdWriteTimestamp(const TimestampQuery& query, PipelineStage stage) {
     TEPHRA_DEBUG_SET_CONTEXT(debugTarget.get(), "cmdWriteTimestamp", nullptr);
-    recordCommand<JobRecordStorage::WriteTimestampData>(jobData->record, JobCommandTypes::WriteTimestamp, query, stage);
+    recordCommand<JobRecordStorage::WriteTimestampData>(
+        jobData->record, JobCommandTypes::WriteTimestamp, QueryManager::getQueryHandle(query), stage);
 }
 
 void Job::vkCmdImportExternalResource(

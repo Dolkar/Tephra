@@ -1,6 +1,7 @@
 #pragma once
 
 #include <tephra/command_list.hpp>
+#include <tephra/query.hpp>
 #include <tephra/common.hpp>
 #include <functional>
 
@@ -96,6 +97,8 @@ public:
     ///     The global execution and memory dependencies to synchronize.
     /// @see @vksymbol{vkCmdPipelineBarrier}
     void cmdPipelineBarrier(ArrayParameter<const std::pair<ComputeAccessMask, ComputeAccessMask>> dependencies);
+
+    void cmdWriteTimestamp(const TimestampQuery& query, PipelineStage stage = PipelineStage::BottomOfPipe);
 
     TEPHRA_MAKE_NONCOPYABLE(ComputeList);
     TEPHRA_MAKE_MOVABLE(ComputeList);

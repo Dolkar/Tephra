@@ -379,7 +379,7 @@ void recordCommandBuffers(
 
         // Record the next command
         if (cmd != nullptr) {
-            recordCommand(recorder, cmd);
+            recordCommand(job, recorder, cmd);
             cmd = cmd->nextCommand;
             cmdIndex++;
         } else {

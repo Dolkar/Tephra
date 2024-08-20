@@ -28,6 +28,7 @@ enum class RenderQueryType {
 };
 
 struct QueryEntry;
+struct JobSemaphore;
 class QueryManager;
 
 class BaseQuery {
