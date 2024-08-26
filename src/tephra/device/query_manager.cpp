@@ -5,11 +5,6 @@
 
 namespace tp {
 
-const tp::JobSemaphore& BaseQuery::getResultJobSemaphore() const {
-    TEPHRA_ASSERT(handle != nullptr);
-    return handle->result.jobSemaphore;
-}
-
 BaseQuery::BaseQuery(BaseQuery&& other) noexcept : parentManager(other.parentManager), handle(other.handle) {
     if (!other.isNull()) {
         other.parentManager = nullptr;
@@ -22,25 +17,33 @@ BaseQuery& BaseQuery::operator=(BaseQuery&& other) noexcept {
     return *this;
 }
 
+void BaseQuery::setMaxHistorySize(uint32_t size) {
+    TEPHRA_ASSERT(!isNull());
+    parentManager->setQueryMaxHistorySize(handle, size);
+}
+
+QueryResult BaseQuery::getLastResult() const {
+    TEPHRA_ASSERT(!isNull());
+    return handle->resultsHistory[handle->lastResultIndex];
+}
+
+QueryResult BaseQuery::getJobResult(const JobSemaphore& jobSemaphore) const {
+    TEPHRA_ASSERT(!isNull());
+    for (const QueryResult& result : handle->resultsHistory) {
+        if (jobSemaphore == result.jobSemaphore)
+            return result;
+    }
+    return {};
+}
+
+BaseQuery::BaseQuery(QueryManager* parentManager, Handle handle) : parentManager(parentManager), handle(handle) {
+    TEPHRA_ASSERT(parentManager != nullptr && handle != nullptr);
+}
+
 BaseQuery::~BaseQuery() noexcept {
     if (!isNull()) {
         parentManager->queueFreeQuery(handle);
     }
-}
-
-uint64_t TimestampQuery::getResult() const {
-    TEPHRA_ASSERT(handle != nullptr);
-    return handle->result.value;
-}
-
-double TimestampQuery::getResultSeconds() const {
-    TEPHRA_ASSERT(!isNull());
-    return parentManager->convertTimestampToSeconds(getResult());
-}
-
-uint64_t RenderQuery::getResult() const {
-    TEPHRA_ASSERT(handle != nullptr);
-    return handle->result.value;
 }
 
 std::pair<VkQueryPoolHandle, uint32_t> QueryPool::lookupQuery(uint32_t index) const {
@@ -89,28 +92,13 @@ void QueryPool::readbackAndFreeVkQueries(uint32_t firstIndex, uint32_t count, Ar
     TEPHRA_ASSERT(count == data.size());
     uint32_t vkPoolIndex = firstIndex / QueriesInPool;
     uint32_t firstQueryInPool = firstIndex % QueriesInPool;
+    TEPHRA_ASSERT(vkPoolIndex <= vkQueryPools.size());
+    TEPHRA_ASSERT(firstQueryInPool + count <= QueriesInPool);
 
-    // The range is allowed to span multiple pools
-    while (true) {
-        TEPHRA_ASSERT(vkPoolIndex <= vkQueryPools.size());
+    deviceImpl->getLogicalDevice()->getQueryResultsAndReset(
+        vkQueryPools[vkPoolIndex].vkGetHandle(), firstQueryInPool, count, data);
 
-        uint32_t queryCountInPool = tp::max(firstQueryInPool + count, QueriesInPool) - firstQueryInPool;
-        deviceImpl->getLogicalDevice()->getQueryResultsAndReset(
-            vkQueryPools[vkPoolIndex].vkGetHandle(),
-            firstQueryInPool,
-            queryCountInPool,
-            tp::viewRange(data, 0, queryCountInPool));
-
-        freeRanges.push_back({ vkPoolIndex * QueriesInPool + firstQueryInPool, queryCountInPool });
-        if (queryCountInPool == count)
-            return;
-
-        // Advance to next pool
-        count -= queryCountInPool;
-        vkPoolIndex++;
-        firstQueryInPool = 0;
-        data = tp::viewRange(data, queryCountInPool, data.size() - queryCountInPool);
-    }
+    freeRanges.push_back({ vkPoolIndex * QueriesInPool + firstQueryInPool, count });
 }
 
 std::pair<VkQueryType, VkQueryPipelineStatisticFlagBits> QueryEntry::decodeVkQueryType() const {
@@ -156,16 +144,25 @@ std::pair<VkQueryType, VkQueryPipelineStatisticFlagBits> QueryEntry::decodeVkQue
     }
 }
 
-void QueryEntry::updateResult(ArrayView<uint64_t> queryData, const tp::JobSemaphore& semaphore) {
-    // QueryData can have multiple entries if used during multiview. Here we decide how to combine them.
-    // It's possible to expose all of them to the user, but that is rarely needed, is implementation
-    // dependent and would complicate the API.
+void QueryEntry::updateResults(ArrayView<uint64_t> queryData, const tp::JobSemaphore& semaphore) {
     TEPHRA_ASSERT(queryData.size() > 0);
     TEPHRA_ASSERT(!semaphore.isNull());
 
-    if (semaphore.timestamp < result.jobSemaphore.timestamp)
+    // Find the oldest result to overwrite
+    QueryResult* oldestResult = resultsHistory.data();
+    for (std::size_t i = 1; i < resultsHistory.size(); i++) {
+        QueryResult* result = &resultsHistory[i];
+        // Null job semaphores have timestamp 0, so they'll be treated as oldest
+        if (result->jobSemaphore.timestamp <= oldestResult->jobSemaphore.timestamp)
+            oldestResult = result;
+    }
+
+    if (semaphore.timestamp <= oldestResult->jobSemaphore.timestamp)
         return;
 
+    // QueryData can have multiple entries if used during multiview. Here we decide how to combine them.
+    // It's possible to expose all of them to the user, but that is rarely needed, is implementation
+    // dependent and would complicate the API.
     uint64_t newResultValue = 0;
     switch (type) {
     case QueryType::Timestamp:
@@ -181,21 +178,27 @@ void QueryEntry::updateResult(ArrayView<uint64_t> queryData, const tp::JobSemaph
         TEPHRA_ASSERTD(false, "Unexpected QueryType");
     }
 
-    result = { newResultValue, semaphore };
+    // Overwrite oldest result
+    *oldestResult = { semaphore, newResultValue };
+
+    QueryResult* lastResult = &resultsHistory[lastResultIndex];
+    // Expecting at least two results in history
+    TEPHRA_ASSERT(lastResult != oldestResult);
+
+    // If this is the newest result, also update the index
+    if (semaphore.timestamp > lastResult->jobSemaphore.timestamp) {
+        lastResultIndex = static_cast<uint32_t>(std::distance(resultsHistory.data(), oldestResult));
+    }
 }
 
 QueryManager::QueryManager(DeviceContainer* deviceImpl, const VulkanCommandInterface* vkiCommands)
-    : deviceImpl(deviceImpl), vkiCommands(vkiCommands) {
-    const VkPhysicalDeviceLimits& limits = deviceImpl->getPhysicalDevice()->vkQueryProperties<VkPhysicalDeviceLimits>();
-    double nanosecondsToSeconds = 1.0E-9;
-    ticksToSecondsFactor = limits.timestampPeriod * nanosecondsToSeconds;
-}
+    : deviceImpl(deviceImpl), vkiCommands(vkiCommands) {}
 
 void QueryManager::createTimestampQueries(ArrayParameter<TimestampQuery* const> queries) {
     std::lock_guard<Mutex> lock(globalMutex);
 
     for (std::size_t i = 0; i < queries.size(); i++) {
-        QueryType type = QueryType::Render;
+        QueryType type = QueryType::Timestamp;
         *queries[i] = TimestampQuery(this, createQuery(type, {}));
     }
 }
@@ -272,7 +275,6 @@ void QueryManager::sampleTimestampQuery(
     pendingSamples.push_back(QuerySample(query, vkQueryIndex, multiviewViewCount, semaphore));
 
     cmdWriteTimestamp(vkCommandBuffer, query->poolIndex, vkQueryIndex, stage);
-
     query->lastPendingSampleTimestamp = semaphore.timestamp;
 }
 
@@ -280,6 +282,12 @@ void QueryManager::queueFreeQuery(const QueryHandle& query) {
     TEPHRA_ASSERT(query != nullptr);
     std::lock_guard<Mutex> lock(globalMutex);
     return entriesToFree.push_back(query);
+}
+
+void QueryManager::setQueryMaxHistorySize(const QueryHandle& query, uint32_t size) {
+    TEPHRA_ASSERT(query != nullptr);
+    std::lock_guard<Mutex> lock(globalMutex);
+    query->resultsHistory.resize(tp::max(size, QueryEntry::MinResultsHistorySize));
 }
 
 void QueryManager::update() {
@@ -295,7 +303,9 @@ void QueryManager::update() {
                     sample.semaphore.timestamp <= previousSignalledSemaphore.timestamp) {
                     samplesToReadout.push_back(sample);
                     return true;
-                } else if (deviceImpl->isJobSemaphoreSignalled(sample.semaphore)) {
+                } else if (deviceImpl->getTimelineManager()->wasTimestampReachedInQueue(
+                               deviceImpl->getQueueMap()->getQueueUniqueIndex(sample.semaphore.queue),
+                               sample.semaphore.timestamp)) {
                     previousSignalledSemaphore = sample.semaphore;
                     samplesToReadout.push_back(sample);
                     return true;
@@ -335,7 +345,8 @@ QueryHandle QueryManager::createQuery(QueryType type, std::variant<std::monostat
 
     query->type = type;
     query->subType = subType;
-    query->result = {};
+    query->resultsHistory.resize(QueryEntry::MinResultsHistorySize);
+    query->lastResultIndex = 0;
 
     auto [vkType, pipelineStatistics] = query->decodeVkQueryType();
     query->poolIndex = getOrCreatePool(vkType, pipelineStatistics);
@@ -369,7 +380,7 @@ void QueryManager::readoutSamples(const ScratchVector<QuerySample>& samples) {
         queryPools[entry->poolIndex].readbackAndFreeVkQueries(
             sample.vkQueryIndex, sample.vkQueryCount, tp::viewRange(queryData, 0, sample.vkQueryCount));
 
-        entry->updateResult(tp::viewRange(queryData, 0, sample.vkQueryCount), sample.semaphore);
+        entry->updateResults(tp::viewRange(queryData, 0, sample.vkQueryCount), sample.semaphore);
     }
 }
 

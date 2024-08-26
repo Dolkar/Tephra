@@ -69,7 +69,7 @@ void RenderPass::assignDeferred(
     // Create render lists using secondary command buffer with rendering inheritance
     prepareInheritance(setup);
 
-    int multiviewViewCount = countBitsSet(vkRenderingInfo.viewMask);
+    int multiviewViewCount = tp::max(countBitsSet(vkRenderingInfo.viewMask), 1u);
 
     for (std::size_t i = 0; i < listsToAssign.size(); i++) {
         listsToAssign[i] = RenderList(
@@ -117,7 +117,7 @@ void RenderPass::recordPass(const JobData* jobData, PrimaryBufferRecorder& recor
 
     if (isInline) {
         // Call the inline command recorder callback
-        int multiviewViewCount = countBitsSet(vkRenderingInfo.viewMask);
+        int multiviewViewCount = tp::max(countBitsSet(vkRenderingInfo.viewMask), 1u);
         RenderList inlineList = RenderList(
             &recorder.getVkiCommands(),
             jobData,

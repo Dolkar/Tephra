@@ -122,6 +122,8 @@ public:
         return queueStates[queueUniqueIndex].get();
     }
 
+    void updateDeviceProgress_();
+
     TEPHRA_MAKE_NONCOPYABLE(DeviceContainer);
     TEPHRA_MAKE_NONMOVABLE(DeviceContainer);
     ~DeviceContainer();

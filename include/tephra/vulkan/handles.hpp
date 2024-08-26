@@ -31,13 +31,13 @@ struct VkObjectHandle {
 
 /// Equality operator for tp::VkObjectHandle.
 template <typename T, VkObjectType Id>
-inline bool operator==(const VkObjectHandle<T, Id>& lhs, const VkObjectHandle<T, Id>& rhs) {
+constexpr bool operator==(const VkObjectHandle<T, Id>& lhs, const VkObjectHandle<T, Id>& rhs) {
     return lhs.vkRawHandle == rhs.vkRawHandle;
 }
 
 /// Inequality operator for tp::VkObjectHandle.
 template <typename T, VkObjectType Id>
-inline bool operator!=(const VkObjectHandle<T, Id>& lhs, const VkObjectHandle<T, Id>& rhs) {
+constexpr bool operator!=(const VkObjectHandle<T, Id>& lhs, const VkObjectHandle<T, Id>& rhs) {
     return !(lhs == rhs);
 }
 

@@ -8,8 +8,9 @@
 #include <tephra/image.hpp>
 #include <tephra/render.hpp>
 #include <tephra/memory.hpp>
-#include <tephra/debug_handler.hpp>
+#include <tephra/semaphore.hpp>
 #include <tephra/query.hpp>
+#include <tephra/debug_handler.hpp>
 #include <tephra/common.hpp>
 #include <functional>
 
@@ -343,6 +344,9 @@ public:
     /// on the device.
     /// @param semaphore
     ///     The job semaphore to query the state of.
+    /// @remarks
+    ///     This method is meant to be a fast check and does not actually query the device for the latest state of the
+    ///     semaphore. To do that, call tp::Device::updateDeviceProgress first.
     bool isJobSemaphoreSignalled(const JobSemaphore& semaphore);
 
     /// Waits until the given tp::JobSemaphore handles have been signalled or until the timeout has been reached.
@@ -381,7 +385,7 @@ public:
     /// @remarks
     ///     The function will **not** be called the moment the semaphores become signalled. Their status is only checked
     ///     occasionally as part of various other API calls. This update can be triggered explicitly through
-    ///     tp::Device::checkDeviceProgress.
+    ///     tp::Device::updateDeviceProgress.
     /// @remarks
     ///     Other device methods that operate on queues (e.g. enqueuing a follow-up job) must **not** be called from
     ///     within the callback function.
@@ -389,7 +393,7 @@ public:
 
     /// Updates the status of job semaphores and triggers the freeing of resources and calling cleanup callbacks if
     /// some jobs have finished executing since the last update.
-    void checkDeviceProgress();
+    void updateDeviceProgress();
 
     /// Creates a tp::Buffer object out of a raw Vulkan buffer handle and an optional VMA memory allocation handle.
     /// @param setup

@@ -6,12 +6,9 @@
 #include <tephra/device.hpp>
 #include <tephra/query.hpp>
 
-namespace tp {
+#include <atomic>
 
-struct QueryResult {
-    uint64_t value = 0;
-    JobSemaphore jobSemaphore = {};
-};
+namespace tp {
 
 // Represents a growing pool of Vulkan queries of the same type and properties
 // Synchronized externally by QueryManager
@@ -35,6 +32,7 @@ public:
     // Allocates a range of consecutive queries (needed for multiview)
     uint32_t allocateVkQueries(uint32_t count);
 
+    // Reads back and frees a range of consecutive queries (range must have been allocated with allocateVkQueries)
     void readbackAndFreeVkQueries(uint32_t firstIndex, uint32_t count, ArrayView<uint64_t> data);
 
 private:
@@ -49,10 +47,16 @@ private:
 struct QueryEntry {
     // Used for beginVkQueryIndex to signify the query has not yet begun
     static constexpr uint32_t InvalidIndex = ~0u;
+    // Store at least two so that we can ping-pong between the results
+    static constexpr uint32_t MinResultsHistorySize = 2u;
 
     QueryType type;
     std::variant<std::monostate, RenderQueryType> subType;
-    QueryResult result;
+    // Unsorted list of results
+    std::vector<QueryResult> resultsHistory;
+    // The index of the most recent result
+    uint32_t lastResultIndex;
+    // The parent pool's index
     uint32_t poolIndex;
     // Index of the last query in the pool for scoped queries. Cleared after the scope ends.
     uint32_t beginVkQueryIndex;
@@ -63,7 +67,7 @@ struct QueryEntry {
     std::pair<VkQueryType, VkQueryPipelineStatisticFlagBits> decodeVkQueryType() const;
 
     // Updates itself from Vulkan query data
-    void updateResult(ArrayView<uint64_t> queryData, const JobSemaphore& semaphore);
+    void updateResults(ArrayView<uint64_t> queryData, const JobSemaphore& semaphore);
 };
 
 // A non-owning query handle
@@ -96,12 +100,10 @@ public:
 
     void queueFreeQuery(const QueryHandle& query);
 
+    void setQueryMaxHistorySize(const QueryHandle& query, uint32_t size);
+
     // Reads out all processed query samples and performs cleanup
     void update();
-
-    double convertTimestampToSeconds(uint64_t timestampQueryResult) const {
-        return ticksToSecondsFactor * timestampQueryResult;
-    }
 
     static QueryHandle getQueryHandle(const BaseQuery& query) {
         return query.handle;
@@ -149,7 +151,6 @@ private:
     std::vector<QuerySample> pendingSamples;
     // For now we just use this global mutex to sync all query operations
     Mutex globalMutex;
-    double ticksToSecondsFactor;
 };
 
 }

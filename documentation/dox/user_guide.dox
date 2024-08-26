@@ -228,9 +228,10 @@ counts, like when using the tp::ImageView of an tp::Image, the parent image must
 Vulkan requires most of its handles to stay alive during the entire time the GPU is using them, which, in a renderer
 setting, means keeping them around for several frames. Tephra handles this by extending the lifetime of all objects that
 hold such Vulkan handles. When an object gets destroyed, its handles get stored in a per-device container with
-information about the jobs that have been enqueued so far. On some device method calls, like
-tp::Device::checkDeviceProgress and tp::Device::submitPresentImagesKHR, the jobs are checked for completion on the device
-and the relevant Vulkan handles will finally be destroyed.
+information about the jobs that have been enqueued so far. During some device method calls, like
+tp::Device::waitForJobSemaphores and tp::Device::enqueueJob, the jobs are checked for completion on the device and the
+relevant Vulkan handles will finally be destroyed. This can also be triggered by explicitly calling
+tp::Device::updateDeviceProgress.
 
 This is done efficiently through the use of globally incrementing job IDs that are used as values for Vulkan's timeline
 semaphores. When a handle is to be destroyed, a value T gets assigned to it, which is the ID of the last enqueued job.

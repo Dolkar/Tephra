@@ -1,6 +1,7 @@
 #pragma once
 
 #include <tephra/common.hpp>
+#include <tephra/semaphore.hpp>
 
 namespace tp {
 
@@ -13,8 +14,10 @@ enum class RenderQueryType {
     // Occlusion queries
     Occlusion,
     // Occlusion queries with PRECISE bit
+    // Requires occlusionQueryPrecise feature
     OcclusionPrecise,
     // Pipeline statistics queries
+    // Requires pipelineStatisticsQuery feature
     InputAssemblyVertices,
     InputAssemblyPrimitives,
     VertexShaderInvocations,
@@ -25,6 +28,15 @@ enum class RenderQueryType {
     FragmentShaderInvocations,
     TessellationControlShaderPatches,
     TessellationEvaluationShaderInvocations,
+};
+
+struct QueryResult {
+    JobSemaphore jobSemaphore;
+    uint64_t value = 0;
+
+    bool isNull() const {
+        return jobSemaphore.timestamp == 0;
+    }
 };
 
 struct QueryEntry;
@@ -41,14 +53,18 @@ public:
         return parentManager == nullptr;
     }
 
-    const JobSemaphore& getResultJobSemaphore() const;
+    void setMaxHistorySize(uint32_t size);
+
+    QueryResult getLastResult() const;
+
+    QueryResult getJobResult(const JobSemaphore& jobSemaphore) const;
 
     TEPHRA_MAKE_NONCOPYABLE(BaseQuery);
     TEPHRA_MAKE_MOVABLE(BaseQuery);
 
 protected:
     BaseQuery() : parentManager(nullptr), handle(nullptr) {}
-    BaseQuery(QueryManager* parentManager, Handle handle) : parentManager(parentManager), handle(handle) {}
+    BaseQuery(QueryManager* parentManager, Handle handle);
     ~BaseQuery() noexcept;
 
     QueryManager* parentManager;
@@ -59,17 +75,12 @@ class TimestampQuery : public BaseQuery {
 public:
     TimestampQuery() : BaseQuery() {}
     TimestampQuery(QueryManager* parentManager, Handle handle) : BaseQuery(parentManager, handle) {}
-
-    uint64_t getResult() const;
-    double getResultSeconds() const;
 };
 
 class RenderQuery : public BaseQuery {
 public:
     RenderQuery() : BaseQuery() {}
     RenderQuery(QueryManager* parentManager, Handle handle) : BaseQuery(parentManager, handle) {}
-
-    uint64_t getResult() const;
 };
 
 }

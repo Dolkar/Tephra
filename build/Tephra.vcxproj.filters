@@ -399,6 +399,9 @@
     <ClInclude Include="..\src\tephra\device\query_manager.hpp">
       <Filter>Source Files\Device</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\tephra\semaphore.hpp">
+      <Filter>Interface Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Interface Files">

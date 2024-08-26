@@ -21,7 +21,6 @@ class Device;
 class PhysicalDevice;
 class ShaderModule;
 class Pipeline;
-
 class DebugTarget;
 
 // Internal class for storing DebugTarget without a full definition

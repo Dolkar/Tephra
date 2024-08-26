@@ -11,13 +11,6 @@ namespace tp {
 constexpr const char* ComputeListTypeName = "ComputeList";
 constexpr const char* RenderListTypeName = "RenderList";
 
-JobSemaphore::JobSemaphore() : queue(QueueType::Undefined), timestamp(0) {}
-
-ExternalSemaphore::ExternalSemaphore() : vkSemaphoreHandle(), timestamp(0) {}
-
-ExternalSemaphore::ExternalSemaphore(VkSemaphoreHandle vkSemaphoreHandle, uint64_t timestamp)
-    : vkSemaphoreHandle(vkSemaphoreHandle), timestamp(timestamp) {}
-
 template <typename T, typename... TArgs>
 T* recordCommand(JobRecordStorage& storage, JobCommandTypes type, TArgs&&... args) {
     std::size_t allocSize = sizeof(JobRecordStorage::CommandMetadata) + sizeof(T);

@@ -604,6 +604,10 @@ VkQueryPoolHandle LogicalDevice::createQueryPool(
 
     VkQueryPool vkQueryPoolHandle;
     throwRetcodeErrors(vkiDevice.createQueryPool(vkDeviceHandle, &createInfo, nullptr, &vkQueryPoolHandle));
+
+    // We need to reset queries before using them for the first time
+    vkiDevice.resetQueryPool(vkDeviceHandle, vkQueryPoolHandle, 0, queryCount);
+
     return VkQueryPoolHandle(vkQueryPoolHandle);
 }
 
