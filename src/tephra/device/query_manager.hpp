@@ -10,6 +10,11 @@
 
 namespace tp {
 
+enum class QueryType {
+    Timestamp,
+    Render,
+};
+
 // Represents a growing pool of Vulkan queries of the same type and properties
 // Synchronized externally by QueryManager
 class QueryPool {

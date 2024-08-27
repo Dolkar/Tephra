@@ -559,6 +559,7 @@ enum class PresentMode : uint32_t {
 TEPHRA_VULKAN_COMPATIBLE_ENUM(PresentMode, VkPresentModeKHR);
 
 /// Vulkan pipeline stages for the purpose of specifying when a tp::TimestampQuery should be written to.
+/// @see @vksymbol{VkPipelineStageFlagBits}
 enum class PipelineStage : uint32_t {
     TopOfPipe = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
     DrawIndirect = VK_PIPELINE_STAGE_DRAW_INDIRECT_BIT,

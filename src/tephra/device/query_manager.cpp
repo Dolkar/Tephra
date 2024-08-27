@@ -17,11 +17,6 @@ BaseQuery& BaseQuery::operator=(BaseQuery&& other) noexcept {
     return *this;
 }
 
-void BaseQuery::setMaxHistorySize(uint32_t size) {
-    TEPHRA_ASSERT(!isNull());
-    parentManager->setQueryMaxHistorySize(handle, size);
-}
-
 QueryResult BaseQuery::getLastResult() const {
     TEPHRA_ASSERT(!isNull());
     return handle->resultsHistory[handle->lastResultIndex];
@@ -34,6 +29,11 @@ QueryResult BaseQuery::getJobResult(const JobSemaphore& jobSemaphore) const {
             return result;
     }
     return {};
+}
+
+void BaseQuery::setMaxHistorySize(uint32_t size) {
+    TEPHRA_ASSERT(!isNull());
+    parentManager->setQueryMaxHistorySize(handle, size);
 }
 
 BaseQuery::BaseQuery(QueryManager* parentManager, Handle handle) : parentManager(parentManager), handle(handle) {

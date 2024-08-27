@@ -192,8 +192,7 @@ public:
     ///     The size of this array must match the size of `pipelineSetups` and all of the elements must point
     ///     be valid pointers.
     /// @remarks
-    ///     Pipeline compilation can be slow. The use of a tp::pipelineCache is recommended as is splitting
-    ///     the pipeline compilation into multiple threads.
+    ///     Pipeline compilation can be slow. Splitting the pipeline compilation into multiple threads is recommended.
     void compileComputePipelines(
         ArrayParameter<const ComputePipelineSetup* const> pipelineSetups,
         const PipelineCache* pipelineCache,
@@ -209,8 +208,7 @@ public:
     ///     The size of this array must match the size of `pipelineSetups` and all of the elements must point
     ///     be valid pointers.
     /// @remarks
-    ///     Pipeline compilation can be slow. The use of a tp::pipelineCache is recommended as is splitting
-    ///     the pipeline compilation into multiple threads.
+    ///     Pipeline compilation can be slow. Splitting the pipeline compilation into multiple threads is recommended.
     void compileGraphicsPipelines(
         ArrayParameter<const GraphicsPipelineSetup* const> pipelineSetups,
         const PipelineCache* pipelineCache,
@@ -238,7 +236,17 @@ public:
         Swapchain* oldSwapchain = nullptr,
         const char* debugName = nullptr);
 
+    /// Creates multiple tp::TimestampQuery objects.
+    /// @param queries
+    ///     An output array of pointers to tp::TimestampQuery objects that are to be created.
     void createTimestampQueries(ArrayParameter<TimestampQuery* const> queries);
+
+    /// Creates multiple tp::RenderQuery objects.
+    /// @param queryTypes
+    ///     The types of render queries that are to be created.
+    /// @param queries
+    ///     An output array of pointers to tp::RenderQuery objects that are to be created. The size of this array must
+    ///     match the size of the `queryTypes` array.
     void createRenderQueries(
         ArrayParameter<const RenderQueryType> queryTypes,
         ArrayParameter<RenderQuery* const> queries);
