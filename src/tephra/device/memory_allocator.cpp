@@ -124,7 +124,9 @@ std::pair<Lifeguard<VkBufferHandle>, Lifeguard<VmaAllocationHandle>> MemoryAlloc
 
     // Allocate memory according to memory preference
     VmaAllocationCreateInfo allocInfo;
-    allocInfo.flags = memoryPreference.createPersistentlyMapped ? VMA_ALLOCATION_CREATE_MAPPED_BIT : 0;
+    allocInfo.flags = setup.vmaAdditionalFlags;
+    allocInfo.flags |= memoryPreference.createPersistentlyMapped ? VMA_ALLOCATION_CREATE_MAPPED_BIT : 0;
+
     allocInfo.usage = VMA_MEMORY_USAGE_UNKNOWN;
     allocInfo.requiredFlags = 0;
     allocInfo.preferredFlags = VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
@@ -268,7 +270,7 @@ std::pair<Lifeguard<VkImageHandle>, Lifeguard<VmaAllocationHandle>> MemoryAlloca
     createInfo.arrayLayers = setup.arrayLayerCount;
     createInfo.samples = vkCastConvertibleEnum(setup.sampleLevel);
     createInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
-    createInfo.usage = vkCastConvertibleEnumMask(setup.usage);
+    createInfo.usage = setup.vkAdditionalUsage | vkCastConvertibleEnumMask(setup.usage);
     createInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
     createInfo.queueFamilyIndexCount = 0;
     createInfo.pQueueFamilyIndices = nullptr;
@@ -308,7 +310,7 @@ std::pair<Lifeguard<VkImageHandle>, Lifeguard<VmaAllocationHandle>> MemoryAlloca
     if (doAllocate) {
         // Images are always allocated from device local memory, don't use memory progression
         VmaAllocationCreateInfo allocInfo;
-        allocInfo.flags = 0;
+        allocInfo.flags = setup.vmaAdditionalFlags;
         allocInfo.usage = VMA_MEMORY_USAGE_UNKNOWN;
         allocInfo.requiredFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
         allocInfo.preferredFlags = 0;
