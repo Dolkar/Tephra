@@ -73,7 +73,7 @@
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#aef2358ce0c2f4e309aa63f06f84268a6" class="m-doc">ImageSetup</a>(</span><span class="m-doc-wrap"><a href="namespacetp.html#a934258f5adba65025b71cc3b7ee994ba" class="m-doc">ImageType</a> type,
+              <span class="m-doc-wrap-bumper"><a href="#aa22f0a5293226c00cbd0637e8cb34dda" class="m-doc">ImageSetup</a>(</span><span class="m-doc-wrap"><a href="namespacetp.html#a934258f5adba65025b71cc3b7ee994ba" class="m-doc">ImageType</a> type,
               <a href="namespacetp.html#a30a831f16dcc9703a77ff823685825c1" class="m-doc">ImageUsageMask</a> usage,
               <a href="namespacetp.html#a575466ff8f546f00468d04124cee38b5" class="m-doc">Format</a> format,
               <a href="structtp_1_1_extent3_d.html" class="m-doc">Extent3D</a> extent,
@@ -81,16 +81,18 @@
               uint32_t arrayLayerCount = 1,
               <a href="namespacetp.html#ab3d0ece6c3b49e1866143d74ead604dd" class="m-doc">MultisampleLevel</a> sampleLevel = MultisampleLevel::x1,
               <a href="classtp_1_1_array_view.html" class="m-doc">ArrayView</a>&lt;<a href="namespacetp.html#a575466ff8f546f00468d04124cee38b5" class="m-doc">Format</a>&gt; compatibleFormats = {},
-              <a href="namespacetp.html#a09e91ec25a4d5c9b24458d2d4738861c" class="m-doc">ImageFlagMask</a> flags = <a href="classtp_1_1_enum_bit_mask.html#a4a96274820fc2248949544d995cd5992" class="m-doc">ImageFlagMask::<wbr />None</a>())</span>
+              <a href="namespacetp.html#a09e91ec25a4d5c9b24458d2d4738861c" class="m-doc">ImageFlagMask</a> flags = <a href="classtp_1_1_enum_bit_mask.html#a4a96274820fc2248949544d995cd5992" class="m-doc">ImageFlagMask::<wbr />None</a>(),
+              VkBufferUsageFlags vkAdditionalUsage = 0,
+              VmaAllocationCreateFlags vmaAdditionalFlags = 0)</span>
             </dt>
             <dd></dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="aef2358ce0c2f4e309aa63f06f84268a6"><div>
+          <section class="m-doc-details" id="aa22f0a5293226c00cbd0637e8cb34dda"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> tp::<wbr />ImageSetup::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aef2358ce0c2f4e309aa63f06f84268a6" class="m-doc-self">ImageSetup</a>(</span><span class="m-doc-wrap"><a href="namespacetp.html#a934258f5adba65025b71cc3b7ee994ba" class="m-doc">ImageType</a> type,
+              <span class="m-doc-wrap-bumper"> tp::<wbr />ImageSetup::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa22f0a5293226c00cbd0637e8cb34dda" class="m-doc-self">ImageSetup</a>(</span><span class="m-doc-wrap"><a href="namespacetp.html#a934258f5adba65025b71cc3b7ee994ba" class="m-doc">ImageType</a> type,
               <a href="namespacetp.html#a30a831f16dcc9703a77ff823685825c1" class="m-doc">ImageUsageMask</a> usage,
               <a href="namespacetp.html#a575466ff8f546f00468d04124cee38b5" class="m-doc">Format</a> format,
               <a href="structtp_1_1_extent3_d.html" class="m-doc">Extent3D</a> extent,
@@ -98,7 +100,9 @@
               uint32_t arrayLayerCount = 1,
               <a href="namespacetp.html#ab3d0ece6c3b49e1866143d74ead604dd" class="m-doc">MultisampleLevel</a> sampleLevel = MultisampleLevel::x1,
               <a href="classtp_1_1_array_view.html" class="m-doc">ArrayView</a>&lt;<a href="namespacetp.html#a575466ff8f546f00468d04124cee38b5" class="m-doc">Format</a>&gt; compatibleFormats = {},
-              <a href="namespacetp.html#a09e91ec25a4d5c9b24458d2d4738861c" class="m-doc">ImageFlagMask</a> flags = <a href="classtp_1_1_enum_bit_mask.html#a4a96274820fc2248949544d995cd5992" class="m-doc">ImageFlagMask::<wbr />None</a>())</span></span>
+              <a href="namespacetp.html#a09e91ec25a4d5c9b24458d2d4738861c" class="m-doc">ImageFlagMask</a> flags = <a href="classtp_1_1_enum_bit_mask.html#a4a96274820fc2248949544d995cd5992" class="m-doc">ImageFlagMask::<wbr />None</a>(),
+              VkBufferUsageFlags vkAdditionalUsage = 0,
+              VmaAllocationCreateFlags vmaAdditionalFlags = 0)</span></span>
             </h3>
             <table class="m-table m-fullwidth m-flat">
               <thead>
@@ -140,6 +144,14 @@
                 <tr>
                   <td>flags</td>
                   <td>Additional flags for creation of the image.</td>
+                </tr>
+                <tr>
+                  <td>vkAdditionalUsage</td>
+                  <td>A mask of additional Vulkan usage flags that will be passed to   <a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkImageCreateInfo.html" class="m-doc-external">VkImageCreateInfo</a>.</td>
+                </tr>
+                <tr>
+                  <td>vmaAdditionalFlags</td>
+                  <td>A mask of additional VMA allocation create flags that will be passed to   &lt;a href=&#x27;<a href="https://gpuopen-librariesandsdks.github.io/VulkanMemoryAllocator/html/struct_vma_allocation_create_info.html" class="m-doc-external">https://gpuopen-librariesandsdks.github.io/VulkanMemoryAllocator/html/struct_<wbr />vma_<wbr />allocation_<wbr />create_<wbr />info.html</a>&quot;&gt;VmaAllocationCreateInfo</td>
                 </tr>
               </tbody>
             </table>
