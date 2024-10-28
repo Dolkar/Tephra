@@ -53,12 +53,13 @@ struct QueryEntry {
     // Used for beginVkQueryIndex to signify the query has not yet begun
     static constexpr uint32_t InvalidIndex = ~0u;
     // Store at least two so that we can ping-pong between the results
-    static constexpr uint32_t MinResultsHistorySize = 2u;
+    static constexpr uint32_t MinMaxResultsHistorySize = 2u;
 
     QueryType type;
     std::variant<std::monostate, RenderQueryType> subType;
     // Unsorted list of results
     std::vector<QueryResult> resultsHistory;
+    uint32_t maxResultsHistorySize;
     // The index of the most recent result
     uint32_t lastResultIndex;
     // The parent pool's index
@@ -104,8 +105,6 @@ public:
         const JobSemaphore& semaphore);
 
     void queueFreeQuery(const QueryHandle& query);
-
-    void setQueryMaxHistorySize(const QueryHandle& query, uint32_t size);
 
     // Reads out all processed query samples and performs cleanup
     void update();

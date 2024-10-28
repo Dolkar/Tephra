@@ -1787,6 +1787,13 @@ bool Window::drawFrame() {
 @endcode
 
 <br><hr>
+@section ug-other Other functionality
+@subsection ug-other-queries Queries
+
+- using them more than once in a job is undefined
+
+
+<br><hr>
 @section ug-utilities Utilities
 
 Tephra also provides some additional utilities built on top of the base API. They live in the tp::utils namespace and

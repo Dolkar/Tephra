@@ -427,7 +427,14 @@ public:
     ///     The call will have no effect when tp::ApplicationExtension::EXT_DebugUtils is not enabled.
     void cmdEndDebugLabel();
 
-    void cmdWriteTimestamp(const TimestampQuery& query, PipelineStage stage = PipelineStage::BottomOfPipe);
+    /// Queries the time on the device as part of the given pipeline stage and writes the result to the provided query
+    /// object.
+    /// @param query
+    ///     The timestamp query object that the result will be written to.
+    /// @param stage
+    ///     The pipeline stage at which the timestamp should be measured. This means a time point at which all the
+    ///     previously submitted commands have finished executing the given pipeline stage.
+    void cmdWriteTimestamp(const TimestampQuery& query, PipelineStage stage);
 
     /// Updates the internal synchronization state for the buffer view to the given external access.
     ///

@@ -101,8 +101,9 @@ protected:
 
 /// Query for measuring execution time on the device timeline.
 /// @remarks
-///     The returned value is the number of "ticks" that has passed since some point in the past. Two timestamp query
-///     values can be subtracted from each other and converted to a duration in nanoseconds by multiplying them with
+///     The returned value is the number of "ticks" that has passed since some undefined point in the past. Two
+///     timestamp query values can be subtracted from each other and converted to a duration in nanoseconds by
+///     multiplying them with
 ///     @see @vksymbol{VkPhysicalDeviceLimits}::`timestampPeriod`.
 /// @remarks
 ///     By default, it is only valid to compare or subtract timstamp query results that were written as part of the same

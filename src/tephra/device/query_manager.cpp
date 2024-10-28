@@ -33,7 +33,7 @@ QueryResult BaseQuery::getJobResult(const JobSemaphore& jobSemaphore) const {
 
 void BaseQuery::setMaxHistorySize(uint32_t size) {
     TEPHRA_ASSERT(!isNull());
-    parentManager->setQueryMaxHistorySize(handle, size);
+    handle->maxResultsHistorySize = tp::max(size, QueryEntry::MinMaxResultsHistorySize);
 }
 
 BaseQuery::BaseQuery(QueryManager* parentManager, Handle handle) : parentManager(parentManager), handle(handle) {
@@ -149,15 +149,19 @@ void QueryEntry::updateResults(ArrayView<uint64_t> queryData, const tp::JobSemap
     TEPHRA_ASSERT(!semaphore.isNull());
 
     // Find the oldest result to overwrite
-    QueryResult* oldestResult = resultsHistory.data();
-    for (std::size_t i = 1; i < resultsHistory.size(); i++) {
-        QueryResult* result = &resultsHistory[i];
-        // Null job semaphores have timestamp 0, so they'll be treated as oldest
-        if (result->jobSemaphore.timestamp <= oldestResult->jobSemaphore.timestamp)
-            oldestResult = result;
+    QueryResult* resultToUpdate = resultsHistory.data();
+    if (resultsHistory.size() >= maxResultsHistorySize) {
+        for (std::size_t i = 1; i < resultsHistory.size(); i++) {
+            QueryResult* result = &resultsHistory[i];
+            // Null job semaphores have timestamp 0, so they'll be treated as oldest
+            if (result->jobSemaphore.timestamp <= resultToUpdate->jobSemaphore.timestamp)
+                resultToUpdate = result;
+        }
+    } else {
+        resultToUpdate = &resultsHistory.emplace_back();
     }
 
-    if (semaphore.timestamp <= oldestResult->jobSemaphore.timestamp)
+    if (semaphore.timestamp <= resultToUpdate->jobSemaphore.timestamp)
         return;
 
     // QueryData can have multiple entries if used during multiview. Here we decide how to combine them.
@@ -179,15 +183,15 @@ void QueryEntry::updateResults(ArrayView<uint64_t> queryData, const tp::JobSemap
     }
 
     // Overwrite oldest result
-    *oldestResult = { semaphore, newResultValue };
+    *resultToUpdate = { semaphore, newResultValue };
 
     QueryResult* lastResult = &resultsHistory[lastResultIndex];
     // Expecting at least two results in history
-    TEPHRA_ASSERT(lastResult != oldestResult);
+    TEPHRA_ASSERT(lastResult != resultToUpdate);
 
     // If this is the newest result, also update the index
     if (semaphore.timestamp > lastResult->jobSemaphore.timestamp) {
-        lastResultIndex = static_cast<uint32_t>(std::distance(resultsHistory.data(), oldestResult));
+        lastResultIndex = static_cast<uint32_t>(std::distance(resultsHistory.data(), resultToUpdate));
     }
 }
 
@@ -284,12 +288,6 @@ void QueryManager::queueFreeQuery(const QueryHandle& query) {
     return entriesToFree.push_back(query);
 }
 
-void QueryManager::setQueryMaxHistorySize(const QueryHandle& query, uint32_t size) {
-    TEPHRA_ASSERT(query != nullptr);
-    std::lock_guard<Mutex> lock(globalMutex);
-    query->resultsHistory.resize(tp::max(size, QueryEntry::MinResultsHistorySize));
-}
-
 void QueryManager::update() {
     std::lock_guard<Mutex> lock(globalMutex);
 
@@ -345,7 +343,7 @@ QueryHandle QueryManager::createQuery(QueryType type, std::variant<std::monostat
 
     query->type = type;
     query->subType = subType;
-    query->resultsHistory.resize(QueryEntry::MinResultsHistorySize);
+    query->maxResultsHistorySize = QueryEntry::MinMaxResultsHistorySize;
     query->lastResultIndex = 0;
 
     auto [vkType, pipelineStatistics] = query->decodeVkQueryType();
