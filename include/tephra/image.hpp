@@ -170,6 +170,8 @@ struct ImageSetup {
     MultisampleLevel sampleLevel;
     ArrayView<Format> compatibleFormats;
     ImageFlagMask flags;
+    VkImageUsageFlags vkAdditionalUsage;
+    VmaAllocationCreateFlags vmaAdditionalFlags;
 
     /// @param type
     ///     The type and dimensionality of the image.
@@ -190,6 +192,11 @@ struct ImageSetup {
     ///     permitted to have.
     /// @param flags
     ///     Additional flags for creation of the image.
+    /// @param vkAdditionalUsage
+    ///     A mask of additional Vulkan usage flags that will be passed to @vksymbol{VkImageCreateInfo}.
+    /// @param vmaAdditionalFlags
+    ///     A mask of additional VMA allocation create flags that will be passed to
+    ///     @vmasymbol{VmaAllocationCreateInfo,struct_vma_allocation_create_info}
     /// @remarks
     ///     The extent must be compatible with the selected image type. For example 2D images
     ///     must have `extent.depth` equal to 1.
@@ -202,7 +209,9 @@ struct ImageSetup {
         uint32_t arrayLayerCount = 1,
         MultisampleLevel sampleLevel = MultisampleLevel::x1,
         ArrayView<Format> compatibleFormats = {},
-        ImageFlagMask flags = ImageFlagMask::None())
+        ImageFlagMask flags = ImageFlagMask::None(),
+        VkBufferUsageFlags vkAdditionalUsage = 0,
+        VmaAllocationCreateFlags vmaAdditionalFlags = 0)
         : type(type),
           usage(usage),
           format(format),
@@ -211,7 +220,9 @@ struct ImageSetup {
           arrayLayerCount(arrayLayerCount),
           sampleLevel(sampleLevel),
           compatibleFormats(compatibleFormats),
-          flags(flags) {}
+          flags(flags),
+          vkAdditionalUsage(vkAdditionalUsage),
+          vmaAdditionalFlags(vmaAdditionalFlags) {}
 };
 
 /// Represents a multidimensional array of data interpreted as textures or attachments.

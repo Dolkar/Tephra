@@ -188,6 +188,7 @@ struct BufferSetup {
     uint64_t size;
     BufferUsageMask usage;
     VkBufferUsageFlags vkAdditionalUsage;
+    VmaAllocationCreateFlags vmaAdditionalFlags;
 
     /// @param size
     ///     The size of the new buffer in bytes.
@@ -195,8 +196,15 @@ struct BufferSetup {
     ///     A mask of tp::BufferUsage specifying the permitted set of usages of the new buffer.
     /// @param vkAdditionalUsage
     ///     A mask of additional Vulkan usage flags that will be passed to @vksymbol{VkBufferCreateInfo}.
-    BufferSetup(uint64_t size, BufferUsageMask usage, VkBufferUsageFlags vkAdditionalUsage = 0)
-        : size(size), usage(usage), vkAdditionalUsage(vkAdditionalUsage) {}
+    /// @param vmaAdditionalFlags
+    ///     A mask of additional VMA allocation create flags that will be passed to
+    ///     @vmasymbol{VmaAllocationCreateInfo,struct_vma_allocation_create_info}
+    BufferSetup(
+        uint64_t size,
+        BufferUsageMask usage,
+        VkBufferUsageFlags vkAdditionalUsage = 0,
+        VmaAllocationCreateFlags vmaAdditionalFlags = 0)
+        : size(size), usage(usage), vkAdditionalUsage(vkAdditionalUsage), vmaAdditionalFlags(vmaAdditionalFlags) {}
 };
 
 /// Represents a linear array of data visible to the device.
