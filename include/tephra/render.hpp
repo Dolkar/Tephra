@@ -327,7 +327,7 @@ public:
     /// @param queries
     ///     The render query objects that the result will be written to.
     /// @remarks
-    ///     All of the query objects must have previously been begun as part of a tp::RenderList::cmdBegunQueries call
+    ///     All of the query objects must have previously been begun as part of a tp::RenderList::cmdBeginQueries call
     ///     of this render list (but not necessarily all in the same call).
     void cmdEndQueries(ArrayParameter<const RenderQuery* const> queries);
 

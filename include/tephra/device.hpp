@@ -399,8 +399,8 @@ public:
     ///     within the callback function.
     void addCleanupCallback(CleanupCallback callback);
 
-    /// Updates the status of job semaphores and triggers the freeing of resources and calling cleanup callbacks if
-    /// some jobs have finished executing since the last update.
+    /// Updates the status of job semaphores, retrieves query results, triggers the freeing of resources and calls
+    /// cleanup callbacks for any jobs that have finished executing since the last update.
     void updateDeviceProgress();
 
     /// Creates a tp::Buffer object out of a raw Vulkan buffer handle and an optional VMA memory allocation handle.
