@@ -140,6 +140,10 @@ VulkanDeviceInterface::VulkanDeviceInterface(const VulkanInstanceInterface& vkiI
     waitSemaphores = LOAD_DEVICE_PROCEDURE(vkWaitSemaphores);
     signalSemaphore = LOAD_DEVICE_PROCEDURE(vkSignalSemaphore);
     getBufferDeviceAddress = LOAD_DEVICE_PROCEDURE(vkGetBufferDeviceAddress);
+    createQueryPool = LOAD_DEVICE_PROCEDURE(vkCreateQueryPool);
+    destroyQueryPool = LOAD_DEVICE_PROCEDURE(vkDestroyQueryPool);
+    getQueryPoolResults = LOAD_DEVICE_PROCEDURE(vkGetQueryPoolResults);
+    resetQueryPool = LOAD_DEVICE_PROCEDURE(vkResetQueryPool);
 
     setDebugUtilsObjectNameEXT = LOAD_DEVICE_EXT_PROCEDURE(vkSetDebugUtilsObjectNameEXT);
     setDebugUtilsObjectTagEXT = LOAD_DEVICE_EXT_PROCEDURE(vkSetDebugUtilsObjectTagEXT);
@@ -213,7 +217,6 @@ VulkanCommandInterface::VulkanCommandInterface(
     cmdPipelineBarrier = LOAD_DEVICE_PROCEDURE(vkCmdPipelineBarrier);
     cmdBeginQuery = LOAD_DEVICE_PROCEDURE(vkCmdBeginQuery);
     cmdEndQuery = LOAD_DEVICE_PROCEDURE(vkCmdEndQuery);
-    cmdResetQueryPool = LOAD_DEVICE_PROCEDURE(vkCmdResetQueryPool);
     cmdWriteTimestamp = LOAD_DEVICE_PROCEDURE(vkCmdWriteTimestamp);
     cmdCopyQueryPoolResults = LOAD_DEVICE_PROCEDURE(vkCmdCopyQueryPoolResults);
     cmdPushConstants = LOAD_DEVICE_PROCEDURE(vkCmdPushConstants);

@@ -93,10 +93,9 @@ bool TimelineManager::waitForTimestamps(
     if (waitVkSemaphoreHandles.empty()) {
         return true;
     } else {
-        // Wait for the rest and update
+        // Wait for the rest
         bool hasFinished = deviceImpl->getLogicalDevice()->waitForSemaphores(
             view(waitVkSemaphoreHandles), view(waitTimestamps), waitAll, timeout);
-        update();
 
         return hasFinished;
     }

@@ -11,13 +11,6 @@ namespace tp {
 constexpr const char* ComputeListTypeName = "ComputeList";
 constexpr const char* RenderListTypeName = "RenderList";
 
-JobSemaphore::JobSemaphore() : queue(QueueType::Undefined), timestamp(0) {}
-
-ExternalSemaphore::ExternalSemaphore() : vkSemaphoreHandle(), timestamp(0) {}
-
-ExternalSemaphore::ExternalSemaphore(VkSemaphoreHandle vkSemaphoreHandle, uint64_t timestamp)
-    : vkSemaphoreHandle(vkSemaphoreHandle), timestamp(timestamp) {}
-
 template <typename T, typename... TArgs>
 T* recordCommand(JobRecordStorage& storage, JobCommandTypes type, TArgs&&... args) {
     std::size_t allocSize = sizeof(JobRecordStorage::CommandMetadata) + sizeof(T);
@@ -411,7 +404,7 @@ void Job::cmdExecuteComputePass(
             setup, std::move(std::get<ComputeInlineCallback>(commandRecording)), std::move(listDebugTarget));
     } else {
         ArrayView<ComputeList>& computeListsToAssign = std::get<ArrayView<ComputeList>>(commandRecording);
-        computePass.assignDeferred(setup, listDebugTarget, computeListsToAssign);
+        computePass.assignDeferred(setup, jobData, listDebugTarget, computeListsToAssign);
     }
 
     for (const BufferComputeAccess& entry : setup.bufferAccesses) {
@@ -445,7 +438,7 @@ void Job::cmdExecuteRenderPass(
             setup, std::move(std::get<RenderInlineCallback>(commandRecording)), std::move(listDebugTarget));
     } else {
         ArrayView<RenderList>& renderListsToAssign = std::get<ArrayView<RenderList>>(commandRecording);
-        renderPass.assignDeferred(setup, listDebugTarget, renderListsToAssign);
+        renderPass.assignDeferred(setup, jobData, listDebugTarget, renderListsToAssign);
     }
 
     for (const BufferRenderAccess& entry : setup.bufferAccesses) {
@@ -484,6 +477,12 @@ void Job::cmdEndDebugLabel() {
     const DeviceContainer* deviceImpl = jobData->resourcePoolImpl->getParentDeviceImpl();
     if (deviceImpl->getLogicalDevice()->isFunctionalityAvailable(Functionality::DebugUtilsEXT))
         recordCommand<JobRecordStorage::DebugLabelData>(jobData->record, JobCommandTypes::EndDebugLabel, nullptr);
+}
+
+void Job::cmdWriteTimestamp(const TimestampQuery& query, PipelineStage stage) {
+    TEPHRA_DEBUG_SET_CONTEXT(debugTarget.get(), "cmdWriteTimestamp", nullptr);
+    recordCommand<JobRecordStorage::WriteTimestampData>(
+        jobData->record, JobCommandTypes::WriteTimestamp, QueryManager::getQueryHandle(query), stage);
 }
 
 void Job::vkCmdImportExternalResource(

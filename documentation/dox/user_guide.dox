@@ -228,9 +228,10 @@ counts, like when using the tp::ImageView of an tp::Image, the parent image must
 Vulkan requires most of its handles to stay alive during the entire time the GPU is using them, which, in a renderer
 setting, means keeping them around for several frames. Tephra handles this by extending the lifetime of all objects that
 hold such Vulkan handles. When an object gets destroyed, its handles get stored in a per-device container with
-information about the jobs that have been enqueued so far. On some device method calls, like
-tp::Device::updateSemaphores and tp::Device::submitPresentImagesKHR, the jobs are checked for completion on the device
-and the relevant Vulkan handles will finally be destroyed.
+information about the jobs that have been enqueued so far. During some device method calls, like
+tp::Device::waitForJobSemaphores and tp::Device::enqueueJob, the jobs are checked for completion on the device and the
+relevant Vulkan handles will finally be destroyed. This can also be triggered by explicitly calling
+tp::Device::updateDeviceProgress.
 
 This is done efficiently through the use of globally incrementing job IDs that are used as values for Vulkan's timeline
 semaphores. When a handle is to be destroyed, a value T gets assigned to it, which is the ID of the last enqueued job.
@@ -1784,6 +1785,64 @@ bool Window::drawFrame() {
     return true;
 }
 @endcode
+
+<br><hr>
+@section ug-other Other functionality
+@subsection ug-other-queries Queries
+
+Another useful functionality exposed by Vulkan are queries, which provide a mechanism for retrieving various statistics
+and timings about the processing of submitted device commands. Since they are executed on the timeline of a device
+queue, the process of retrieving the information is asynchronous. In Tephra, queries are split based on the kind of
+information they record and how they are used.
+
+tp::TimestampQuery provides the ability to record a timestamp at a chosen point during command execution. By default,
+the timestamp isn't very useful on its own, but by recording two timestamps and subtracting their values, the duration
+of a sequence of commands can be measured. The format of the values can be arbitrary and depend on the device, but
+they can be converted to nanoseconds by multiplying them with @vksymbol{VkPhysicalDeviceLimits}::`timestampPeriod`.
+Timestamp queries can be created through tp::Device::createTimestampQueries and then either recorded into a job
+with tp::Job::cmdWriteTimestamp, tp::ComputeList::cmdWriteTimestamp or tp::RenderList::cmdWriteTimestamp. In any case,
+you need to also provide a tp::PipelineStage value, which further specifies at what point in the pipeline should the
+timestamp be written. For example, writing a timestamp with the `tp::PipelineStage::FragmentShader` pipeline stage value
+should capture the timestamp at the point when all the previously submitted commands have finished executing all of
+their fragment shader invocations. The support for accurate timestamps of all pipeline stages is not universal, however.
+
+tp::RenderQuery is intended to measure some statistic about a sequence of render commands. For a list of available
+statistics, see tp::RenderQueryType. Render query objects can be created with tp::Device::createRenderQueries,
+while specifying the type of each query to be created. Unlike timestamp queries, they can only be used in render lists
+and require recording two commands in sequence: tp::RenderList::cmdBeginQueries later followed by
+tp::RenderList::cmdEndQueries within the same render list. Calling only one of them with any of the render query objects
+is not valid, as is calling them out of order or across render list boundaries.
+
+Each query object, regardless of type, can be used repeatedly across multiple jobs (but only once in any job). This
+allows for easy monitoring of repeating workloads, such as frame rendering. The last available result can be retrieved
+by calling tp::BaseQuery::getLastResult, returning a tp::QueryResult object. It contains both the recorded value and a
+tp::JobSemaphore identifying the job during which the value was recorded. By default, every query object only stores
+the last measured value, but this can optionally be expanded by calling tp::BaseQuery::setMaxHistorySize. Afterwards,
+any previously executed job can be queried for a result with tp::BaseQuery::getJobResult.
+
+One caveat is that Tephra does not retrieve these results immediately after they are available, but instead needs to
+periodically check and update the existing values. This is done automatically at key points like during a call to
+tp::Device::waitForJobSemaphores, but can also be expedited by manually calling tp::Device::updateDeviceProgress.
+Queries are an area where ease of use was prioritized over performance, as it is expected that they will be used
+sparingly (not more than a few hundred times per frame) or while debugging.
+
+@m_class{m-note m-dim}
+
+@parblock
+The design of queries in Vulkan, of course, did not presume how queries will be used and spared no precautions. Queries
+of each type are created from their own query pools and are one time use only, though recyclable once the result has
+been read back. Tephra manages that with internally synchronized pools that are shared for the device. Its query objects
+are only loosely associated with Vulkan queries. When a query write is recorded, such as through
+tp::Job::cmdWriteTimestamp, a Vulkan query object is retrieved from a pool and queued to be read back later. When the
+job finishes executing and the query results are to be read, the manager reads out the awaiting Vulkan queries and
+notifies the Tephra query objects that requested the values about the new result. The query objects then update their
+internal state, discarding the oldest result in favor of the new one.
+
+One more complication comes from the interaction between Vulkan queries and multiview. While rendering using multiview,
+each query may produce either one result for all views, or one result for each view, depending on the implementation.
+Tephra consolidates the results transparently, so that your query code does not need to change when you enable multiview.
+
+@endparblock
 
 <br><hr>
 @section ug-utilities Utilities

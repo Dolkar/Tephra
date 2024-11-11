@@ -94,22 +94,26 @@ CommandList::CommandList()
 
 CommandList::CommandList(
     const VulkanCommandInterface* vkiCommands,
+    const JobData* jobData,
     VkPipelineBindPoint vkPipelineBindPoint,
     VkCommandBufferHandle vkInlineCommandBuffer,
     DebugTarget debugTarget)
     : debugTarget(std::move(debugTarget)),
       vkiCommands(vkiCommands),
+      jobData(jobData),
       vkCommandBufferHandle(vkInlineCommandBuffer),
       vkFutureCommandBuffer(nullptr),
       vkPipelineBindPoint(vkPipelineBindPoint) {}
 
 CommandList::CommandList(
     const VulkanCommandInterface* vkiCommands,
+    const JobData* jobData,
     VkPipelineBindPoint vkPipelineBindPoint,
     VkCommandBufferHandle* vkFutureCommandBuffer,
     DebugTarget debugTarget)
     : debugTarget(std::move(debugTarget)),
       vkiCommands(vkiCommands),
+      jobData(jobData),
       vkCommandBufferHandle(),
       vkFutureCommandBuffer(vkFutureCommandBuffer),
       vkPipelineBindPoint(vkPipelineBindPoint) {}

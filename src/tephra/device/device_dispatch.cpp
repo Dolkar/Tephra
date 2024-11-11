@@ -313,6 +313,20 @@ OwningPtr<Swapchain> Device::createSwapchainKHR(
     return swapchain;
 }
 
+void Device::createTimestampQueries(ArrayParameter<TimestampQuery* const> queries) {
+    auto deviceImpl = static_cast<DeviceContainer*>(this);
+    TEPHRA_DEBUG_SET_CONTEXT(deviceImpl->getDebugTarget(), "createTimestampQueries", nullptr);
+    deviceImpl->getQueryManager()->createTimestampQueries(queries);
+}
+
+void Device::createRenderQueries(
+    ArrayParameter<const RenderQueryType> queryTypes,
+    ArrayParameter<RenderQuery* const> queries) {
+    auto deviceImpl = static_cast<DeviceContainer*>(this);
+    TEPHRA_DEBUG_SET_CONTEXT(deviceImpl->getDebugTarget(), "createRenderQueries", nullptr);
+    deviceImpl->getQueryManager()->createRenderQueries(queryTypes, queries);
+}
+
 OwningPtr<Buffer> Device::allocateBuffer(
     const BufferSetup& setup,
     const MemoryPreference& memoryPreference,
@@ -429,8 +443,10 @@ JobSemaphore Device::enqueueJob(
     signalSemaphore.timestamp = deviceImpl->getTimelineManager()->assignNextTimestamp(queueIndex);
     jobData->semaphores.jobSignal = signalSemaphore;
 
-    // Update the timeline manager to process its callbacks and free up some resources before allocating again
-    deviceImpl->getTimelineManager()->update();
+    if (!jobData->flags.contains(tp::JobFlag::Small)) {
+        // Update the current progress to maybe free up some resources before allocating again
+        deviceImpl->updateDeviceProgress_();
+    }
 
     // Enqueue the job
     QueueState* queueState = deviceImpl->getQueueState(queueIndex);
@@ -505,9 +521,6 @@ void Device::submitPresentImagesKHR(
     }
 
     SwapchainImpl::submitPresentImages(deviceImpl, queueIndex, swapchains, imageIndices);
-
-    // It should generally be useful to do this here
-    deviceImpl->getTimelineManager()->update();
 }
 
 bool Device::isJobSemaphoreSignalled(const JobSemaphore& semaphore) {
@@ -525,7 +538,6 @@ bool Device::isJobSemaphoreSignalled(const JobSemaphore& semaphore) {
         }
     }
 
-    deviceImpl->getTimelineManager()->updateQueue(queueIndex);
     return deviceImpl->getTimelineManager()->wasTimestampReachedInQueue(queueIndex, semaphore.timestamp);
 }
 
@@ -568,8 +580,11 @@ bool Device::waitForJobSemaphores(ArrayParameter<const JobSemaphore> semaphores,
         }
     }
 
-    return deviceImpl->getTimelineManager()->waitForTimestamps(
+    bool signalled = deviceImpl->getTimelineManager()->waitForTimestamps(
         view(queueIndices), view(queueTimestamps), waitAll, timeout);
+
+    deviceImpl->updateDeviceProgress_();
+    return signalled;
 }
 
 void Device::waitForIdle() {
@@ -578,7 +593,7 @@ void Device::waitForIdle() {
 
     deviceImpl->getLogicalDevice()->waitForDeviceIdle();
     // Release resources and update callbacks as well
-    deviceImpl->getTimelineManager()->update();
+    deviceImpl->updateDeviceProgress_();
 }
 
 void Device::addCleanupCallback(CleanupCallback callback) {
@@ -588,11 +603,11 @@ void Device::addCleanupCallback(CleanupCallback callback) {
     deviceImpl->getTimelineManager()->addCleanupCallback(std::move(callback));
 }
 
-void Device::updateSemaphores() {
+void Device::updateDeviceProgress() {
     auto deviceImpl = static_cast<DeviceContainer*>(this);
-    TEPHRA_DEBUG_SET_CONTEXT(deviceImpl->getDebugTarget(), "updateSemaphores", nullptr);
+    TEPHRA_DEBUG_SET_CONTEXT(deviceImpl->getDebugTarget(), "updateDeviceProgress", nullptr);
 
-    deviceImpl->getTimelineManager()->update();
+    deviceImpl->updateDeviceProgress_();
 }
 
 OwningPtr<Buffer> Device::vkCreateExternalBuffer(
@@ -696,6 +711,11 @@ PFN_vkVoidFunction Device::vkLoadDeviceProcedure(const char* procedureName) cons
     return deviceImpl->getParentAppImpl()->getInstance()->loadDeviceProcedure(vkGetDeviceHandle(), procedureName);
 }
 
+void DeviceContainer::updateDeviceProgress_() {
+    getTimelineManager()->update();
+    getQueryManager()->update();
+}
+
 DeviceContainer::~DeviceContainer() {
     TEPHRA_DEBUG_SET_CONTEXT_DESTRUCTOR(getDebugTarget());
 }
@@ -717,5 +737,6 @@ template Lifeguard<VkSamplerHandle> Device::vkMakeHandleLifeguard(VkSamplerHandl
 template Lifeguard<VkPipelineHandle> Device::vkMakeHandleLifeguard(VkPipelineHandle vkHandle);
 template Lifeguard<VkSwapchainHandleKHR> Device::vkMakeHandleLifeguard(VkSwapchainHandleKHR vkHandle);
 template Lifeguard<VkSemaphoreHandle> Device::vkMakeHandleLifeguard(VkSemaphoreHandle vkHandle);
+template Lifeguard<VkQueryPoolHandle> Device::vkMakeHandleLifeguard(VkQueryPoolHandle vkHandle);
 
 }

@@ -162,6 +162,19 @@ public:
 
     void queueSubmit(uint32_t queueIndex, const SubmitBatch& submitBatch);
 
+    VkQueryPoolHandle createQueryPool(
+        VkQueryType queryType,
+        VkQueryPipelineStatisticFlagBits pipelineStatistics,
+        uint32_t queryCount);
+
+    void destroyQueryPool(VkQueryPoolHandle vkQueryPoolHandle) noexcept;
+
+    void getQueryResultsAndReset(
+        VkQueryPoolHandle vkQueryPoolHandle,
+        uint32_t firstQuery,
+        uint32_t queryCount,
+        ArrayView<uint64_t> data);
+
     VkSwapchainHandleKHR createSwapchainKHR(
         const SwapchainSetup& setup,
         VkSwapchainHandleKHR vkOldSwapchainHandle,

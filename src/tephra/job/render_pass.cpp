@@ -50,6 +50,7 @@ void AttachmentAccess::convertToVkAccess(
 
 void RenderPass::assignDeferred(
     const RenderPassSetup& setup,
+    const JobData* jobData,
     const DebugTarget& listDebugTarget,
     ArrayView<RenderList>& listsToAssign) {
     prepareNonAttachmentAccesses(setup);
@@ -68,11 +69,15 @@ void RenderPass::assignDeferred(
     // Create render lists using secondary command buffer with rendering inheritance
     prepareInheritance(setup);
 
+    int multiviewViewCount = tp::max(countBitsSet(vkRenderingInfo.viewMask), 1u);
+
     for (std::size_t i = 0; i < listsToAssign.size(); i++) {
         listsToAssign[i] = RenderList(
             &deviceImpl->getCommandPoolPool()->getVkiCommands(),
+            jobData,
             &vkDeferredCommandBuffers[i],
             &vkInheritanceInfo,
+            multiviewViewCount,
             listDebugTarget);
     }
 }
@@ -105,15 +110,20 @@ void RenderPass::resolveAttachmentViews() {
     }
 }
 
-void RenderPass::recordPass(PrimaryBufferRecorder& recorder) {
+void RenderPass::recordPass(const JobData* jobData, PrimaryBufferRecorder& recorder) {
     // Begin and end rendering here
     VkCommandBufferHandle vkPrimaryCommandBufferHandle = recorder.requestBuffer();
     recorder.getVkiCommands().cmdBeginRendering(vkPrimaryCommandBufferHandle, &vkRenderingInfo);
 
     if (isInline) {
         // Call the inline command recorder callback
+        int multiviewViewCount = tp::max(countBitsSet(vkRenderingInfo.viewMask), 1u);
         RenderList inlineList = RenderList(
-            &recorder.getVkiCommands(), vkPrimaryCommandBufferHandle, std::move(inlineListDebugTarget));
+            &recorder.getVkiCommands(),
+            jobData,
+            vkPrimaryCommandBufferHandle,
+            multiviewViewCount,
+            std::move(inlineListDebugTarget));
         inlineRecordingCallback(inlineList);
 
     } else {
@@ -308,9 +318,10 @@ void RenderPass::prepareInheritance(const RenderPassSetup& setup) {
     vkInheritanceInfo.renderPass = VK_NULL_HANDLE;
     vkInheritanceInfo.subpass = 0;
     vkInheritanceInfo.framebuffer = nullptr;
+    // We don't need query inheritance
     vkInheritanceInfo.occlusionQueryEnable = false;
-    vkInheritanceInfo.queryFlags = 0; // TODO
-    vkInheritanceInfo.pipelineStatistics = 0; // TODO
+    vkInheritanceInfo.queryFlags = 0;
+    vkInheritanceInfo.pipelineStatistics = 0;
 }
 
 }

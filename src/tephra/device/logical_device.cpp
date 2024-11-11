@@ -15,6 +15,7 @@ LogicalDevice::LogicalDevice(Instance* instance, QueueMap* queueMap, const Devic
 
     // Add own required features - these are guaranteed to be supported
     auto& vk12Features = vkFeatureMap.get<VkPhysicalDeviceVulkan12Features>();
+    vk12Features.hostQueryReset = VK_TRUE;
     vk12Features.timelineSemaphore = VK_TRUE;
     auto& vk13Features = vkFeatureMap.get<VkPhysicalDeviceVulkan13Features>();
     vk13Features.dynamicRendering = VK_TRUE;
@@ -587,6 +588,51 @@ void LogicalDevice::queueSubmit(uint32_t queueIndex, const SubmitBatch& submitBa
 
     throwRetcodeErrors(vkiDevice.queueSubmit(
         queueInfo.vkQueueHandle, static_cast<uint32_t>(vkSubmitInfos.size()), vkSubmitInfos.data(), VK_NULL_HANDLE));
+}
+
+VkQueryPoolHandle LogicalDevice::createQueryPool(
+    VkQueryType queryType,
+    VkQueryPipelineStatisticFlagBits pipelineStatistics,
+    uint32_t queryCount) {
+    VkQueryPoolCreateInfo createInfo;
+    createInfo.sType = VK_STRUCTURE_TYPE_QUERY_POOL_CREATE_INFO;
+    createInfo.pNext = nullptr;
+    createInfo.flags = 0;
+    createInfo.queryType = queryType;
+    createInfo.queryCount = queryCount;
+    createInfo.pipelineStatistics = pipelineStatistics;
+
+    VkQueryPool vkQueryPoolHandle;
+    throwRetcodeErrors(vkiDevice.createQueryPool(vkDeviceHandle, &createInfo, nullptr, &vkQueryPoolHandle));
+
+    // We need to reset queries before using them for the first time
+    vkiDevice.resetQueryPool(vkDeviceHandle, vkQueryPoolHandle, 0, queryCount);
+
+    return VkQueryPoolHandle(vkQueryPoolHandle);
+}
+
+void LogicalDevice::destroyQueryPool(VkQueryPoolHandle vkQueryPoolHandle) noexcept {
+    vkiDevice.destroyQueryPool(vkDeviceHandle, vkQueryPoolHandle, nullptr);
+}
+
+void LogicalDevice::getQueryResultsAndReset(
+    VkQueryPoolHandle vkQueryPoolHandle,
+    uint32_t firstQuery,
+    uint32_t queryCount,
+    ArrayView<uint64_t> data) {
+    TEPHRA_ASSERT(queryCount == data.size());
+    VkResult result = throwRetcodeErrors(vkiDevice.getQueryPoolResults(
+        vkDeviceHandle,
+        vkQueryPoolHandle,
+        firstQuery,
+        queryCount,
+        sizeof(uint64_t) * data.size(),
+        data.data(),
+        sizeof(uint64_t),
+        VK_QUERY_RESULT_64_BIT));
+    TEPHRA_ASSERTD(result != VK_NOT_READY, "Queries are assumed to have finished!");
+
+    vkiDevice.resetQueryPool(vkDeviceHandle, vkQueryPoolHandle, firstQuery, queryCount);
 }
 
 VkSwapchainHandleKHR LogicalDevice::createSwapchainKHR(

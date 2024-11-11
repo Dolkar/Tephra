@@ -2,6 +2,7 @@
 
 #include <tephra/command_list.hpp>
 #include <tephra/descriptor.hpp>
+#include <tephra/query.hpp>
 #include <tephra/common.hpp>
 #include <functional>
 
@@ -308,6 +309,28 @@ public:
     /// @see @vksymbol{vkCmdSetDepthBounds}
     void cmdSetDepthBounds(float minDepthBounds = 0.0f, float maxDepthBounds = 1.0f);
 
+    /// Queries the time on the device as part of the given pipeline stage and writes the result to the provided query
+    /// object.
+    /// @param query
+    ///     The timestamp query object that the result will be written to.
+    /// @param stage
+    ///     The pipeline stage at which the timestamp should be measured. This means a time point at which all the
+    ///     previously submitted commands have finished executing the given pipeline stage.
+    void cmdWriteTimestamp(const TimestampQuery& query, PipelineStage stage);
+
+    /// Begins the scope of one or more render queries.
+    /// @param queries
+    ///     The render query objects to begin.
+    void cmdBeginQueries(ArrayParameter<const RenderQuery* const> queries);
+
+    /// Ends the scope of one or more render queries, writing the result to their provided objects.
+    /// @param queries
+    ///     The render query objects that the result will be written to.
+    /// @remarks
+    ///     All of the query objects must have previously been begun as part of a tp::RenderList::cmdBeginQueries call
+    ///     of this render list (but not necessarily all in the same call).
+    void cmdEndQueries(ArrayParameter<const RenderQuery* const> queries);
+
     TEPHRA_MAKE_NONCOPYABLE(RenderList);
     TEPHRA_MAKE_MOVABLE(RenderList);
     virtual ~RenderList();
@@ -317,16 +340,21 @@ private:
     friend class RenderPass;
 
     const VkCommandBufferInheritanceInfo* vkInheritanceInfo = nullptr;
+    uint32_t multiviewViewCount;
 
     RenderList(
         const VulkanCommandInterface* vkiCommands,
+        const JobData* jobData,
         VkCommandBufferHandle vkInlineCommandBuffer,
+        uint32_t multiviewViewCount,
         DebugTarget debugTarget);
 
     RenderList(
         const VulkanCommandInterface* vkiCommands,
+        const JobData* jobData,
         VkCommandBufferHandle* vkFutureCommandBuffer,
         const VkCommandBufferInheritanceInfo* vkInheritanceInfo,
+        uint32_t multiviewViewCount,
         DebugTarget debugTarget);
 };
 

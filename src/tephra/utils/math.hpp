@@ -102,4 +102,14 @@ inline uint64_t roundUpToPoTMultiple(uint64_t v, uint64_t m) {
     return (v + m - 1) & ~(m - 1);
 }
 
+inline uint32_t countBitsSet(uint32_t v) {
+    // Kernighan's algorithm. In C++20 we could use std::popcount, but this is fine
+    uint32_t c = 0;
+    while (v != 0) {
+        v &= v - 1;
+        c++;
+    }
+    return c;
+}
+
 }

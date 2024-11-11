@@ -31,13 +31,13 @@ struct VkObjectHandle {
 
 /// Equality operator for tp::VkObjectHandle.
 template <typename T, VkObjectType Id>
-inline bool operator==(const VkObjectHandle<T, Id>& lhs, const VkObjectHandle<T, Id>& rhs) {
+constexpr bool operator==(const VkObjectHandle<T, Id>& lhs, const VkObjectHandle<T, Id>& rhs) {
     return lhs.vkRawHandle == rhs.vkRawHandle;
 }
 
 /// Inequality operator for tp::VkObjectHandle.
 template <typename T, VkObjectType Id>
-inline bool operator!=(const VkObjectHandle<T, Id>& lhs, const VkObjectHandle<T, Id>& rhs) {
+constexpr bool operator!=(const VkObjectHandle<T, Id>& lhs, const VkObjectHandle<T, Id>& rhs) {
     return !(lhs == rhs);
 }
 
@@ -70,6 +70,7 @@ using VkPhysicalDeviceHandle = VkObjectHandle<VkPhysicalDevice, VK_OBJECT_TYPE_P
 using VkPipelineCacheHandle = VkObjectHandle<VkPipelineCache, VK_OBJECT_TYPE_PIPELINE_CACHE>;
 using VkPipelineHandle = VkObjectHandle<VkPipeline, VK_OBJECT_TYPE_PIPELINE>;
 using VkPipelineLayoutHandle = VkObjectHandle<VkPipelineLayout, VK_OBJECT_TYPE_PIPELINE_LAYOUT>;
+using VkQueryPoolHandle = VkObjectHandle<VkQueryPool, VK_OBJECT_TYPE_QUERY_POOL>;
 using VkQueueHandle = VkObjectHandle<VkQueue, VK_OBJECT_TYPE_QUEUE>;
 using VkSamplerHandle = VkObjectHandle<VkSampler, VK_OBJECT_TYPE_SAMPLER>;
 using VkSemaphoreHandle = VkObjectHandle<VkSemaphore, VK_OBJECT_TYPE_SEMAPHORE>;

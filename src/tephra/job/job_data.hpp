@@ -6,6 +6,7 @@
 #include "local_descriptor_sets.hpp"
 #include "compute_pass.hpp"
 #include "render_pass.hpp"
+#include "../device/query_manager.hpp"
 #include "../utils/data_block_allocator.hpp"
 #include "../common_impl.hpp"
 #include <tephra/job.hpp>
@@ -31,7 +32,8 @@ enum class JobCommandTypes {
     ImportExternalImage,
     BeginDebugLabel,
     InsertDebugLabel,
-    EndDebugLabel
+    EndDebugLabel,
+    WriteTimestamp,
 };
 
 struct JobResourceStorage {
@@ -193,6 +195,13 @@ struct JobRecordStorage {
             else
                 memset(color, 0, sizeof(float) * 4);
         }
+    };
+
+    struct WriteTimestampData {
+        QueryHandle query;
+        PipelineStage stage;
+
+        WriteTimestampData(const QueryHandle& query, PipelineStage stage) : query(query), stage(stage) {}
     };
 
     void clear();

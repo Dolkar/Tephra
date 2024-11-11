@@ -4,6 +4,7 @@
 #include "memory_allocator.hpp"
 #include "deferred_destructor.hpp"
 #include "cross_queue_sync.hpp"
+#include "query_manager.hpp"
 #include "queue_state.hpp"
 #include "queue_map.hpp"
 #include "timeline_manager.hpp"
@@ -27,7 +28,8 @@ public:
           commandPoolPool(this),
           crossQueueSync(this),
           deferredDestructor(&logicalDevice, &memoryAllocator, &crossQueueSync),
-          timelineManager(this) {
+          timelineManager(this),
+          queryManager(this, &commandPoolPool.getVkiCommands()) {
         // Initialize queue states
         for (uint32_t queueIndex = 0; queueIndex < queueMap.getQueueInfos().size(); queueIndex++) {
             queueStates.push_back(std::make_unique<QueueState>(this, queueIndex));
@@ -108,6 +110,10 @@ public:
         return &timelineManager;
     }
 
+    QueryManager* getQueryManager() {
+        return &queryManager;
+    }
+
     const QueueState* getQueueState(uint32_t queueUniqueIndex) const {
         return queueStates[queueUniqueIndex].get();
     }
@@ -115,6 +121,8 @@ public:
     QueueState* getQueueState(uint32_t queueUniqueIndex) {
         return queueStates[queueUniqueIndex].get();
     }
+
+    void updateDeviceProgress_();
 
     TEPHRA_MAKE_NONCOPYABLE(DeviceContainer);
     TEPHRA_MAKE_NONMOVABLE(DeviceContainer);
@@ -133,6 +141,7 @@ private:
     std::vector<std::unique_ptr<QueueState>> queueStates;
     DeferredDestructor deferredDestructor;
     TimelineManager timelineManager;
+    QueryManager queryManager;
 };
 
 }

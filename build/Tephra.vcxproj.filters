@@ -154,6 +154,9 @@
     <ClCompile Include="..\src\tephra\job\aliasing_suballocator.cpp">
       <Filter>Source Files\Job</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\tephra\device\query_manager.cpp">
+      <Filter>Source Files\Device</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\tephra\application.hpp">
@@ -389,6 +392,15 @@
     </ClInclude>
     <ClInclude Include="..\src\tephra\utils\scratch_allocator.hpp">
       <Filter>Source Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\tephra\query.hpp">
+      <Filter>Interface Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\tephra\device\query_manager.hpp">
+      <Filter>Source Files\Device</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\tephra\semaphore.hpp">
+      <Filter>Interface Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
