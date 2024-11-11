@@ -115,6 +115,11 @@
             </dt>
             <dd>Inserts a pipeline barrier that synchronizes the given dependencies of future commands on past commands.</dd>
             <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a5a7d65505e39e5897458857dc6915bd7" class="m-doc">cmdWriteTimestamp</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_timestamp_query.html" class="m-doc">TimestampQuery</a>&amp; query,
+              <a href="namespacetp.html#a053aec667af5489bac94921ecb4862ce" class="m-doc">PipelineStage</a> stage = PipelineStage::BottomOfPipe)</span>
+            </dt>
+            <dd>Queries the time on the device as part of the given pipeline stage and writes the result to the provided query object.</dd>
+            <dt>
               <span class="m-doc-wrap-bumper">void <a href="#a969c0b1eb83b5b690343215d2ae81a39" class="m-doc">endRecording</a>(</span><span class="m-doc-wrap">)</span>
             </dt>
             <dd>Ends recording commands to the list. No other methods can be called after this point.</dd>
@@ -202,6 +207,28 @@
               </tbody>
             </table>
 <aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/vkCmdPipelineBarrier.html" class="m-doc-external">vkCmdPipelineBarrier</a></p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a5a7d65505e39e5897458857dc6915bd7"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />ComputeList::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5a7d65505e39e5897458857dc6915bd7" class="m-doc-self">cmdWriteTimestamp</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_timestamp_query.html" class="m-doc">TimestampQuery</a>&amp; query,
+              <a href="namespacetp.html#a053aec667af5489bac94921ecb4862ce" class="m-doc">PipelineStage</a> stage = PipelineStage::BottomOfPipe)</span></span>
+            </h3>
+            <p>Queries the time on the device as part of the given pipeline stage and writes the result to the provided query object.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">query</td>
+                  <td>The timestamp query object that the result will be written to.</td>
+                </tr>
+                <tr>
+                  <td>stage</td>
+                  <td>The pipeline stage at which the timestamp should be measured. This means a time point at which all the previously submitted commands have finished executing the given pipeline stage.</td>
+                </tr>
+              </tbody>
+            </table>
           </div></section>
           <section class="m-doc-details" id="a969c0b1eb83b5b690343215d2ae81a39"><div>
             <h3>

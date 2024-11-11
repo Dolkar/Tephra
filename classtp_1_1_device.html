@@ -135,6 +135,11 @@
             </dt>
             <dd>Creates a <a href="classtp_1_1_pipeline_layout.html" class="m-doc">tp::<wbr />PipelineLayout</a> object from the given descriptor set and push constant layouts.</dd>
             <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a99036a78c0f0f7ac2ac5a1628b79d427" class="m-doc">createRenderQueries</a>(</span><span class="m-doc-wrap"><a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const <a href="namespacetp.html#aa6c62459455a178fc8709ba4f1d02d2f" class="m-doc">RenderQueryType</a>&gt; queryTypes,
+              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;<a href="classtp_1_1_render_query.html" class="m-doc">RenderQuery</a>*const&gt; queries)</span>
+            </dt>
+            <dd>Creates multiple <a href="classtp_1_1_render_query.html" class="m-doc">tp::<wbr />RenderQuery</a> objects.</dd>
+            <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#adc4fbef87e05ca7209197ab272c4cc99" class="m-doc">createSampler</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_sampler_setup.html" class="m-doc">SamplerSetup</a>&amp; setup,
               const char* debugName = nullptr) -&gt; <a href="classtp_1_1_sampler.html" class="m-doc">Sampler</a></span>
             </dt>
@@ -150,6 +155,10 @@
               const char* debugName = nullptr) -&gt; <a href="namespacetp.html#ae6eb5f06ba3b55ca0acded49e2f6b754" class="m-doc">OwningPtr</a>&lt;<a href="classtp_1_1_swapchain.html" class="m-doc">Swapchain</a>&gt;</span>
             </dt>
             <dd>Creates a <a href="classtp_1_1_swapchain.html" class="m-doc">tp::<wbr />Swapchain</a> object according to the given setup structure.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a764da9eba4cb9fdee7d10e4766c66b9e" class="m-doc">createTimestampQueries</a>(</span><span class="m-doc-wrap"><a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;<a href="classtp_1_1_timestamp_query.html" class="m-doc">TimestampQuery</a>*const&gt; queries)</span>
+            </dt>
+            <dd>Creates multiple <a href="classtp_1_1_timestamp_query.html" class="m-doc">tp::<wbr />TimestampQuery</a> objects.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a1fb94f90c9cd0968b70750ec5be5a41b" class="m-doc">enqueueJob</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_device_queue.html" class="m-doc">DeviceQueue</a>&amp; queue,
               <a href="classtp_1_1_job.html" class="m-doc">Job</a> job,
@@ -183,10 +192,10 @@
               <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const <a href="structtp_1_1_external_semaphore.html" class="m-doc">ExternalSemaphore</a>&gt; waitExternalSemaphores = {})</span>
             </dt>
             <dd>Submits all <a href="classtp_1_1_job.html" class="m-doc">tp::<wbr />Job</a> objects previously enqueued to the specified queue and schedules them to be executed on the device.</dd>
-            <dt id="aac2faa875acd46b70fa584acdbab14f8">
-              <span class="m-doc-wrap-bumper">void <a href="#aac2faa875acd46b70fa584acdbab14f8" class="m-doc-self">updateSemaphores</a>(</span><span class="m-doc-wrap">)</span>
+            <dt id="a6eb4dffbd9761d0b283a2d563930228c">
+              <span class="m-doc-wrap-bumper">void <a href="#a6eb4dffbd9761d0b283a2d563930228c" class="m-doc-self">updateDeviceProgress</a>(</span><span class="m-doc-wrap">)</span>
             </dt>
-            <dd>Updates the status of job semaphores and triggers the freeing of resources and calling cleanup callbacks if some jobs have finished executing since the last update.</dd>
+            <dd>Updates the status of job semaphores, retrieves query results, triggers the freeing of resources and calls cleanup callbacks for any jobs that have finished executing since the last update.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#ab0c1d0f65c291890e9b51d34d84528da" class="m-doc">vkCreateExternalBuffer</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_buffer_setup.html" class="m-doc">BufferSetup</a>&amp; setup,
               <a href="classtp_1_1_lifeguard.html" class="m-doc">Lifeguard</a>&lt;<a href="structtp_1_1_vk_object_handle.html" class="m-doc">VkBufferHandle</a>&gt;&amp;&amp; bufferHandle,
@@ -252,7 +261,7 @@
                 </tr>
               </tbody>
             </table>
-<aside class="m-note m-default"><h4>Remark</h4><p>The function will <strong>not</strong> be called the moment the semaphores become signalled. Their status is only checked occasionally as part of various other API calls. This update can be triggered explicitly through <a href="classtp_1_1_device.html#aac2faa875acd46b70fa584acdbab14f8" class="m-doc">tp::<wbr />Device::<wbr />updateSemaphores</a>.</p><p>Other device methods that operate on queues (e.g. enqueuing a follow-up job) must <strong>not</strong> be called from within the callback function.</p></aside>
+<aside class="m-note m-default"><h4>Remark</h4><p>The function will <strong>not</strong> be called the moment the semaphores become signalled. Their status is only checked occasionally as part of various other API calls. This update can be triggered explicitly through <a href="classtp_1_1_device.html#a6eb4dffbd9761d0b283a2d563930228c" class="m-doc">tp::<wbr />Device::<wbr />updateDeviceProgress</a>.</p><p>Other device methods that operate on queues (e.g. enqueuing a follow-up job) must <strong>not</strong> be called from within the callback function.</p></aside>
           </div></section>
           <section class="m-doc-details" id="ab1f7c9dd53018893e062d06b01719c97"><div>
             <h3>
@@ -329,7 +338,7 @@
                 </tr>
               </tbody>
             </table>
-<aside class="m-note m-default"><h4>Remark</h4><p><a href="classtp_1_1_pipeline.html" class="m-doc">Pipeline</a> compilation can be slow. The use of a tp::pipelineCache is recommended as is splitting the pipeline compilation into multiple threads.</p></aside>
+<aside class="m-note m-default"><h4>Remark</h4><p><a href="classtp_1_1_pipeline.html" class="m-doc">Pipeline</a> compilation can be slow. Splitting the pipeline compilation into multiple threads is recommended.</p></aside>
           </div></section>
           <section class="m-doc-details" id="ab23e1bd4fe693ef3cf5d8c2c92bb1deb"><div>
             <h3>
@@ -357,7 +366,7 @@
                 </tr>
               </tbody>
             </table>
-<aside class="m-note m-default"><h4>Remark</h4><p><a href="classtp_1_1_pipeline.html" class="m-doc">Pipeline</a> compilation can be slow. The use of a tp::pipelineCache is recommended as is splitting the pipeline compilation into multiple threads.</p></aside>
+<aside class="m-note m-default"><h4>Remark</h4><p><a href="classtp_1_1_pipeline.html" class="m-doc">Pipeline</a> compilation can be slow. Splitting the pipeline compilation into multiple threads is recommended.</p></aside>
           </div></section>
           <section class="m-doc-details" id="a39b93e3ea48231a3e736779ff30346bc"><div>
             <h3>
@@ -471,6 +480,28 @@
             </table>
 <aside class="m-note m-default"><h4>Remark</h4><p>The set number provided during the creation of each <a href="classtp_1_1_descriptor_set_layout.html" class="m-doc">tp::<wbr />DescriptorSetLayout</a> must match its index in the array.</p></aside>
           </div></section>
+          <section class="m-doc-details" id="a99036a78c0f0f7ac2ac5a1628b79d427"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />Device::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a99036a78c0f0f7ac2ac5a1628b79d427" class="m-doc-self">createRenderQueries</a>(</span><span class="m-doc-wrap"><a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const <a href="namespacetp.html#aa6c62459455a178fc8709ba4f1d02d2f" class="m-doc">RenderQueryType</a>&gt; queryTypes,
+              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;<a href="classtp_1_1_render_query.html" class="m-doc">RenderQuery</a>*const&gt; queries)</span></span>
+            </h3>
+            <p>Creates multiple <a href="classtp_1_1_render_query.html" class="m-doc">tp::<wbr />RenderQuery</a> objects.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">queryTypes</td>
+                  <td>The types of render queries that are to be created.</td>
+                </tr>
+                <tr>
+                  <td>queries</td>
+                  <td>An output array of pointers to <a href="classtp_1_1_render_query.html" class="m-doc">tp::<wbr />RenderQuery</a> objects that are to be created. The size of this array must match the size of the <code>queryTypes</code> array.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="adc4fbef87e05ca7209197ab272c4cc99"><div>
             <h3>
               <span class="m-doc-wrap-bumper"><a href="classtp_1_1_sampler.html" class="m-doc">Sampler</a> tp::<wbr />Device::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adc4fbef87e05ca7209197ab272c4cc99" class="m-doc-self">createSampler</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_sampler_setup.html" class="m-doc">SamplerSetup</a>&amp; setup,
@@ -543,6 +574,23 @@
             </table>
 <aside class="m-note m-default"><h4>Remark</h4><p>The use of this function requires the <a href="namespacetp_1_1_device_extension.html#adc15a5a63bec60fa63cc6ea59d1ea392" class="m-doc">tp::<wbr />DeviceExtension::<wbr />KHR_Swapchain</a> extension to be enabled.</p></aside>
           </div></section>
+          <section class="m-doc-details" id="a764da9eba4cb9fdee7d10e4766c66b9e"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />Device::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a764da9eba4cb9fdee7d10e4766c66b9e" class="m-doc-self">createTimestampQueries</a>(</span><span class="m-doc-wrap"><a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;<a href="classtp_1_1_timestamp_query.html" class="m-doc">TimestampQuery</a>*const&gt; queries)</span></span>
+            </h3>
+            <p>Creates multiple <a href="classtp_1_1_timestamp_query.html" class="m-doc">tp::<wbr />TimestampQuery</a> objects.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">queries</td>
+                  <td>An output array of pointers to <a href="classtp_1_1_timestamp_query.html" class="m-doc">tp::<wbr />TimestampQuery</a> objects that are to be created.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="a1fb94f90c9cd0968b70750ec5be5a41b"><div>
             <h3>
               <span class="m-doc-wrap-bumper"><a href="structtp_1_1_job_semaphore.html" class="m-doc">JobSemaphore</a> tp::<wbr />Device::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1fb94f90c9cd0968b70750ec5be5a41b" class="m-doc-self">enqueueJob</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_device_queue.html" class="m-doc">DeviceQueue</a>&amp; queue,
@@ -610,6 +658,7 @@
                 </tr>
               </tbody>
             </table>
+<aside class="m-note m-default"><h4>Remark</h4><p>This method is meant to be a fast check and does not actually query the device for the latest state of the semaphore. To do that, call <a href="classtp_1_1_device.html#a6eb4dffbd9761d0b283a2d563930228c" class="m-doc">tp::<wbr />Device::<wbr />updateDeviceProgress</a> first.</p></aside>
           </div></section>
           <section class="m-doc-details" id="a229a32a200a0848ecec78210ca09ab1d"><div>
             <h3>

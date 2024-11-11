@@ -97,6 +97,10 @@
             </dt>
             <dd>Begins recording commands to the list, using the given command pool.</dd>
             <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#af68bf624162b61a9ff9fb72c306dd9ff" class="m-doc">cmdBeginQueries</a>(</span><span class="m-doc-wrap"><a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const <a href="classtp_1_1_render_query.html" class="m-doc">RenderQuery</a>*const&gt; queries)</span>
+            </dt>
+            <dd>Begins the scope of one or more render queries.</dd>
+            <dt>
               <span class="m-doc-wrap-bumper">void <a href="#af702ae963f8802a146d24aed36532aad" class="m-doc">cmdBindGraphicsPipeline</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_pipeline.html" class="m-doc">Pipeline</a>&amp; pipeline)</span>
             </dt>
             <dd>Binds a graphics <a href="classtp_1_1_pipeline.html" class="m-doc">tp::<wbr />Pipeline</a> for use in subsequent draw commands.</dd>
@@ -152,6 +156,10 @@
             </dt>
             <dd>Records indirect draws, with both the parameters and the draw count sourced from buffers.</dd>
             <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#adca8e59f91e0004f22a9d5774b9be867" class="m-doc">cmdEndQueries</a>(</span><span class="m-doc-wrap"><a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const <a href="classtp_1_1_render_query.html" class="m-doc">RenderQuery</a>*const&gt; queries)</span>
+            </dt>
+            <dd>Ends the scope of one or more render queries, writing the result to their provided objects.</dd>
+            <dt>
               <span class="m-doc-wrap-bumper">void <a href="#a24029020b57f6302641cbdc2a418b5ff" class="m-doc">cmdSetBlendConstants</a>(</span><span class="m-doc-wrap">float blendConstants[4])</span>
             </dt>
             <dd>Sets the blend constants pipeline dynamic state.</dd>
@@ -181,6 +189,11 @@
             </dt>
             <dd>Sets the viewport(s) to render to.</dd>
             <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a6849fd7ca756c692ba04ab2a074a0fa2" class="m-doc">cmdWriteTimestamp</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_timestamp_query.html" class="m-doc">TimestampQuery</a>&amp; query,
+              <a href="namespacetp.html#a053aec667af5489bac94921ecb4862ce" class="m-doc">PipelineStage</a> stage)</span>
+            </dt>
+            <dd>Queries the time on the device as part of the given pipeline stage and writes the result to the provided query object.</dd>
+            <dt>
               <span class="m-doc-wrap-bumper">void <a href="#aee74e317d7b1253ef04005ef34254d78" class="m-doc">endRecording</a>(</span><span class="m-doc-wrap">)</span>
             </dt>
             <dd>Ends recording commands to the list. No other methods can be called after this point.</dd>
@@ -205,6 +218,23 @@
               </tbody>
             </table>
 <aside class="m-note m-default"><h4>Remark</h4><p>The parent <a href="classtp_1_1_job.html" class="m-doc">tp::<wbr />Job</a> must be in an enqueued state.</p><p>The <a href="classtp_1_1_render_list.html" class="m-doc">tp::<wbr />RenderList</a> must not have been received as a parameter to <a href="namespacetp.html#abce3813304107869c695ab3e0bafa0fa" class="m-doc">tp::<wbr />RenderInlineCallback</a>.</p><p>The <a href="classtp_1_1_command_pool.html" class="m-doc">tp::<wbr />CommandPool</a> is not thread safe. Only one thread may be recording commands using the same pool at a time.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/vkBeginCommandBuffer.html" class="m-doc-external">vkBeginCommandBuffer</a></p></aside>
+          </div></section>
+          <section class="m-doc-details" id="af68bf624162b61a9ff9fb72c306dd9ff"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />RenderList::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af68bf624162b61a9ff9fb72c306dd9ff" class="m-doc-self">cmdBeginQueries</a>(</span><span class="m-doc-wrap"><a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const <a href="classtp_1_1_render_query.html" class="m-doc">RenderQuery</a>*const&gt; queries)</span></span>
+            </h3>
+            <p>Begins the scope of one or more render queries.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">queries</td>
+                  <td>The render query objects to begin.</td>
+                </tr>
+              </tbody>
+            </table>
           </div></section>
           <section class="m-doc-details" id="af702ae963f8802a146d24aed36532aad"><div>
             <h3>
@@ -462,6 +492,24 @@
             </table>
 <aside class="m-note m-default"><h4>Remark</h4><p>The   <a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkPhysicalDeviceVulkan12Features.html" class="m-doc-external">VkPhysicalDeviceVulkan12Features</a>::<code>drawIndirectCount</code> feature must be enabled.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/vkCmdDrawIndirectCount.html" class="m-doc-external">vkCmdDrawIndirectCount</a></p></aside>
           </div></section>
+          <section class="m-doc-details" id="adca8e59f91e0004f22a9d5774b9be867"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />RenderList::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adca8e59f91e0004f22a9d5774b9be867" class="m-doc-self">cmdEndQueries</a>(</span><span class="m-doc-wrap"><a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const <a href="classtp_1_1_render_query.html" class="m-doc">RenderQuery</a>*const&gt; queries)</span></span>
+            </h3>
+            <p>Ends the scope of one or more render queries, writing the result to their provided objects.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">queries</td>
+                  <td>The render query objects that the result will be written to.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>Remark</h4><p>All of the query objects must have previously been begun as part of a <a href="classtp_1_1_render_list.html#af68bf624162b61a9ff9fb72c306dd9ff" class="m-doc">tp::<wbr />RenderList::<wbr />cmdBeginQueries</a> call of this render list (but not necessarily all in the same call).</p></aside>
+          </div></section>
           <section class="m-doc-details" id="a24029020b57f6302641cbdc2a418b5ff"><div>
             <h3>
               <span class="m-doc-wrap-bumper">void tp::<wbr />RenderList::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a24029020b57f6302641cbdc2a418b5ff" class="m-doc-self">cmdSetBlendConstants</a>(</span><span class="m-doc-wrap">float blendConstants[4])</span></span>
@@ -594,6 +642,28 @@
               </tbody>
             </table>
 <aside class="m-note m-default"><h4>Remark</h4><p>The number of viewports must match the count set for the currently bound pipeline.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/vkCmdSetViewport.html" class="m-doc-external">vkCmdSetViewport</a></p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a6849fd7ca756c692ba04ab2a074a0fa2"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />RenderList::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6849fd7ca756c692ba04ab2a074a0fa2" class="m-doc-self">cmdWriteTimestamp</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_timestamp_query.html" class="m-doc">TimestampQuery</a>&amp; query,
+              <a href="namespacetp.html#a053aec667af5489bac94921ecb4862ce" class="m-doc">PipelineStage</a> stage)</span></span>
+            </h3>
+            <p>Queries the time on the device as part of the given pipeline stage and writes the result to the provided query object.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">query</td>
+                  <td>The timestamp query object that the result will be written to.</td>
+                </tr>
+                <tr>
+                  <td>stage</td>
+                  <td>The pipeline stage at which the timestamp should be measured. This means a time point at which all the previously submitted commands have finished executing the given pipeline stage.</td>
+                </tr>
+              </tbody>
+            </table>
           </div></section>
           <section class="m-doc-details" id="aee74e317d7b1253ef04005ef34254d78"><div>
             <h3>

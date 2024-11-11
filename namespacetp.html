@@ -126,6 +126,10 @@
             </dt>
             <dd>Specifies the output blending state of a render pass attachment.</dd>
             <dt>
+              class <a href="classtp_1_1_base_query.html" class="m-doc">BaseQuery</a>
+            </dt>
+            <dd>Base class implementing the shared functionality of device queries.</dd>
+            <dt>
               struct <a href="structtp_1_1_blend_state.html" class="m-doc">BlendState</a>
             </dt>
             <dd>Describes the blending operation with its factors for a single component of a render pass attachment.</dd>
@@ -426,6 +430,10 @@
             </dt>
             <dd>Describes a range of push constants.</dd>
             <dt>
+              struct <a href="structtp_1_1_query_result.html" class="m-doc">QueryResult</a>
+            </dt>
+            <dd>Represents the result of a query that was written as part of a completed job.</dd>
+            <dt>
               struct <a href="structtp_1_1_queue_type_info.html" class="m-doc">QueueTypeInfo</a>
             </dt>
             <dd>Information about the physical device queues for a particular queue type.</dd>
@@ -441,6 +449,10 @@
               struct <a href="structtp_1_1_render_pass_setup.html" class="m-doc">RenderPassSetup</a>
             </dt>
             <dd>Used as configuration for executing a render pass.</dd>
+            <dt>
+              class <a href="classtp_1_1_render_query.html" class="m-doc">RenderQuery</a>
+            </dt>
+            <dd>Query for measuring some statistic over a range of render commands.</dd>
             <dt>
               class <a href="classtp_1_1_runtime_error.html" class="m-doc">RuntimeError</a>
             </dt>
@@ -501,6 +513,10 @@
               struct <a href="structtp_1_1_timeout.html" class="m-doc">Timeout</a>
             </dt>
             <dd>Specifies a timeout duration for wait operations.</dd>
+            <dt>
+              class <a href="classtp_1_1_timestamp_query.html" class="m-doc">TimestampQuery</a>
+            </dt>
+            <dd>Query for measuring execution time on the device timeline.</dd>
             <dt>
               class <a href="classtp_1_1_too_many_objects_error.html" class="m-doc">TooManyObjectsError</a>
             </dt>
@@ -1108,6 +1124,23 @@
             </dt>
             <dd>Additional pipeline creation options.</dd>
             <dt>
+              <span class="m-doc-wrap-bumper">enum class <a href="#a053aec667af5489bac94921ecb4862ce" class="m-doc">PipelineStage</a>: uint32_t { </span><span class="m-doc-wrap"><a href="#a053aec667af5489bac94921ecb4862cea6c3f657e58e065f3ce859124a36e61ca" class="m-doc">TopOfPipe</a> = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+              <a href="#a053aec667af5489bac94921ecb4862cea95b0e6b8c7aa6af632295afda7a926bc" class="m-doc">DrawIndirect</a> = VK_PIPELINE_STAGE_DRAW_INDIRECT_BIT,
+              <a href="#a053aec667af5489bac94921ecb4862cea9cd8956bef976d28daf75c3ef327137d" class="m-doc">VertexInput</a> = VK_PIPELINE_STAGE_VERTEX_INPUT_BIT,
+              <a href="#a053aec667af5489bac94921ecb4862ceaeb3ca4dac3e206977e0b7d998eefcc33" class="m-doc">VertexShader</a> = VK_PIPELINE_STAGE_VERTEX_SHADER_BIT,
+              <a href="#a053aec667af5489bac94921ecb4862cea5c7677768f940918492b22f765d4e3b4" class="m-doc">ControlShader</a> = VK_PIPELINE_STAGE_TESSELLATION_CONTROL_SHADER_BIT,
+              <a href="#a053aec667af5489bac94921ecb4862cea74ab94b6017a5dba05edb43d9ebf4c99" class="m-doc">EvaluationShader</a> = VK_PIPELINE_STAGE_TESSELLATION_EVALUATION_SHADER_BIT,
+              <a href="#a053aec667af5489bac94921ecb4862cea87fd5b66e314d52345d46590e7124805" class="m-doc">GeometryShader</a> = VK_PIPELINE_STAGE_GEOMETRY_SHADER_BIT,
+              <a href="#a053aec667af5489bac94921ecb4862cea90a9bb4e665932b1781da33fc2f32922" class="m-doc">FragmentShader</a> = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+              <a href="#a053aec667af5489bac94921ecb4862cea5ad09049db5ad41b32b78a92294484c7" class="m-doc">EarlyFragmentTests</a> = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT,
+              <a href="#a053aec667af5489bac94921ecb4862ceaeada3dda11ce9944c5f92e0d721f9394" class="m-doc">LateFragmentTests</a> = VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT,
+              <a href="#a053aec667af5489bac94921ecb4862cea7bd7f6eb17dd65b0920fe450b4a8c040" class="m-doc">ColorAttachmentOutput</a> = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+              <a href="#a053aec667af5489bac94921ecb4862cea2216355d14abbc1a80dadd4f881c0f39" class="m-doc">ComputeShader</a> = VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+              <a href="#a053aec667af5489bac94921ecb4862cea3d76aa16cb23e9b4e7a56ab41155f930" class="m-doc">StageTransfer</a> = VK_PIPELINE_STAGE_TRANSFER_BIT,
+              <a href="#a053aec667af5489bac94921ecb4862cea59504c17c51b321c240a88a49ecb8cdf" class="m-doc">BottomOfPipe</a> = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT }</span>
+            </dt>
+            <dd>Vulkan pipeline stages for the purpose of specifying when a <a href="classtp_1_1_timestamp_query.html" class="m-doc">tp::<wbr />TimestampQuery</a> should be written to.</dd>
+            <dt>
               <span class="m-doc-wrap-bumper">enum class <a href="#ad7c69a8d8b81187a779224a594b4ed27" class="m-doc">PresentMode</a>: uint32_t { </span><span class="m-doc-wrap"><a href="#ad7c69a8d8b81187a779224a594b4ed27a43f6615bbb2c40a5306ff804094420b1" class="m-doc">Immediate</a> = VK_PRESENT_MODE_IMMEDIATE_KHR,
               <a href="#ad7c69a8d8b81187a779224a594b4ed27a2dcff8c037093c5d3552ad532e603f9f" class="m-doc">Mailbox</a> = VK_PRESENT_MODE_MAILBOX_KHR,
               <a href="#ad7c69a8d8b81187a779224a594b4ed27ac589858dbe1d06c46544266ae4cd2c6f" class="m-doc">FIFO</a> = VK_PRESENT_MODE_FIFO_KHR,
@@ -1203,6 +1236,21 @@
               <a href="#a7b3b9770de7339614190cd96c3426092ad53f4cffb9edd4c910a417f0eb9acdce" class="m-doc">FragmentShaderUniformRead</a> = 1 &lt;&lt; 27 }</span>
             </dt>
             <dd>Describes a kind of resource access from the render pipeline.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">enum class <a href="#aa6c62459455a178fc8709ba4f1d02d2f" class="m-doc">RenderQueryType</a> { </span><span class="m-doc-wrap"><a href="#aa6c62459455a178fc8709ba4f1d02d2faaaceaef1909e0c12c4eb1a0d2b4bc42f" class="m-doc">Occlusion</a>,
+              <a href="#aa6c62459455a178fc8709ba4f1d02d2fa62bde6c555f3cb6c6003803f67475a8d" class="m-doc">OcclusionPrecise</a>,
+              <a href="#aa6c62459455a178fc8709ba4f1d02d2fa196407c565d3e768930c1e652b91f636" class="m-doc">InputAssemblyVertices</a>,
+              <a href="#aa6c62459455a178fc8709ba4f1d02d2fac09f9be4f8706b3465e28800772de3d4" class="m-doc">InputAssemblyPrimitives</a>,
+              <a href="#aa6c62459455a178fc8709ba4f1d02d2fa8bbe45062be663917ea2b03e1e1fb922" class="m-doc">VertexShaderInvocations</a>,
+              <a href="#aa6c62459455a178fc8709ba4f1d02d2fa88729d2c04615823d2a3b9c754d25b69" class="m-doc">GeometryShaderInvocations</a>,
+              <a href="#aa6c62459455a178fc8709ba4f1d02d2fa4b91dab751de2024205530e0d94d9dc4" class="m-doc">GeometryShaderPrimitives</a>,
+              <a href="#aa6c62459455a178fc8709ba4f1d02d2fa45dd867c992b3138b5382155703632bd" class="m-doc">ClippingInvocations</a>,
+              <a href="#aa6c62459455a178fc8709ba4f1d02d2fa6a874b0d9e2ac83f2939103b48505927" class="m-doc">ClippingPrimitives</a>,
+              <a href="#aa6c62459455a178fc8709ba4f1d02d2fad7e130715c08b5147d8d46f4c4f38812" class="m-doc">FragmentShaderInvocations</a>,
+              <a href="#aa6c62459455a178fc8709ba4f1d02d2fa854420efc78d5c9ad67be6602c7ce543" class="m-doc">TessellationControlShaderPatches</a>,
+              <a href="#aa6c62459455a178fc8709ba4f1d02d2fa1197dd4c57dfc696ad7feda251139c22" class="m-doc">TessellationEvaluationShaderInvocations</a> }</span>
+            </dt>
+            <dd>Specifies the type of the measured quantity by a <a href="classtp_1_1_render_query.html" class="m-doc">tp::<wbr />RenderQuery</a>.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">enum class <a href="#a198f24458c6fe67ac726d5e3c4ffdb9a" class="m-doc">ResolveMode</a>: uint32_t { </span><span class="m-doc-wrap"><a href="#a198f24458c6fe67ac726d5e3c4ffdb9aa37b0558e20b714c1470618154c8ca42e" class="m-doc">SampleZero</a> = VK_RESOLVE_MODE_SAMPLE_ZERO_BIT,
               <a href="#a198f24458c6fe67ac726d5e3c4ffdb9aab1897515d548a960afe49ecf66a29021" class="m-doc">Average</a> = VK_RESOLVE_MODE_AVERAGE_BIT,
@@ -1492,6 +1540,11 @@
               const <a href="structtp_1_1_device_queue.html" class="m-doc">DeviceQueue</a>&amp; rhs) -&gt; bool <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Inequality operator for <a href="structtp_1_1_device_queue.html" class="m-doc">tp::<wbr />DeviceQueue</a>.</dd>
+            <dt id="ad04ac45a8e34ae12ab8d630c9105b5a4">
+              <span class="m-doc-wrap-bumper">auto <a href="#ad04ac45a8e34ae12ab8d630c9105b5a4" class="m-doc-self">operator!=</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_external_semaphore.html" class="m-doc">ExternalSemaphore</a>&amp; lhs,
+              const <a href="structtp_1_1_external_semaphore.html" class="m-doc">ExternalSemaphore</a>&amp; rhs) -&gt; bool <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Inequality operator for <a href="structtp_1_1_external_semaphore.html" class="m-doc">tp::<wbr />ExternalSemaphore</a>.</dd>
             <dt id="ad181240a4418cd7546c5c74405c3d13a">
               <span class="m-doc-wrap-bumper">auto <a href="#ad181240a4418cd7546c5c74405c3d13a" class="m-doc-self">operator!=</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_image.html" class="m-doc">Image</a>&amp; lhs,
               const <a href="classtp_1_1_image.html" class="m-doc">Image</a>&amp; rhs) -&gt; bool</span>
@@ -1502,10 +1555,15 @@
               const <a href="classtp_1_1_image_view.html" class="m-doc">ImageView</a>&amp; rhs) -&gt; bool</span>
             </dt>
             <dd>Inequality operator for <a href="classtp_1_1_image_view.html" class="m-doc">tp::<wbr />ImageView</a>.</dd>
-            <dt id="ab5068a7644c946809aa3c86bf9bb6790">
+            <dt id="ac704752a41ed4c6fd842c0adcb65593c">
+              <span class="m-doc-wrap-bumper">auto <a href="#ac704752a41ed4c6fd842c0adcb65593c" class="m-doc-self">operator!=</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_job_semaphore.html" class="m-doc">JobSemaphore</a>&amp; lhs,
+              const <a href="structtp_1_1_job_semaphore.html" class="m-doc">JobSemaphore</a>&amp; rhs) -&gt; bool <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Inequality operator for <a href="structtp_1_1_job_semaphore.html" class="m-doc">tp::<wbr />JobSemaphore</a>.</dd>
+            <dt id="a0f221f3aa5cc6c52295b968faeb707dd">
               <div class="m-doc-template">template&lt;typename T, VkObjectType Id&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#ab5068a7644c946809aa3c86bf9bb6790" class="m-doc-self">operator!=</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_vk_object_handle.html" class="m-doc">VkObjectHandle</a>&lt;T, Id&gt;&amp; lhs,
-              const <a href="structtp_1_1_vk_object_handle.html" class="m-doc">VkObjectHandle</a>&lt;T, Id&gt;&amp; rhs) -&gt; bool</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a0f221f3aa5cc6c52295b968faeb707dd" class="m-doc-self">operator!=</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_vk_object_handle.html" class="m-doc">VkObjectHandle</a>&lt;T, Id&gt;&amp; lhs,
+              const <a href="structtp_1_1_vk_object_handle.html" class="m-doc">VkObjectHandle</a>&lt;T, Id&gt;&amp; rhs) -&gt; bool <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Inequality operator for <a href="structtp_1_1_vk_object_handle.html" class="m-doc">tp::<wbr />VkObjectHandle</a>.</dd>
             <dt id="a3fcf620bce34942d7a32bc554006e87c">
@@ -1523,6 +1581,11 @@
               const <a href="structtp_1_1_device_queue.html" class="m-doc">DeviceQueue</a>&amp; rhs) -&gt; bool <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Equality operator for <a href="structtp_1_1_device_queue.html" class="m-doc">tp::<wbr />DeviceQueue</a>.</dd>
+            <dt id="a9a25ff071029bef762070f802608e3d1">
+              <span class="m-doc-wrap-bumper">auto <a href="#a9a25ff071029bef762070f802608e3d1" class="m-doc-self">operator==</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_external_semaphore.html" class="m-doc">ExternalSemaphore</a>&amp; lhs,
+              const <a href="structtp_1_1_external_semaphore.html" class="m-doc">ExternalSemaphore</a>&amp; rhs) -&gt; bool <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Equality operator for <a href="structtp_1_1_external_semaphore.html" class="m-doc">tp::<wbr />ExternalSemaphore</a>.</dd>
             <dt id="a803fc4b90ad7ae2278a954fcb5324248">
               <span class="m-doc-wrap-bumper">auto <a href="#a803fc4b90ad7ae2278a954fcb5324248" class="m-doc-self">operator==</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_image.html" class="m-doc">Image</a>&amp; lhs,
               const <a href="classtp_1_1_image.html" class="m-doc">Image</a>&amp; rhs) -&gt; bool</span>
@@ -1533,10 +1596,15 @@
               const <a href="classtp_1_1_image_view.html" class="m-doc">ImageView</a>&amp; rhs) -&gt; bool</span>
             </dt>
             <dd>Equality operator for <a href="classtp_1_1_image_view.html" class="m-doc">tp::<wbr />ImageView</a>.</dd>
-            <dt id="ab96cbab627bb6ad3c5cdfee53b399b30">
+            <dt id="ade982ba63b3d8d1cbeef7c4487cd8f1d">
+              <span class="m-doc-wrap-bumper">auto <a href="#ade982ba63b3d8d1cbeef7c4487cd8f1d" class="m-doc-self">operator==</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_job_semaphore.html" class="m-doc">JobSemaphore</a>&amp; lhs,
+              const <a href="structtp_1_1_job_semaphore.html" class="m-doc">JobSemaphore</a>&amp; rhs) -&gt; bool <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Equality operator for <a href="structtp_1_1_job_semaphore.html" class="m-doc">tp::<wbr />JobSemaphore</a>.</dd>
+            <dt id="ada3dc95e4d136f680b2795e0907d9ed4">
               <div class="m-doc-template">template&lt;typename T, VkObjectType Id&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#ab96cbab627bb6ad3c5cdfee53b399b30" class="m-doc-self">operator==</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_vk_object_handle.html" class="m-doc">VkObjectHandle</a>&lt;T, Id&gt;&amp; lhs,
-              const <a href="structtp_1_1_vk_object_handle.html" class="m-doc">VkObjectHandle</a>&lt;T, Id&gt;&amp; rhs) -&gt; bool</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ada3dc95e4d136f680b2795e0907d9ed4" class="m-doc-self">operator==</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_vk_object_handle.html" class="m-doc">VkObjectHandle</a>&lt;T, Id&gt;&amp; lhs,
+              const <a href="structtp_1_1_vk_object_handle.html" class="m-doc">VkObjectHandle</a>&lt;T, Id&gt;&amp; rhs) -&gt; bool <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Equality operator for <a href="structtp_1_1_vk_object_handle.html" class="m-doc">tp::<wbr />VkObjectHandle</a>.</dd>
             <dt id="ac25c30fd113465e9cb1a1d9a6cfcbe4d">
@@ -2569,6 +2637,13 @@
               </tbody>
             </table>
           </div></section>
+          <section class="m-doc-details" id="a053aec667af5489bac94921ecb4862ce"><div>
+            <h3>
+              enum class tp::<wbr /><a href="#a053aec667af5489bac94921ecb4862ce" class="m-doc-self">PipelineStage</a>: uint32_t
+            </h3>
+            <p>Vulkan pipeline stages for the purpose of specifying when a <a href="classtp_1_1_timestamp_query.html" class="m-doc">tp::<wbr />TimestampQuery</a> should be written to.</p>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkPipelineStageFlagBits.html" class="m-doc-external">VkPipelineStageFlagBits</a></p></aside>
+          </div></section>
           <section class="m-doc-details" id="ad7c69a8d8b81187a779224a594b4ed27"><div>
             <h3>
               enum class tp::<wbr /><a href="#ad7c69a8d8b81187a779224a594b4ed27" class="m-doc-self">PresentMode</a>: uint32_t
@@ -3109,6 +3184,90 @@
                   <td><a href="#a7b3b9770de7339614190cd96c3426092ad53f4cffb9edd4c910a417f0eb9acdce" class="m-doc-self" id="a7b3b9770de7339614190cd96c3426092ad53f4cffb9edd4c910a417f0eb9acdce">FragmentShaderUniformRead</a></td>
                   <td>
                   <p>Fragment shader read access through uniform buffer descriptors.</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aa6c62459455a178fc8709ba4f1d02d2f"><div>
+            <h3>
+              enum class tp::<wbr /><a href="#aa6c62459455a178fc8709ba4f1d02d2f" class="m-doc-self">RenderQueryType</a>
+            </h3>
+            <p>Specifies the type of the measured quantity by a <a href="classtp_1_1_render_query.html" class="m-doc">tp::<wbr />RenderQuery</a>.</p>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkQueryType.html" class="m-doc-external">VkQueryType</a></p><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkQueryPipelineStatisticFlagBits.html" class="m-doc-external">VkQueryPipelineStatisticFlagBits</a></p></aside><aside class="m-note m-default"><h4>Remark</h4><p>All pipeline statistics queries require the   <a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkPhysicalDeviceVulkanFeatures.html" class="m-doc-external">VkPhysicalDeviceVulkanFeatures</a>::<code>pipelineStatisticsQuery</code> feature to be enabled.</p></aside>
+            <table class="m-table m-fullwidth m-flat m-doc">
+              <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><a href="#aa6c62459455a178fc8709ba4f1d02d2faaaceaef1909e0c12c4eb1a0d2b4bc42f" class="m-doc-self" id="aa6c62459455a178fc8709ba4f1d02d2faaaceaef1909e0c12c4eb1a0d2b4bc42f">Occlusion</a></td>
+                  <td>
+                  <p>Measures the number of samples that pass the per-fragment tests. The result can be approximate for values greater than 0.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#aa6c62459455a178fc8709ba4f1d02d2fa62bde6c555f3cb6c6003803f67475a8d" class="m-doc-self" id="aa6c62459455a178fc8709ba4f1d02d2fa62bde6c555f3cb6c6003803f67475a8d">OcclusionPrecise</a></td>
+                  <td>
+                  <p>Measures the number of samples that pass the per-fragment tests. The use of this type requires the   <a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkPhysicalDeviceVulkanFeatures.html" class="m-doc-external">VkPhysicalDeviceVulkanFeatures</a>::<code>occlusionQueryPrecise</code> feature to be enabled.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#aa6c62459455a178fc8709ba4f1d02d2fa196407c565d3e768930c1e652b91f636" class="m-doc-self" id="aa6c62459455a178fc8709ba4f1d02d2fa196407c565d3e768930c1e652b91f636">InputAssemblyVertices</a></td>
+                  <td>
+                  <p><a href="classtp_1_1_pipeline.html" class="m-doc">Pipeline</a> statistics query counting the number of vertices processed by the input assembly stage.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#aa6c62459455a178fc8709ba4f1d02d2fac09f9be4f8706b3465e28800772de3d4" class="m-doc-self" id="aa6c62459455a178fc8709ba4f1d02d2fac09f9be4f8706b3465e28800772de3d4">InputAssemblyPrimitives</a></td>
+                  <td>
+                  <p><a href="classtp_1_1_pipeline.html" class="m-doc">Pipeline</a> statistics query counting the number of primitives processed by the input assembly stage.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#aa6c62459455a178fc8709ba4f1d02d2fa8bbe45062be663917ea2b03e1e1fb922" class="m-doc-self" id="aa6c62459455a178fc8709ba4f1d02d2fa8bbe45062be663917ea2b03e1e1fb922">VertexShaderInvocations</a></td>
+                  <td>
+                  <p><a href="classtp_1_1_pipeline.html" class="m-doc">Pipeline</a> statistics query counting the number of vertex shader invocations.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#aa6c62459455a178fc8709ba4f1d02d2fa88729d2c04615823d2a3b9c754d25b69" class="m-doc-self" id="aa6c62459455a178fc8709ba4f1d02d2fa88729d2c04615823d2a3b9c754d25b69">GeometryShaderInvocations</a></td>
+                  <td>
+                  <p><a href="classtp_1_1_pipeline.html" class="m-doc">Pipeline</a> statistics query counting number of geometry shader invocations.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#aa6c62459455a178fc8709ba4f1d02d2fa4b91dab751de2024205530e0d94d9dc4" class="m-doc-self" id="aa6c62459455a178fc8709ba4f1d02d2fa4b91dab751de2024205530e0d94d9dc4">GeometryShaderPrimitives</a></td>
+                  <td>
+                  <p><a href="classtp_1_1_pipeline.html" class="m-doc">Pipeline</a> statistics query counting the number of primitives generated by geometry shader invocations.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#aa6c62459455a178fc8709ba4f1d02d2fa45dd867c992b3138b5382155703632bd" class="m-doc-self" id="aa6c62459455a178fc8709ba4f1d02d2fa45dd867c992b3138b5382155703632bd">ClippingInvocations</a></td>
+                  <td>
+                  <p><a href="classtp_1_1_pipeline.html" class="m-doc">Pipeline</a> statistics query counting the number of primitives processed by the &quot;primitive clipping&quot; stage of the pipeline.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#aa6c62459455a178fc8709ba4f1d02d2fa6a874b0d9e2ac83f2939103b48505927" class="m-doc-self" id="aa6c62459455a178fc8709ba4f1d02d2fa6a874b0d9e2ac83f2939103b48505927">ClippingPrimitives</a></td>
+                  <td>
+                  <p><a href="classtp_1_1_pipeline.html" class="m-doc">Pipeline</a> statistics query counting the number of primitives output by the &quot;primitive clipping&quot; stage of the pipeline.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#aa6c62459455a178fc8709ba4f1d02d2fad7e130715c08b5147d8d46f4c4f38812" class="m-doc-self" id="aa6c62459455a178fc8709ba4f1d02d2fad7e130715c08b5147d8d46f4c4f38812">FragmentShaderInvocations</a></td>
+                  <td>
+                  <p><a href="classtp_1_1_pipeline.html" class="m-doc">Pipeline</a> statistics query counting the number of fragment shader invocations.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#aa6c62459455a178fc8709ba4f1d02d2fa854420efc78d5c9ad67be6602c7ce543" class="m-doc-self" id="aa6c62459455a178fc8709ba4f1d02d2fa854420efc78d5c9ad67be6602c7ce543">TessellationControlShaderPatches</a></td>
+                  <td>
+                  <p><a href="classtp_1_1_pipeline.html" class="m-doc">Pipeline</a> statistics query counting the number of patches processed by the tessellation control shader.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#aa6c62459455a178fc8709ba4f1d02d2fa1197dd4c57dfc696ad7feda251139c22" class="m-doc-self" id="aa6c62459455a178fc8709ba4f1d02d2fa1197dd4c57dfc696ad7feda251139c22">TessellationEvaluationShaderInvocations</a></td>
+                  <td>
+                  <p><a href="classtp_1_1_pipeline.html" class="m-doc">Pipeline</a> statistics query counting the number of invocations of the tessellation evaluation shader.</p>
                   </td>
                 </tr>
               </tbody>
