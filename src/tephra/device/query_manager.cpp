@@ -19,7 +19,10 @@ BaseQuery& BaseQuery::operator=(BaseQuery&& other) noexcept {
 
 QueryResult BaseQuery::getLastResult() const {
     TEPHRA_ASSERT(!isNull());
-    return handle->resultsHistory[handle->lastResultIndex];
+    if (handle->resultsHistory.empty())
+        return {};
+    else
+        return handle->resultsHistory[handle->lastResultIndex];
 }
 
 QueryResult BaseQuery::getJobResult(const JobSemaphore& jobSemaphore) const {
@@ -184,10 +187,7 @@ void QueryEntry::updateResults(ArrayView<uint64_t> queryData, const tp::JobSemap
 
     // Overwrite oldest result
     *resultToUpdate = { semaphore, newResultValue };
-
     QueryResult* lastResult = &resultsHistory[lastResultIndex];
-    // Expecting at least two results in history
-    TEPHRA_ASSERT(lastResult != resultToUpdate);
 
     // If this is the newest result, also update the index
     if (semaphore.timestamp > lastResult->jobSemaphore.timestamp) {
