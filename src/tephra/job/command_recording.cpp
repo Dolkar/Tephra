@@ -1,7 +1,10 @@
 #include "command_recording.hpp"
 #include "compute_pass.hpp"
 #include "render_pass.hpp"
+
+#include "resource_pool_container.hpp"
 #include "../acceleration_structure_impl.hpp"
+#include "../device/device_container.hpp"
 #include "../device/command_pool.hpp"
 
 namespace tp {
@@ -332,6 +335,7 @@ void identifyCommandResourceAccesses(
     case JobCommandTypes::BeginDebugLabel:
     case JobCommandTypes::InsertDebugLabel:
     case JobCommandTypes::EndDebugLabel:
+    case JobCommandTypes::WriteTimestamp:
         break; // Commands without resource accesses
     default: {
         TEPHRA_ASSERTD(false, "Unimplemented command.");
@@ -339,7 +343,7 @@ void identifyCommandResourceAccesses(
     }
 }
 
-void recordCommand(PrimaryBufferRecorder& recorder, JobRecordStorage::CommandMetadata* command) {
+void recordCommand(const JobData* job, PrimaryBufferRecorder& recorder, JobRecordStorage::CommandMetadata* command) {
     const VulkanCommandInterface& vkiCommands = recorder.getVkiCommands();
 
     switch (command->commandType) {
@@ -545,12 +549,12 @@ void recordCommand(PrimaryBufferRecorder& recorder, JobRecordStorage::CommandMet
     }
     case JobCommandTypes::ExecuteComputePass: {
         auto* data = getCommandData<JobRecordStorage::ExecuteComputePassData>(command);
-        data->pass->recordPass(recorder);
+        data->pass->recordPass(job, recorder);
         break;
     }
     case JobCommandTypes::ExecuteRenderPass: {
         auto* data = getCommandData<JobRecordStorage::ExecuteRenderPassData>(command);
-        data->pass->recordPass(recorder);
+        data->pass->recordPass(job, recorder);
         break;
     }
     case JobCommandTypes::BeginDebugLabel: {
@@ -571,6 +575,11 @@ void recordCommand(PrimaryBufferRecorder& recorder, JobRecordStorage::CommandMet
         TEPHRA_ASSERT(vkiCommands.cmdEndDebugUtilsLabelEXT != nullptr);
         vkiCommands.cmdEndDebugUtilsLabelEXT(recorder.requestBuffer());
         break;
+    }
+    case JobCommandTypes::WriteTimestamp: {
+        auto* data = getCommandData<JobRecordStorage::WriteTimestampData>(command);
+        job->resourcePoolImpl->getParentDeviceImpl()->getQueryManager()->sampleTimestampQuery(
+            recorder.requestBuffer(), data->query, data->stage, 1, job->semaphores.jobSignal);
     }
     case JobCommandTypes::BuildAccelerationStructures: {
         TEPHRA_ASSERT(vkiCommands.cmdBuildAccelerationStructuresKHR != nullptr);

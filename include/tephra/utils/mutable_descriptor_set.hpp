@@ -116,6 +116,7 @@ namespace utils {
         void doResolve();
         // returns the binding and descriptor offset into that binding
         std::pair<const DescriptorBinding*, uint32_t> findDescriptorBinding(std::size_t descriptorIndex) const;
+        void validateSetImmediate(uint32_t firstDescriptorIndex, tp::ArrayParameter<const tp::Descriptor> descriptors);
     };
 
 }

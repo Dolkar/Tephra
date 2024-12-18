@@ -9,6 +9,8 @@
 #include <tephra/image.hpp>
 #include <tephra/render.hpp>
 #include <tephra/memory.hpp>
+#include <tephra/semaphore.hpp>
+#include <tephra/query.hpp>
 #include <tephra/debug_handler.hpp>
 #include <tephra/common.hpp>
 #include <functional>
@@ -191,8 +193,7 @@ public:
     ///     The size of this array must match the size of `pipelineSetups` and all of the elements must point
     ///     be valid pointers.
     /// @remarks
-    ///     Pipeline compilation can be slow. The use of a tp::pipelineCache is recommended as is splitting
-    ///     the pipeline compilation into multiple threads.
+    ///     Pipeline compilation can be slow. Splitting the pipeline compilation into multiple threads is recommended.
     void compileComputePipelines(
         ArrayParameter<const ComputePipelineSetup* const> pipelineSetups,
         const PipelineCache* pipelineCache,
@@ -208,8 +209,7 @@ public:
     ///     The size of this array must match the size of `pipelineSetups` and all of the elements must point
     ///     be valid pointers.
     /// @remarks
-    ///     Pipeline compilation can be slow. The use of a tp::pipelineCache is recommended as is splitting
-    ///     the pipeline compilation into multiple threads.
+    ///     Pipeline compilation can be slow. Splitting the pipeline compilation into multiple threads is recommended.
     void compileGraphicsPipelines(
         ArrayParameter<const GraphicsPipelineSetup* const> pipelineSetups,
         const PipelineCache* pipelineCache,
@@ -236,6 +236,21 @@ public:
         const SwapchainSetup& setup,
         Swapchain* oldSwapchain = nullptr,
         const char* debugName = nullptr);
+
+    /// Creates multiple tp::TimestampQuery objects.
+    /// @param queries
+    ///     An output array of pointers to tp::TimestampQuery objects that are to be created.
+    void createTimestampQueries(ArrayParameter<TimestampQuery* const> queries);
+
+    /// Creates multiple tp::RenderQuery objects.
+    /// @param queryTypes
+    ///     The types of render queries that are to be created.
+    /// @param queries
+    ///     An output array of pointers to tp::RenderQuery objects that are to be created. The size of this array must
+    ///     match the size of the `queryTypes` array.
+    void createRenderQueries(
+        ArrayParameter<const RenderQueryType> queryTypes,
+        ArrayParameter<RenderQuery* const> queries);
 
     /// Creates a tp::Buffer object according to the given setup structure and allocates memory for it according
     /// to the memory preference.
@@ -342,6 +357,9 @@ public:
     /// on the device.
     /// @param semaphore
     ///     The job semaphore to query the state of.
+    /// @remarks
+    ///     This method is meant to be a fast check and does not actually query the device for the latest state of the
+    ///     semaphore. To do that, call tp::Device::updateDeviceProgress first.
     bool isJobSemaphoreSignalled(const JobSemaphore& semaphore);
 
     /// Waits until the given tp::JobSemaphore handles have been signalled or until the timeout has been reached.
@@ -380,15 +398,15 @@ public:
     /// @remarks
     ///     The function will **not** be called the moment the semaphores become signalled. Their status is only checked
     ///     occasionally as part of various other API calls. This update can be triggered explicitly through
-    ///     tp::Device::updateSemaphores.
+    ///     tp::Device::updateDeviceProgress.
     /// @remarks
     ///     Other device methods that operate on queues (e.g. enqueuing a follow-up job) must **not** be called from
     ///     within the callback function.
     void addCleanupCallback(CleanupCallback callback);
 
-    /// Updates the status of job semaphores and triggers the freeing of resources and calling cleanup callbacks if
-    /// some jobs have finished executing since the last update.
-    void updateSemaphores();
+    /// Updates the status of job semaphores, retrieves query results, triggers the freeing of resources and calls
+    /// cleanup callbacks for any jobs that have finished executing since the last update.
+    void updateDeviceProgress();
 
     /// Creates a tp::Buffer object out of a raw Vulkan buffer handle and an optional VMA memory allocation handle.
     /// @param setup

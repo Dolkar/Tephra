@@ -57,6 +57,7 @@
 #include <tephra/buffer.hpp>
 #include <tephra/image.hpp>
 #include <tephra/sampler.hpp>
+#include <tephra/query.hpp>
 #include <tephra/debug_handler.hpp>
 #include <tephra/format_compatibility.hpp>
 #include <tephra/format.hpp>

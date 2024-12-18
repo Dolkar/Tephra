@@ -3,7 +3,7 @@
 
 **License**: [MIT](https://github.com/Dolkar/Tephra/blob/main/LICENSE)
 
-**Current version**: [v0.4.1](https://dolkar.github.io/Tephra/changelog.html)
+**Current version**: [v0.5.0](https://dolkar.github.io/Tephra/changelog.html)
 
 **Links**: [User guide](https://dolkar.github.io/Tephra/user-guide.html) | [API Documentation](https://dolkar.github.io/Tephra/annotated.html) |
            [Discussions](https://github.com/Dolkar/Tephra/discussions)
@@ -111,15 +111,15 @@ The following features are already present:
 - Support for multi-threaded recording and device-level thread safety
 - Improved image and buffer views
 - Safe delayed destruction of Vulkan handles
+- Timestamp, occlusion and pipeline queries
 - Interoperability with plain Vulkan (WIP)
+- Native support of commonly used Vulkan extensions (WIP)
 - Debug logging, statistics, tests and partial usage validation (WIP)
 
 The following features are planned and will likely be available in the future:
-- Timestamp, occlusion and pipeline queries
-- Ray tracing features
+- Ray tracing features (see raytracing branch)
 - Better handling of dynamic pipeline state
 - Improved pipeline building and management
-- Native support of commonly used Vulkan extensions
 - Vulkan profiles
 
 The following features are out of scope for the library and won't be included:

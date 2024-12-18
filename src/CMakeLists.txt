@@ -10,6 +10,7 @@ set(TEPHRA_SOURCES
     ${SOURCE_PATH}/tephra/device/handle_lifeguard.cpp
     ${SOURCE_PATH}/tephra/device/logical_device.cpp
     ${SOURCE_PATH}/tephra/device/memory_allocator.cpp
+    ${SOURCE_PATH}/tephra/device/query_manager.cpp
     ${SOURCE_PATH}/tephra/device/queue_map.cpp
     ${SOURCE_PATH}/tephra/device/queue_state.cpp
     ${SOURCE_PATH}/tephra/device/timeline_manager.cpp

@@ -1,6 +1,7 @@
 #include "vulkan/interface.hpp"
 #include "job/accesses.hpp"
 #include "job/compute_pass.hpp"
+#include "job/resource_pool_container.hpp"
 #include "device/device_container.hpp"
 #include "common_impl.hpp"
 #include <tephra/compute.hpp>
@@ -100,6 +101,12 @@ void ComputeList::cmdPipelineBarrier(
         nullptr);
 }
 
+void ComputeList::cmdWriteTimestamp(const TimestampQuery& query, PipelineStage stage) {
+    TEPHRA_DEBUG_SET_CONTEXT(debugTarget.get(), "cmdWriteTimestamp", nullptr);
+    jobData->resourcePoolImpl->getParentDeviceImpl()->getQueryManager()->sampleTimestampQuery(
+        vkCommandBufferHandle, QueryManager::getQueryHandle(query), stage, 1, jobData->semaphores.jobSignal);
+}
+
 ComputeList::ComputeList(ComputeList&&) noexcept = default;
 
 ComputeList& ComputeList::operator=(ComputeList&&) noexcept = default;
@@ -108,14 +115,18 @@ ComputeList::~ComputeList() = default;
 
 ComputeList::ComputeList(
     const VulkanCommandInterface* vkiCommands,
+    const JobData* jobData,
     VkCommandBufferHandle vkInlineCommandBuffer,
     DebugTarget debugTarget)
-    : CommandList(vkiCommands, VK_PIPELINE_BIND_POINT_COMPUTE, vkInlineCommandBuffer, std::move(debugTarget)) {}
+    : CommandList(vkiCommands, jobData, VK_PIPELINE_BIND_POINT_COMPUTE, vkInlineCommandBuffer, std::move(debugTarget)) {
+}
 
 ComputeList::ComputeList(
     const VulkanCommandInterface* vkiCommands,
+    const JobData* jobData,
     VkCommandBufferHandle* vkFutureCommandBuffer,
     DebugTarget debugTarget)
-    : CommandList(vkiCommands, VK_PIPELINE_BIND_POINT_COMPUTE, vkFutureCommandBuffer, std::move(debugTarget)) {}
+    : CommandList(vkiCommands, jobData, VK_PIPELINE_BIND_POINT_COMPUTE, vkFutureCommandBuffer, std::move(debugTarget)) {
+}
 
 }

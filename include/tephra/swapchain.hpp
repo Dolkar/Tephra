@@ -2,6 +2,7 @@
 
 #include <tephra/job.hpp>
 #include <tephra/image.hpp>
+#include <tephra/semaphore.hpp>
 #include <tephra/common.hpp>
 #include <optional>
 

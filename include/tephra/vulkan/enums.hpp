@@ -563,6 +563,26 @@ enum class PresentMode : uint32_t {
 };
 TEPHRA_VULKAN_COMPATIBLE_ENUM(PresentMode, VkPresentModeKHR);
 
+/// Vulkan pipeline stages for the purpose of specifying when a tp::TimestampQuery should be written to.
+/// @see @vksymbol{VkPipelineStageFlagBits}
+enum class PipelineStage : uint32_t {
+    TopOfPipe = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+    DrawIndirect = VK_PIPELINE_STAGE_DRAW_INDIRECT_BIT,
+    VertexInput = VK_PIPELINE_STAGE_VERTEX_INPUT_BIT,
+    VertexShader = VK_PIPELINE_STAGE_VERTEX_SHADER_BIT,
+    ControlShader = VK_PIPELINE_STAGE_TESSELLATION_CONTROL_SHADER_BIT,
+    EvaluationShader = VK_PIPELINE_STAGE_TESSELLATION_EVALUATION_SHADER_BIT,
+    GeometryShader = VK_PIPELINE_STAGE_GEOMETRY_SHADER_BIT,
+    FragmentShader = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+    EarlyFragmentTests = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT,
+    LateFragmentTests = VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT,
+    ColorAttachmentOutput = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+    ComputeShader = VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+    StageTransfer = VK_PIPELINE_STAGE_TRANSFER_BIT,
+    BottomOfPipe = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
+};
+TEPHRA_VULKAN_COMPATIBLE_ENUM(PipelineStage, VkPipelineStageFlagBits);
+
 enum class AccelerationStructureType : uint32_t {
     TopLevel = VK_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL_KHR,
     BottomLevel = VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_KHR,

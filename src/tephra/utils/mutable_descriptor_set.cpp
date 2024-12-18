@@ -16,7 +16,7 @@ namespace utils {
               static_cast<tp::DeviceContainer*>(device)->getDebugTarget(),
               "MutableDescriptorSet",
               debugName)),
-          changesPending(false),
+          changesPending(true),
           needsResolve(false) {
         TEPHRA_DEBUG_SET_CONTEXT(debugTarget.get(), "constructor", nullptr);
 
@@ -62,7 +62,7 @@ namespace utils {
                     currentDescriptors.size(),
                     ").");
             } else {
-                auto [descriptorBinding, firstDescriptorOffset] = findDescriptorBinding(descriptorIndex);
+                auto [descriptorBinding, bindingDescriptorOffset] = findDescriptorBinding(descriptorIndex);
                 descriptor.debugValidateAgainstBinding(*descriptorBinding, descriptorIndex, true);
             }
         }
@@ -104,58 +104,22 @@ namespace utils {
         TEPHRA_DEBUG_SET_CONTEXT(debugTarget.get(), "setImmediate", std::to_string(firstDescriptorIndex).c_str());
 
         if constexpr (TephraValidationEnabled) {
-            if (allocatedSets.empty()) {
-                reportDebugMessage(
-                    DebugMessageSeverity::Error,
-                    DebugMessageType::Validation,
-                    "No descriptor sets have been committed yet since the last reset.");
-            }
-
-            if (firstDescriptorIndex + descriptors.size() > currentDescriptors.size()) {
-                reportDebugMessage(
-                    DebugMessageSeverity::Error,
-                    DebugMessageType::Validation,
-                    "The range of descriptors being set (",
-                    firstDescriptorIndex,
-                    " - ",
-                    firstDescriptorIndex + descriptors.size(),
-                    ") is out of range of the number of descriptor in the set's layout (",
-                    currentDescriptors.size(),
-                    ").");
-            }
+            validateSetImmediate(firstDescriptorIndex, descriptors);
         }
 
         for (uint32_t i = 0; i < descriptors.size(); i++) {
             currentDescriptors[firstDescriptorIndex + i] = descriptors[i];
         }
 
-        auto [descriptorBinding, firstDescriptorOffset] = findDescriptorBinding(firstDescriptorIndex);
-
-        if constexpr (TephraValidationEnabled) {
-            if (firstDescriptorOffset + descriptors.size() > descriptorBinding->arraySize) {
-                reportDebugMessage(
-                    DebugMessageSeverity::Error,
-                    DebugMessageType::Validation,
-                    "The range of descriptors being set (",
-                    firstDescriptorIndex,
-                    " - ",
-                    firstDescriptorIndex + descriptors.size(),
-                    ") is out of range of the associated descriptor set binding's array size (",
-                    descriptorBinding->arraySize,
-                    ").");
-            }
-
-            for (uint32_t i = 0; i < descriptors.size(); i++) {
-                descriptors[i].debugValidateAgainstBinding(*descriptorBinding, firstDescriptorIndex + i, true);
-            }
-        }
+        auto [descriptorBinding, bindingDescriptorOffset] = findDescriptorBinding(firstDescriptorIndex);
+        TEPHRA_ASSERT(firstDescriptorIndex >= bindingDescriptorOffset);
 
         VkWriteDescriptorSet descriptorWrite;
         descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
         descriptorWrite.pNext = nullptr;
         descriptorWrite.dstSet = allocatedSets.back().vkGetDescriptorSetHandle();
         descriptorWrite.dstBinding = descriptorBinding->bindingNumber;
-        descriptorWrite.dstArrayElement = firstDescriptorOffset;
+        descriptorWrite.dstArrayElement = firstDescriptorIndex - bindingDescriptorOffset;
         descriptorWrite.descriptorCount = static_cast<uint32_t>(descriptors.size());
         descriptorWrite.descriptorType = vkCastConvertibleEnum(descriptorBinding->descriptorType);
 
@@ -166,9 +130,15 @@ namespace utils {
         ScratchVector<VkBufferView> vkBufferViews;
 
         if (descriptors[0].vkResolveDescriptorImageInfo() != nullptr) {
+            // Deduce image layout
+            VkImageLayout imageLayout = vkGetImageLayoutForDescriptor(
+                descriptorBinding->descriptorType,
+                descriptorBinding->flags.contains(DescriptorBindingFlag::AliasStorageImage));
+
             vkImageInfos.reserve(descriptors.size());
             for (const tp::Descriptor& descriptor : descriptors) {
                 vkImageInfos.push_back(*descriptor.vkResolveDescriptorImageInfo());
+                vkImageInfos.back().imageLayout = imageLayout;
             }
             descriptorWrite.pImageInfo = vkImageInfos.data();
         } else if (descriptors[0].vkResolveDescriptorBufferInfo() != nullptr) {
@@ -228,7 +198,7 @@ namespace utils {
         currentDescriptors.clear();
         currentDescriptors.resize(layout.getDescriptorCount());
         futureDescriptors.clear();
-        changesPending = false;
+        changesPending = true;
         needsResolve = false;
     }
 
@@ -245,7 +215,7 @@ namespace utils {
                 futureDescriptors[descriptorIndex] = {};
 
                 if constexpr (TephraValidationEnabled) {
-                    auto [descriptorBinding, firstDescriptorOffset] = findDescriptorBinding(descriptorIndex);
+                    auto [descriptorBinding, bindingDescriptorOffset] = findDescriptorBinding(descriptorIndex);
                     currentDescriptors[descriptorIndex].debugValidateAgainstBinding(
                         *descriptorBinding, descriptorIndex, true);
                 }
@@ -264,5 +234,57 @@ namespace utils {
         return { &layout.getBindings()[bindingIndex], bindingDescriptorOffsets[bindingIndex] };
     }
 
+    void MutableDescriptorSet::validateSetImmediate(
+        uint32_t firstDescriptorIndex,
+        tp::ArrayParameter<const tp::Descriptor> descriptors) {
+        if (descriptors.empty()) {
+            reportDebugMessage(
+                DebugMessageSeverity::Error,
+                DebugMessageType::Validation,
+                "Call to setImmediate with no descriptors is not allowed.");
+            return;
+        }
+
+        if (allocatedSets.empty()) {
+            reportDebugMessage(
+                DebugMessageSeverity::Error,
+                DebugMessageType::Validation,
+                "No descriptor sets have been committed yet since the last reset.");
+        }
+
+        if (firstDescriptorIndex + descriptors.size() > currentDescriptors.size()) {
+            reportDebugMessage(
+                DebugMessageSeverity::Error,
+                DebugMessageType::Validation,
+                "The range of descriptors being set (",
+                firstDescriptorIndex,
+                " - ",
+                firstDescriptorIndex + descriptors.size() - 1,
+                ") is out of range of the number of descriptors in the set's layout (",
+                currentDescriptors.size(),
+                ").");
+        }
+
+        auto [descriptorBinding, bindingDescriptorOffset] = findDescriptorBinding(firstDescriptorIndex);
+
+        if (firstDescriptorIndex + descriptors.size() > bindingDescriptorOffset + descriptorBinding->arraySize) {
+            reportDebugMessage(
+                DebugMessageSeverity::Error,
+                DebugMessageType::Validation,
+                "The range of descriptors being set (",
+                firstDescriptorIndex,
+                " - ",
+                firstDescriptorIndex + descriptors.size() - 1,
+                ") is out of range of the associated descriptor set binding's array (",
+                bindingDescriptorOffset,
+                " - ",
+                bindingDescriptorOffset + descriptorBinding->arraySize - 1,
+                ").");
+        }
+
+        for (uint32_t i = 0; i < descriptors.size(); i++) {
+            descriptors[i].debugValidateAgainstBinding(*descriptorBinding, firstDescriptorIndex + i, true);
+        }
+    }
 }
 }

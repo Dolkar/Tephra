@@ -70,7 +70,8 @@ private:
         DestructionQueue<VkSamplerHandle>,
         DestructionQueue<VkSwapchainHandleKHR>,
         DestructionQueue<VkSemaphoreHandle>,
-        DestructionQueue<VmaAllocationHandle>>;
+        DestructionQueue<VmaAllocationHandle>,
+        DestructionQueue<VkQueryPoolHandle>>;
 
     LogicalDevice* logicalDevice;
     MemoryAllocator* memoryAllocator;
@@ -112,6 +113,7 @@ void DeferredDestructor::destroyImmediately(T handle) {
         [ld](VkSwapchainHandleKHR h) { ld->destroySwapchainKHR(h); },
         [ld](VkSemaphoreHandle h) { ld->destroySemaphore(h); },
         [this](VmaAllocationHandle h) { this->memoryAllocator->freeAllocation(h); },
+        [ld](VkQueryPoolHandle h) { ld->destroyQueryPool(h); },
     }(handle);
 }
 
