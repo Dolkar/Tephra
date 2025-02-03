@@ -19,6 +19,7 @@ LogicalDevice::LogicalDevice(Instance* instance, QueueMap* queueMap, const Devic
     vk12Features.timelineSemaphore = VK_TRUE;
     auto& vk13Features = vkFeatureMap.get<VkPhysicalDeviceVulkan13Features>();
     vk13Features.dynamicRendering = VK_TRUE;
+    vk13Features.synchronization2 = VK_TRUE;
 
     // Chain feature structures to extended structure pointer
     void* vkCreateInfoExtPtr = setup.vkCreateInfoExtPtr;

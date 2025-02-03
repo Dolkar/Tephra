@@ -211,7 +211,7 @@ enum class DescriptorBindingFlag {
     ///     @vksymbol{VkPhysicalDeviceVulkan12Features}::`descriptorBindingVariableDescriptorCount` feature to be
     ///     enabled.
     VariableDescriptorCount = 1 << 1,
-    /// Allows binding the same image to a sampled image descriptor that uses this flag at the same time as to a storage
+    /// Allows binding an image to a sampled image descriptor that uses this flag at the same time as to a storage
     /// image descriptor. Internally, the image will be transitioned to a general layout, just like for a storage image.
     /// @remarks
     ///     The read access performed through this descriptor will be the same as if its type was
@@ -220,8 +220,8 @@ enum class DescriptorBindingFlag {
     ///     This flag may potentially reduce sampling performance of the image, especially if the image has previously
     ///     been bound as a render target.
     /// @remarks
-    ///     This flag is only valid with descriptor types tp::DescriptorType::SampledImage,
-    ///     tp::DescriptorType::CombinedImageSampler and tp::DescriptorType::InputAttachment.
+    ///     This flag is only valid with descriptor types tp::DescriptorType::SampledImage and
+    ///     tp::DescriptorType::CombinedImageSampler.
     AliasStorageImage = 1 << 2,
     /// Allows this binding to be updated inside a descriptor set after it has already been bound and used. This only
     /// affects tp::utils::MutableDescriptorSet::setImmediate or other custom methods relying on

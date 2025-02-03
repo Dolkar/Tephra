@@ -8,7 +8,7 @@ VkImageLayout vkGetImageLayoutForDescriptor(DescriptorType descriptorType, bool 
     switch (descriptorType) {
     case DescriptorType::CombinedImageSampler:
     case DescriptorType::SampledImage:
-        return aliasStorageImage ? VK_IMAGE_LAYOUT_GENERAL : VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        return aliasStorageImage ? VK_IMAGE_LAYOUT_GENERAL : VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL;
     case DescriptorType::StorageImage:
         return VK_IMAGE_LAYOUT_GENERAL;
     case DescriptorType::TexelBuffer:
@@ -117,16 +117,14 @@ void convertReadAccessToVkAccess(ReadAccessMask readMask, VkPipelineStageFlags* 
 VkImageLayout vkGetImageLayoutFromReadAccess(ReadAccessMask readMask) {
     if (readMask.contains(ReadAccess::Transfer))
         return VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
-    if (readMask.contains(ReadAccess::DepthStencilAttachment))
-        return VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
     if (readMask.contains(ReadAccess::ImagePresentKHR))
         return VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
     if (readMask.containsAny(
             ReadAccess::VertexShaderSampled | ReadAccess::TessellationControlShaderSampled |
             ReadAccess::TessellationEvaluationShaderSampled | ReadAccess::GeometryShaderSampled |
-            ReadAccess::FragmentShaderSampled | ReadAccess::ComputeShaderSampled))
-        return VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+            ReadAccess::FragmentShaderSampled | ReadAccess::ComputeShaderSampled | ReadAccess::DepthStencilAttachment))
+        return VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL;
 
     if (readMask.containsAny(
             ReadAccess::VertexShaderStorage | ReadAccess::TessellationControlShaderStorage |
@@ -170,7 +168,7 @@ void convertComputeAccessToVkAccess(
 
 VkImageLayout vkGetImageLayoutFromComputeAccess(ComputeAccessMask computeMask) {
     if (computeMask.contains(ComputeAccess::ComputeShaderSampledRead)) {
-        return VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        return VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL;
     } else {
         return VK_IMAGE_LAYOUT_GENERAL;
     }
@@ -266,7 +264,7 @@ VkImageLayout vkGetImageLayoutFromRenderAccess(RenderAccessMask renderMask) {
             RenderAccess::TessellationEvaluationShaderSampledRead |
             RenderAccess::TessellationEvaluationShaderStorageRead | RenderAccess::FragmentShaderSampledRead |
             RenderAccess::FragmentShaderStorageRead)) {
-        return VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        return VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL;
     }
 
     if (renderMask.containsAny(

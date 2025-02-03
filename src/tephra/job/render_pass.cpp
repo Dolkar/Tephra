@@ -12,36 +12,31 @@ void AttachmentAccess::convertToVkAccess(
     VkImageLayout* layoutPtr) {
     TEPHRA_ASSERT(!imageView.isNull());
     *rangePtr = imageView.getWholeRange();
+    rangePtr->aspectMask = aspect;
     *layoutPtr = layout;
 
-    // Deduce Vulkan access from just the layout chosen in prepareRendering:
-    // TODO: Sync2
     switch (layout) {
     case VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL:
         accessPtr->stageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
         accessPtr->accessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
         break;
-    case VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_OPTIMAL:
-        accessPtr->stageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
-        accessPtr->accessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
-        rangePtr->aspectMask = ImageAspect::Depth;
-        break;
-    case VK_IMAGE_LAYOUT_STENCIL_READ_ONLY_OPTIMAL:
-        accessPtr->stageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
-        accessPtr->accessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
-        rangePtr->aspectMask = ImageAspect::Stencil;
-        break;
     case VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL:
+        TEPHRA_ASSERT(aspect == ImageAspect::Depth);
         accessPtr->stageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
         accessPtr->accessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT |
             VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-        rangePtr->aspectMask = ImageAspect::Depth;
         break;
     case VK_IMAGE_LAYOUT_STENCIL_ATTACHMENT_OPTIMAL:
+        TEPHRA_ASSERT(aspect == ImageAspect::Stencil);
         accessPtr->stageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
         accessPtr->accessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT |
             VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-        rangePtr->aspectMask = ImageAspect::Stencil;
+        break;
+    case VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL:
+        TEPHRA_ASSERT(aspect == ImageAspect::Depth || aspect == ImageAspect::Stencil);
+        // This should match ReadAccess::DepthStencilAttachment
+        accessPtr->stageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+        accessPtr->accessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
         break;
     default:
         TEPHRA_ASSERTD(false, "Unexpected layout");
@@ -169,8 +164,8 @@ void RenderPass::prepareRendering(const RenderPassSetup& setup, bool useSecondar
     // Prepare attachments, but we can't resolve the images yet
     vkRenderingAttachments.clear();
     attachmentAccesses.clear();
-    auto addAttachmentRef = [this](const ImageView& imageView, VkImageLayout layout) {
-        this->attachmentAccesses.push_back({ imageView, layout });
+    auto addAttachmentRef = [this](const ImageView& imageView, VkImageLayout layout, ImageAspect aspect) {
+        this->attachmentAccesses.push_back({ imageView, layout, aspect });
         return VK_NULL_HANDLE;
     };
 
@@ -198,15 +193,17 @@ void RenderPass::prepareRendering(const RenderPassSetup& setup, bool useSecondar
             vkDepthAttachment.storeOp = vkCastConvertibleEnum(attachment.depthStoreOp);
 
             if (attachment.depthReadOnly)
-                vkDepthAttachment.imageLayout = VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_OPTIMAL;
+                vkDepthAttachment.imageLayout = VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL;
             else
                 vkDepthAttachment.imageLayout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;
             vkDepthAttachment.imageView = addAttachmentRef(
-                hasDepth ? attachment.image : ImageView(), vkDepthAttachment.imageLayout);
+                hasDepth ? attachment.image : ImageView(), vkDepthAttachment.imageLayout, ImageAspect::Depth);
 
             vkDepthAttachment.resolveImageLayout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;
             vkDepthAttachment.resolveImageView = addAttachmentRef(
-                hasDepth ? attachment.resolveImage : ImageView(), vkDepthAttachment.resolveImageLayout);
+                hasDepth ? attachment.resolveImage : ImageView(),
+                vkDepthAttachment.resolveImageLayout,
+                ImageAspect::Depth);
 
             vkRenderingAttachments.push_back(vkDepthAttachment);
         }
@@ -217,15 +214,17 @@ void RenderPass::prepareRendering(const RenderPassSetup& setup, bool useSecondar
             vkStencilAttachment.storeOp = vkCastConvertibleEnum(attachment.stencilStoreOp);
 
             if (attachment.stencilReadOnly)
-                vkStencilAttachment.imageLayout = VK_IMAGE_LAYOUT_STENCIL_READ_ONLY_OPTIMAL;
+                vkStencilAttachment.imageLayout = VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL;
             else
                 vkStencilAttachment.imageLayout = VK_IMAGE_LAYOUT_STENCIL_ATTACHMENT_OPTIMAL;
             vkStencilAttachment.imageView = addAttachmentRef(
-                hasStencil ? attachment.image : ImageView(), vkStencilAttachment.imageLayout);
+                hasStencil ? attachment.image : ImageView(), vkStencilAttachment.imageLayout, ImageAspect::Stencil);
 
             vkStencilAttachment.resolveImageLayout = VK_IMAGE_LAYOUT_STENCIL_ATTACHMENT_OPTIMAL;
             vkStencilAttachment.resolveImageView = addAttachmentRef(
-                hasStencil ? attachment.resolveImage : ImageView(), vkStencilAttachment.resolveImageLayout);
+                hasStencil ? attachment.resolveImage : ImageView(),
+                vkStencilAttachment.resolveImageLayout,
+                ImageAspect::Stencil);
 
             vkRenderingAttachments.push_back(vkStencilAttachment);
         }
@@ -237,12 +236,13 @@ void RenderPass::prepareRendering(const RenderPassSetup& setup, bool useSecondar
         vkAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
         vkAttachment.pNext = nullptr;
         vkAttachment.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-        vkAttachment.imageView = addAttachmentRef(attachment.image, vkAttachment.imageLayout);
+        vkAttachment.imageView = addAttachmentRef(attachment.image, vkAttachment.imageLayout, ImageAspect::Color);
 
         bool hasResolve = !attachment.resolveImage.isNull();
         vkAttachment.resolveMode = hasResolve ? vkCastConvertibleEnum(attachment.resolveMode) : VK_RESOLVE_MODE_NONE;
         vkAttachment.resolveImageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-        vkAttachment.resolveImageView = addAttachmentRef(attachment.resolveImage, vkAttachment.resolveImageLayout);
+        vkAttachment.resolveImageView = addAttachmentRef(
+            attachment.resolveImage, vkAttachment.resolveImageLayout, ImageAspect::Color);
 
         vkAttachment.clearValue = attachment.clearValue.vkValue;
         vkAttachment.loadOp = vkCastConvertibleEnum(attachment.loadOp);

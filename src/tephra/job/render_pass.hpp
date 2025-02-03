@@ -29,6 +29,7 @@ struct StoredImageRenderAccess {
 struct AttachmentAccess {
     StoredImageView imageView;
     VkImageLayout layout;
+    ImageAspect aspect;
 
     void convertToVkAccess(ImageAccessRange* rangePtr, ResourceAccess* accessPtr, VkImageLayout* layoutPtr);
 };
