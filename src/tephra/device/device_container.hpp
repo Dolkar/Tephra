@@ -35,7 +35,7 @@ public:
             queueStates.push_back(std::make_unique<QueueState>(this, queueIndex));
         }
 
-        timelineManager.initializeQueueSemaphores(static_cast<uint32_t>(queueStates.size()));
+        timelineManager.initializeQueues(static_cast<uint32_t>(queueStates.size()));
     }
 
     const DebugTarget* getDebugTarget() const {

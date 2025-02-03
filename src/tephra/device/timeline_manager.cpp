@@ -15,7 +15,7 @@ inline uint64_t atomicStoreMax(std::atomic<uint64_t>& atomicVar, uint64_t value,
 
 TimelineManager::TimelineManager(DeviceContainer* deviceImpl) : deviceImpl(deviceImpl) {}
 
-void TimelineManager::initializeQueueSemaphores(uint32_t queueCount) {
+void TimelineManager::initializeQueues(uint32_t queueCount) {
     TEPHRA_ASSERT(queueSemaphores.empty());
 
     for (uint32_t queueIndex = 0; queueIndex < queueCount; queueIndex++) {
@@ -107,24 +107,11 @@ void TimelineManager::addCleanupCallback(CleanupCallback callback) {
     if (wasTimestampReachedInAllQueues(lastPendingTimestamp)) {
         callback();
     } else {
-        std::lock_guard<Mutex> mutexLock(callbackMutex);
-
-        // Timestamps are added to global callback queue lazily
-        if (!activeCallbacks.empty() && activeCallbacks.back()->timestamp >= lastPendingTimestamp) {
-            // An entry already exists, we can just append the callback
-            activeCallbacks.back()->cleanupCallbacks.push_back(std::move(callback));
-        } else {
-            // Add a new entry into the queue
-            CallbackInfo* newCallbackInfo = callbackPool.acquireExisting();
-            if (newCallbackInfo == nullptr)
-                newCallbackInfo = callbackPool.acquireNew();
-            newCallbackInfo->timestamp = lastPendingTimestamp;
-            newCallbackInfo->cleanupCallbacks.push_back(std::move(callback));
-
-            activeCallbacks.push_back(newCallbackInfo);
-        }
+        callbacks.addCleanupCallback(Callbacks::GlobalQueueIndex, lastPendingTimestamp, std::move(callback));
     }
 }
+
+void TimelineManager::addCleanupCallback(uint32_t queueDeviceIndex, CleanupCallback callback) {}
 
 uint64_t TimelineManager::updateQueue(uint32_t queueDeviceIndex) {
     TEPHRA_ASSERT(queueDeviceIndex < queueSemaphores.size());
@@ -191,9 +178,8 @@ void TimelineManager::update() {
             reportDebugMessage(
                 DebugMessageSeverity::Warning,
                 DebugMessageType::Performance,
-                "Too many jobs were enqueued before the last one finished (",
-                activeCallbacks.size(),
-                "). This may delay the release of resources.");
+                "Too many jobs were enqueued before the last one finished (>100). "
+                "This may delay the release of resources.");
         }
     }
 }
@@ -233,5 +219,29 @@ TimelineManager::QueueSemaphore& TimelineManager::QueueSemaphore::operator=(Queu
     other.vkSemaphoreHandle = {};
     return *this;
 }
+
+void TimelineManager::Callbacks::addCleanupCallback(
+    uint32_t queueIndex,
+    uint64_t pendingTimestamp,
+    CleanupCallback callback) {
+    std::lock_guard<Mutex> mutexLock(callbackMutex);
+
+    // Timestamps are added to global callback queue lazily
+    if (!activeCallbacks.empty() && activeCallbacks.back()->timestamp >= lastPendingTimestamp) {
+        // An entry already exists, we can just append the callback
+        activeCallbacks.back()->cleanupCallbacks.push_back(std::move(callback));
+    } else {
+        // Add a new entry into the queue
+        CallbackInfo* newCallbackInfo = callbackPool.acquireExisting();
+        if (newCallbackInfo == nullptr)
+            newCallbackInfo = callbackPool.acquireNew();
+        newCallbackInfo->timestamp = lastPendingTimestamp;
+        newCallbackInfo->cleanupCallbacks.push_back(std::move(callback));
+
+        activeCallbacks.push_back(newCallbackInfo);
+    }
+}
+
+void TimelineManager::Callbacks::issueCallbacks(uint32_t queueIndex, uint64_t reachedTimestamp) {}
 
 }
