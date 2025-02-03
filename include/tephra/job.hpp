@@ -162,10 +162,10 @@ public:
     /// @remarks
     ///     `readAccessMask` must internally map to exactly one Vulkan image layout. See the following table for the
     ///     sets of read accesses that are compatible with each other and what layout they map to:
-    ///     - tp::ReadAccess::(...)ShaderSampled: `VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL`
+    ///     - tp::ReadAccess::(...)ShaderSampled: `VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL`
     ///     - tp::ReadAccess::(...)ShaderStorage, tp::ReadAccess::Unknown: `VK_IMAGE_LAYOUT_GENERAL`
     ///     - tp::ReadAccess::Transfer: `VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL`
-    ///     - tp::ReadAccess::DepthStencilAttachment: `VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL`
+    ///     - tp::ReadAccess::DepthStencilAttachment: `VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL`
     ///     - tp::ReadAccess::ImagePresentKHR: `VK_IMAGE_LAYOUT_PRESENT_SRC_KHR`
     void cmdExportResource(
         const ImageView& image,
