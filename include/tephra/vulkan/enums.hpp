@@ -92,7 +92,6 @@ TEPHRA_VULKAN_COMPATIBLE_ENUM(DeviceType, VkPhysicalDeviceType);
 /// Sampled descriptors, providing read-only access with format conversions:
 ///     - tp::DescriptorType::CombinedImageSampler
 ///     - tp::DescriptorType::SampledImage
-///     - tp::DescriptorType::InputAttachment
 ///     - tp::DescriptorType::TexelBuffer
 ///
 /// Storage descriptors, providing read, write and atomic access:

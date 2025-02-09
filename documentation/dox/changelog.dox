@@ -6,6 +6,11 @@ version increments.
 
 @tableofcontents
 
+@section v0-6-0 In-dev version 0.5.1
+Released 2025-02-03
+- Enabled easier sampling of a read-only depth or stencil attachment within the same render pass.
+- Simplified read-only image layouts by leveraging the `synchronization2` feature.
+
 @section v0-5-0 In-dev version 0.5.0
 Released 2024-11-11
 - Implemented device queries, see the @ref ug-other-queries section of the user guide.

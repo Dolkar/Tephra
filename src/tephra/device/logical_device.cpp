@@ -17,6 +17,7 @@ inline FunctionalityMask processExtensions(
     vk12Features.timelineSemaphore = VK_TRUE;
     auto& vk13Features = vkFeatureMap.get<VkPhysicalDeviceVulkan13Features>();
     vk13Features.dynamicRendering = VK_TRUE;
+    vk13Features.synchronization2 = VK_TRUE;
 
     // Add required features and extensions
     if (containsString(view(vkExtensions), DeviceExtension::KHR_AccelerationStructure)) {

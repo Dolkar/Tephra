@@ -580,6 +580,7 @@ void recordCommand(const JobData* job, PrimaryBufferRecorder& recorder, JobRecor
         auto* data = getCommandData<JobRecordStorage::WriteTimestampData>(command);
         job->resourcePoolImpl->getParentDeviceImpl()->getQueryManager()->sampleTimestampQuery(
             recorder.requestBuffer(), data->query, data->stage, 1, job->semaphores.jobSignal);
+        break;
     }
     case JobCommandTypes::BuildAccelerationStructures: {
         TEPHRA_ASSERT(vkiCommands.cmdBuildAccelerationStructuresKHR != nullptr);
