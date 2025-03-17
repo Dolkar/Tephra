@@ -63,7 +63,7 @@ class QueryManager;
 
 /// Base class implementing the shared functionality of device queries.
 class BaseQuery {
-    friend class QueryManager;
+    friend class QueryRecorder;
 
 public:
     /// Returns `true` if the query is null and not valid for use.

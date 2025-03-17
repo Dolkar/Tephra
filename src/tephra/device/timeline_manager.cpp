@@ -27,6 +27,8 @@ void TimelineManager::initializeQueues(uint32_t queueCount) {
 
         queueSemaphores.emplace_back(vkSemaphoreHandle);
     }
+
+    callbacks.initializeQueues(queueCount);
 }
 
 uint64_t TimelineManager::assignNextTimestamp(uint32_t queueDeviceIndex) {
@@ -111,7 +113,16 @@ void TimelineManager::addCleanupCallback(CleanupCallback callback) {
     }
 }
 
-void TimelineManager::addCleanupCallback(uint32_t queueDeviceIndex, CleanupCallback callback) {}
+void TimelineManager::addCleanupCallback(uint32_t queueDeviceIndex, CleanupCallback callback) {
+    TEPHRA_ASSERT(queueDeviceIndex < queueSemaphores.size());
+    uint64_t lastPendingTimestamp = getLastPendingTimestamp();
+
+    if (wasTimestampReachedInQueue(queueDeviceIndex, lastPendingTimestamp)) {
+        callback();
+    } else {
+        callbacks.addCleanupCallback(queueDeviceIndex, lastPendingTimestamp, std::move(callback));
+    }
+}
 
 uint64_t TimelineManager::updateQueue(uint32_t queueDeviceIndex) {
     TEPHRA_ASSERT(queueDeviceIndex < queueSemaphores.size());
@@ -145,31 +156,16 @@ void TimelineManager::update() {
     // Update all the queues individually, accumulating the latest timestamp value reached in all queues
     uint64_t minReachedTimestamp = getLastPendingTimestamp();
     for (int i = 0; i < queueSemaphores.size(); i++) {
-        minReachedTimestamp = tp::min(minReachedTimestamp, updateQueue(i));
+        uint64_t queueReachedTimestamp = updateQueue(i);
+        minReachedTimestamp = tp::min(minReachedTimestamp, queueReachedTimestamp);
+        // Also issue per-queue callbacks
+        callbacks.issueCallbacks(i, queueReachedTimestamp);
     }
 
     minReachedTimestamp = atomicStoreMax(lastReachedTimestampGlobal, minReachedTimestamp, std::memory_order_relaxed);
 
-    {
-        // Issue cleanup callbacks
-        std::lock_guard<Mutex> cleanupLock(callbackMutex);
-
-        while (!activeCallbacks.empty()) {
-            auto* timestampInfo = activeCallbacks.front();
-            if (minReachedTimestamp >= timestampInfo->timestamp) {
-                // Issue callbacks and release
-                for (CleanupCallback& cleanupCallback : timestampInfo->cleanupCallbacks) {
-                    cleanupCallback();
-                }
-                timestampInfo->cleanupCallbacks.clear();
-
-                callbackPool.release(timestampInfo);
-                activeCallbacks.pop_front();
-            } else {
-                break;
-            }
-        }
-    }
+    // Issue global callbacks
+    callbacks.issueCallbacks(Callbacks::GlobalQueueIndex, minReachedTimestamp);
 
     if constexpr (TephraValidationEnabled) {
         uint64_t lastPendingTimestamp = getLastPendingTimestamp();
@@ -224,24 +220,47 @@ void TimelineManager::Callbacks::addCleanupCallback(
     uint32_t queueIndex,
     uint64_t pendingTimestamp,
     CleanupCallback callback) {
-    std::lock_guard<Mutex> mutexLock(callbackMutex);
+    std::lock_guard<Mutex> mutexLock(mutex);
 
-    // Timestamps are added to global callback queue lazily
-    if (!activeCallbacks.empty() && activeCallbacks.back()->timestamp >= lastPendingTimestamp) {
+    std::deque<CallbackInfo*>& activeCallbacks = queueIndex == GlobalQueueIndex ? globalCallbacks :
+                                                                                  queueCallbacks[queueIndex];
+
+    if (!activeCallbacks.empty() && activeCallbacks.back()->timestamp >= pendingTimestamp) {
         // An entry already exists, we can just append the callback
         activeCallbacks.back()->cleanupCallbacks.push_back(std::move(callback));
     } else {
         // Add a new entry into the queue
-        CallbackInfo* newCallbackInfo = callbackPool.acquireExisting();
+        CallbackInfo* newCallbackInfo = pool.acquireExisting();
         if (newCallbackInfo == nullptr)
-            newCallbackInfo = callbackPool.acquireNew();
-        newCallbackInfo->timestamp = lastPendingTimestamp;
+            newCallbackInfo = pool.acquireNew();
+        newCallbackInfo->timestamp = pendingTimestamp;
         newCallbackInfo->cleanupCallbacks.push_back(std::move(callback));
 
         activeCallbacks.push_back(newCallbackInfo);
     }
 }
 
-void TimelineManager::Callbacks::issueCallbacks(uint32_t queueIndex, uint64_t reachedTimestamp) {}
+void TimelineManager::Callbacks::issueCallbacks(uint32_t queueIndex, uint64_t reachedTimestamp) {
+    std::deque<CallbackInfo*>& activeCallbacks = queueIndex == GlobalQueueIndex ? globalCallbacks :
+                                                                                  queueCallbacks[queueIndex];
+    // Early-out without locking
+    if (activeCallbacks.empty())
+        return;
 
+    std::lock_guard<Mutex> mutexLock(mutex);
+    while (!activeCallbacks.empty()) {
+        auto* timestampInfo = activeCallbacks.front();
+        if (reachedTimestamp >= timestampInfo->timestamp) {
+            // Issue callbacks and release
+            for (CleanupCallback& cleanupCallback : timestampInfo->cleanupCallbacks) {
+                cleanupCallback();
+            }
+            timestampInfo->cleanupCallbacks.clear();
+
+            pool.release(timestampInfo);
+            activeCallbacks.pop_front();
+        } else {
+            break;
+        }
+    }
 }
