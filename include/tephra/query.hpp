@@ -58,7 +58,7 @@ struct QueryResult {
     }
 };
 
-struct QueryEntry;
+struct QueryRecord;
 class QueryManager;
 
 /// Base class implementing the shared functionality of device queries.
@@ -89,7 +89,7 @@ public:
     TEPHRA_MAKE_MOVABLE(BaseQuery);
 
 protected:
-    using Handle = QueryEntry*;
+    using Handle = QueryRecord*;
 
     BaseQuery() : parentManager(nullptr), handle(nullptr) {}
     BaseQuery(QueryManager* parentManager, Handle handle);

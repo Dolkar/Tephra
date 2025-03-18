@@ -11,13 +11,6 @@
 
 namespace tp {
 
-// queries 2.0:
-//
-// Query batch - Fixed size buffer of queries of some size, submitted at the same time
-// Command buffers (and jobs) grab a batch when needed - this amortizes the allocation cost by the size of the batch
-// Lookup of free batches can then be simplified (no need to track query ranges), literally just an object pool
-// Batches are submitted for readback and reset as a whole as part of job submission
-
 class QueryBatchPool;
 
 enum class QueryType {
@@ -26,7 +19,7 @@ enum class QueryType {
 };
 
 // Represents data for a reusable Tephra Query
-struct QueryEntry {
+struct QueryRecord {
     // Store at least two so that we can ping-pong between the results
     static constexpr uint32_t MinMaxResultsHistorySize = 2u;
 
@@ -44,7 +37,7 @@ struct QueryEntry {
     VkQueryPoolHandle beginScopeVkQueryPool;
     // When recording a scoped query, stores the index of the begin query within its pool
     uint32_t beginScopeQueryIndex;
-    // Used to allow safe freeing of entries
+    // Used to allow safe freeing of records
     uint64_t lastPendingSampleTimestamp;
 
     // Translates query to Vulkan values
@@ -54,7 +47,7 @@ struct QueryEntry {
     void updateResults(ArrayView<uint64_t> sampleData, const JobSemaphore& semaphore);
 };
 
-// Holds a small batch of query samples for updating query entries of the same type at once
+// Holds a small batch of query samples for updating query records of the same type at once
 class QueryBatch {
 public:
     static constexpr uint32_t MaxSampleCount = 32u;
@@ -76,19 +69,24 @@ public:
 
     // Allocates a range of consecutive samples for a single query (more than one is needed for multiview)
     // Returns the index of the first one
-    uint32_t allocateSamples(QueryEntry* entry, uint32_t count);
+    uint32_t allocateSamples(QueryRecord* record, uint32_t count);
 
     // Reads back data from the queries in this batch (assuming it is ready and the given semaphore is signalled),
-    // updates the entries and resets itself
-    void readbackAndReset(DeviceContainer* deviceImpl, const JobSemaphore& semaphore);
+    // updating the records
+    void readback(DeviceContainer* deviceImpl, const JobSemaphore& semaphore);
+
+    // Reset without reading anything back
+    void reset() {
+        usedCount = 0;
+    }
 
 private:
     // The parent pool the batch was allocated from
     QueryBatchPool* batchPool;
     Lifeguard<VkQueryPoolHandle> vkQueryPool;
-    // The Tephra query entry to update that is associated with each Vulkan query sample
-    // Multiple consecutive samples for the same entry will be considered as multiview samples
-    std::array<QueryEntry*, MaxSampleCount> samples;
+    // The query record to update that is associated with each Vulkan query sample
+    // Multiple consecutive samples for the same record will be considered as multiview samples
+    std::array<QueryRecord*, MaxSampleCount> samples;
     uint32_t usedCount = 0;
 };
 
@@ -123,7 +121,7 @@ private:
 class QueryManager;
 
 // A non-owning query handle
-using QueryHandle = QueryEntry*;
+using QueryHandle = QueryRecord*;
 
 // A proxy used for recording queries to command buffers
 class QueryRecorder {
@@ -134,7 +132,8 @@ public:
         const VulkanCommandInterface* vkiCommands,
         VkCommandBufferHandle vkCommandBuffer,
         ArrayParameter<const RenderQuery* const> queries,
-        uint32_t multiviewViewCount);
+        uint32_t multiviewViewCount,
+        const JobSemaphore& semaphore);
 
     void endSampleRenderQueries(
         const VulkanCommandInterface* vkiCommands,
@@ -146,7 +145,8 @@ public:
         VkCommandBufferHandle vkCommandBuffer,
         const QueryHandle& query,
         PipelineStage stage,
-        uint32_t multiviewViewCount);
+        uint32_t multiviewViewCount,
+        const JobSemaphore& semaphore);
 
     // Adds all used batches to the list and resets itself
     void retrieveBatchesToSubmit(std::vector<QueryBatch*>& batchList);
@@ -171,14 +171,17 @@ public:
     explicit QueryManager(DeviceContainer* deviceImpl);
 
     void createTimestampQueries(ArrayParameter<TimestampQuery* const> queries);
+
     void createRenderQueries(
         ArrayParameter<const RenderQueryType> queryTypes,
         ArrayParameter<RenderQuery* const> queries);
 
     void queueFreeQuery(const QueryHandle& query);
+
     // Recycles batches that weren't submitted
     void freeDiscardedBatches(ArrayParameter<QueryBatch*> batches);
-    // Submits batches
+
+    // Submits batches for readback
     void submitBatches(ArrayParameter<QueryBatch*> batches, const JobSemaphore& semaphore);
 
     // Reads out all processed query samples and performs cleanup
@@ -187,21 +190,27 @@ public:
 private:
     using PendingBatchQueue = std::deque<std::pair<JobSemaphore, QueryBatch*>>;
 
-    // Allocates a batch for the given query
+    // Locks and allocates a batch for the given query
     QueryBatch* allocateBatchForQuery(const QueryHandle& query);
-    // Creates a new Tephra query of the given type, assuming globalMutex is locked
-    QueryHandle createQuery(QueryType type, std::variant<std::monostate, RenderQueryType> subType);
-    // Translates query to the index of the pool
-    uint32_t queryToPoolIndex(const QueryHandle& query);
+    // Creates a new query record of the given type, assuming globalMutex is locked
+    QueryHandle createQueryRecord(QueryType type, std::variant<std::monostate, RenderQueryType> subType);
+    // Returns the batch pool for the given Vulkan query type, assuming globalMutex is locked
+    QueryBatchPool& getOrCreatePool(VkQueryType vkQueryType, VkQueryPipelineStatisticFlagBits pipelineStatistics);
 
     DeviceContainer* deviceImpl;
-    std::vector<QueryBatchPool> queryPools;
+    // Pools of query batches for each type, created on demand
+    std::deque<QueryBatchPool> queryPools;
     // Pending batch queue for each device queue
     std::vector<PendingBatchQueue> pendingBatchQueues;
-    ObjectPool<QueryEntry> entryPool;
-    std::vector<QueryEntry*> entriesToFree;
-    // For now we just use this global mutex to sync all query operations
-    Mutex globalMutex;
+    // Pool for reusing query records (interface-facing query objects)
+    ObjectPool<QueryRecord> recordPool;
+    // List of query records to free once unused
+    std::vector<QueryRecord*> recordsToFree;
+    // Mutex synchronizing access to queryPools, recordPool and recordsToFree
+    Mutex recordMutex;
+    // Mutex synchronizing access to pendingBatchQueues and individual QueryBatchPools
+    // Could potentially be an independent mutex for each queue
+    Mutex batchMutex;
 };
 
 }
