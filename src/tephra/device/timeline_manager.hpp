@@ -17,7 +17,7 @@ public:
     explicit TimelineManager(DeviceContainer* deviceImpl);
 
     // To be called before use once the queue count is known
-    void initializeQueues(uint32_t queueCount);
+    void initializeQueueSemaphores(uint32_t queueCount);
 
     // Creates a new unique timestamp for a job that will execute in this queue. Jobs in the same queue must be executed
     // in the order defined by these timestamps.
@@ -53,10 +53,6 @@ public:
     // Used for resource cleanup
     void addCleanupCallback(CleanupCallback callback);
 
-    // Registers a callback to be called when the current last pending timestamp has been reached in the specified
-    // queue. Used for resource cleanup
-    void addCleanupCallback(uint32_t queueDeviceIndex, CleanupCallback callback);
-
     // Updates the last reached timestamp of the queue and returns the new timestamp
     uint64_t updateQueue(uint32_t queueDeviceIndex);
 
@@ -70,35 +66,14 @@ public:
     ~TimelineManager();
 
 private:
-    class Callbacks {
-    public:
-        static constexpr const uint32_t GlobalQueueIndex = ~0u;
+    struct CallbackInfo {
+        uint64_t timestamp = 0;
+        std::vector<CleanupCallback> cleanupCallbacks;
 
-        void initializeQueues(uint32_t queueCount) {
-            queueCallbacks.resize(queueCount);
+        void clear() {
+            timestamp = 0;
+            cleanupCallbacks.clear();
         }
-
-        void addCleanupCallback(uint32_t queueIndex, uint64_t pendingTimestamp, CleanupCallback callback);
-
-        void issueCallbacks(uint32_t queueIndex, uint64_t reachedTimestamp);
-
-    private:
-        struct CallbackInfo {
-            uint64_t timestamp = 0;
-            std::vector<CleanupCallback> cleanupCallbacks;
-
-            void clear() {
-                timestamp = 0;
-                cleanupCallbacks.clear();
-            }
-        };
-
-        // A queue of cleanup callbacks to be issued when the timestamp has been reached in all queues.
-        std::deque<CallbackInfo*> globalCallbacks;
-        // A queue of cleanup callbacks to be issued per queue
-        std::vector<std::deque<CallbackInfo*>> queueCallbacks;
-        ObjectPool<CallbackInfo> pool;
-        Mutex mutex;
     };
 
     struct QueueSemaphore {
@@ -129,7 +104,11 @@ private:
 
     // One timeline semaphore for each queue
     std::vector<QueueSemaphore> queueSemaphores;
-    Callbacks callbacks;
+
+    // A queue of cleanup callbacks to be issued when the timestamp has been reached in all queues.
+    std::deque<CallbackInfo*> activeCallbacks;
+    ObjectPool<CallbackInfo> callbackPool;
+    Mutex callbackMutex;
 };
 
 }
