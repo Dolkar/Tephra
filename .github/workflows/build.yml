@@ -55,7 +55,7 @@ jobs:
     - uses: lukka/get-cmake@latest
       
     - name: Prepare Vulkan SDK
-      uses: humbletim/setup-vulkan-sdk@v1.2.0
+      uses: humbletim/setup-vulkan-sdk@v1.2.1
       with:
         vulkan-query-version: latest
         # Vulkan-Loader is not actually needed, but cmake cannot include the Vulkan library as just headers
