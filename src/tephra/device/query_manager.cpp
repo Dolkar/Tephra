@@ -188,14 +188,13 @@ QueryBatch* QueryBatchPool::allocateBatch() {
     if (batch == nullptr) {
         VkQueryPoolHandle vkQueryPool = deviceImpl->getLogicalDevice()->createQueryPool(
             vkQueryType, pipelineStatistics, QueryBatch::MaxSampleCount);
-        batch = pool.acquireNew(this, pool.objectsAllocated(), deviceImpl->vkMakeHandleLifeguard(vkQueryPool));
+        batch = pool.acquireNew(this, deviceImpl->vkMakeHandleLifeguard(vkQueryPool));
     }
 
     return batch;
 }
 
 void QueryBatchPool::freeBatch(QueryBatch* queryBatch) {
-    queryBatch->reset();
     pool.release(queryBatch);
 }
 
@@ -203,8 +202,8 @@ void QueryRecorder::beginSampleRenderQueries(
     const VulkanCommandInterface* vkiCommands,
     VkCommandBufferHandle vkCommandBuffer,
     ArrayParameter<const RenderQuery* const> queries,
-    uint32_t multiviewViewCount,
-    const JobSemaphore& semaphore) {
+    uint32_t multiviewViewCount) {
+    TEPHRA_ASSERT(!jobSemaphore.isNull());
     for (const RenderQuery* queryPtr : queries) {
         QueryHandle query = getQueryHandle(*queryPtr);
         TEPHRA_ASSERT(query->type == QueryType::Render);
@@ -223,8 +222,14 @@ void QueryRecorder::beginSampleRenderQueries(
         query->beginScopeVkQueryPool = batch->vkGetQueryPoolHandle();
         query->beginScopeQueryIndex = vkQueryIndex;
 
-        query->lastPendingSampleTimestamp = semaphore.timestamp;
+        query->lastPendingSampleTimestamp = jobSemaphore.timestamp;
     }
+}
+
+void QueryRecorder::setJobSemaphore(const JobSemaphore& semaphore) {
+    TEPHRA_ASSERT(jobSemaphore.isNull());
+    TEPHRA_ASSERT(!semaphore.isNull());
+    jobSemaphore = semaphore;
 }
 
 void QueryRecorder::endSampleRenderQueries(
@@ -246,8 +251,8 @@ void QueryRecorder::sampleTimestampQuery(
     VkCommandBufferHandle vkCommandBuffer,
     const QueryHandle& query,
     PipelineStage stage,
-    uint32_t multiviewViewCount,
-    const JobSemaphore& semaphore) {
+    uint32_t multiviewViewCount) {
+    TEPHRA_ASSERT(!jobSemaphore.isNull());
     TEPHRA_ASSERT(query->type == QueryType::Timestamp);
 
     // Allocate and record sample
@@ -257,13 +262,23 @@ void QueryRecorder::sampleTimestampQuery(
     vkiCommands->cmdWriteTimestamp(
         vkCommandBuffer, vkCastConvertibleEnum(stage), batch->vkGetQueryPoolHandle(), vkQueryIndex);
 
-    query->lastPendingSampleTimestamp = semaphore.timestamp;
+    query->lastPendingSampleTimestamp = jobSemaphore.timestamp;
 }
 
-void QueryRecorder::retrieveBatchesToSubmit(std::vector<QueryBatch*>& batchList) {
+void QueryRecorder::retrieveBatchesAndReset(ScratchVector<QueryBatch*>& batchList) {
     for (QueryBatch* batch : usedBatches)
         batchList.push_back(batch);
+
     usedBatches.clear();
+    jobSemaphore = {};
+}
+
+void QueryRecorder::reset() {
+    if (!usedBatches.empty()) {
+        manager->freeDiscardedBatches(view(usedBatches));
+    }
+    usedBatches.clear();
+    jobSemaphore = {};
 }
 
 QueryBatch* QueryRecorder::getBatch(const QueryHandle& query, uint32_t sampleCount) {
@@ -329,7 +344,7 @@ void QueryManager::freeDiscardedBatches(ArrayParameter<QueryBatch*> batches) {
     }
 }
 
-void QueryManager::submitBatches(ArrayParameter<QueryBatch*> batches, const JobSemaphore& semaphore) {
+void QueryManager::awaitBatches(ArrayParameter<QueryBatch*> batches, const JobSemaphore& semaphore) {
     TEPHRA_ASSERT(!semaphore.isNull());
     std::lock_guard<Mutex> lock(batchMutex);
 

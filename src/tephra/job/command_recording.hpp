@@ -2,6 +2,7 @@
 
 #include "job_data.hpp"
 #include "accesses.hpp"
+#include "../device/query_manager.hpp"
 #include "../common_impl.hpp"
 #include "../vulkan/interface.hpp"
 
@@ -23,6 +24,8 @@ public:
     std::size_t getCommandBufferCount() const {
         return vkCommandBuffers->size();
     }
+
+    QueryRecorder& getQueryRecorder();
 
     // Request the last primary command buffer to record a command to it
     VkCommandBufferHandle requestBuffer();

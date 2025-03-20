@@ -15,6 +15,7 @@ void ComputeList::beginRecording(CommandPool* commandPool) {
     TEPHRA_ASSERTD(vkFutureCommandBuffer != nullptr, "beginRecording() of inline ComputeList");
 
     vkCommandBufferHandle = commandPool->acquirePrimaryCommandBuffer(debugTarget->getObjectName());
+    queryRecorder = &commandPool->getQueryRecorder();
 
     // Record to a fresh primary command buffer
     VkCommandBufferBeginInfo beginInfo;
@@ -103,8 +104,8 @@ void ComputeList::cmdPipelineBarrier(
 
 void ComputeList::cmdWriteTimestamp(const TimestampQuery& query, PipelineStage stage) {
     TEPHRA_DEBUG_SET_CONTEXT(debugTarget.get(), "cmdWriteTimestamp", nullptr);
-    jobData->resourcePoolImpl->getParentDeviceImpl()->getQueryManager()->sampleTimestampQuery(
-        vkCommandBufferHandle, QueryManager::getQueryHandle(query), stage, 1, jobData->semaphores.jobSignal);
+    queryRecorder->sampleTimestampQuery(
+        vkiCommands, vkCommandBufferHandle, QueryRecorder::getQueryHandle(query), stage, 1);
 }
 
 ComputeList::ComputeList(ComputeList&&) noexcept = default;
@@ -115,18 +116,14 @@ ComputeList::~ComputeList() = default;
 
 ComputeList::ComputeList(
     const VulkanCommandInterface* vkiCommands,
-    const JobData* jobData,
     VkCommandBufferHandle vkInlineCommandBuffer,
     DebugTarget debugTarget)
-    : CommandList(vkiCommands, jobData, VK_PIPELINE_BIND_POINT_COMPUTE, vkInlineCommandBuffer, std::move(debugTarget)) {
-}
+    : CommandList(vkiCommands, VK_PIPELINE_BIND_POINT_COMPUTE, vkInlineCommandBuffer, std::move(debugTarget)) {}
 
 ComputeList::ComputeList(
     const VulkanCommandInterface* vkiCommands,
-    const JobData* jobData,
     VkCommandBufferHandle* vkFutureCommandBuffer,
     DebugTarget debugTarget)
-    : CommandList(vkiCommands, jobData, VK_PIPELINE_BIND_POINT_COMPUTE, vkFutureCommandBuffer, std::move(debugTarget)) {
-}
+    : CommandList(vkiCommands, VK_PIPELINE_BIND_POINT_COMPUTE, vkFutureCommandBuffer, std::move(debugTarget)) {}
 
 }

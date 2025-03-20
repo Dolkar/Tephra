@@ -83,8 +83,6 @@ void QueueState::submitQueuedJobs(
         for (Job* job : jobsToSubmit) {
             TEPHRA_ASSERT(!queuedJobs.empty());
             TEPHRA_ASSERT(job == &queuedJobs.front());
-
-            JobResourcePoolContainer::queueReleaseSubmittedJob(std::move(*job));
             queuedJobs.pop_front();
         }
     }

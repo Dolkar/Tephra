@@ -45,7 +45,6 @@ void AttachmentAccess::convertToVkAccess(
 
 void RenderPass::assignDeferred(
     const RenderPassSetup& setup,
-    const JobData* jobData,
     const DebugTarget& listDebugTarget,
     ArrayView<RenderList>& listsToAssign) {
     prepareNonAttachmentAccesses(setup);
@@ -69,7 +68,6 @@ void RenderPass::assignDeferred(
     for (std::size_t i = 0; i < listsToAssign.size(); i++) {
         listsToAssign[i] = RenderList(
             &deviceImpl->getCommandPoolPool()->getVkiCommands(),
-            jobData,
             &vkDeferredCommandBuffers[i],
             &vkInheritanceInfo,
             multiviewViewCount,
@@ -105,7 +103,7 @@ void RenderPass::resolveAttachmentViews() {
     }
 }
 
-void RenderPass::recordPass(const JobData* jobData, PrimaryBufferRecorder& recorder) {
+void RenderPass::recordPass(PrimaryBufferRecorder& recorder) {
     // Begin and end rendering here
     VkCommandBufferHandle vkPrimaryCommandBufferHandle = recorder.requestBuffer();
     recorder.getVkiCommands().cmdBeginRendering(vkPrimaryCommandBufferHandle, &vkRenderingInfo);
@@ -115,7 +113,6 @@ void RenderPass::recordPass(const JobData* jobData, PrimaryBufferRecorder& recor
         int multiviewViewCount = tp::max(countBitsSet(vkRenderingInfo.viewMask), 1u);
         RenderList inlineList = RenderList(
             &recorder.getVkiCommands(),
-            jobData,
             vkPrimaryCommandBufferHandle,
             multiviewViewCount,
             std::move(inlineListDebugTarget));

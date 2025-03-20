@@ -17,6 +17,7 @@ void RenderList::beginRecording(CommandPool* commandPool) {
 
     // Record to a secondary command buffer (somehow faster than using primary command buffers on Nvidia)
     vkCommandBufferHandle = commandPool->acquireSecondaryCommandBuffer(debugTarget->getObjectName());
+    queryRecorder = &commandPool->getQueryRecorder();
 
     VkCommandBufferBeginInfo beginInfo;
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -178,24 +179,18 @@ void RenderList::cmdSetDepthBounds(float minDepthBounds, float maxDepthBounds) {
 
 void RenderList::cmdWriteTimestamp(const TimestampQuery& query, PipelineStage stage) {
     TEPHRA_DEBUG_SET_CONTEXT(debugTarget.get(), "cmdWriteTimestamp", nullptr);
-    jobData->resourcePoolImpl->getParentDeviceImpl()->getQueryManager()->sampleTimestampQuery(
-        vkCommandBufferHandle,
-        QueryManager::getQueryHandle(query),
-        stage,
-        multiviewViewCount,
-        jobData->semaphores.jobSignal);
+    queryRecorder->sampleTimestampQuery(
+        vkiCommands, vkCommandBufferHandle, QueryRecorder::getQueryHandle(query), stage, multiviewViewCount);
 }
 
 void RenderList::cmdBeginQueries(ArrayParameter<const RenderQuery* const> queries) {
     TEPHRA_DEBUG_SET_CONTEXT(debugTarget.get(), "cmdBeginQueries", nullptr);
-    jobData->resourcePoolImpl->getParentDeviceImpl()->getQueryManager()->beginSampleRenderQueries(
-        vkCommandBufferHandle, queries, multiviewViewCount, jobData->semaphores.jobSignal);
+    queryRecorder->beginSampleRenderQueries(vkiCommands, vkCommandBufferHandle, queries, multiviewViewCount);
 }
 
 void RenderList::cmdEndQueries(ArrayParameter<const RenderQuery* const> queries) {
     TEPHRA_DEBUG_SET_CONTEXT(debugTarget.get(), "cmdEndQueries", nullptr);
-    jobData->resourcePoolImpl->getParentDeviceImpl()->getQueryManager()->endSampleRenderQueries(
-        vkCommandBufferHandle, queries);
+    queryRecorder->endSampleRenderQueries(vkiCommands, vkCommandBufferHandle, queries);
 }
 
 RenderList::RenderList(RenderList&&) noexcept = default;
@@ -206,22 +201,20 @@ RenderList::~RenderList() = default;
 
 RenderList::RenderList(
     const VulkanCommandInterface* vkiCommands,
-    const JobData* jobData,
     VkCommandBufferHandle vkInlineCommandBuffer,
     uint32_t multiviewViewCount,
     DebugTarget debugTarget)
-    : CommandList(vkiCommands, jobData, VK_PIPELINE_BIND_POINT_GRAPHICS, vkInlineCommandBuffer, std::move(debugTarget)),
+    : CommandList(vkiCommands, VK_PIPELINE_BIND_POINT_GRAPHICS, vkInlineCommandBuffer, std::move(debugTarget)),
       vkInheritanceInfo(nullptr),
       multiviewViewCount(multiviewViewCount) {}
 
 RenderList::RenderList(
     const VulkanCommandInterface* vkiCommands,
-    const JobData* jobData,
     VkCommandBufferHandle* vkFutureCommandBuffer,
     const VkCommandBufferInheritanceInfo* vkInheritanceInfo,
     uint32_t multiviewViewCount,
     DebugTarget debugTarget)
-    : CommandList(vkiCommands, jobData, VK_PIPELINE_BIND_POINT_GRAPHICS, vkFutureCommandBuffer, std::move(debugTarget)),
+    : CommandList(vkiCommands, VK_PIPELINE_BIND_POINT_GRAPHICS, vkFutureCommandBuffer, std::move(debugTarget)),
       vkInheritanceInfo(vkInheritanceInfo),
       multiviewViewCount(multiviewViewCount) {}
 

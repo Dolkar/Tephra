@@ -58,8 +58,6 @@ public:
 
     static void allocateJobResources(Job& job);
 
-    static void queueReleaseSubmittedJob(Job job);
-
     static void queueReleaseJob(JobData* jobData);
 
     static const DebugTarget* getJobDebugTarget(const Job& job) {

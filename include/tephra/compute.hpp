@@ -44,7 +44,7 @@ TEPHRA_MAKE_ENUM_BIT_MASK(ComputeAccessMask, ComputeAccess);
 class ComputeList : public CommandList {
 public:
     /// Constructs a null tp::ComputeList.
-    ComputeList() : CommandList(){};
+    ComputeList() : CommandList() {};
 
     /// Begins recording commands to the list, using the given command pool.
     /// @param commandPool
@@ -117,13 +117,11 @@ private:
 
     ComputeList(
         const VulkanCommandInterface* vkiCommands,
-        const JobData* jobData,
         VkCommandBufferHandle vkInlineCommandBuffer,
         DebugTarget debugTarget);
 
     ComputeList(
         const VulkanCommandInterface* vkiCommands,
-        const JobData* jobData,
         VkCommandBufferHandle* vkFutureCommandBuffer,
         DebugTarget debugTarget);
 };

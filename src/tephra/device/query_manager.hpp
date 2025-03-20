@@ -76,7 +76,7 @@ public:
     void readback(DeviceContainer* deviceImpl, const JobSemaphore& semaphore);
 
     // Reset without reading anything back
-    void reset() {
+    void clear() {
         usedCount = 0;
     }
 
@@ -124,16 +124,19 @@ class QueryManager;
 using QueryHandle = QueryRecord*;
 
 // A proxy used for recording queries to command buffers
+// It can be shared across command buffers that will execute as part of the same job, but is not thread safe
 class QueryRecorder {
 public:
     explicit QueryRecorder(QueryManager* manager) : manager(manager) {}
+
+    // The current job's semaphore is needed for recording queries
+    void setJobSemaphore(const JobSemaphore& semaphore);
 
     void beginSampleRenderQueries(
         const VulkanCommandInterface* vkiCommands,
         VkCommandBufferHandle vkCommandBuffer,
         ArrayParameter<const RenderQuery* const> queries,
-        uint32_t multiviewViewCount,
-        const JobSemaphore& semaphore);
+        uint32_t multiviewViewCount);
 
     void endSampleRenderQueries(
         const VulkanCommandInterface* vkiCommands,
@@ -145,11 +148,13 @@ public:
         VkCommandBufferHandle vkCommandBuffer,
         const QueryHandle& query,
         PipelineStage stage,
-        uint32_t multiviewViewCount,
-        const JobSemaphore& semaphore);
+        uint32_t multiviewViewCount);
 
-    // Adds all used batches to the list and resets itself
-    void retrieveBatchesToSubmit(std::vector<QueryBatch*>& batchList);
+    // Adds all used batches to the list to be submitted and resets itself
+    void retrieveBatchesAndReset(ScratchVector<QueryBatch*>& batchList);
+
+    // Reset any used batches that may have been used, but not submitted
+    void reset();
 
     static QueryHandle getQueryHandle(const BaseQuery& query) {
         return query.handle;
@@ -161,6 +166,7 @@ private:
 
     QueryManager* manager;
     std::vector<QueryBatch*> usedBatches;
+    JobSemaphore jobSemaphore;
 };
 
 // Global manager for all queries
@@ -181,8 +187,8 @@ public:
     // Recycles batches that weren't submitted
     void freeDiscardedBatches(ArrayParameter<QueryBatch*> batches);
 
-    // Submits batches for readback
-    void submitBatches(ArrayParameter<QueryBatch*> batches, const JobSemaphore& semaphore);
+    // Awaits submitted batches for readback
+    void awaitBatches(ArrayParameter<QueryBatch*> batches, const JobSemaphore& semaphore);
 
     // Reads out all processed query samples and performs cleanup
     void update();
