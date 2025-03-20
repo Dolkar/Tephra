@@ -344,7 +344,7 @@ void QueryManager::freeDiscardedBatches(ArrayParameter<QueryBatch*> batches) {
     }
 }
 
-void QueryManager::awaitBatches(ArrayParameter<QueryBatch*> batches, const JobSemaphore& semaphore) {
+void QueryManager::registerBatches(ArrayParameter<QueryBatch*> batches, const JobSemaphore& semaphore) {
     TEPHRA_ASSERT(!semaphore.isNull());
     std::lock_guard<Mutex> lock(batchMutex);
 

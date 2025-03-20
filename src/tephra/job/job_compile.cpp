@@ -400,7 +400,7 @@ void recordCommandBuffers(
     for (CommandPool* secondaryPool : job->resources.commandPools) {
         secondaryPool->getQueryRecorder().retrieveBatchesAndReset(queryBatches);
     }
-    deviceImpl->getQueryManager()->awaitBatches(view(queryBatches), job->semaphores.jobSignal);
+    deviceImpl->getQueryManager()->registerBatches(view(queryBatches), job->semaphores.jobSignal);
 }
 
 void compileJob(

@@ -187,8 +187,8 @@ public:
     // Recycles batches that weren't submitted
     void freeDiscardedBatches(ArrayParameter<QueryBatch*> batches);
 
-    // Awaits submitted batches for readback
-    void awaitBatches(ArrayParameter<QueryBatch*> batches, const JobSemaphore& semaphore);
+    // Register submitted batches for readback
+    void registerBatches(ArrayParameter<QueryBatch*> batches, const JobSemaphore& semaphore);
 
     // Reads out all processed query samples and performs cleanup
     void update();
