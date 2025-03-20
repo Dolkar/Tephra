@@ -6,7 +6,12 @@ version increments.
 
 @tableofcontents
 
-@section v0-6-0 In-dev version 0.5.1
+@section v0-5-2 In-dev version 0.5.2
+Released 2025-03-20
+- Optimized queries through batching and reuse within a tp::CommandPool. This should lead to improved performance
+  and reduced lock contention when using a large number of queries.
+
+@section v0-5-1 In-dev version 0.5.1
 Released 2025-02-03
 - Enabled easier sampling of a read-only depth or stencil attachment within the same render pass.
 - Simplified read-only image layouts by leveraging the `synchronization2` feature.

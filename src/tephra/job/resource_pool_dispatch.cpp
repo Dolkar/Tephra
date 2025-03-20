@@ -124,19 +124,6 @@ void JobResourcePoolContainer::allocateJobResources(Job& job) {
     }
 }
 
-void JobResourcePoolContainer::queueReleaseSubmittedJob(Job job) {
-    // The only point of a Job object is to hold JobData and handle destruction while it's not yet submitted
-    // Clearing the pointer will ensure it won't attempt to free its resources immediately once destroyed in this
-    // method.
-    JobData* jobData = job.jobData;
-    TEPHRA_ASSERT(jobData != nullptr);
-    TEPHRA_ASSERT(jobData->resourcePoolImpl != nullptr);
-    job.jobData = nullptr;
-    TEPHRA_ASSERT(!jobData->semaphores.jobSignal.isNull());
-
-    queueReleaseJob(jobData);
-}
-
 void JobResourcePoolContainer::queueReleaseJob(JobData* jobData) {
     JobResourcePoolContainer* resourcePool = jobData->resourcePoolImpl;
     if (resourcePool == nullptr)

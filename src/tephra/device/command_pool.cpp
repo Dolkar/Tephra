@@ -3,15 +3,21 @@
 
 namespace tp {
 
-CommandPool::CommandPool(VkCommandPoolHandle vkCommandPoolHandle, CommandPoolPool* commandPoolPool, QueueType queueType)
+CommandPool::CommandPool(
+    VkCommandPoolHandle vkCommandPoolHandle,
+    CommandPoolPool* commandPoolPool,
+    QueueType queueType,
+    QueryRecorder queryRecorder)
     : vkCommandPoolHandle(vkCommandPoolHandle),
       commandPoolPool(commandPoolPool),
       queueType(queueType),
+      queryRecorder(queryRecorder),
       usedPrimaryBuffers(0),
       usedSecondaryBuffers(0) {}
 
 void CommandPool::reset() {
     commandPoolPool->resetCommandPool(vkCommandPoolHandle, false);
+    queryRecorder.reset();
     usedPrimaryBuffers = 0;
     usedSecondaryBuffers = 0;
 }
@@ -61,7 +67,6 @@ CommandPool* CommandPoolPool::acquirePool(QueueType queueType, const char* debug
     if (!freeList.empty()) {
         CommandPool* pool = freeList.back();
         freeList.pop_back();
-        pool->reset();
         return pool;
     }
 
@@ -72,11 +77,12 @@ CommandPool* CommandPoolPool::acquirePool(QueueType queueType, const char* debug
 
     deviceImpl->getLogicalDevice()->setObjectDebugName(vkCommandPoolHandle, debugName);
 
-    storage.emplace_back(vkCommandPoolHandle, this, queueType);
+    storage.emplace_back(vkCommandPoolHandle, this, queueType, QueryRecorder(deviceImpl->getQueryManager()));
     return &storage.back();
 }
 
 void CommandPoolPool::releasePool(CommandPool* cmdPool) {
+    cmdPool->reset();
     std::lock_guard<Mutex> mutexLock(mutex);
 
     auto& freeList = freeLists[static_cast<int>(cmdPool->getQueueType())];

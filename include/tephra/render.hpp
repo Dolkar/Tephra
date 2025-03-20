@@ -99,7 +99,7 @@ class VulkanCommandInterface;
 class RenderList : public CommandList {
 public:
     /// Constructs a null tp::RenderList.
-    RenderList() : CommandList(){};
+    RenderList() : CommandList() {};
 
     /// Begins recording commands to the list, using the given command pool.
     /// @param commandPool
@@ -340,18 +340,17 @@ private:
     friend class RenderPass;
 
     const VkCommandBufferInheritanceInfo* vkInheritanceInfo = nullptr;
-    uint32_t multiviewViewCount;
+    uint32_t multiviewViewCount = 0;
 
     RenderList(
         const VulkanCommandInterface* vkiCommands,
-        const JobData* jobData,
         VkCommandBufferHandle vkInlineCommandBuffer,
+        QueryRecorder* queryRecorder,
         uint32_t multiviewViewCount,
         DebugTarget debugTarget);
 
     RenderList(
         const VulkanCommandInterface* vkiCommands,
-        const JobData* jobData,
         VkCommandBufferHandle* vkFutureCommandBuffer,
         const VkCommandBufferInheritanceInfo* vkInheritanceInfo,
         uint32_t multiviewViewCount,

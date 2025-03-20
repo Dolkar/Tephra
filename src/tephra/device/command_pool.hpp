@@ -2,6 +2,7 @@
 
 #include "../vulkan/interface.hpp"
 #include "../common_impl.hpp"
+#include "query_manager.hpp"
 #include <tephra/physical_device.hpp>
 #include <deque>
 
@@ -11,7 +12,11 @@ class CommandPoolPool;
 
 class CommandPool {
 public:
-    CommandPool(VkCommandPoolHandle vkCommandPoolHandle, CommandPoolPool* commandPoolPool, QueueType queueType);
+    CommandPool(
+        VkCommandPoolHandle vkCommandPoolHandle,
+        CommandPoolPool* commandPoolPool,
+        QueueType queueType,
+        QueryRecorder queryRecorder);
 
     // Resets the command buffers allocated from this pool, allowing them to be reused
     void reset();
@@ -21,6 +26,11 @@ public:
 
     // Returns a free secondary command buffer handle, allocating new ones if necessary
     VkCommandBufferHandle acquireSecondaryCommandBuffer(const char* debugName);
+
+    // Returns the associated query recorder
+    QueryRecorder& getQueryRecorder() {
+        return queryRecorder;
+    }
 
     QueueType getQueueType() const {
         return queueType;
@@ -36,6 +46,7 @@ private:
     VkCommandPoolHandle vkCommandPoolHandle;
     CommandPoolPool* commandPoolPool;
     QueueType queueType;
+    QueryRecorder queryRecorder;
     std::vector<VkCommandBufferHandle> primaryBuffers;
     uint32_t usedPrimaryBuffers;
     std::vector<VkCommandBufferHandle> secondaryBuffers;

@@ -404,7 +404,7 @@ void Job::cmdExecuteComputePass(
             setup, std::move(std::get<ComputeInlineCallback>(commandRecording)), std::move(listDebugTarget));
     } else {
         ArrayView<ComputeList>& computeListsToAssign = std::get<ArrayView<ComputeList>>(commandRecording);
-        computePass.assignDeferred(setup, jobData, listDebugTarget, computeListsToAssign);
+        computePass.assignDeferred(setup, listDebugTarget, computeListsToAssign);
     }
 
     for (const BufferComputeAccess& entry : setup.bufferAccesses) {
@@ -438,7 +438,7 @@ void Job::cmdExecuteRenderPass(
             setup, std::move(std::get<RenderInlineCallback>(commandRecording)), std::move(listDebugTarget));
     } else {
         ArrayView<RenderList>& renderListsToAssign = std::get<ArrayView<RenderList>>(commandRecording);
-        renderPass.assignDeferred(setup, jobData, listDebugTarget, renderListsToAssign);
+        renderPass.assignDeferred(setup, listDebugTarget, renderListsToAssign);
     }
 
     for (const BufferRenderAccess& entry : setup.bufferAccesses) {
@@ -482,7 +482,7 @@ void Job::cmdEndDebugLabel() {
 void Job::cmdWriteTimestamp(const TimestampQuery& query, PipelineStage stage) {
     TEPHRA_DEBUG_SET_CONTEXT(debugTarget.get(), "cmdWriteTimestamp", nullptr);
     recordCommand<JobRecordStorage::WriteTimestampData>(
-        jobData->record, JobCommandTypes::WriteTimestamp, QueryManager::getQueryHandle(query), stage);
+        jobData->record, JobCommandTypes::WriteTimestamp, QueryRecorder::getQueryHandle(query), stage);
 }
 
 void Job::vkCmdImportExternalResource(
@@ -537,8 +537,6 @@ Job& Job::operator=(Job&& other) noexcept {
 
 Job::~Job() {
     if (jobData != nullptr) {
-        // The Job should at this point still be owned by the user, implying it hasn't been enqueued yet
-        // So release it as unused
         TEPHRA_DEBUG_SET_CONTEXT_DESTRUCTOR(debugTarget.get());
         JobResourcePoolContainer::queueReleaseJob(jobData);
     }

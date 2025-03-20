@@ -443,6 +443,10 @@ JobSemaphore Device::enqueueJob(
     signalSemaphore.timestamp = deviceImpl->getTimelineManager()->assignNextTimestamp(queueIndex);
     jobData->semaphores.jobSignal = signalSemaphore;
 
+    // Inform any query recorders about the semaphore
+    for (CommandPool* commandPool : jobData->resources.commandPools)
+        commandPool->getQueryRecorder().setJobSemaphore(signalSemaphore);
+
     if (!jobData->flags.contains(tp::JobFlag::Small)) {
         // Update the current progress to maybe free up some resources before allocating again
         deviceImpl->updateDeviceProgress_();

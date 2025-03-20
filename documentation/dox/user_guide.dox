@@ -1823,20 +1823,24 @@ any previously executed job can be queried for a result with tp::BaseQuery::getJ
 One caveat is that Tephra does not retrieve these results immediately after they are available, but instead needs to
 periodically check and update the existing values. This is done automatically at key points like during a call to
 tp::Device::waitForJobSemaphores, but can also be expedited by manually calling tp::Device::updateDeviceProgress.
-Queries are an area where ease of use was prioritized over performance, as it is expected that they will be used
-sparingly (not more than a few hundred times per frame) or while debugging.
+Note that queries have a non-zero performance impact, both on the host and device side, depending on the device vendor,
+and so should be used sparingly. This especially needs to be taken into account when trying to measure timings, as too
+many timestamp queries will themselves affect the results.
 
 @m_class{m-note m-dim}
 
 @parblock
 The design of queries in Vulkan, of course, did not presume how queries will be used and spared no precautions. Queries
 of each type are created from their own query pools and are one time use only, though recyclable once the result has
-been read back. Tephra manages that with internally synchronized pools that are shared for the device. Its query objects
-are only loosely associated with Vulkan queries. When a query write is recorded, such as through
-tp::Job::cmdWriteTimestamp, a Vulkan query object is retrieved from a pool and queued to be read back later. When the
-job finishes executing and the query results are to be read, the manager reads out the awaiting Vulkan queries and
-notifies the Tephra query objects that requested the values about the new result. The query objects then update their
-internal state, discarding the oldest result in favor of the new one.
+been read back. Tephra manages that with internally synchronized pools that are shared across the device. Vulkan queries
+of the same type are allocated in batches and kept in tp::CommandPool for recording queries into command buffers within
+the same job.
+
+When a query write is recorded, such as through tp::Job::cmdWriteTimestamp, a slot within a batch is reserved for the
+sample. Once the job is submitted, all batches are queued to be read back later. When the job finishes executing and
+the query results are to be read, the manager reads out the awaiting Vulkan queries and notifies the Tephra query
+objects that requested the sample about the new result. The query objects then update their internal state, discarding
+the oldest result in favor of the new one.
 
 One more complication comes from the interaction between Vulkan queries and multiview. While rendering using multiview,
 each query may produce either one result for all views, or one result for each view, depending on the implementation.
