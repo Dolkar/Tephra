@@ -345,6 +345,7 @@ private:
     RenderList(
         const VulkanCommandInterface* vkiCommands,
         VkCommandBufferHandle vkInlineCommandBuffer,
+        QueryRecorder* queryRecorder,
         uint32_t multiviewViewCount,
         DebugTarget debugTarget);
 

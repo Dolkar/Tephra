@@ -117,8 +117,14 @@ ComputeList::~ComputeList() = default;
 ComputeList::ComputeList(
     const VulkanCommandInterface* vkiCommands,
     VkCommandBufferHandle vkInlineCommandBuffer,
+    QueryRecorder* queryRecorder,
     DebugTarget debugTarget)
-    : CommandList(vkiCommands, VK_PIPELINE_BIND_POINT_COMPUTE, vkInlineCommandBuffer, std::move(debugTarget)) {}
+    : CommandList(
+          vkiCommands,
+          VK_PIPELINE_BIND_POINT_COMPUTE,
+          vkInlineCommandBuffer,
+          queryRecorder,
+          std::move(debugTarget)) {}
 
 ComputeList::ComputeList(
     const VulkanCommandInterface* vkiCommands,

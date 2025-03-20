@@ -97,10 +97,11 @@ CommandList::CommandList(
     const VulkanCommandInterface* vkiCommands,
     VkPipelineBindPoint vkPipelineBindPoint,
     VkCommandBufferHandle vkInlineCommandBuffer,
+    QueryRecorder* queryRecorder,
     DebugTarget debugTarget)
     : debugTarget(std::move(debugTarget)),
       vkiCommands(vkiCommands),
-      queryRecorder(nullptr), // Gets set on beginRecording
+      queryRecorder(queryRecorder),
       vkCommandBufferHandle(vkInlineCommandBuffer),
       vkFutureCommandBuffer(nullptr),
       vkPipelineBindPoint(vkPipelineBindPoint) {}

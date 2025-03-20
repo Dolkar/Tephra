@@ -105,7 +105,7 @@ public:
     /// @param stage
     ///     The pipeline stage at which the timestamp should be measured. This means a time point at which all the
     ///     previously submitted commands have finished executing the given pipeline stage.
-    void cmdWriteTimestamp(const TimestampQuery& query, PipelineStage stage = PipelineStage::BottomOfPipe);
+    void cmdWriteTimestamp(const TimestampQuery& query, PipelineStage stage);
 
     TEPHRA_MAKE_NONCOPYABLE(ComputeList);
     TEPHRA_MAKE_MOVABLE(ComputeList);
@@ -118,6 +118,7 @@ private:
     ComputeList(
         const VulkanCommandInterface* vkiCommands,
         VkCommandBufferHandle vkInlineCommandBuffer,
+        QueryRecorder* queryRecorder,
         DebugTarget debugTarget);
 
     ComputeList(

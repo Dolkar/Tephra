@@ -202,9 +202,15 @@ RenderList::~RenderList() = default;
 RenderList::RenderList(
     const VulkanCommandInterface* vkiCommands,
     VkCommandBufferHandle vkInlineCommandBuffer,
+    QueryRecorder* queryRecorder,
     uint32_t multiviewViewCount,
     DebugTarget debugTarget)
-    : CommandList(vkiCommands, VK_PIPELINE_BIND_POINT_GRAPHICS, vkInlineCommandBuffer, std::move(debugTarget)),
+    : CommandList(
+          vkiCommands,
+          VK_PIPELINE_BIND_POINT_GRAPHICS,
+          vkInlineCommandBuffer,
+          queryRecorder,
+          std::move(debugTarget)),
       vkInheritanceInfo(nullptr),
       multiviewViewCount(multiviewViewCount) {}
 

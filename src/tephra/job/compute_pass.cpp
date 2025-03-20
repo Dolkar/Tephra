@@ -42,7 +42,10 @@ void ComputePass::recordPass(PrimaryBufferRecorder& recorder) {
     if (isInline) {
         // Call the inline command recorder callback
         ComputeList inlineList = ComputeList(
-            &recorder.getVkiCommands(), recorder.requestBuffer(), std::move(inlineListDebugTarget));
+            &recorder.getVkiCommands(),
+            recorder.requestBuffer(),
+            &recorder.getQueryRecorder(),
+            std::move(inlineListDebugTarget));
         inlineRecordingCallback(inlineList);
     } else {
         for (VkCommandBufferHandle vkCommandBuffer : vkDeferredCommandBuffers) {

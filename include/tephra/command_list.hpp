@@ -142,6 +142,7 @@ protected:
         const VulkanCommandInterface* vkiCommands,
         VkPipelineBindPoint vkPipelineBindPoint,
         VkCommandBufferHandle vkInlineCommandBuffer,
+        QueryRecorder* queryRecorder,
         DebugTarget debugTarget);
 
     CommandList(

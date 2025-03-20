@@ -114,6 +114,7 @@ void RenderPass::recordPass(PrimaryBufferRecorder& recorder) {
         RenderList inlineList = RenderList(
             &recorder.getVkiCommands(),
             vkPrimaryCommandBufferHandle,
+            &recorder.getQueryRecorder(),
             multiviewViewCount,
             std::move(inlineListDebugTarget));
         inlineRecordingCallback(inlineList);
