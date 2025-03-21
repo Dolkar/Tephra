@@ -61,6 +61,7 @@ private:
     VkDeviceHandle vkDeviceHandle;
     VmaAllocatorHandle vmaAllocator;
     VulkanDeviceMemoryInterface vkiMemory;
+    MemoryAllocatorSetup::OutOfMemoryCallback outOfMemoryCallback;
 
     uint32_t memoryLocationTypeIndices[MemoryLocationEnumView::size()] = { ~0u };
     VkMemoryPropertyFlags memoryTypeFlags[VK_MAX_MEMORY_TYPES] = { 0 };

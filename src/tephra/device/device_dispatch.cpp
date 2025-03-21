@@ -23,8 +23,11 @@ constexpr const char* SwapchainTypeName = "Swapchain";
 
 MemoryAllocatorSetup::MemoryAllocatorSetup(
     uint64_t preferredLargeHeapBlockSize,
-    VmaDeviceMemoryCallbacks* vmaDeviceMemoryCallbacks)
-    : preferredLargeHeapBlockSize(preferredLargeHeapBlockSize), vmaDeviceMemoryCallbacks(vmaDeviceMemoryCallbacks) {}
+    VmaDeviceMemoryCallbacks* vmaDeviceMemoryCallbacks,
+    OutOfMemoryCallback outOfMemoryCallback)
+    : preferredLargeHeapBlockSize(preferredLargeHeapBlockSize),
+      vmaDeviceMemoryCallbacks(vmaDeviceMemoryCallbacks),
+      outOfMemoryCallback(outOfMemoryCallback) {}
 
 DeviceSetup::DeviceSetup(
     const PhysicalDevice* physicalDevice,

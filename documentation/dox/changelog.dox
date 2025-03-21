@@ -7,9 +7,10 @@ version increments.
 @tableofcontents
 
 @section v0-5-2 In-dev version 0.5.2
-Released 2025-03-20
+Released 2025-03-21
 - Optimized queries through batching and reuse within a tp::CommandPool. This should lead to improved performance
   and reduced lock contention when using a large number of queries.
+- Added tp::MemoryAllocatorSetup::OutOfMemoryCallback as a last resort for handling out-of-memory situations.
 
 @section v0-5-1 In-dev version 0.5.1
 Released 2025-02-03

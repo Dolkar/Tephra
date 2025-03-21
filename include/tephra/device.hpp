@@ -51,8 +51,19 @@ using CleanupCallback = std::function<void()>;
 /// @see tp::DeviceSetup
 /// @see @vmasymbol{VmaAllocatorCreateInfo,struct_vma_allocator_create_info}
 struct MemoryAllocatorSetup {
+    /// The type of user-provided function callback for in-place handling of out-of-memory situations. It receives the
+    /// memory location that failed the allocation. The callback should attempt to free some unneeded resources and
+    /// return `true` if it did. Tephra will then wait (blocking the allocation) until the memory can be safely
+    /// released and attempts the allocation again.
+    /// @remarks
+    ///     Callbacks that return `true` are meant to be used as a last resort for handling cases where the allocation
+    ///     outright fails. It is recommended to leverage tp::DeviceExtension::EXT_MemoryBudget and stick to the
+    ///     reported budget to avoid such situations as much as possible.
+    using OutOfMemoryCallback = std::function<bool(MemoryLocation)>;
+
     uint64_t preferredLargeHeapBlockSize;
     VmaDeviceMemoryCallbacks* vmaDeviceMemoryCallbacks;
+    OutOfMemoryCallback outOfMemoryCallback;
 
     /// @param preferredLargeHeapBlockSize
     ///     The preferred size in bytes of a single memory block to be allocated from large heaps > 1 GiB.
@@ -60,9 +71,13 @@ struct MemoryAllocatorSetup {
     /// @param vmaDeviceMemoryCallbacks
     ///     Informative callbacks for @vksymbol{vkAllocateMemory}, @vksymbol{vkFreeMemory}.
     ///     See @vmasymbol{VmaDeviceMemoryCallbacks,struct_vma_device_memory_callbacks}
+    /// @param outOfMemoryCallback
+    ///     Callback for in-place handling of out-of-memory situations. It will be called when a requested buffer
+    ///     or image allocation fails.
     MemoryAllocatorSetup(
         uint64_t preferredLargeHeapBlockSize = 0,
-        VmaDeviceMemoryCallbacks* vmaDeviceMemoryCallbacks = nullptr);
+        VmaDeviceMemoryCallbacks* vmaDeviceMemoryCallbacks = nullptr,
+        OutOfMemoryCallback outOfMemoryCallback = {});
 };
 
 /// Used as configuration for creating a new tp::Device object.

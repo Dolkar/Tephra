@@ -11,7 +11,9 @@ enum class UserAllocationFlag : uintptr_t {
 TEPHRA_MAKE_ENUM_BIT_MASK(UserAllocationFlagMask, UserAllocationFlag);
 
 MemoryAllocator::MemoryAllocator(DeviceContainer* deviceImpl, Instance* instance, const MemoryAllocatorSetup& setup)
-    : deviceImpl(deviceImpl), vkDeviceHandle(deviceImpl->getLogicalDevice()->vkGetDeviceHandle()) {
+    : deviceImpl(deviceImpl),
+      vkDeviceHandle(deviceImpl->getLogicalDevice()->vkGetDeviceHandle()),
+      outOfMemoryCallback(setup.outOfMemoryCallback) {
     LogicalDevice* device = deviceImpl->getLogicalDevice();
 
     VmaAllocatorCreateInfo allocInfo;
@@ -140,16 +142,34 @@ std::pair<Lifeguard<VkBufferHandle>, Lifeguard<VmaAllocationHandle>> MemoryAlloc
         if (locationTypeIndex != ~0u) {
             allocInfo.memoryTypeBits = 1u << locationTypeIndex;
 
-            VkResult retcode = vmaAllocateMemoryForBuffer(
-                vmaAllocator, vkBufferHandle, &allocInfo, vkCastTypedHandlePtr(&allocation), nullptr);
-            if (retcode >= 0) {
-                retcode = vmaBindBufferMemory(vmaAllocator, allocation, vkBufferHandle);
-                if (retcode >= 0)
-                    break;
+            while (true) {
+                VkResult retcode = vmaAllocateMemoryForBuffer(
+                    vmaAllocator, vkBufferHandle, &allocInfo, vkCastTypedHandlePtr(&allocation), nullptr);
+                if (retcode >= 0) {
+                    retcode = vmaBindBufferMemory(vmaAllocator, allocation, vkBufferHandle);
+                    if (retcode >= 0)
+                        break;
+                }
+
+                // Try to free up some memory, if there was some released, retry the allocation again
+                if (retcode == VK_ERROR_OUT_OF_DEVICE_MEMORY && outOfMemoryCallback &&
+                    outOfMemoryCallback(memoryLocation)) {
+                    // Allow deferredDestructor to run which may actually release some of the memory just released by
+                    // the host application
+                    deviceImpl->waitForIdle();
+                    continue;
+                }
+
+                if (retcode != VK_ERROR_OUT_OF_DEVICE_MEMORY) {
+                    throwRetcodeErrors(retcode);
+                }
+
+                break;
             }
-            if (retcode != VK_ERROR_OUT_OF_DEVICE_MEMORY) {
-                throwRetcodeErrors(retcode);
-            }
+
+            // Allocation successful, stop searching free memory according to memory preference
+            if (!allocation.isNull())
+                break;
         }
     }
 
@@ -318,13 +338,27 @@ std::pair<Lifeguard<VkImageHandle>, Lifeguard<VmaAllocationHandle>> MemoryAlloca
         allocInfo.pool = VK_NULL_HANDLE;
         allocInfo.pUserData = nullptr;
 
-        throwRetcodeErrors(vmaCreateImage(
-            vmaAllocator,
-            &createInfo,
-            &allocInfo,
-            vkCastTypedHandlePtr(&vkImageHandle),
-            vkCastTypedHandlePtr(&vmaAllocationHandle),
-            nullptr));
+        while (true) {
+            VkResult retcode = vmaCreateImage(
+                vmaAllocator,
+                &createInfo,
+                &allocInfo,
+                vkCastTypedHandlePtr(&vkImageHandle),
+                vkCastTypedHandlePtr(&vmaAllocationHandle),
+                nullptr);
+
+            // Try to free up some memory, if there was some released, retry the allocation again
+            if (retcode == VK_ERROR_OUT_OF_DEVICE_MEMORY && outOfMemoryCallback &&
+                outOfMemoryCallback(MemoryLocation::DeviceLocal)) {
+                // Allow deferredDestructors to run which may actually release some of the memory just released by the
+                // host application
+                deviceImpl->waitForIdle();
+                continue;
+            }
+
+            throwRetcodeErrors(retcode);
+            break;
+        }
     } else {
         vkImageHandle = deviceImpl->getLogicalDevice()->createImage(createInfo);
     }
