@@ -200,7 +200,8 @@ void Barrier::extendMemoryDependency(const ImageDependency& dependency, uint32_t
     TEPHRA_ASSERT(extendedDependency.range.aspectMask.containsAll(dependency.range.aspectMask));
 
     TEPHRA_ASSERT(
-        dependency.srcLayout == extendedDependency.srcLayout || dependency.srcLayout == VK_IMAGE_LAYOUT_UNDEFINED);
+        dependency.srcLayout == extendedDependency.srcLayout || dependency.srcLayout == dependency.dstLayout ||
+        dependency.srcLayout == VK_IMAGE_LAYOUT_UNDEFINED);
     // This one usually triggers when a single command has two overlapping usages that need incompatible layouts
     TEPHRA_ASSERT(dependency.dstLayout == extendedDependency.dstLayout);
 
