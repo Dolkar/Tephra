@@ -45,7 +45,6 @@ public:
 
     void assignDeferred(
         const ComputePassSetup& setup,
-        const JobData* jobData,
         const DebugTarget& listDebugTarget,
         ArrayView<ComputeList>& listsToAssign);
 
@@ -54,7 +53,7 @@ public:
         ComputeInlineCallback recordingCallback,
         DebugTarget listDebugTarget);
 
-    void recordPass(const JobData* jobData, PrimaryBufferRecorder& recorder);
+    void recordPass(PrimaryBufferRecorder& recorder);
 
     TEPHRA_MAKE_NONCOPYABLE(ComputePass);
     TEPHRA_MAKE_NONMOVABLE(ComputePass);

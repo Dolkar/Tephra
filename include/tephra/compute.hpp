@@ -44,7 +44,7 @@ TEPHRA_MAKE_ENUM_BIT_MASK(ComputeAccessMask, ComputeAccess);
 class ComputeList : public CommandList {
 public:
     /// Constructs a null tp::ComputeList.
-    ComputeList() : CommandList(){};
+    ComputeList() : CommandList() {};
 
     /// Begins recording commands to the list, using the given command pool.
     /// @param commandPool
@@ -105,7 +105,7 @@ public:
     /// @param stage
     ///     The pipeline stage at which the timestamp should be measured. This means a time point at which all the
     ///     previously submitted commands have finished executing the given pipeline stage.
-    void cmdWriteTimestamp(const TimestampQuery& query, PipelineStage stage = PipelineStage::BottomOfPipe);
+    void cmdWriteTimestamp(const TimestampQuery& query, PipelineStage stage);
 
     TEPHRA_MAKE_NONCOPYABLE(ComputeList);
     TEPHRA_MAKE_MOVABLE(ComputeList);
@@ -117,13 +117,12 @@ private:
 
     ComputeList(
         const VulkanCommandInterface* vkiCommands,
-        const JobData* jobData,
         VkCommandBufferHandle vkInlineCommandBuffer,
+        QueryRecorder* queryRecorder,
         DebugTarget debugTarget);
 
     ComputeList(
         const VulkanCommandInterface* vkiCommands,
-        const JobData* jobData,
         VkCommandBufferHandle* vkFutureCommandBuffer,
         DebugTarget debugTarget);
 };

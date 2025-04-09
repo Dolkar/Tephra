@@ -20,6 +20,10 @@ PrimaryBufferRecorder::PrimaryBufferRecorder(
       vkCommandBuffers(vkCommandBuffers),
       vkCurrentBuffer() {}
 
+QueryRecorder& PrimaryBufferRecorder::getQueryRecorder() {
+    return commandPool->getQueryRecorder();
+}
+
 VkCommandBufferHandle PrimaryBufferRecorder::requestBuffer() {
     if (vkCurrentBuffer.isNull()) {
         // Setup of a primary one time use command buffer
@@ -549,12 +553,12 @@ void recordCommand(const JobData* job, PrimaryBufferRecorder& recorder, JobRecor
     }
     case JobCommandTypes::ExecuteComputePass: {
         auto* data = getCommandData<JobRecordStorage::ExecuteComputePassData>(command);
-        data->pass->recordPass(job, recorder);
+        data->pass->recordPass(recorder);
         break;
     }
     case JobCommandTypes::ExecuteRenderPass: {
         auto* data = getCommandData<JobRecordStorage::ExecuteRenderPassData>(command);
-        data->pass->recordPass(job, recorder);
+        data->pass->recordPass(recorder);
         break;
     }
     case JobCommandTypes::BeginDebugLabel: {
@@ -578,8 +582,8 @@ void recordCommand(const JobData* job, PrimaryBufferRecorder& recorder, JobRecor
     }
     case JobCommandTypes::WriteTimestamp: {
         auto* data = getCommandData<JobRecordStorage::WriteTimestampData>(command);
-        job->resourcePoolImpl->getParentDeviceImpl()->getQueryManager()->sampleTimestampQuery(
-            recorder.requestBuffer(), data->query, data->stage, 1, job->semaphores.jobSignal);
+        recorder.getQueryRecorder().sampleTimestampQuery(
+            &vkiCommands, recorder.requestBuffer(), data->query, data->stage, 1);
         break;
     }
     case JobCommandTypes::BuildAccelerationStructures: {

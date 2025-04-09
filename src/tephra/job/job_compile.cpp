@@ -361,6 +361,9 @@ void recordCommandBuffers(
     PrimaryBufferRecorder& recorder,
     const JobData* job,
     const BarrierList& barriers) {
+    // Prepare query recording
+    recorder.getQueryRecorder().setJobSemaphore(job->semaphores.jobSignal);
+
     auto* cmd = job->record.firstCommandPtr;
     uint32_t cmdIndex = 0;
     uint32_t barrierIndex = 0;
@@ -386,6 +389,14 @@ void recordCommandBuffers(
             break;
         }
     }
+
+    // Compile query batches from primary and secondary buffers and notify the manager about them
+    ScratchVector<QueryBatch*> queryBatches;
+    recorder.getQueryRecorder().retrieveBatchesAndReset(queryBatches);
+    for (CommandPool* secondaryPool : job->resources.commandPools) {
+        secondaryPool->getQueryRecorder().retrieveBatchesAndReset(queryBatches);
+    }
+    deviceImpl->getQueryManager()->registerBatches(view(queryBatches), job->semaphores.jobSignal);
 }
 
 void compileJob(

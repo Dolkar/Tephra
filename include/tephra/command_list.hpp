@@ -8,6 +8,7 @@ namespace tp {
 
 class CommandPool;
 class VulkanCommandInterface;
+class QueryRecorder;
 struct JobData;
 
 /// An abstract class that implements common functionality for recording commands inside either a compute or render
@@ -130,7 +131,7 @@ public:
 protected:
     DebugTargetPtr debugTarget;
     const VulkanCommandInterface* vkiCommands;
-    const JobData* jobData;
+    QueryRecorder* queryRecorder;
     VkCommandBufferHandle vkCommandBufferHandle;
     VkCommandBufferHandle* vkFutureCommandBuffer;
     VkPipelineBindPoint vkPipelineBindPoint;
@@ -139,14 +140,13 @@ protected:
 
     CommandList(
         const VulkanCommandInterface* vkiCommands,
-        const JobData* jobData,
         VkPipelineBindPoint vkPipelineBindPoint,
         VkCommandBufferHandle vkInlineCommandBuffer,
+        QueryRecorder* queryRecorder,
         DebugTarget debugTarget);
 
     CommandList(
         const VulkanCommandInterface* vkiCommands,
-        const JobData* jobData,
         VkPipelineBindPoint vkPipelineBindPoint,
         VkCommandBufferHandle* vkFutureCommandBuffer,
         DebugTarget debugTarget);

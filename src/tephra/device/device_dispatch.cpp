@@ -25,8 +25,11 @@ constexpr const char* SwapchainTypeName = "Swapchain";
 
 MemoryAllocatorSetup::MemoryAllocatorSetup(
     uint64_t preferredLargeHeapBlockSize,
-    VmaDeviceMemoryCallbacks* vmaDeviceMemoryCallbacks)
-    : preferredLargeHeapBlockSize(preferredLargeHeapBlockSize), vmaDeviceMemoryCallbacks(vmaDeviceMemoryCallbacks) {}
+    VmaDeviceMemoryCallbacks* vmaDeviceMemoryCallbacks,
+    OutOfMemoryCallback outOfMemoryCallback)
+    : preferredLargeHeapBlockSize(preferredLargeHeapBlockSize),
+      vmaDeviceMemoryCallbacks(vmaDeviceMemoryCallbacks),
+      outOfMemoryCallback(outOfMemoryCallback) {}
 
 DeviceSetup::DeviceSetup(
     const PhysicalDevice* physicalDevice,
@@ -481,6 +484,10 @@ JobSemaphore Device::enqueueJob(
     signalSemaphore.queue = queue;
     signalSemaphore.timestamp = deviceImpl->getTimelineManager()->assignNextTimestamp(queueIndex);
     jobData->semaphores.jobSignal = signalSemaphore;
+
+    // Inform any query recorders about the semaphore
+    for (CommandPool* commandPool : jobData->resources.commandPools)
+        commandPool->getQueryRecorder().setJobSemaphore(signalSemaphore);
 
     if (!jobData->flags.contains(tp::JobFlag::Small)) {
         // Update the current progress to maybe free up some resources before allocating again

@@ -65,6 +65,11 @@ public:
             { tempBufferView, tp::ComputeAccess::ComputeShaderStorageWrite }
         };
 
+        // Also test timestamp queries
+        tp::TimestampQuery jobQuery, passQuery;
+        ctx.device->createTimestampQueries({ &jobQuery, &passQuery });
+        job.cmdWriteTimestamp(jobQuery, tp::PipelineStage::TopOfPipe);
+
         job.cmdExecuteComputePass(tp::ComputePassSetup(tp::view(bufferAccesses), {}), [&](tp::ComputeList& inlineList) {
             inlineList.cmdBindComputePipeline(squareComputePipeline);
             inlineList.cmdBindDescriptorSets(ioComputePipelineLayout, { firstDescSet });
@@ -80,6 +85,8 @@ public:
             // Compute pipeline is still bound from the previous inline pass
             inlineList.cmdBindDescriptorSets(ioComputePipelineLayout, { secondDescSet });
             inlineList.cmdDispatch(bufferSize / (sizeof(uint32_t) * groupSize), 1, 1);
+
+            inlineList.cmdWriteTimestamp(passQuery, tp::PipelineStage::BottomOfPipe);
         });
 
         // Export the host buffer back to host so we can read from it to confirm the results
@@ -113,6 +120,15 @@ public:
             static_cast<uint64_t>(2), ctx.getLastStatistic(tp::StatisticEventType::JobPipelineBarriersInserted));
         Assert::AreEqual(
             static_cast<uint64_t>(2), ctx.getLastStatistic(tp::StatisticEventType::JobBufferMemoryBarriersInserted));
+
+        // Query checks
+        tp::QueryResult jobQueryResult = jobQuery.getLastResult();
+        Assert::IsFalse(jobQueryResult.isNull());
+        tp::QueryResult passQueryResult = passQuery.getLastResult();
+        Assert::IsFalse(passQueryResult.isNull());
+        Assert::AreEqual(jobQueryResult.jobSemaphore.timestamp, semaphore.timestamp);
+        Assert::AreEqual(passQueryResult.jobSemaphore.timestamp, semaphore.timestamp);
+        Assert::AreNotEqual(jobQueryResult.value, passQueryResult.value);
     }
 
     // Same test as above, but within one compute pass, using a manual pipeline barrier and deferred compute list
@@ -157,6 +173,11 @@ public:
               tp::ComputeAccess::ComputeShaderStorageRead | tp::ComputeAccess::ComputeShaderStorageWrite }
         };
 
+        // Also test timestamp queries
+        tp::TimestampQuery jobQuery, passQuery;
+        ctx.device->createTimestampQueries({ &jobQuery, &passQuery });
+        job.cmdWriteTimestamp(jobQuery, tp::PipelineStage::TopOfPipe);
+
         tp::ComputeList computeList;
         job.cmdExecuteComputePass(tp::ComputePassSetup(tp::view(bufferAccesses), {}), tp::viewOne(computeList));
 
@@ -182,6 +203,7 @@ public:
         computeList.cmdBindDescriptorSets(ioComputePipelineLayout, { secondPassDescriptor });
         computeList.cmdDispatch(bufferSize / (sizeof(uint32_t) * groupSize), 1, 1);
 
+        computeList.cmdWriteTimestamp(passQuery, tp::PipelineStage::BottomOfPipe);
         computeList.endRecording();
 
         // Finally submit the job
@@ -204,14 +226,23 @@ public:
             Assert::AreEqual(static_cast<uint64_t>(0), error);
         }
 
-        // Deferred recording splits the primary command buffers
+        // Deferred pass records to its own primary command buffer and also splits the job's command buffer into two.
         Assert::AreEqual(
-            static_cast<uint64_t>(2), ctx.getLastStatistic(tp::StatisticEventType::JobPrimaryCommandBuffersUsed));
+            static_cast<uint64_t>(3), ctx.getLastStatistic(tp::StatisticEventType::JobPrimaryCommandBuffersUsed));
         // Just one automatic barrier expected to synchronize against host export
         Assert::AreEqual(
             static_cast<uint64_t>(1), ctx.getLastStatistic(tp::StatisticEventType::JobPipelineBarriersInserted));
         Assert::AreEqual(
             static_cast<uint64_t>(1), ctx.getLastStatistic(tp::StatisticEventType::JobBufferMemoryBarriersInserted));
+
+        // Query checks
+        tp::QueryResult jobQueryResult = jobQuery.getLastResult();
+        Assert::IsFalse(jobQueryResult.isNull());
+        tp::QueryResult passQueryResult = passQuery.getLastResult();
+        Assert::IsFalse(passQueryResult.isNull());
+        Assert::AreEqual(jobQueryResult.jobSemaphore.timestamp, semaphore.timestamp);
+        Assert::AreEqual(passQueryResult.jobSemaphore.timestamp, semaphore.timestamp);
+        Assert::AreNotEqual(jobQueryResult.value, passQueryResult.value);
     }
 
 private:

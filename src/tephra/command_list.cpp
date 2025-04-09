@@ -87,6 +87,7 @@ CommandList::~CommandList() = default;
 
 CommandList::CommandList()
     : debugTarget(DebugTarget::makeSilent()),
+      queryRecorder(nullptr),
       vkiCommands(nullptr),
       vkCommandBufferHandle(),
       vkFutureCommandBuffer(nullptr),
@@ -94,26 +95,25 @@ CommandList::CommandList()
 
 CommandList::CommandList(
     const VulkanCommandInterface* vkiCommands,
-    const JobData* jobData,
     VkPipelineBindPoint vkPipelineBindPoint,
     VkCommandBufferHandle vkInlineCommandBuffer,
+    QueryRecorder* queryRecorder,
     DebugTarget debugTarget)
     : debugTarget(std::move(debugTarget)),
       vkiCommands(vkiCommands),
-      jobData(jobData),
+      queryRecorder(queryRecorder),
       vkCommandBufferHandle(vkInlineCommandBuffer),
       vkFutureCommandBuffer(nullptr),
       vkPipelineBindPoint(vkPipelineBindPoint) {}
 
 CommandList::CommandList(
     const VulkanCommandInterface* vkiCommands,
-    const JobData* jobData,
     VkPipelineBindPoint vkPipelineBindPoint,
     VkCommandBufferHandle* vkFutureCommandBuffer,
     DebugTarget debugTarget)
     : debugTarget(std::move(debugTarget)),
       vkiCommands(vkiCommands),
-      jobData(jobData),
+      queryRecorder(nullptr), // Gets set on beginRecording
       vkCommandBufferHandle(),
       vkFutureCommandBuffer(vkFutureCommandBuffer),
       vkPipelineBindPoint(vkPipelineBindPoint) {}
