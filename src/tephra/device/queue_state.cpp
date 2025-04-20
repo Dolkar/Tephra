@@ -44,25 +44,27 @@ void QueueState::submitQueuedJobs(
     const JobSemaphore& lastJobToSubmit,
     ArrayParameter<const JobSemaphore> waitJobSemaphores,
     ArrayParameter<const ExternalSemaphore> waitExternalSemaphores) {
-    // Gather jobs we want to submit
-    ScratchVector<Job*> jobsToSubmit;
+    // Gather jobs we want to submit, do the rest outside the lock
+    ScratchVector<Job> jobsToSubmit;
     {
         std::lock_guard<Mutex> mutexLock(queuedJobsMutex);
 
-        for (Job& job : queuedJobs) {
+        while (!queuedJobs.empty()) {
+            Job& job = queuedJobs.front();
             JobData* jobData = JobResourcePoolContainer::getJobData(job);
 
             if (!lastJobToSubmit.isNull() && jobData->semaphores.jobSignal.timestamp > lastJobToSubmit.timestamp) {
                 break;
             }
 
-            jobsToSubmit.push_back(&job);
+            jobsToSubmit.push_back(std::move(job));
+            queuedJobs.pop_front();
         }
     }
 
     // Include any submit wait semaphores, ideally as part of the first job
     if (!jobsToSubmit.empty()) {
-        JobSemaphoreStorage& firstSemaphores = JobResourcePoolContainer::getJobData(*jobsToSubmit[0])->semaphores;
+        JobSemaphoreStorage& firstSemaphores = JobResourcePoolContainer::getJobData(jobsToSubmit[0])->semaphores;
 
         firstSemaphores.insertWaits(view(queuedSemaphoreStorage.jobWaits), view(queuedSemaphoreStorage.externalWaits));
         queuedSemaphoreStorage.clear();
@@ -78,23 +80,10 @@ void QueueState::submitQueuedJobs(
     consumeAwaitingForgets();
     submitJobs(view(jobsToSubmit));
 
-    for (Job* job : jobsToSubmit) {
-        JobResourcePoolContainer::queueReleaseSubmittedJob(std::move(*job));
-    }
-
-    {
-        std::lock_guard<Mutex> mutexLock(queuedJobsMutex);
-        for (Job* job : jobsToSubmit) {
-            TEPHRA_ASSERT(!queuedJobs.empty());
-            TEPHRA_ASSERT(job == &queuedJobs.front());
-            queuedJobs.pop_front();
-        }
-    }
-
     // TODO: Check as validation perf warning if any resource has too many distinct accesses
 }
 
-void QueueState::submitJobs(ArrayView<Job*> jobs) {
+void QueueState::submitJobs(ArrayView<Job> jobs) {
     // Set up for job compilation
     const QueueInfo& queueInfo = deviceImpl->getQueueMap()->getQueueInfos()[queueIndex];
     CommandPool* commandPool = deviceImpl->getCommandPoolPool()->acquirePool(
@@ -119,8 +108,8 @@ void QueueState::submitJobs(ArrayView<Job*> jobs) {
         // Process as many jobs as we can in the same submit
         std::size_t endJobIndex = startJobIndex + 1;
         while (endJobIndex < jobs.size()) {
-            Job* job = jobs[endJobIndex];
-            JobData* jobData = JobResourcePoolContainer::getJobData(*job);
+            Job& job = jobs[endJobIndex];
+            JobData* jobData = JobResourcePoolContainer::getJobData(job);
 
             // Putting this in the same submit would cause the previous jobs to wait, too
             bool hasWaits = !jobData->semaphores.jobWaits.empty() || !jobData->semaphores.externalWaits.empty();
@@ -137,7 +126,7 @@ void QueueState::submitJobs(ArrayView<Job*> jobs) {
         submitEntry.commandBufferOffset = static_cast<uint32_t>(submitBatch.vkCommandBuffers.size());
 
         for (std::size_t jobIndex = startJobIndex; jobIndex < endJobIndex; jobIndex++) {
-            Job& job = queuedJobs[jobIndex];
+            Job& job = jobs[jobIndex];
             JobData* jobData = JobResourcePoolContainer::getJobData(job);
 
             // Set up semaphores

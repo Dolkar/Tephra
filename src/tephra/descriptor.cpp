@@ -106,6 +106,10 @@ ReadAccessMask DescriptorBinding::getReadAccessMask() const {
     case DescriptorType::UniformBufferDynamic:
         accessTypeIndex = uniformAccessIndex;
         break;
+    case DescriptorType::AccelerationStructureKHR:
+        // Has its own dedicated Vulkan access mask which it will be translated to on export
+        accessTypeIndex = uniformAccessIndex;
+        break;
     case DescriptorType::Sampler:
         return ReadAccessMask::None();
     default:

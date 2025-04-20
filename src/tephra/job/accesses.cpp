@@ -104,6 +104,10 @@ ResourceAccess convertReadAccessToVkAccess(ReadAccessMask readMask) {
         access.stageMask |= VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
         access.accessMask |= VK_ACCESS_UNIFORM_READ_BIT;
     }
+    if (readMask.contains(ReadAccess::AccelerationStructureBuildKHR)) {
+        access.stageMask |= VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR;
+        access.accessMask |= VK_ACCESS_ACCELERATION_STRUCTURE_READ_BIT_KHR;
+    }
     if (readMask.contains(ReadAccess::ImagePresentKHR)) {
         access.stageMask |= VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
         access.accessMask |= 0;

@@ -106,9 +106,12 @@ private:
 struct StoredInstanceGeometryBuildInfo {
     StoredBufferView instanceBuffer;
     bool arrayOfPointers;
+    ArrayView<StoredAccelerationStructureView> accessedViews;
 
-    StoredInstanceGeometryBuildInfo(const InstanceGeometryBuildInfo& info)
-        : instanceBuffer(info.instanceBuffer), arrayOfPointers(info.arrayOfPointers) {}
+    StoredInstanceGeometryBuildInfo(
+        const InstanceGeometryBuildInfo& info,
+        ArrayView<StoredAccelerationStructureView> accessedViewData)
+        : instanceBuffer(info.instanceBuffer), arrayOfPointers(info.arrayOfPointers), accessedViews(accessedViewData) {}
 };
 
 struct StoredTriangleGeometryBuildInfo {
@@ -143,14 +146,28 @@ struct StoredAccelerationStructureBuildInfo {
 
     StoredAccelerationStructureBuildInfo(
         const AccelerationStructureBuildInfo& info,
+        ArrayView<StoredAccelerationStructureView> accessedViewData,
         ArrayView<StoredTriangleGeometryBuildInfo> triangleGeometriesData,
         ArrayView<StoredAABBGeometryBuildInfo> aabbGeometriesData)
         : mode(info.mode),
           dstView(info.dstView),
-          instanceGeometry(info.instanceGeometry),
+          instanceGeometry(info.instanceGeometry, accessedViewData),
           triangleGeometries(triangleGeometriesData),
           aabbGeometries(aabbGeometriesData),
           srcView(info.srcView) {}
+};
+
+struct StoredAccelerationStructureBuildIndirectInfo {
+    ArrayView<uint32_t> maxPrimitiveCounts;
+    StoredBufferView buildRangeBuffer;
+    uint32_t buildRangeStride;
+
+    StoredAccelerationStructureBuildIndirectInfo(
+        const AccelerationStructureBuildIndirectInfo& info,
+        ArrayView<uint32_t> maxPrimitiveCounts)
+        : maxPrimitiveCounts(maxPrimitiveCounts),
+          buildRangeBuffer(info.buildRangeBuffer),
+          buildRangeStride(info.buildRangeStride) {}
 };
 
 // Caching of AccelerationStructure handles - they depend on buffer, offset, size and type

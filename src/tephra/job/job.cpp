@@ -205,7 +205,8 @@ void Job::cmdExportResource(
     markResourceUsage(jobData, accelerationStructure.getBackingBufferView(), true);
 
     ResourceAccess access = convertReadAccessToVkAccess(readAccessMask);
-    // To avoid adding extra read access flags, we treat acceleration structure accesses like uniform accesses
+    // To avoid adding extra read access flags for each stage, we treat acceleration structure accesses like uniform
+    // accesses and translate them here
     if (containsAllBits(access.accessMask, VK_ACCESS_UNIFORM_READ_BIT)) {
         access.accessMask &= ~VK_ACCESS_UNIFORM_READ_BIT;
         access.accessMask |= VK_ACCESS_ACCELERATION_STRUCTURE_READ_BIT_KHR;
@@ -485,88 +486,6 @@ void Job::cmdWriteTimestamp(const TimestampQuery& query, PipelineStage stage) {
         jobData->record, JobCommandTypes::WriteTimestamp, QueryRecorder::getQueryHandle(query), stage);
 }
 
-void Job::cmdBuildAccelerationStructuresKHR(ArrayParameter<const AccelerationStructureBuildInfo> buildInfos) {
-    TEPHRA_DEBUG_SET_CONTEXT(debugTarget.get(), "cmdBuildAccelerationStructuresKHR", nullptr);
-
-    using BuildData = JobRecordStorage::BuildAccelerationStructuresData::SingleBuild;
-    ScratchVector<BuildData> builds;
-    builds.reserve(buildInfos.size());
-
-    for (const AccelerationStructureBuildInfo& buildInfo : buildInfos) {
-        // Mark input buffers as used
-        markResourceUsage(jobData, buildInfo.dstView.getBackingBufferView());
-
-        if (!buildInfo.srcView.isNull())
-            markResourceUsage(jobData, buildInfo.srcView.getBackingBufferView());
-
-        if (!buildInfo.instanceGeometry.instanceBuffer.isNull())
-            markResourceUsage(jobData, buildInfo.instanceGeometry.instanceBuffer);
-
-        for (const TriangleGeometryBuildInfo& triangles : buildInfo.triangleGeometries) {
-            markResourceUsage(jobData, triangles.vertexBuffer);
-            if (!triangles.indexBuffer.isNull())
-                markResourceUsage(jobData, triangles.indexBuffer);
-            if (!triangles.transformBuffer.isNull())
-                markResourceUsage(jobData, triangles.transformBuffer);
-        }
-
-        for (const AABBGeometryBuildInfo& aabbs : buildInfo.aabbGeometries) {
-            markResourceUsage(jobData, aabbs.aabbBuffer);
-        }
-
-        // Get the dedicated builder for this AS
-        AccelerationStructureBuilder* builder;
-        if (buildInfo.dstView.viewsJobLocalAccelerationStructure()) {
-            builder = JobLocalAccelerationStructureImpl::getAccelerationStructureImpl(buildInfo.dstView).getBuilder();
-        } else {
-            auto& asImpl = AccelerationStructureImpl::getAccelerationStructureImpl(buildInfo.dstView);
-            builder = asImpl.getBuilder().get();
-
-            // Borrow ownership of the builder of the used persistent AS into a separate storage
-            jobData->record.usedASBuilders.push_back(asImpl.getBuilder());
-        }
-
-        // Allocate scratch buffer for the build
-        uint64_t scratchBufferSize = builder->getScratchBufferSize(buildInfo.mode);
-
-        auto scratchBufferSetup = BufferSetup(
-            scratchBufferSize, BufferUsage::StorageBuffer | BufferUsage::DeviceAddress, 0, 256);
-        BufferView scratchBuffer = jobData->resources.localBuffers.acquireNewBuffer(
-            scratchBufferSetup, DebugTarget::makeSilent());
-
-        // Immediately mark the scratch buffer as used
-        markResourceUsage(jobData, scratchBuffer);
-
-        // Copy the data as stored resources
-        auto triangleGeometriesData = jobData->record.cmdBuffer.allocate<StoredTriangleGeometryBuildInfo>(
-            buildInfo.triangleGeometries);
-        auto aabbGeometriesData = jobData->record.cmdBuffer.allocate<StoredAABBGeometryBuildInfo>(
-            buildInfo.aabbGeometries);
-
-        builds.emplace_back(
-            builder,
-            StoredAccelerationStructureBuildInfo(buildInfo, triangleGeometriesData, aabbGeometriesData),
-            scratchBuffer);
-    }
-
-    auto buildsData = jobData->record.cmdBuffer.allocate<BuildData>(view(builds));
-
-    recordCommand<JobRecordStorage::BuildAccelerationStructuresData>(
-        jobData->record, JobCommandTypes::BuildAccelerationStructures, buildsData);
-}
-
-void Job::cmdCopyAccelerationStructureKHR(
-    const AccelerationStructureView& srcView,
-    const AccelerationStructureView& dstView) {
-    TEPHRA_DEBUG_SET_CONTEXT(debugTarget.get(), "cmdCopyAccelerationStructureKHR", nullptr);
-
-    markResourceUsage(jobData, srcView.getBackingBufferView());
-    markResourceUsage(jobData, dstView.getBackingBufferView());
-
-    recordCommand<JobRecordStorage::CopyAccelerationStructureData>(
-        jobData->record, JobCommandTypes::CopyAccelerationStructure, srcView, dstView);
-}
-
 void Job::vkCmdImportExternalResource(
     const BufferView& buffer,
     VkPipelineStageFlags vkStageMask,
@@ -604,6 +523,137 @@ void Job::vkCmdImportExternalResource(
         range,
         ResourceAccess(vkStageMask, vkAccessMask),
         vkImageLayout);
+}
+
+using AccelerationStructureBuildData = JobRecordStorage::BuildAccelerationStructuresData::SingleBuild;
+inline AccelerationStructureBuildData prepareASBuildData(
+    tp::JobData* jobData,
+    const AccelerationStructureBuildInfo& buildInfo,
+    const AccelerationStructureBuildIndirectInfo& indirectInfo) {
+    // Mark input buffers as used
+    markResourceUsage(jobData, buildInfo.dstView.getBackingBufferView());
+
+    if (!buildInfo.srcView.isNull())
+        markResourceUsage(jobData, buildInfo.srcView.getBackingBufferView());
+
+    if (!buildInfo.instanceGeometry.instanceBuffer.isNull())
+        markResourceUsage(jobData, buildInfo.instanceGeometry.instanceBuffer);
+
+    for (const AccelerationStructureView& accessedView : buildInfo.instanceGeometry.accessedViews) {
+        markResourceUsage(jobData, accessedView.getBackingBufferView());
+    }
+
+    for (const TriangleGeometryBuildInfo& triangles : buildInfo.triangleGeometries) {
+        markResourceUsage(jobData, triangles.vertexBuffer);
+        if (!triangles.indexBuffer.isNull())
+            markResourceUsage(jobData, triangles.indexBuffer);
+        if (!triangles.transformBuffer.isNull())
+            markResourceUsage(jobData, triangles.transformBuffer);
+    }
+
+    for (const AABBGeometryBuildInfo& aabbs : buildInfo.aabbGeometries) {
+        markResourceUsage(jobData, aabbs.aabbBuffer);
+    }
+
+    if (!indirectInfo.buildRangeBuffer.isNull())
+        markResourceUsage(jobData, indirectInfo.buildRangeBuffer);
+
+    // Get the dedicated builder for this AS
+    auto& builder = AccelerationStructureBuilder::getBuilderFromView(buildInfo.dstView);
+    if (!buildInfo.dstView.viewsJobLocalAccelerationStructure()) {
+        // Borrow ownership of the builder of the used persistent AS into a separate storage
+        auto& asImpl = AccelerationStructureImpl::getAccelerationStructureImpl(buildInfo.dstView);
+        jobData->record.usedASBuilders.push_back(asImpl.getBuilder());
+    }
+
+    // Allocate scratch buffer for the build
+    uint64_t scratchBufferSize = builder.getScratchBufferSize(buildInfo.mode);
+
+    auto scratchBufferSetup = BufferSetup(
+        scratchBufferSize, BufferUsage::StorageBuffer | BufferUsage::DeviceAddress, 0, 256);
+    BufferView scratchBuffer = jobData->resources.localBuffers.acquireNewBuffer(
+        scratchBufferSetup, DebugTarget::makeSilent());
+
+    // Immediately mark the scratch buffer as used
+    markResourceUsage(jobData, scratchBuffer);
+
+    // Copy the data as stored resources
+    auto accessedViewsData = jobData->record.cmdBuffer.allocate<StoredAccelerationStructureView>(
+        buildInfo.instanceGeometry.accessedViews);
+    auto triangleGeometriesData = jobData->record.cmdBuffer.allocate<StoredTriangleGeometryBuildInfo>(
+        buildInfo.triangleGeometries);
+    auto aabbGeometriesData = jobData->record.cmdBuffer.allocate<StoredAABBGeometryBuildInfo>(buildInfo.aabbGeometries);
+    auto maxPrimitiveCountsData = jobData->record.cmdBuffer.allocate<uint32_t>(indirectInfo.maxPrimitiveCounts);
+
+    return AccelerationStructureBuildData(
+        &builder,
+        StoredAccelerationStructureBuildInfo(buildInfo, accessedViewsData, triangleGeometriesData, aabbGeometriesData),
+        StoredAccelerationStructureBuildIndirectInfo(indirectInfo, maxPrimitiveCountsData),
+        scratchBuffer);
+}
+
+void Job::cmdBuildAccelerationStructuresKHR(ArrayParameter<const AccelerationStructureBuildInfo> buildInfos) {
+    TEPHRA_DEBUG_SET_CONTEXT(debugTarget.get(), "cmdBuildAccelerationStructuresKHR", nullptr);
+
+    if constexpr (TephraValidationEnabled) {
+        for (int i = 0; i < buildInfos.size(); i++) {
+            auto& builder = AccelerationStructureBuilder::getBuilderFromView(buildInfos[i].dstView);
+            builder.validateBuildInfo(buildInfos[i], i);
+        }
+    }
+
+    auto buildsData = jobData->record.cmdBuffer.allocate<AccelerationStructureBuildData>(buildInfos.size());
+    auto unusedIndirectInfo = AccelerationStructureBuildIndirectInfo({}, {});
+    for (int i = 0; i < buildInfos.size(); i++) {
+        buildsData[i] = prepareASBuildData(jobData, buildInfos[i], unusedIndirectInfo);
+    }
+
+    recordCommand<JobRecordStorage::BuildAccelerationStructuresData>(
+        jobData->record, JobCommandTypes::BuildAccelerationStructures, buildsData);
+}
+
+void Job::cmdBuildAccelerationStructuresIndirectKHR(
+    ArrayParameter<const AccelerationStructureBuildInfo> buildInfos,
+    ArrayParameter<const AccelerationStructureBuildIndirectInfo> indirectInfos) {
+    TEPHRA_DEBUG_SET_CONTEXT(debugTarget.get(), "cmdBuildAccelerationStructuresIndirectKHR", nullptr);
+
+    if constexpr (TephraValidationEnabled) {
+        if (buildInfos.size() != indirectInfos.size()) {
+            reportDebugMessage(
+                DebugMessageSeverity::Error,
+                DebugMessageType::Validation,
+                "The sizes of the 'buildInfos' (",
+                buildInfos.size(),
+                ") and 'indirectInfos' (",
+                indirectInfos.size(),
+                ") arrays do not match.");
+        }
+
+        for (int i = 0; i < buildInfos.size(); i++) {
+            auto& builder = AccelerationStructureBuilder::getBuilderFromView(buildInfos[i].dstView);
+            builder.validateBuildIndirectInfo(buildInfos[i], indirectInfos[i], i);
+        }
+    }
+
+    auto buildsData = jobData->record.cmdBuffer.allocate<AccelerationStructureBuildData>(buildInfos.size());
+    for (int i = 0; i < buildInfos.size(); i++) {
+        buildsData[i] = prepareASBuildData(jobData, buildInfos[i], indirectInfos[i]);
+    }
+
+    recordCommand<JobRecordStorage::BuildAccelerationStructuresData>(
+        jobData->record, JobCommandTypes::BuildAccelerationStructuresIndirect, buildsData);
+}
+
+void Job::cmdCopyAccelerationStructureKHR(
+    const AccelerationStructureView& srcView,
+    const AccelerationStructureView& dstView) {
+    TEPHRA_DEBUG_SET_CONTEXT(debugTarget.get(), "cmdCopyAccelerationStructureKHR", nullptr);
+
+    markResourceUsage(jobData, srcView.getBackingBufferView());
+    markResourceUsage(jobData, dstView.getBackingBufferView());
+
+    recordCommand<JobRecordStorage::CopyAccelerationStructureData>(
+        jobData->record, JobCommandTypes::CopyAccelerationStructure, srcView, dstView);
 }
 
 Job::Job(Job&& other) noexcept : debugTarget(std::move(other.debugTarget)), jobData(other.jobData) {

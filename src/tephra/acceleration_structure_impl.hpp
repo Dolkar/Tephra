@@ -34,22 +34,45 @@ public:
             return vkBuildSizes.updateScratchSize;
     }
 
-    std::pair<VkAccelerationStructureBuildGeometryInfoKHR, const VkAccelerationStructureBuildRangeInfoKHR*> prepareBuild(
+    std::size_t getGeometryCount() const {
+        return vkGeometries.size();
+    }
+
+    // Prepares Vulkan structure for the build command, filling out the passed build ranges
+    VkAccelerationStructureBuildGeometryInfoKHR prepareBuild(
+        StoredAccelerationStructureBuildInfo& buildInfo,
+        StoredBufferView& scratchBuffer,
+        ArrayView<VkAccelerationStructureBuildRangeInfoKHR> vkBuildRanges);
+
+    // Prepares Vulkan structure for the indirect build command
+    VkAccelerationStructureBuildGeometryInfoKHR prepareBuildIndirect(
         StoredAccelerationStructureBuildInfo& buildInfo,
         StoredBufferView& scratchBuffer);
 
+    void validateBuildInfo(const AccelerationStructureBuildInfo& buildInfo, int buildIndex) const;
+
+    void validateBuildIndirectInfo(
+        const AccelerationStructureBuildInfo& buildInfo,
+        const AccelerationStructureBuildIndirectInfo& indirectInfo,
+        int buildIndex) const;
+
     void reset(DeviceContainer* deviceImpl, const AccelerationStructureSetup& setup);
 
+    static AccelerationStructureBuilder& getBuilderFromView(const AccelerationStructureView& asView);
+
 private:
+    // Creates a build info structure for the final build command
+    VkAccelerationStructureBuildGeometryInfoKHR prepareBuildInfo(
+        StoredAccelerationStructureBuildInfo& buildInfo,
+        StoredBufferView& scratchBuffer);
     // Makes the Vulkan build info structure with null resources from setup structure
-    VkAccelerationStructureBuildGeometryInfoKHR makeVkBuildInfo(
+    VkAccelerationStructureBuildGeometryInfoKHR initVkBuildInfo(
         AccelerationStructureBuildMode buildMode = AccelerationStructureBuildMode::Build) const;
 
     AccelerationStructureType type;
     AccelerationStructureBuildFlagMask buildFlags;
     std::vector<VkAccelerationStructureGeometryKHR> vkGeometries;
     std::vector<uint32_t> maxPrimitiveCounts;
-    std::vector<VkAccelerationStructureBuildRangeInfoKHR> vkBuildRanges;
     VkAccelerationStructureBuildSizesInfoKHR vkBuildSizes;
 };
 

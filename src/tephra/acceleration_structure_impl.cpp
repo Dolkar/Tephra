@@ -12,59 +12,40 @@ AccelerationStructureBuilder::AccelerationStructureBuilder(
     reset(deviceImpl, setup);
 }
 
-std::pair<VkAccelerationStructureBuildGeometryInfoKHR, const VkAccelerationStructureBuildRangeInfoKHR*>
-AccelerationStructureBuilder::prepareBuild(
+VkAccelerationStructureBuildGeometryInfoKHR AccelerationStructureBuilder::prepareBuild(
     StoredAccelerationStructureBuildInfo& buildInfo,
-    StoredBufferView& scratchBuffer) {
-    auto getCheckedDeviceAddress = [](StoredBufferView& buffer) {
-        DeviceAddress address = { buffer.getDeviceAddress() };
-        TEPHRA_ASSERT(address != 0 || buffer.isNull());
-        return address;
-    };
+    StoredBufferView& scratchBuffer,
+    ArrayView<VkAccelerationStructureBuildRangeInfoKHR> vkBuildRanges) {
+    TEPHRA_ASSERT(vkBuildRanges.size() == vkGeometries.size());
 
-    VkAccelerationStructureBuildGeometryInfoKHR vkBuildInfo = makeVkBuildInfo(buildInfo.mode);
+    // Offsets remain zero, the rest gets filled depending on the geometry
+    VkAccelerationStructureBuildRangeInfoKHR buildRangeTemplate;
+    buildRangeTemplate.primitiveCount = 0;
+    buildRangeTemplate.primitiveOffset = 0;
+    buildRangeTemplate.firstVertex = 0;
+    buildRangeTemplate.transformOffset = 0;
+    for (std::size_t i = 0; i < vkBuildRanges.size(); i++) {
+        vkBuildRanges[i] = buildRangeTemplate;
+    }
 
-    if (!buildInfo.srcView.isNull())
-        vkBuildInfo.srcAccelerationStructure = buildInfo.srcView.vkGetAccelerationStructureHandle();
-    vkBuildInfo.dstAccelerationStructure = buildInfo.dstView.vkGetAccelerationStructureHandle();
-    vkBuildInfo.scratchData = { getCheckedDeviceAddress(scratchBuffer) };
+    VkAccelerationStructureBuildGeometryInfoKHR vkBuildInfo = prepareBuildInfo(buildInfo, scratchBuffer);
 
+    // Fill out build ranges
     if (type == AccelerationStructureType::TopLevel) {
         // Instance geometry
-        TEPHRA_ASSERT(vkGeometries.size() == 1);
-        TEPHRA_ASSERT(vkGeometries[0].geometryType == VK_GEOMETRY_TYPE_INSTANCES_KHR);
-        auto& instanceGeom = vkGeometries[0].geometry.instances;
-
-        instanceGeom.arrayOfPointers = buildInfo.instanceGeometry.arrayOfPointers;
         StoredBufferView& instanceData = buildInfo.instanceGeometry.instanceBuffer;
         std::size_t instanceSize = buildInfo.instanceGeometry.arrayOfPointers ?
             sizeof(DeviceAddress) :
             sizeof(VkAccelerationStructureInstanceKHR);
 
-        instanceGeom.data = { getCheckedDeviceAddress(instanceData) };
         std::size_t instanceCount = instanceData.getSize() / instanceSize;
 
-        // We never set the offsets in build ranges to anything other than 0
         vkBuildRanges[0].primitiveCount = static_cast<uint32_t>(instanceCount);
     } else {
-        std::size_t geometryCount = buildInfo.triangleGeometries.size() + buildInfo.aabbGeometries.size();
-        TEPHRA_ASSERT(vkGeometries.size() == geometryCount);
-
         std::size_t geomIndex = 0;
         for (StoredTriangleGeometryBuildInfo& triInfo : buildInfo.triangleGeometries) {
-            TEPHRA_ASSERT(vkGeometries[geomIndex].geometryType == VK_GEOMETRY_TYPE_TRIANGLES_KHR);
+            // Calculate triangle count
             auto& triangleGeom = vkGeometries[geomIndex].geometry.triangles;
-
-            triangleGeom.vertexData = { getCheckedDeviceAddress(triInfo.vertexBuffer) };
-            triangleGeom.vertexStride = triInfo.vertexStride;
-            if (triangleGeom.vertexStride == 0) {
-                Format vertexFormat = vkCastConvertibleEnum(triangleGeom.vertexFormat);
-                triangleGeom.vertexStride = getFormatClassProperties(vertexFormat).texelBlockBytes;
-            }
-
-            // Optional buffer views, but getDeviceAddress on a null view returns 0
-            triangleGeom.indexData = { getCheckedDeviceAddress(triInfo.indexBuffer) };
-            triangleGeom.transformData = { getCheckedDeviceAddress(triInfo.transformBuffer) };
 
             std::size_t triangleCount;
             if (!triInfo.indexBuffer.isNull()) {
@@ -82,19 +63,20 @@ AccelerationStructureBuilder::prepareBuild(
         }
 
         for (StoredAABBGeometryBuildInfo& aabbInfo : buildInfo.aabbGeometries) {
-            TEPHRA_ASSERT(vkGeometries[geomIndex].geometryType == VK_GEOMETRY_TYPE_AABBS_KHR);
-            auto& aabbGeom = vkGeometries[geomIndex].geometry.aabbs;
-
-            aabbGeom.data = { getCheckedDeviceAddress(aabbInfo.aabbBuffer) };
-            aabbGeom.stride = aabbInfo.stride;
-
             std::size_t aabbCount = aabbInfo.aabbBuffer.getSize() / aabbInfo.stride;
             vkBuildRanges[geomIndex].primitiveCount = static_cast<uint32_t>(aabbCount);
             geomIndex++;
         }
     }
 
-    return { vkBuildInfo, vkBuildRanges.data() };
+    return vkBuildInfo;
+}
+
+VkAccelerationStructureBuildGeometryInfoKHR AccelerationStructureBuilder::prepareBuildIndirect(
+    StoredAccelerationStructureBuildInfo& buildInfo,
+    StoredBufferView& scratchBuffer) {
+    // Filling out build ranges indirectly is the app's responsibility
+    return prepareBuildInfo(buildInfo, scratchBuffer);
 }
 
 void AccelerationStructureBuilder::reset(DeviceContainer* deviceImpl, const AccelerationStructureSetup& setup) {
@@ -148,8 +130,10 @@ void AccelerationStructureBuilder::reset(DeviceContainer* deviceImpl, const Acce
 
             // Not set yet:
             geom.geometry.triangles.vertexData = { VkDeviceAddress(0) };
-            geom.geometry.triangles.vertexStride = 0;
             geom.geometry.triangles.indexData = { VkDeviceAddress(0) };
+
+            // Set to default value, but overridable:
+            geom.geometry.triangles.vertexStride = getFormatClassProperties(triSetup.vertexFormat).texelBlockBytes;
 
             maxPrimitiveCounts.emplace_back(triSetup.maxTriangleCount);
         }
@@ -169,20 +153,79 @@ void AccelerationStructureBuilder::reset(DeviceContainer* deviceImpl, const Acce
         }
     }
 
-    VkAccelerationStructureBuildRangeInfoKHR buildRangeTemplate;
-    buildRangeTemplate.primitiveCount = 0;
-    buildRangeTemplate.primitiveOffset = 0;
-    buildRangeTemplate.firstVertex = 0;
-    buildRangeTemplate.transformOffset = 0;
-    vkBuildRanges.resize(vkGeometries.size(), buildRangeTemplate);
-
     // Query acceleration structure sizes
-    VkAccelerationStructureBuildGeometryInfoKHR vkBuildInfo = makeVkBuildInfo();
+    VkAccelerationStructureBuildGeometryInfoKHR vkBuildInfo = initVkBuildInfo();
     vkBuildSizes = deviceImpl->getLogicalDevice()->getAccelerationStructureBuildSizes(
         vkBuildInfo, maxPrimitiveCounts.data());
 }
 
-VkAccelerationStructureBuildGeometryInfoKHR AccelerationStructureBuilder::makeVkBuildInfo(
+AccelerationStructureBuilder& AccelerationStructureBuilder::getBuilderFromView(const AccelerationStructureView& asView) {
+    TEPHRA_ASSERT(!asView.isNull());
+    if (asView.viewsJobLocalAccelerationStructure()) {
+        return *JobLocalAccelerationStructureImpl::getAccelerationStructureImpl(asView).getBuilder();
+    } else {
+        return *AccelerationStructureImpl::getAccelerationStructureImpl(asView).getBuilder();
+    }
+}
+
+VkAccelerationStructureBuildGeometryInfoKHR AccelerationStructureBuilder::prepareBuildInfo(
+    StoredAccelerationStructureBuildInfo& buildInfo,
+    StoredBufferView& scratchBuffer) {
+    auto getCheckedDeviceAddress = [](StoredBufferView& buffer) {
+        DeviceAddress address = { buffer.getDeviceAddress() };
+        TEPHRA_ASSERT(address != 0 || buffer.isNull());
+        return address;
+    };
+
+    VkAccelerationStructureBuildGeometryInfoKHR vkBuildInfo = initVkBuildInfo(buildInfo.mode);
+
+    if (!buildInfo.srcView.isNull())
+        vkBuildInfo.srcAccelerationStructure = buildInfo.srcView.vkGetAccelerationStructureHandle();
+    vkBuildInfo.dstAccelerationStructure = buildInfo.dstView.vkGetAccelerationStructureHandle();
+    vkBuildInfo.scratchData = { getCheckedDeviceAddress(scratchBuffer) };
+
+    if (type == AccelerationStructureType::TopLevel) {
+        // Instance geometry
+        TEPHRA_ASSERT(vkGeometries.size() == 1);
+        TEPHRA_ASSERT(vkGeometries[0].geometryType == VK_GEOMETRY_TYPE_INSTANCES_KHR);
+        auto& instanceGeom = vkGeometries[0].geometry.instances;
+
+        instanceGeom.arrayOfPointers = buildInfo.instanceGeometry.arrayOfPointers;
+        StoredBufferView& instanceData = buildInfo.instanceGeometry.instanceBuffer;
+        instanceGeom.data = { getCheckedDeviceAddress(instanceData) };
+    } else {
+        std::size_t geometryCount = buildInfo.triangleGeometries.size() + buildInfo.aabbGeometries.size();
+        TEPHRA_ASSERT(vkGeometries.size() == geometryCount);
+
+        std::size_t geomIndex = 0;
+        for (StoredTriangleGeometryBuildInfo& triInfo : buildInfo.triangleGeometries) {
+            TEPHRA_ASSERT(vkGeometries[geomIndex].geometryType == VK_GEOMETRY_TYPE_TRIANGLES_KHR);
+            auto& triGeom = vkGeometries[geomIndex].geometry.triangles;
+
+            triGeom.vertexData = { getCheckedDeviceAddress(triInfo.vertexBuffer) };
+            if (triInfo.vertexStride != 0)
+                triGeom.vertexStride = triInfo.vertexStride;
+
+            // Optional buffer views, but getDeviceAddress on a null view returns 0
+            triGeom.indexData = { getCheckedDeviceAddress(triInfo.indexBuffer) };
+            triGeom.transformData = { getCheckedDeviceAddress(triInfo.transformBuffer) };
+            geomIndex++;
+        }
+
+        for (StoredAABBGeometryBuildInfo& aabbInfo : buildInfo.aabbGeometries) {
+            TEPHRA_ASSERT(vkGeometries[geomIndex].geometryType == VK_GEOMETRY_TYPE_AABBS_KHR);
+            auto& aabbGeom = vkGeometries[geomIndex].geometry.aabbs;
+
+            aabbGeom.data = { getCheckedDeviceAddress(aabbInfo.aabbBuffer) };
+            aabbGeom.stride = aabbInfo.stride;
+            geomIndex++;
+        }
+    }
+
+    return vkBuildInfo;
+}
+
+VkAccelerationStructureBuildGeometryInfoKHR AccelerationStructureBuilder::initVkBuildInfo(
     AccelerationStructureBuildMode buildMode) const {
     VkAccelerationStructureBuildGeometryInfoKHR vkBuildInfo;
     vkBuildInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_GEOMETRY_INFO_KHR;
@@ -235,4 +278,258 @@ AccelerationStructureImpl& AccelerationStructureImpl::getAccelerationStructureIm
     TEPHRA_ASSERT(!asView.viewsJobLocalAccelerationStructure());
     return *std::get<AccelerationStructureImpl*>(asView.accelerationStructure);
 }
+
+// --- Validation ---
+
+void AccelerationStructureBuilder::validateBuildInfo(const AccelerationStructureBuildInfo& buildInfo, int buildIndex)
+    const {
+    TEPHRA_ASSERT(TephraValidationEnabled);
+
+    // Check for proper buffer size alignments
+    if (type == AccelerationStructureType::TopLevel) {
+        // Should be caught by Vulkan validation, but would crash our validation
+        if (buildInfo.instanceGeometry.instanceBuffer.isNull())
+            return;
+
+        std::size_t bufferSize = buildInfo.instanceGeometry.instanceBuffer.getSize();
+        std::size_t instanceSize = buildInfo.instanceGeometry.arrayOfPointers ?
+            sizeof(DeviceAddress) :
+            sizeof(VkAccelerationStructureInstanceKHR);
+
+        if ((bufferSize % instanceSize) != 0)
+            reportDebugMessage(
+                DebugMessageSeverity::Error,
+                DebugMessageType::Validation,
+                "The size of `buildInfos[",
+                buildIndex,
+                "].instanceGeometry.instanceBuffer' (",
+                bufferSize,
+                ") is not a multiple of the expected instance value size (",
+                instanceSize,
+                ").");
+    } else {
+        std::size_t geomCount = buildInfo.triangleGeometries.size() + buildInfo.aabbGeometries.size();
+        if (geomCount != getGeometryCount()) {
+            reportDebugMessage(
+                DebugMessageSeverity::Error,
+                DebugMessageType::Validation,
+                "The total number of triangle and / or AABB geometries in `buildInfos[",
+                buildIndex,
+                "]` (",
+                geomCount,
+                ") is different than expected (",
+                getGeometryCount(),
+                ").");
+            return;
+        }
+
+        for (std::size_t triGeomIndex = 0; triGeomIndex < buildInfo.triangleGeometries.size(); triGeomIndex++) {
+            const TriangleGeometryBuildInfo& triInfo = buildInfo.triangleGeometries[triGeomIndex];
+            const auto& triGeom = vkGeometries[triGeomIndex].geometry.triangles;
+
+            if (!triInfo.indexBuffer.isNull()) {
+                TEPHRA_ASSERT(triGeom.indexType != VK_INDEX_TYPE_NONE_KHR);
+                uint32_t indexSize = triGeom.indexType == VK_INDEX_TYPE_UINT16 ? 2 : 4;
+                std::size_t triangleSize = 3 * indexSize;
+                std::size_t bufferSize = triInfo.indexBuffer.getSize();
+
+                if ((bufferSize % triangleSize) != 0)
+                    reportDebugMessage(
+                        DebugMessageSeverity::Error,
+                        DebugMessageType::Validation,
+                        "The size of `buildInfos[",
+                        buildIndex,
+                        "].triangleGeometries[",
+                        triGeomIndex,
+                        "].indexBuffer' (",
+                        bufferSize,
+                        ") is not a multiple of the expected triangle size (",
+                        triangleSize,
+                        ").");
+            }
+
+            if (!triInfo.vertexBuffer.isNull()) {
+                std::size_t bufferSize = triInfo.vertexBuffer.getSize();
+                std::size_t vertexStride = triInfo.vertexStride;
+                // Default to vertex stride derived from format
+                if (vertexStride == 0)
+                    vertexStride = triGeom.vertexStride;
+
+                if ((bufferSize % vertexStride) != 0)
+                    reportDebugMessage(
+                        DebugMessageSeverity::Error,
+                        DebugMessageType::Validation,
+                        "The size of `buildInfos[",
+                        buildIndex,
+                        "].triangleGeometries[",
+                        triGeomIndex,
+                        "].vertexBuffer' (",
+                        bufferSize,
+                        ") is not a multiple of the expected stride (",
+                        vertexStride,
+                        ").");
+            }
+        }
+
+        for (std::size_t aabbGeomIndex = 0; aabbGeomIndex < buildInfo.aabbGeometries.size(); aabbGeomIndex++) {
+            const AABBGeometryBuildInfo& aabbInfo = buildInfo.aabbGeometries[aabbGeomIndex];
+            if (!aabbInfo.aabbBuffer.isNull()) {
+                std::size_t bufferSize = aabbInfo.aabbBuffer.getSize();
+                if ((bufferSize % aabbInfo.stride) != 0)
+                    reportDebugMessage(
+                        DebugMessageSeverity::Error,
+                        DebugMessageType::Validation,
+                        "The size of `buildInfos[",
+                        buildIndex,
+                        "].aabbGeometries[",
+                        aabbGeomIndex,
+                        "].aabbBuffer' (",
+                        bufferSize,
+                        ") is not a multiple of the expected stride (",
+                        aabbInfo.stride,
+                        ").");
+            }
+        }
+    }
+}
+
+void AccelerationStructureBuilder::validateBuildIndirectInfo(
+    const AccelerationStructureBuildInfo& buildInfo,
+    const AccelerationStructureBuildIndirectInfo& indirectInfo,
+    int buildIndex) const {
+    TEPHRA_ASSERT(TephraValidationEnabled);
+
+    // Should be caught by Vulkan validation, but would crash our validation
+    if (indirectInfo.buildRangeBuffer.isNull())
+        return;
+
+    // Check indirectInfo array and buffer sizes based on the geometry count
+    std::size_t geomCount;
+    if (type == AccelerationStructureType::TopLevel) {
+        geomCount = 1;
+    } else {
+        geomCount = buildInfo.triangleGeometries.size() + buildInfo.aabbGeometries.size();
+        if (geomCount != getGeometryCount()) {
+            reportDebugMessage(
+                DebugMessageSeverity::Error,
+                DebugMessageType::Validation,
+                "The total number of triangle and / or AABB geometries in `buildInfos[",
+                buildIndex,
+                "]` (",
+                geomCount,
+                ") is different than expected (",
+                getGeometryCount(),
+                ").");
+            return;
+        }
+    }
+
+    if (indirectInfo.maxPrimitiveCounts.size() != geomCount) {
+        reportDebugMessage(
+            DebugMessageSeverity::Error,
+            DebugMessageType::Validation,
+            "The size of `indirectInfos[",
+            buildIndex,
+            "].maxPrimitiveCounts' (",
+            indirectInfo.maxPrimitiveCounts.size(),
+            ") is different from the expected size (",
+            geomCount,
+            ").");
+        return;
+    }
+
+    std::size_t indirectBufferSize = indirectInfo.buildRangeBuffer.getSize();
+    std::size_t indirectBufferSizeExpected = geomCount * indirectInfo.buildRangeStride;
+    if (indirectBufferSize != indirectBufferSizeExpected)
+        reportDebugMessage(
+            DebugMessageSeverity::Error,
+            DebugMessageType::Validation,
+            "The size of `indirectInfos[",
+            buildIndex,
+            "].buildRangeBuffer' (",
+            indirectBufferSize,
+            ") is different from the expected size (",
+            indirectBufferSizeExpected,
+            ").");
+
+    // Now, for each geometry, check that the buffers are big enough to hold the given maxPrimitiveCounts
+    // Fill these arrays and validate them all at once
+    ScratchVector<std::size_t> primitiveBufferSizes;
+    ScratchVector<std::size_t> primitiveCapacities;
+    primitiveBufferSizes.resize(geomCount);
+    primitiveCapacities.resize(geomCount);
+
+    if (type == AccelerationStructureType::TopLevel) {
+        if (buildInfo.instanceGeometry.instanceBuffer.isNull())
+            return;
+
+        std::size_t bufferSize = buildInfo.instanceGeometry.instanceBuffer.getSize();
+        std::size_t instanceSize = buildInfo.instanceGeometry.arrayOfPointers ?
+            sizeof(DeviceAddress) :
+            sizeof(VkAccelerationStructureInstanceKHR);
+
+        std::size_t maxInstanceCount = bufferSize / instanceSize;
+        TEPHRA_ASSERT(geomCount == 1);
+        primitiveBufferSizes[0] = bufferSize;
+        primitiveCapacities[0] = maxInstanceCount;
+    } else {
+        std::size_t geomIndex = 0;
+        for (std::size_t triGeomIndex = 0; triGeomIndex < buildInfo.triangleGeometries.size(); triGeomIndex++) {
+            const TriangleGeometryBuildInfo& triInfo = buildInfo.triangleGeometries[triGeomIndex];
+            const auto& triGeom = vkGeometries[triGeomIndex].geometry.triangles;
+
+            std::size_t bufferSize = 0;
+            std::size_t maxTriangleCount = 0;
+            if (!triInfo.indexBuffer.isNull()) {
+                bufferSize = triInfo.indexBuffer.getSize();
+                TEPHRA_ASSERT(triGeom.indexType != VK_INDEX_TYPE_NONE_KHR);
+                uint32_t indexSize = triGeom.indexType == VK_INDEX_TYPE_UINT16 ? 2 : 4;
+                maxTriangleCount = bufferSize / (3 * indexSize);
+            } else if (!triInfo.vertexBuffer.isNull()) {
+                bufferSize = triInfo.vertexBuffer.getSize();
+                uint64_t vertexStride = triInfo.vertexStride;
+                // Default to vertex stride derived from format
+                if (vertexStride == 0)
+                    vertexStride = triGeom.vertexStride;
+                maxTriangleCount = bufferSize / (3 * vertexStride);
+            }
+
+            primitiveBufferSizes[geomIndex] = bufferSize;
+            primitiveCapacities[geomIndex] = maxTriangleCount;
+            geomIndex++;
+        }
+
+        for (std::size_t aabbGeomIndex = 0; aabbGeomIndex < buildInfo.aabbGeometries.size(); aabbGeomIndex++) {
+            const AABBGeometryBuildInfo& aabbInfo = buildInfo.aabbGeometries[aabbGeomIndex];
+            if (!aabbInfo.aabbBuffer.isNull()) {
+                primitiveBufferSizes[geomIndex] = aabbInfo.aabbBuffer.getSize();
+                primitiveCapacities[geomIndex] = aabbInfo.aabbBuffer.getSize() / aabbInfo.stride;
+            }
+            geomIndex++;
+        }
+    }
+
+    for (std::size_t geomIndex = 0; geomIndex < geomCount; geomIndex++) {
+        std::size_t bufferSize = primitiveBufferSizes[geomIndex];
+        std::size_t maxBufferPrimitives = primitiveCapacities[geomIndex];
+
+        if (bufferSize != 0 && indirectInfo.maxPrimitiveCounts[geomIndex] > maxBufferPrimitives) {
+            reportDebugMessage(
+                DebugMessageSeverity::Error,
+                DebugMessageType::Validation,
+                "`indirectInfos[",
+                buildIndex,
+                "].maxPrimitiveCount[",
+                geomIndex,
+                "]' (",
+                indirectInfo.maxPrimitiveCounts[geomIndex],
+                ") is bigger than the maximum number of primitives the corresponding geometry buffer can hold (",
+                maxBufferPrimitives,
+                ", buffer size is ",
+                bufferSize,
+                ").");
+        }
+    }
+}
+
 }

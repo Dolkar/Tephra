@@ -281,7 +281,8 @@ void identifyCommandResourceAccesses(
         }
         break;
     }
-    case JobCommandTypes::BuildAccelerationStructures: {
+    case JobCommandTypes::BuildAccelerationStructures:
+    case JobCommandTypes::BuildAccelerationStructuresIndirect: {
         auto* data = getCommandData<JobRecordStorage::BuildAccelerationStructuresData>(command);
         const auto asBuildStage = VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR;
         const auto asBuildInput = ResourceAccess(asBuildStage, VK_ACCESS_SHADER_READ_BIT);
@@ -305,6 +306,12 @@ void identifyCommandResourceAccesses(
             if (!buildInfo.instanceGeometry.instanceBuffer.isNull())
                 addBufferAccess(bufferAccesses, buildInfo.instanceGeometry.instanceBuffer, asBuildInput);
 
+            for (StoredAccelerationStructureView& accessedView : buildInfo.instanceGeometry.accessedViews) {
+                StoredBufferView& srcBuffer = accessedView.getBackingBufferView();
+                addBufferAccess(
+                    bufferAccesses, srcBuffer, { asBuildStage, VK_ACCESS_ACCELERATION_STRUCTURE_READ_BIT_KHR });
+            }
+
             for (StoredTriangleGeometryBuildInfo& triangles : buildInfo.triangleGeometries) {
                 addBufferAccess(bufferAccesses, triangles.vertexBuffer, asBuildInput);
                 if (!triangles.indexBuffer.isNull())
@@ -313,12 +320,16 @@ void identifyCommandResourceAccesses(
                     addBufferAccess(bufferAccesses, triangles.transformBuffer, asBuildInput);
             }
 
-            const auto scratchAccess = VK_ACCESS_ACCELERATION_STRUCTURE_READ_BIT_KHR |
-                VK_ACCESS_ACCELERATION_STRUCTURE_WRITE_BIT_KHR;
             for (StoredAABBGeometryBuildInfo& aabbs : buildInfo.aabbGeometries) {
                 addBufferAccess(bufferAccesses, aabbs.aabbBuffer, asBuildInput);
             }
 
+            StoredBufferView& indirectBuffer = buildData.indirectInfo.buildRangeBuffer;
+            if (!indirectBuffer.isNull())
+                addBufferAccess(bufferAccesses, indirectBuffer, { asBuildStage, VK_ACCESS_INDIRECT_COMMAND_READ_BIT });
+
+            const auto scratchAccess = VK_ACCESS_ACCELERATION_STRUCTURE_READ_BIT_KHR |
+                VK_ACCESS_ACCELERATION_STRUCTURE_WRITE_BIT_KHR;
             addBufferAccess(bufferAccesses, buildData.scratchBuffer, { asBuildStage, scratchAccess });
         }
         break;
@@ -593,16 +604,27 @@ void recordCommand(const JobData* job, PrimaryBufferRecorder& recorder, JobRecor
         // Prepare and aggregate vulkan structures for all builds
         ScratchVector<VkAccelerationStructureBuildGeometryInfoKHR> vkBuildInfos;
         ScratchVector<const VkAccelerationStructureBuildRangeInfoKHR*> vkRangeInfosPtrs;
+        ScratchVector<VkAccelerationStructureBuildRangeInfoKHR> vkRangeInfos;
         vkBuildInfos.reserve(data->builds.size());
         vkRangeInfosPtrs.reserve(data->builds.size());
 
+        std::size_t totalGeometryCount = 0;
+        for (std::size_t i = 0; i < data->builds.size(); i++) {
+            totalGeometryCount += data->builds[i].builder->getGeometryCount();
+        }
+        vkRangeInfos.resize(totalGeometryCount);
+
+        std::size_t vkRangeInfoOffset = 0;
         for (std::size_t i = 0; i < data->builds.size(); i++) {
             auto& buildData = data->builds[i];
-            auto [vkBuildInfo, vkRangeInfos] = buildData.builder->prepareBuild(
-                buildData.buildInfo, buildData.scratchBuffer);
+            // Grab a set of range infos for the builder to fill
+            std::size_t geometryCount = buildData.builder->getGeometryCount();
+            auto vkRangeInfoView = viewRange(vkRangeInfos, vkRangeInfoOffset, geometryCount);
+            vkRangeInfoOffset += geometryCount;
 
-            vkBuildInfos.push_back(vkBuildInfo);
-            vkRangeInfosPtrs.push_back(vkRangeInfos);
+            vkBuildInfos.push_back(
+                buildData.builder->prepareBuild(buildData.buildInfo, buildData.scratchBuffer, vkRangeInfoView));
+            vkRangeInfosPtrs.push_back(vkRangeInfoView.data());
         }
 
         vkiCommands.cmdBuildAccelerationStructuresKHR(
@@ -610,6 +632,51 @@ void recordCommand(const JobData* job, PrimaryBufferRecorder& recorder, JobRecor
             static_cast<uint32_t>(vkBuildInfos.size()),
             vkBuildInfos.data(),
             vkRangeInfosPtrs.data());
+        break;
+    }
+    case JobCommandTypes::BuildAccelerationStructuresIndirect: {
+        TEPHRA_ASSERT(vkiCommands.cmdBuildAccelerationStructuresKHR != nullptr);
+        auto* data = getCommandData<JobRecordStorage::BuildAccelerationStructuresData>(command);
+
+        // Prepare and aggregate vulkan structures for all builds
+        ScratchVector<VkAccelerationStructureBuildGeometryInfoKHR> vkBuildInfos;
+        ScratchVector<VkDeviceAddress> vkIndirectDeviceAddresses;
+        ScratchVector<uint32_t> vkIndirectStrides;
+        ScratchVector<const uint32_t*> maxPrimitiveCountPtrs;
+        ScratchVector<uint32_t> maxPrimitiveCounts;
+
+        vkBuildInfos.reserve(data->builds.size());
+        vkIndirectDeviceAddresses.reserve(data->builds.size());
+        vkIndirectStrides.reserve(data->builds.size());
+        maxPrimitiveCountPtrs.reserve(data->builds.size());
+
+        std::size_t totalGeometryCount = 0;
+        for (std::size_t i = 0; i < data->builds.size(); i++) {
+            totalGeometryCount += data->builds[i].builder->getGeometryCount();
+        }
+        maxPrimitiveCounts.reserve(totalGeometryCount);
+
+        for (std::size_t i = 0; i < data->builds.size(); i++) {
+            auto& buildData = data->builds[i];
+            vkBuildInfos.push_back(
+                buildData.builder->prepareBuildIndirect(buildData.buildInfo, buildData.scratchBuffer));
+
+            vkIndirectDeviceAddresses.push_back(buildData.indirectInfo.buildRangeBuffer.getDeviceAddress());
+            vkIndirectStrides.push_back(buildData.indirectInfo.buildRangeStride);
+            auto it = maxPrimitiveCounts.insert(
+                maxPrimitiveCounts.end(),
+                buildData.indirectInfo.maxPrimitiveCounts.begin(),
+                buildData.indirectInfo.maxPrimitiveCounts.end());
+            maxPrimitiveCountPtrs.push_back(&*it);
+        }
+
+        vkiCommands.cmdBuildAccelerationStructuresIndirectKHR(
+            recorder.requestBuffer(),
+            static_cast<uint32_t>(vkBuildInfos.size()),
+            vkBuildInfos.data(),
+            vkIndirectDeviceAddresses.data(),
+            vkIndirectStrides.data(),
+            maxPrimitiveCountPtrs.data());
         break;
     }
     case JobCommandTypes::CopyAccelerationStructure: {

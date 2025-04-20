@@ -453,12 +453,6 @@ public:
     ///     previously submitted commands have finished executing the given pipeline stage.
     void cmdWriteTimestamp(const TimestampQuery& query, PipelineStage stage);
 
-    void cmdBuildAccelerationStructuresKHR(ArrayParameter<const AccelerationStructureBuildInfo> buildInfos);
-
-    void cmdCopyAccelerationStructureKHR(
-        const AccelerationStructureView& srcView,
-        const AccelerationStructureView& dstView);
-
     /// Updates the internal synchronization state for the buffer view to the given external access.
     ///
     /// This should be used after a resource has been accessed by an operation done outside of Tephra and before it
@@ -514,6 +508,17 @@ public:
         VkImageLayout vkImageLayout,
         VkPipelineStageFlags vkStageMask,
         VkAccessFlags vkAccessMask);
+
+    // Future remark: Can't build a TLAS and a BLAS it references in the same call
+    void cmdBuildAccelerationStructuresKHR(ArrayParameter<const AccelerationStructureBuildInfo> buildInfos);
+
+    void cmdBuildAccelerationStructuresIndirectKHR(
+        ArrayParameter<const AccelerationStructureBuildInfo> buildInfos,
+        ArrayParameter<const AccelerationStructureBuildIndirectInfo> indirectInfos);
+
+    void cmdCopyAccelerationStructureKHR(
+        const AccelerationStructureView& srcView,
+        const AccelerationStructureView& dstView);
 
     TEPHRA_MAKE_NONCOPYABLE(Job);
     TEPHRA_MAKE_MOVABLE(Job);

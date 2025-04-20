@@ -123,9 +123,13 @@ protected:
 struct InstanceGeometryBuildInfo {
     BufferView instanceBuffer; // VkAccelerationStructureInstanceKHR
     bool arrayOfPointers;
+    ArrayView<const AccelerationStructureView> accessedViews;
 
-    InstanceGeometryBuildInfo(BufferView instanceBuffer, bool arrayOfPointers = false)
-        : instanceBuffer(instanceBuffer), arrayOfPointers(arrayOfPointers) {}
+    InstanceGeometryBuildInfo(
+        BufferView instanceBuffer,
+        bool arrayOfPointers = false,
+        ArrayView<const AccelerationStructureView> accessedViews = {})
+        : instanceBuffer(instanceBuffer), arrayOfPointers(arrayOfPointers), accessedViews(accessedViews) {}
 };
 
 struct TriangleGeometryBuildInfo {
@@ -152,7 +156,7 @@ struct AABBGeometryBuildInfo {
     BufferView aabbBuffer; // VkAabbPositionsKHR
     uint64_t stride;
 
-    AABBGeometryBuildInfo(BufferView aabbBuffer, uint64_t stride = 8) : aabbBuffer(aabbBuffer), stride(stride) {}
+    AABBGeometryBuildInfo(BufferView aabbBuffer, uint64_t stride = 24) : aabbBuffer(aabbBuffer), stride(stride) {}
 };
 
 struct AccelerationStructureBuildInfo {
@@ -175,6 +179,20 @@ struct AccelerationStructureBuildInfo {
         ArrayView<const TriangleGeometryBuildInfo> triangleGeometries,
         ArrayView<const AABBGeometryBuildInfo> aabbGeometries,
         AccelerationStructureView srcView = {});
+};
+
+struct AccelerationStructureBuildIndirectInfo {
+    ArrayView<const uint32_t> maxPrimitiveCounts;
+    BufferView buildRangeBuffer; // VkAccelerationStructureBuildRangeInfoKHR
+    uint32_t buildRangeStride;
+
+    AccelerationStructureBuildIndirectInfo(
+        ArrayView<const uint32_t> maxPrimitiveCounts,
+        BufferView buildRangeBuffer,
+        uint32_t buildRangeStride = 16)
+        : maxPrimitiveCounts(maxPrimitiveCounts),
+          buildRangeBuffer(buildRangeBuffer),
+          buildRangeStride(buildRangeStride) {}
 };
 
 }

@@ -54,7 +54,7 @@ private:
     JobSemaphoreStorage queuedSemaphoreStorage;
 
     // Compiles and submits the given jobs
-    void submitJobs(ArrayView<Job*> jobs);
+    void submitJobs(ArrayView<Job> jobs);
 
     // Analyze cross-queue export commands in the job and broadcast them
     void broadcastResourceExports(const JobRecordStorage& jobRecord, const JobSemaphore& srcSemaphore);

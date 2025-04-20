@@ -275,8 +275,14 @@ void CornellExample::prepareBLAS() {
         blasList.push_back(std::move(blas));
     }
 
-    // Build and submit
+    // Build, export and submit
     buildJob.cmdBuildAccelerationStructuresKHR(tp::view(buildInfos));
+
+    for (int i = 0; i < blasList.size(); i++) {
+        // We will use it to build a TLAS and also trace through it in a compute shader
+        buildJob.cmdExportResource(
+            *blasList[i], tp::ReadAccess::AccelerationStructureBuildKHR | tp::ReadAccess::ComputeShaderUniform);
+    }
 
     device->enqueueJob(mainQueue, std::move(buildJob));
     device->submitQueuedJobs(mainQueue);

@@ -228,6 +228,7 @@ public:
     PFN_vkCmdEndRendering cmdEndRendering = nullptr;
 
     PFN_vkCmdBuildAccelerationStructuresKHR cmdBuildAccelerationStructuresKHR = nullptr;
+    PFN_vkCmdBuildAccelerationStructuresIndirectKHR cmdBuildAccelerationStructuresIndirectKHR = nullptr;
     PFN_vkCmdCopyAccelerationStructureKHR cmdCopyAccelerationStructureKHR = nullptr;
     PFN_vkCmdWriteAccelerationStructuresPropertiesKHR cmdWriteAccelerationStructuresPropertiesKHR = nullptr;
 

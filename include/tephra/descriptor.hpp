@@ -67,6 +67,9 @@ enum class ReadAccess : uint64_t {
     /// Compute shader read access through uniform descriptors.
     ComputeShaderUniform = 1 << 23,
 
+    /// Acceleration structure read access to the bottom-level acceleration structures referenced in instance buffers
+    /// of tp::Job::cmdBuildAccelerationStructuresKHR or cmdBuildAccelerationStructuresIndirectKHR.
+    AccelerationStructureBuildKHR = 1ull << 61,
     /// Image present operation access through tp::Device::submitPresentImagesKHR.
     ImagePresentKHR = 1ull << 62,
 

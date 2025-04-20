@@ -36,6 +36,7 @@ enum class JobCommandTypes {
     EndDebugLabel,
     WriteTimestamp,
     BuildAccelerationStructures,
+    BuildAccelerationStructuresIndirect,
     CopyAccelerationStructure
 };
 
@@ -215,17 +216,20 @@ struct JobRecordStorage {
         WriteTimestampData(const QueryHandle& query, PipelineStage stage) : query(query), stage(stage) {}
     };
 
+    // Shared for regular and indirect build commands
     struct BuildAccelerationStructuresData {
         struct SingleBuild {
             AccelerationStructureBuilder* builder;
             StoredAccelerationStructureBuildInfo buildInfo;
+            StoredAccelerationStructureBuildIndirectInfo indirectInfo;
             StoredBufferView scratchBuffer;
 
             SingleBuild(
                 AccelerationStructureBuilder* builder,
                 StoredAccelerationStructureBuildInfo buildInfo,
+                StoredAccelerationStructureBuildIndirectInfo indirectInfo,
                 StoredBufferView scratchBuffer)
-                : builder(builder), buildInfo(buildInfo), scratchBuffer(scratchBuffer) {}
+                : builder(builder), buildInfo(buildInfo), indirectInfo(indirectInfo), scratchBuffer(scratchBuffer) {}
         };
 
         ArrayView<SingleBuild> builds;
