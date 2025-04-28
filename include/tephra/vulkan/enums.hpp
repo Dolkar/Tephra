@@ -588,15 +588,15 @@ enum class AccelerationStructureType : uint32_t {
 };
 TEPHRA_VULKAN_COMPATIBLE_ENUM(AccelerationStructureType, VkAccelerationStructureTypeKHR);
 
-enum class AccelerationStructureBuildFlag : uint32_t {
+enum class AccelerationStructureFlag : uint32_t {
     AllowUpdate = VK_BUILD_ACCELERATION_STRUCTURE_ALLOW_UPDATE_BIT_KHR,
-    // AllowCompaction = VK_BUILD_ACCELERATION_STRUCTURE_ALLOW_COMPACTION_BIT_KHR, // Not supported yet
+    AllowCompaction = VK_BUILD_ACCELERATION_STRUCTURE_ALLOW_COMPACTION_BIT_KHR,
     PreferFastTrace = VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_KHR,
     PreferFastBuild = VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_BUILD_BIT_KHR,
     LowMemory = VK_BUILD_ACCELERATION_STRUCTURE_LOW_MEMORY_BIT_KHR,
 };
-TEPHRA_VULKAN_COMPATIBLE_ENUM(AccelerationStructureBuildFlag, VkBuildAccelerationStructureFlagBitsKHR);
-TEPHRA_MAKE_ENUM_BIT_MASK(AccelerationStructureBuildFlagMask, AccelerationStructureBuildFlag);
+TEPHRA_VULKAN_COMPATIBLE_ENUM(AccelerationStructureFlag, VkBuildAccelerationStructureFlagBitsKHR);
+TEPHRA_MAKE_ENUM_BIT_MASK(AccelerationStructureFlagMask, AccelerationStructureFlag);
 
 enum class AccelerationStructureBuildMode : uint32_t {
     Build = VK_BUILD_ACCELERATION_STRUCTURE_MODE_BUILD_KHR,

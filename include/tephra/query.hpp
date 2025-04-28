@@ -83,7 +83,14 @@ public:
     QueryResult getJobResult(const JobSemaphore& jobSemaphore) const;
 
     /// Sets the maximum number of past stored results that can be retrieved with tp::BaseQuery::getJobResult.
+    /// @remarks
+    ///     This function may not be called while the query is in use (pending a result).
     void setMaxHistorySize(uint32_t size);
+
+    /// Throws away all previous results.
+    /// @remarks
+    ///     This function may not be called while the query is in use (pending a result).
+    void clear();
 
     TEPHRA_MAKE_NONCOPYABLE(BaseQuery);
     TEPHRA_MAKE_MOVABLE(BaseQuery);

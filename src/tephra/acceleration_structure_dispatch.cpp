@@ -67,17 +67,17 @@ VkAccelerationStructureHandleKHR AccelerationStructure::vkGetAccelerationStructu
 }
 
 AccelerationStructureSetup AccelerationStructureSetup::TopLevel(
-    AccelerationStructureBuildFlagMask buildFlags,
+    AccelerationStructureFlagMask flags,
     InstanceGeometrySetup instanceGeometry) {
-    return { AccelerationStructureType::TopLevel, buildFlags, instanceGeometry, {}, {} };
+    return { AccelerationStructureType::TopLevel, flags, instanceGeometry, {}, {} };
 }
 
 AccelerationStructureSetup AccelerationStructureSetup::BottomLevel(
-    AccelerationStructureBuildFlagMask buildFlags,
+    AccelerationStructureFlagMask flags,
     ArrayView<const TriangleGeometrySetup> triangleGeometries,
     ArrayView<const AABBGeometrySetup> aabbGeometries) {
     return {
-        AccelerationStructureType::BottomLevel, buildFlags, InstanceGeometrySetup(0), triangleGeometries, aabbGeometries
+        AccelerationStructureType::BottomLevel, flags, InstanceGeometrySetup(0), triangleGeometries, aabbGeometries
     };
 }
 

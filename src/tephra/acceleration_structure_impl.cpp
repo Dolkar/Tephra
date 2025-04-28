@@ -81,7 +81,7 @@ VkAccelerationStructureBuildGeometryInfoKHR AccelerationStructureBuilder::prepar
 
 void AccelerationStructureBuilder::reset(DeviceContainer* deviceImpl, const AccelerationStructureSetup& setup) {
     type = setup.type;
-    buildFlags = setup.buildFlags;
+    flags = setup.flags;
 
     // Initialize the geometries and maxPrimitiveCounts array with null resources according to the setup
     vkGeometries.clear();
@@ -231,7 +231,7 @@ VkAccelerationStructureBuildGeometryInfoKHR AccelerationStructureBuilder::initVk
     vkBuildInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_GEOMETRY_INFO_KHR;
     vkBuildInfo.pNext = nullptr;
     vkBuildInfo.type = vkCastConvertibleEnum(type);
-    vkBuildInfo.flags = vkCastConvertibleEnumMask(buildFlags);
+    vkBuildInfo.flags = vkCastConvertibleEnumMask(flags);
     vkBuildInfo.mode = vkCastConvertibleEnum(buildMode);
     vkBuildInfo.geometryCount = static_cast<uint32_t>(vkGeometries.size());
     vkBuildInfo.pGeometries = vkGeometries.data();
@@ -270,7 +270,11 @@ AccelerationStructureImpl::AccelerationStructureImpl(
     : AccelerationStructureBaseImpl(deviceImpl, std::move(accelerationStructureHandle)),
       debugTarget(std::move(debugTarget)),
       backingBuffer(std::move(backingBuffer)),
-      builder(std::move(builder)) {}
+      builder(std::move(builder)) {
+    if (builder->getFlags().contains(tp::AccelerationStructureFlag::AllowCompaction)) {
+        deviceImpl->getQueryManager()->createAccelerationStructureQueriesKHR({ &compactedSizeQuery });
+    }
+}
 
 AccelerationStructureImpl& AccelerationStructureImpl::getAccelerationStructureImpl(
     const AccelerationStructureView& asView) {

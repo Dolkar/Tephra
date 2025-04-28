@@ -83,17 +83,17 @@ struct AABBGeometrySetup {
 
 struct AccelerationStructureSetup {
     AccelerationStructureType type;
-    AccelerationStructureBuildFlagMask buildFlags;
+    AccelerationStructureFlagMask flags;
     InstanceGeometrySetup instanceGeometry;
     ArrayView<const TriangleGeometrySetup> triangleGeometries;
     ArrayView<const AABBGeometrySetup> aabbGeometries;
 
     static AccelerationStructureSetup TopLevel(
-        AccelerationStructureBuildFlagMask buildFlags,
+        AccelerationStructureFlagMask flags,
         InstanceGeometrySetup instanceGeometry);
 
     static AccelerationStructureSetup BottomLevel(
-        AccelerationStructureBuildFlagMask buildFlags,
+        AccelerationStructureFlagMask flags,
         ArrayView<const TriangleGeometrySetup> triangleGeometries,
         ArrayView<const AABBGeometrySetup> aabbGeometries);
 };

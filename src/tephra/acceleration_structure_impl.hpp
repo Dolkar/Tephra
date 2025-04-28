@@ -3,12 +3,22 @@
 #include "common_impl.hpp"
 #include <tephra/acceleration_structure.hpp>
 #include <tephra/buffer.hpp>
+#include <tephra/query.hpp>
 #include <memory.h>
 
 namespace tp {
 
 struct StoredAccelerationStructureBuildInfo;
 class StoredBufferView;
+
+// Query for retrieving acceleration structure information, internal only
+class AccelerationStructureQueryKHR : public BaseQuery {
+public:
+    /// Creates a null timestamp query
+    AccelerationStructureQueryKHR() : BaseQuery() {}
+
+    AccelerationStructureQueryKHR(QueryManager* parentManager, Handle handle) : BaseQuery(parentManager, handle) {}
+};
 
 // Stores information needed to build or update an acceleration structure
 class AccelerationStructureBuilder {
@@ -21,6 +31,10 @@ public:
 
     AccelerationStructureType getType() const {
         return type;
+    }
+
+    AccelerationStructureFlagMask getFlags() const {
+        return flags;
     }
 
     uint64_t getStorageSize() const {
@@ -70,7 +84,7 @@ private:
         AccelerationStructureBuildMode buildMode = AccelerationStructureBuildMode::Build) const;
 
     AccelerationStructureType type;
-    AccelerationStructureBuildFlagMask buildFlags;
+    AccelerationStructureFlagMask flags;
     std::vector<VkAccelerationStructureGeometryKHR> vkGeometries;
     std::vector<uint32_t> maxPrimitiveCounts;
     VkAccelerationStructureBuildSizesInfoKHR vkBuildSizes;
@@ -121,6 +135,10 @@ public:
         return backingBuffer->getDefaultView();
     }
 
+    const AccelerationStructureQueryKHR& getCompactedSizeQuery() const {
+        return compactedSizeQuery;
+    }
+
     std::shared_ptr<AccelerationStructureBuilder>& getBuilder() {
         return builder;
     }
@@ -130,6 +148,7 @@ public:
 private:
     DebugTarget debugTarget;
     OwningPtr<Buffer> backingBuffer;
+    AccelerationStructureQueryKHR compactedSizeQuery;
     // Shared ptr because jobs need temporary ownership of the builder
     std::shared_ptr<AccelerationStructureBuilder> builder;
 };

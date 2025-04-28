@@ -17,7 +17,10 @@ constexpr const char* JobLocalImageTypeName = "JobLocalImage";
 constexpr const char* JobLocalAccelerationStructureTypeName = "JobLocalAccelerationStructure";
 
 template <typename T, typename... TArgs>
-T* recordCommand(JobRecordStorage& storage, JobCommandTypes type, TArgs&&... args) {
+std::pair<JobRecordStorage::CommandMetadata*, T*> allocateCommand(
+    JobRecordStorage& storage,
+    JobCommandTypes type,
+    TArgs&&... args) {
     std::size_t allocSize = sizeof(JobRecordStorage::CommandMetadata) + sizeof(T);
     ArrayView<std::byte> bytes = storage.cmdBuffer.allocate(allocSize);
 
@@ -25,24 +28,28 @@ T* recordCommand(JobRecordStorage& storage, JobCommandTypes type, TArgs&&... arg
     metadataPtr->commandType = type;
     metadataPtr->nextCommand = nullptr;
 
-    if (storage.lastCommandPtr != nullptr) {
-        storage.lastCommandPtr->nextCommand = metadataPtr;
-    }
-    storage.lastCommandPtr = metadataPtr;
-
-    if (storage.commandCount == 0) {
-        storage.firstCommandPtr = metadataPtr;
-    }
-    storage.commandCount++;
-
     auto cmdDataPtr = bytes.data() + sizeof(JobRecordStorage::CommandMetadata);
-    return new (cmdDataPtr) T(std::forward<TArgs>(args)...);
+    return { metadataPtr, new (cmdDataPtr) T(std::forward<TArgs>(args)...) };
+}
+
+template <typename T, typename... TArgs>
+T* recordCommand(JobRecordStorage& storage, JobCommandTypes type, TArgs&&... args) {
+    auto [metadataPtr, cmdDataPtr] = allocateCommand<T>(storage, type, std::forward<TArgs>(args)...);
+    storage.addCommand(metadataPtr);
+    return cmdDataPtr;
+}
+
+template <typename T, typename... TArgs>
+T* recordDelayedCommand(JobRecordStorage& storage, JobCommandTypes type, TArgs&&... args) {
+    auto [metadataPtr, cmdDataPtr] = allocateCommand<T>(storage, type, std::forward<TArgs>(args)...);
+    storage.addDelayedCommand(metadataPtr);
+    return cmdDataPtr;
 }
 
 inline void markResourceUsage(JobData* jobData, const BufferView& buffer, bool isExport = false) {
     TEPHRA_ASSERT(!buffer.isNull());
     if (buffer.viewsJobLocalBuffer()) {
-        jobData->resources.localBuffers.markBufferUsage(buffer, jobData->record.commandCount);
+        jobData->resources.localBuffers.markBufferUsage(buffer, jobData->record.nextCommandIndex);
         if (isExport) {
             jobData->resources.localBuffers.markBufferUsage(buffer, ~0);
         }
@@ -52,7 +59,7 @@ inline void markResourceUsage(JobData* jobData, const BufferView& buffer, bool i
 inline void markResourceUsage(JobData* jobData, const ImageView& image, bool isExport = false) {
     TEPHRA_ASSERT(!image.isNull());
     if (image.viewsJobLocalImage()) {
-        jobData->resources.localImages.markImageUsage(image, jobData->record.commandCount);
+        jobData->resources.localImages.markImageUsage(image, jobData->record.nextCommandIndex);
         if (isExport) {
             jobData->resources.localImages.markImageUsage(image, ~0);
         }
@@ -74,6 +81,13 @@ Job::Job(JobData* jobData, DebugTarget debugTarget) : debugTarget(std::move(debu
 }
 
 void Job::finalize() {
+    // Patch delayed commands to the end of the command list
+    if (jobData->record.firstDelayedCommandPtr != nullptr) {
+        TEPHRA_ASSERT(jobData->record.lastCommandPtr != nullptr);
+        jobData->record.lastCommandPtr->nextCommand = jobData->record.firstDelayedCommandPtr;
+        jobData->record.lastCommandPtr = jobData->record.lastDelayedCommandPtr;
+    }
+
     if (debugTarget->getObjectName() != nullptr)
         cmdEndDebugLabel();
 }
@@ -525,8 +539,19 @@ void Job::vkCmdImportExternalResource(
         vkImageLayout);
 }
 
+// Command only used internally after AS build
+inline void cmdWriteAccelerationStructureSize(tp::JobData* jobData, const AccelerationStructureView& view) {
+    const AccelerationStructureQueryKHR& query = AccelerationStructureImpl::getAccelerationStructureImpl(view)
+                                                     .getCompactedSizeQuery();
+
+    // Record it as a delayed command
+    markResourceUsage(jobData, view.getBackingBufferView(), true);
+    recordDelayedCommand<JobRecordStorage::WriteAccelerationStructureSizeData>(
+        jobData->record, JobCommandTypes::WriteAccelerationStructureSize, QueryRecorder::getQueryHandle(query), view);
+};
+
 using AccelerationStructureBuildData = JobRecordStorage::BuildAccelerationStructuresData::SingleBuild;
-inline AccelerationStructureBuildData prepareASBuildData(
+inline AccelerationStructureBuildData prepareASBuild(
     tp::JobData* jobData,
     const AccelerationStructureBuildInfo& buildInfo,
     const AccelerationStructureBuildIndirectInfo& indirectInfo) {
@@ -563,7 +588,7 @@ inline AccelerationStructureBuildData prepareASBuildData(
     if (!buildInfo.dstView.viewsJobLocalAccelerationStructure()) {
         // Borrow ownership of the builder of the used persistent AS into a separate storage
         auto& asImpl = AccelerationStructureImpl::getAccelerationStructureImpl(buildInfo.dstView);
-        jobData->record.usedASBuilders.push_back(asImpl.getBuilder());
+        jobData->resources.usedASBuilders.push_back(asImpl.getBuilder());
     }
 
     // Allocate scratch buffer for the build
@@ -605,11 +630,20 @@ void Job::cmdBuildAccelerationStructuresKHR(ArrayParameter<const AccelerationStr
     auto buildsData = jobData->record.cmdBuffer.allocate<AccelerationStructureBuildData>(buildInfos.size());
     auto unusedIndirectInfo = AccelerationStructureBuildIndirectInfo({}, {});
     for (int i = 0; i < buildInfos.size(); i++) {
-        buildsData[i] = prepareASBuildData(jobData, buildInfos[i], unusedIndirectInfo);
+        buildsData[i] = prepareASBuild(jobData, buildInfos[i], unusedIndirectInfo);
     }
 
     recordCommand<JobRecordStorage::BuildAccelerationStructuresData>(
         jobData->record, JobCommandTypes::BuildAccelerationStructures, buildsData);
+
+    // We also want to query the compacted size for acceleration structures that support it after building
+    // Leaving it for the end of the job will help avoid needless barriers
+    for (int i = 0; i < buildInfos.size(); i++) {
+        if (buildInfos[i].mode == tp::AccelerationStructureBuildMode::Build &&
+            buildsData[i].builder->getFlags().contains(tp::AccelerationStructureFlag::AllowCompaction)) {
+            cmdWriteAccelerationStructureSize(jobData, buildInfos[i].dstView);
+        }
+    }
 }
 
 void Job::cmdBuildAccelerationStructuresIndirectKHR(
@@ -637,11 +671,20 @@ void Job::cmdBuildAccelerationStructuresIndirectKHR(
 
     auto buildsData = jobData->record.cmdBuffer.allocate<AccelerationStructureBuildData>(buildInfos.size());
     for (int i = 0; i < buildInfos.size(); i++) {
-        buildsData[i] = prepareASBuildData(jobData, buildInfos[i], indirectInfos[i]);
+        buildsData[i] = prepareASBuild(jobData, buildInfos[i], indirectInfos[i]);
     }
 
     recordCommand<JobRecordStorage::BuildAccelerationStructuresData>(
         jobData->record, JobCommandTypes::BuildAccelerationStructuresIndirect, buildsData);
+
+    // We also want to query the compacted size for acceleration structures that support it after building
+    // Leaving it for the end of the job will help avoid needless barriers
+    for (int i = 0; i < buildInfos.size(); i++) {
+        if (buildInfos[i].mode == tp::AccelerationStructureBuildMode::Build &&
+            buildsData[i].builder->getFlags().contains(tp::AccelerationStructureFlag::AllowCompaction)) {
+            cmdWriteAccelerationStructureSize(jobData, buildInfos[i].dstView);
+        }
+    }
 }
 
 void Job::cmdCopyAccelerationStructureKHR(

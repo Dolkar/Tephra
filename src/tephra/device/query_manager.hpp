@@ -2,6 +2,7 @@
 
 #include "../utils/object_pool.hpp"
 #include "../common_impl.hpp"
+#include "../acceleration_structure_impl.hpp"
 
 #include <tephra/device.hpp>
 #include <tephra/query.hpp>
@@ -16,6 +17,7 @@ class QueryBatchPool;
 enum class QueryType {
     Timestamp,
     Render,
+    AccelerationStructureInfoKHR,
 };
 
 // Represents data for a reusable Tephra Query
@@ -29,8 +31,6 @@ struct QueryRecord {
     QueryBatchPool* batchPool;
     // Unsorted list of results
     std::vector<QueryResult> resultsHistory;
-    // How many results can be stored
-    uint32_t maxResultsHistorySize;
     // The index of the most recent result
     uint32_t lastResultIndex;
     // When recording a scoped query, stores the pool of the begin query
@@ -42,7 +42,6 @@ struct QueryRecord {
 
     // Translates query to Vulkan values
     std::pair<VkQueryType, VkQueryPipelineStatisticFlagBits> decodeVkQueryType() const;
-
     // Updates itself from Vulkan query sample data
     void updateResults(ArrayView<uint64_t> sampleData, const JobSemaphore& semaphore);
 };
@@ -66,15 +65,12 @@ public:
     uint32_t getRemainingSampleCount() const {
         return MaxSampleCount - usedCount;
     }
-
     // Allocates a range of consecutive samples for a single query (more than one is needed for multiview)
     // Returns the index of the first one
     uint32_t allocateSamples(QueryRecord* record, uint32_t count);
-
     // Reads back data from the queries in this batch (assuming it is ready and the given semaphore is signalled),
     // updating the records
     void readback(DeviceContainer* deviceImpl, const JobSemaphore& semaphore);
-
     // Reset without reading anything back
     void clear() {
         usedCount = 0;
@@ -150,9 +146,14 @@ public:
         PipelineStage stage,
         uint32_t multiviewViewCount);
 
+    void sampleAccelerationStructureQueriesKHR(
+        const VulkanCommandInterface* vkiCommands,
+        VkCommandBufferHandle vkCommandBuffer,
+        ArrayView<const AccelerationStructureQueryKHR* const> queries,
+        ArrayView<const AccelerationStructureView* const> asViews);
+
     // Adds all used batches to the list to be submitted and resets itself
     void retrieveBatchesAndReset(ScratchVector<QueryBatch*>& batchList);
-
     // Reset any used batches that may have been used, but not submitted
     void reset();
 
@@ -182,14 +183,13 @@ public:
         ArrayParameter<const RenderQueryType> queryTypes,
         ArrayParameter<RenderQuery* const> queries);
 
-    void queueFreeQuery(const QueryHandle& query);
+    void createAccelerationStructureQueriesKHR(ArrayParameter<AccelerationStructureQueryKHR* const> queries);
 
+    void queueFreeQuery(const QueryHandle& query);
     // Recycles batches that weren't submitted
     void freeDiscardedBatches(ArrayParameter<QueryBatch*> batches);
-
     // Register submitted batches for readback
     void registerBatches(ArrayParameter<QueryBatch*> batches, const JobSemaphore& semaphore);
-
     // Reads out all processed query samples and performs cleanup
     void update();
 

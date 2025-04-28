@@ -37,7 +37,8 @@ enum class JobCommandTypes {
     WriteTimestamp,
     BuildAccelerationStructures,
     BuildAccelerationStructuresIndirect,
-    CopyAccelerationStructure
+    CopyAccelerationStructure,
+    WriteAccelerationStructureSize,
 };
 
 struct JobResourceStorage {
@@ -46,6 +47,9 @@ struct JobResourceStorage {
     JobLocalAccelerationStructures localAccelerationStructures;
     JobLocalDescriptorSets localDescriptorSets;
     std::vector<CommandPool*> commandPools;
+    // TODO: We need to extend the lifetime of AS builders used in this job, but DataBlockAllocator currently
+    // doesn't call destructors of the type-erased blocks
+    std::vector<std::shared_ptr<AccelerationStructureBuilder>> usedASBuilders;
 
     explicit JobResourceStorage(JobResourcePoolContainer* resourcePoolImpl);
 
@@ -216,6 +220,14 @@ struct JobRecordStorage {
         WriteTimestampData(const QueryHandle& query, PipelineStage stage) : query(query), stage(stage) {}
     };
 
+    struct WriteAccelerationStructureSizeData {
+        QueryHandle query;
+        StoredAccelerationStructureView view;
+
+        WriteAccelerationStructureSizeData(const QueryHandle& query, AccelerationStructureView view)
+            : query(query), view(view) {}
+    };
+
     // Shared for regular and indirect build commands
     struct BuildAccelerationStructuresData {
         struct SingleBuild {
@@ -245,20 +257,22 @@ struct JobRecordStorage {
             : srcView(srcView), dstView(dstView) {}
     };
 
+    void addCommand(JobRecordStorage::CommandMetadata* commandPtr);
+    void addDelayedCommand(JobRecordStorage::CommandMetadata* commandPtr);
+
     void clear();
 
-    uint64_t commandCount = 0;
+    uint64_t nextCommandIndex = 0;
     DataBlockAllocator<> cmdBuffer;
     CommandMetadata* firstCommandPtr = nullptr;
     CommandMetadata* lastCommandPtr = nullptr;
+    CommandMetadata* firstDelayedCommandPtr = nullptr;
+    CommandMetadata* lastDelayedCommandPtr = nullptr;
 
     std::size_t computePassCount = 0;
     std::deque<ComputePass> computePassStorage;
     std::size_t renderPassCount = 0;
     std::deque<RenderPass> renderPassStorage;
-    // TODO: We need to extend the lifetime of AS builders used in this job, but DataBlockAllocator currently
-    // doesn't call destructors of the type-erased blocks
-    std::vector<std::shared_ptr<AccelerationStructureBuilder>> usedASBuilders;
 };
 
 struct JobSemaphoreStorage {

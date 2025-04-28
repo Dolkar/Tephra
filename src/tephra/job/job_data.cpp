@@ -15,19 +15,44 @@ void JobResourceStorage::clear() {
     localImages.clear();
     localAccelerationStructures.clear();
     localDescriptorSets.clear();
+    usedASBuilders.clear();
     // Command pools must be released explicitly back to their pool, a clear won't do
     TEPHRA_ASSERT(commandPools.empty());
 }
 
+void JobRecordStorage::addCommand(JobRecordStorage::CommandMetadata* commandPtr) {
+    if (lastCommandPtr != nullptr) {
+        lastCommandPtr->nextCommand = commandPtr;
+    }
+    lastCommandPtr = commandPtr;
+
+    if (firstCommandPtr == nullptr) {
+        firstCommandPtr = commandPtr;
+    }
+    nextCommandIndex++;
+}
+
+void JobRecordStorage::addDelayedCommand(JobRecordStorage::CommandMetadata* commandPtr) {
+    if (lastDelayedCommandPtr != nullptr) {
+        lastDelayedCommandPtr->nextCommand = commandPtr;
+    }
+    lastDelayedCommandPtr = commandPtr;
+
+    if (firstDelayedCommandPtr == nullptr) {
+        firstDelayedCommandPtr = commandPtr;
+    }
+}
+
 void JobRecordStorage::clear() {
-    commandCount = 0;
+    nextCommandIndex = 0;
     cmdBuffer.clear();
     firstCommandPtr = nullptr;
     lastCommandPtr = nullptr;
+    firstDelayedCommandPtr = nullptr;
+    lastDelayedCommandPtr = nullptr;
 
     computePassCount = 0;
     renderPassCount = 0;
-    usedASBuilders.clear();
 }
 
 JobData::JobData(JobResourcePoolContainer* resourcePoolImpl)

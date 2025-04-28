@@ -28,6 +28,10 @@ const ArrayView<const VkPipelineStageFlags> GraphicsPipelineStages{ GraphicsPipe
                                                                     GraphicsPipelineStageCount };
 const VkPipelineStageFlags GraphicsPipelineStagesMask = combineFlags(GraphicsPipelineStages);
 
+VkPipelineStageFlags getGraphicsPipelineStageMask() {
+    return GraphicsPipelineStagesMask;
+}
+
 const uint64_t ComputePipelineStageCount = 2;
 const VkPipelineStageFlags ComputePipelineStagesArray[ComputePipelineStageCount] = {
     VK_PIPELINE_STAGE_DRAW_INDIRECT_BIT,
@@ -36,6 +40,10 @@ const VkPipelineStageFlags ComputePipelineStagesArray[ComputePipelineStageCount]
 const ArrayView<const VkPipelineStageFlags> ComputePipelineStages{ ComputePipelineStagesArray,
                                                                    ComputePipelineStageCount };
 const VkPipelineStageFlags ComputePipelineStagesMask = combineFlags(ComputePipelineStages);
+
+VkPipelineStageFlags getComputePipelineStageMask() {
+    return ComputePipelineStagesMask;
+}
 
 VkBufferMemoryBarrier BufferDependency::toMemoryBarrier() const {
     TEPHRA_ASSERT((srcQueueFamilyIndex == VK_QUEUE_FAMILY_IGNORED) == (srcQueueFamilyIndex == dstQueueFamilyIndex));

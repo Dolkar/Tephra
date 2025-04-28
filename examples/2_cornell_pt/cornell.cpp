@@ -254,7 +254,7 @@ void CornellExample::prepareBLAS() {
             tp::GeometryFlag::Opaque);
 
         auto blasSetup = tp::AccelerationStructureSetup::BottomLevel(
-            tp::AccelerationStructureBuildFlag::PreferFastTrace, tp::viewOne(triSetup), {});
+            tp::AccelerationStructureFlag::PreferFastTrace, tp::viewOne(triSetup), {});
 
         std::string name = "geom" + std::to_string(i);
         auto blas = device->allocateAccelerationStructureKHR(blasSetup, name.c_str());
@@ -381,7 +381,7 @@ tp::AccelerationStructureView CornellExample::prepareTLAS(tp::Job& renderJob) {
 
     auto instanceSetup = tp::InstanceGeometrySetup(instanceCount, tp::GeometryFlag::Opaque);
     auto tlasSetup = tp::AccelerationStructureSetup::TopLevel(
-        tp::AccelerationStructureBuildFlag::PreferFastTrace, instanceSetup);
+        tp::AccelerationStructureFlag::PreferFastTrace, instanceSetup);
     auto tlas = renderJob.allocateLocalAccelerationStructureKHR(tlasSetup, "tlas");
 
     // Upload instance data. Again, very small, so cmdUpdateBuffer suffices
