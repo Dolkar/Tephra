@@ -378,7 +378,7 @@ void CornellExample::prepareRayQueryPipeline() {
 
 tp::AccelerationStructureView CornellExample::prepareTLAS(tp::Job& renderJob) {
     // Form a list of instances. One instance = one BLAS
-    int instanceCount = blasList.size();
+    int instanceCount = static_cast<int>(blasList.size());
     std::vector<VkAccelerationStructureInstanceKHR> vkInstances;
 
     for (int i = 0; i < instanceCount; i++) {

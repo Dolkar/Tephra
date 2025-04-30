@@ -140,6 +140,7 @@ AccelerationStructureView Job::allocateLocalAccelerationStructureKHR(
         asBuilder->getStorageSize(),
         BufferUsageMask::None(),
         VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR,
+        0,
         256);
     auto backingBuffer = jobData->resources.localBuffers.acquireNewBuffer(
         backingBufferSetup, DebugTarget::makeSilent());
@@ -540,7 +541,7 @@ void Job::vkCmdImportExternalResource(
 }
 
 // Command only used internally after AS build
-inline void cmdWriteAccelerationStructureSizes(JobData* jobData, ArrayView<AccelerationStructureView> views) {
+inline void cmdWriteAccelerationStructureSizes(JobData* jobData, ArrayParameter<const AccelerationStructureView> views) {
     ScratchVector<QueryHandle> queries;
     queries.resize(views.size());
 
@@ -607,7 +608,7 @@ inline AccelerationStructureBuildData prepareASBuild(
     uint64_t scratchBufferSize = builder.getScratchBufferSize(buildInfo.mode);
 
     auto scratchBufferSetup = BufferSetup(
-        scratchBufferSize, BufferUsage::StorageBuffer | BufferUsage::DeviceAddress, 0, 256);
+        scratchBufferSize, BufferUsage::StorageBuffer | BufferUsage::DeviceAddress, 0, 0, 256);
     BufferView scratchBuffer = jobData->resources.localBuffers.acquireNewBuffer(
         scratchBufferSetup, DebugTarget::makeSilent());
 
@@ -633,7 +634,7 @@ void Job::cmdBuildAccelerationStructuresKHR(ArrayParameter<const AccelerationStr
     TEPHRA_DEBUG_SET_CONTEXT(debugTarget.get(), "cmdBuildAccelerationStructuresKHR", nullptr);
 
     if constexpr (TephraValidationEnabled) {
-        for (int i = 0; i < buildInfos.size(); i++) {
+        for (std::size_t i = 0; i < buildInfos.size(); i++) {
             auto& builder = AccelerationStructureBuilder::getBuilderFromView(buildInfos[i].dstView);
             builder.validateBuildInfo(buildInfos[i], i);
         }
@@ -641,7 +642,7 @@ void Job::cmdBuildAccelerationStructuresKHR(ArrayParameter<const AccelerationStr
 
     auto buildsData = jobData->record.cmdBuffer.allocate<AccelerationStructureBuildData>(buildInfos.size());
     auto unusedIndirectInfo = AccelerationStructureBuildIndirectInfo({}, {});
-    for (int i = 0; i < buildInfos.size(); i++) {
+    for (std::size_t i = 0; i < buildInfos.size(); i++) {
         buildsData[i] = prepareASBuild(jobData, buildInfos[i], unusedIndirectInfo);
     }
 
@@ -651,7 +652,7 @@ void Job::cmdBuildAccelerationStructuresKHR(ArrayParameter<const AccelerationStr
     // We also want to query the compacted size for acceleration structures that support it after building
     // Leaving it for the end of the job will help avoid needless barriers
     ScratchVector<AccelerationStructureView> toCompact;
-    for (int i = 0; i < buildInfos.size(); i++) {
+    for (std::size_t i = 0; i < buildInfos.size(); i++) {
         if (buildInfos[i].mode == tp::AccelerationStructureBuildMode::Build &&
             buildsData[i].builder->getFlags().contains(tp::AccelerationStructureFlag::AllowCompaction)) {
             toCompact.push_back(buildInfos[i].dstView);
@@ -678,14 +679,14 @@ void Job::cmdBuildAccelerationStructuresIndirectKHR(
                 ") arrays do not match.");
         }
 
-        for (int i = 0; i < buildInfos.size(); i++) {
+        for (std::size_t i = 0; i < buildInfos.size(); i++) {
             auto& builder = AccelerationStructureBuilder::getBuilderFromView(buildInfos[i].dstView);
             builder.validateBuildIndirectInfo(buildInfos[i], indirectInfos[i], i);
         }
     }
 
     auto buildsData = jobData->record.cmdBuffer.allocate<AccelerationStructureBuildData>(buildInfos.size());
-    for (int i = 0; i < buildInfos.size(); i++) {
+    for (std::size_t i = 0; i < buildInfos.size(); i++) {
         buildsData[i] = prepareASBuild(jobData, buildInfos[i], indirectInfos[i]);
     }
 
@@ -695,7 +696,7 @@ void Job::cmdBuildAccelerationStructuresIndirectKHR(
     // We also want to query the compacted size for acceleration structures that support it after building
     // Leaving it for the end of the job will help avoid needless barriers
     ScratchVector<AccelerationStructureView> toCompact;
-    for (int i = 0; i < buildInfos.size(); i++) {
+    for (std::size_t i = 0; i < buildInfos.size(); i++) {
         if (buildInfos[i].mode == tp::AccelerationStructureBuildMode::Build &&
             buildsData[i].builder->getFlags().contains(tp::AccelerationStructureFlag::AllowCompaction)) {
             toCompact.push_back(buildInfos[i].dstView);

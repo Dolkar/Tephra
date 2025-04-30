@@ -337,6 +337,10 @@ void prepareBarriers(
         case JobCommandTypes::BuildAccelerationStructuresIndirect: {
             // Flush export operations for resources that can be used for acceleration structure build
             resourceExportHandler.flushExports(cmdIndex, VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR);
+
+            // Process regular accesses
+            identifyCommandResourceAccesses(cmd, newBufferAccesses, newImageAccesses);
+            processAccesses(cmdIndex, view(newBufferAccesses), view(newImageAccesses), barriers, queueSyncState);
             break;
         }
         default: {

@@ -385,6 +385,7 @@ OwningPtr<AccelerationStructure> Device::allocateAccelerationStructureKHR(
         asBuilder->getStorageSize(),
         BufferUsageMask::None(),
         VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT,
+        0,
         256);
     auto [bufferHandleLifeguard, allocationHandleLifeguard] = deviceImpl->getMemoryAllocator()->allocateBuffer(
         backingBufferSetup, MemoryPreference::Device);
@@ -394,6 +395,7 @@ OwningPtr<AccelerationStructure> Device::allocateAccelerationStructureKHR(
         std::move(bufferHandleLifeguard),
         std::move(allocationHandleLifeguard),
         DebugTarget::makeSilent()));
+    deviceImpl->getLogicalDevice()->setObjectDebugName(getOwnedPtr(backingBuffer)->vkGetBufferHandle(), debugName);
 
     auto accelerationStructureLifeguard = vkMakeHandleLifeguard(
         deviceImpl->getLogicalDevice()->createAccelerationStructureKHR(setup.type, backingBuffer->getDefaultView()));
@@ -405,6 +407,8 @@ OwningPtr<AccelerationStructure> Device::allocateAccelerationStructureKHR(
         std::move(accelerationStructureLifeguard),
         std::move(backingBuffer),
         std::move(debugTarget)));
+    deviceImpl->getLogicalDevice()->setObjectDebugName(
+        getOwnedPtr(accelerationStructure)->vkGetAccelerationStructureHandle(), debugName);
 
     return accelerationStructure;
 }
@@ -458,6 +462,7 @@ OwningPtr<AccelerationStructure> Device::allocateCompactedAccelerationStructureK
         sizeQuery.getLastResult().value,
         BufferUsageMask::None(),
         VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT,
+        0,
         256);
     auto [bufferHandleLifeguard, allocationHandleLifeguard] = deviceImpl->getMemoryAllocator()->allocateBuffer(
         backingBufferSetup, MemoryPreference::Device);
@@ -467,6 +472,7 @@ OwningPtr<AccelerationStructure> Device::allocateCompactedAccelerationStructureK
         std::move(bufferHandleLifeguard),
         std::move(allocationHandleLifeguard),
         DebugTarget::makeSilent()));
+    deviceImpl->getLogicalDevice()->setObjectDebugName(getOwnedPtr(backingBuffer)->vkGetBufferHandle(), debugName);
 
     auto accelerationStructureLifeguard = vkMakeHandleLifeguard(
         deviceImpl->getLogicalDevice()->createAccelerationStructureKHR(
@@ -481,6 +487,8 @@ OwningPtr<AccelerationStructure> Device::allocateCompactedAccelerationStructureK
         std::move(accelerationStructureLifeguard),
         std::move(backingBuffer),
         std::move(debugTarget)));
+    deviceImpl->getLogicalDevice()->setObjectDebugName(
+        getOwnedPtr(accelerationStructure)->vkGetAccelerationStructureHandle(), debugName);
 
     return accelerationStructure;
 }

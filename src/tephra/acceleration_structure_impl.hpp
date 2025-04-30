@@ -61,12 +61,12 @@ public:
         StoredAccelerationStructureBuildInfo& buildInfo,
         StoredBufferView& scratchBuffer);
 
-    void validateBuildInfo(const AccelerationStructureBuildInfo& buildInfo, int buildIndex) const;
+    void validateBuildInfo(const AccelerationStructureBuildInfo& buildInfo, std::size_t buildIndex) const;
 
     void validateBuildIndirectInfo(
         const AccelerationStructureBuildInfo& buildInfo,
         const AccelerationStructureBuildIndirectInfo& indirectInfo,
-        int buildIndex) const;
+        std::size_t buildIndex) const;
 
     void reset(DeviceContainer* deviceImpl, const AccelerationStructureSetup& setup);
 

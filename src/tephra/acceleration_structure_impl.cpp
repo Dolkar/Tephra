@@ -290,8 +290,9 @@ AccelerationStructureImpl& AccelerationStructureImpl::getAccelerationStructureIm
 
 // --- Validation ---
 
-void AccelerationStructureBuilder::validateBuildInfo(const AccelerationStructureBuildInfo& buildInfo, int buildIndex)
-    const {
+void AccelerationStructureBuilder::validateBuildInfo(
+    const AccelerationStructureBuildInfo& buildInfo,
+    std::size_t buildIndex) const {
     TEPHRA_ASSERT(TephraValidationEnabled);
 
     // Check for proper buffer size alignments
@@ -405,7 +406,7 @@ void AccelerationStructureBuilder::validateBuildInfo(const AccelerationStructure
 void AccelerationStructureBuilder::validateBuildIndirectInfo(
     const AccelerationStructureBuildInfo& buildInfo,
     const AccelerationStructureBuildIndirectInfo& indirectInfo,
-    int buildIndex) const {
+    std::size_t buildIndex) const {
     TEPHRA_ASSERT(TephraValidationEnabled);
 
     // Should be caught by Vulkan validation, but would crash our validation
