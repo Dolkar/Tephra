@@ -45,7 +45,7 @@ VkAccelerationStructureBuildGeometryInfoKHR AccelerationStructureBuilder::prepar
         std::size_t geomIndex = 0;
         for (StoredTriangleGeometryBuildInfo& triInfo : buildInfo.triangleGeometries) {
             // Calculate triangle count
-            auto& triangleGeom = vkGeometries[geomIndex].geometry.triangles;
+            const auto& triangleGeom = vkGeometries[geomIndex].geometry.triangles;
 
             std::size_t triangleCount;
             if (!triInfo.indexBuffer.isNull()) {
@@ -131,9 +131,7 @@ void AccelerationStructureBuilder::reset(DeviceContainer* deviceImpl, const Acce
             // Not set yet:
             geom.geometry.triangles.vertexData = { VkDeviceAddress(0) };
             geom.geometry.triangles.indexData = { VkDeviceAddress(0) };
-
-            // Set to default value, but overridable:
-            geom.geometry.triangles.vertexStride = getFormatClassProperties(triSetup.vertexFormat).texelBlockBytes;
+            geom.geometry.triangles.vertexStride = 0;
 
             maxPrimitiveCounts.emplace_back(triSetup.maxTriangleCount);
         }
@@ -205,8 +203,11 @@ VkAccelerationStructureBuildGeometryInfoKHR AccelerationStructureBuilder::prepar
             triGeom.vertexData = { getCheckedDeviceAddress(triInfo.vertexBuffer) };
             if (triInfo.vertexStride != 0)
                 triGeom.vertexStride = triInfo.vertexStride;
+            else
+                triGeom.vertexStride = getFormatClassProperties(vkCastConvertibleEnum(triGeom.vertexFormat))
+                                           .texelBlockBytes;
 
-            // Optional buffer views, but getDeviceAddress on a null view returns 0
+            // Optional buffer views, but getCheckedDeviceAddress on a null view returns 0
             triGeom.indexData = { getCheckedDeviceAddress(triInfo.indexBuffer) };
             triGeom.transformData = { getCheckedDeviceAddress(triInfo.transformBuffer) };
             geomIndex++;
@@ -270,10 +271,14 @@ AccelerationStructureImpl::AccelerationStructureImpl(
     : AccelerationStructureBaseImpl(deviceImpl, std::move(accelerationStructureHandle)),
       debugTarget(std::move(debugTarget)),
       backingBuffer(std::move(backingBuffer)),
-      builder(std::move(builder)) {
-    if (builder->getFlags().contains(tp::AccelerationStructureFlag::AllowCompaction)) {
+      builder(std::move(builder)) {}
+
+AccelerationStructureQueryKHR& AccelerationStructureImpl::getOrCreateCompactedSizeQuery() {
+    TEPHRA_ASSERT(builder->getFlags().contains(tp::AccelerationStructureFlag::AllowCompaction));
+    if (compactedSizeQuery.isNull()) {
         deviceImpl->getQueryManager()->createAccelerationStructureQueriesKHR({ &compactedSizeQuery });
     }
+    return compactedSizeQuery;
 }
 
 AccelerationStructureImpl& AccelerationStructureImpl::getAccelerationStructureImpl(
@@ -357,7 +362,7 @@ void AccelerationStructureBuilder::validateBuildInfo(const AccelerationStructure
                 std::size_t vertexStride = triInfo.vertexStride;
                 // Default to vertex stride derived from format
                 if (vertexStride == 0)
-                    vertexStride = triGeom.vertexStride;
+                    vertexStride = getFormatClassProperties(vkCastConvertibleEnum(triGeom.vertexFormat)).texelBlockBytes;
 
                 if ((bufferSize % vertexStride) != 0)
                     reportDebugMessage(
@@ -494,7 +499,7 @@ void AccelerationStructureBuilder::validateBuildIndirectInfo(
                 uint64_t vertexStride = triInfo.vertexStride;
                 // Default to vertex stride derived from format
                 if (vertexStride == 0)
-                    vertexStride = triGeom.vertexStride;
+                    vertexStride = getFormatClassProperties(vkCastConvertibleEnum(triGeom.vertexFormat)).texelBlockBytes;
                 maxTriangleCount = bufferSize / (3 * vertexStride);
             }
 

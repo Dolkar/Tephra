@@ -518,7 +518,8 @@ public:
 
     void cmdCopyAccelerationStructureKHR(
         const AccelerationStructureView& srcView,
-        const AccelerationStructureView& dstView);
+        const AccelerationStructureView& dstView,
+        AccelerationStructureCopyMode mode);
 
     TEPHRA_MAKE_NONCOPYABLE(Job);
     TEPHRA_MAKE_MOVABLE(Job);

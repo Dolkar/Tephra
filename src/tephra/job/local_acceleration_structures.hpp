@@ -154,7 +154,12 @@ struct StoredAccelerationStructureBuildInfo {
           instanceGeometry(info.instanceGeometry, accessedViewData),
           triangleGeometries(triangleGeometriesData),
           aabbGeometries(aabbGeometriesData),
-          srcView(info.srcView) {}
+          srcView(info.srcView) {
+        // For update mode, we allow omitting srcView for an in-place update
+        if (mode == AccelerationStructureBuildMode::Update && srcView.isNull()) {
+            dstView = srcView;
+        }
+    }
 };
 
 struct StoredAccelerationStructureBuildIndirectInfo {

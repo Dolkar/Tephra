@@ -604,6 +604,12 @@ enum class AccelerationStructureBuildMode : uint32_t {
 };
 TEPHRA_VULKAN_COMPATIBLE_ENUM(AccelerationStructureBuildMode, VkBuildAccelerationStructureModeKHR);
 
+enum class AccelerationStructureCopyMode : uint32_t {
+    Clone = VK_COPY_ACCELERATION_STRUCTURE_MODE_CLONE_KHR,
+    Compact = VK_COPY_ACCELERATION_STRUCTURE_MODE_COMPACT_KHR,
+};
+TEPHRA_VULKAN_COMPATIBLE_ENUM(AccelerationStructureCopyMode, VkCopyAccelerationStructureModeKHR);
+
 enum class GeometryFlag : uint32_t {
     Opaque = VK_GEOMETRY_OPAQUE_BIT_KHR,
     NoDuplicateAnyHitInvocation = VK_GEOMETRY_NO_DUPLICATE_ANY_HIT_INVOCATION_BIT_KHR,

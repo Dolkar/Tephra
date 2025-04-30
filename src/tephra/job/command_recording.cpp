@@ -290,14 +290,18 @@ void identifyCommandResourceAccesses(
         for (auto& buildData : data->builds) {
             StoredAccelerationStructureBuildInfo& buildInfo = buildData.buildInfo;
             StoredBufferView& dstBuffer = buildInfo.dstView.getBackingBufferView();
+            bool inPlaceUpdate = buildInfo.mode == AccelerationStructureBuildMode::Update &&
+                !buildInfo.srcView.isNull() &&
+                buildInfo.srcView.vkGetAccelerationStructureHandle() ==
+                    buildInfo.dstView.vkGetAccelerationStructureHandle();
 
             VkAccessFlags dstAccess = VK_ACCESS_ACCELERATION_STRUCTURE_WRITE_BIT_KHR;
             // Destination structure could also be read from in case of an in-place update
-            if (buildInfo.mode == AccelerationStructureBuildMode::Update && buildInfo.srcView.isNull())
+            if (inPlaceUpdate)
                 dstAccess |= VK_ACCESS_ACCELERATION_STRUCTURE_READ_BIT_KHR;
             addBufferAccess(bufferAccesses, dstBuffer, { asBuildStage, dstAccess });
 
-            if (!buildInfo.srcView.isNull()) {
+            if (!buildInfo.srcView.isNull() && !inPlaceUpdate) {
                 StoredBufferView& srcBuffer = buildInfo.srcView.getBackingBufferView();
                 addBufferAccess(
                     bufferAccesses, srcBuffer, { asBuildStage, VK_ACCESS_ACCELERATION_STRUCTURE_READ_BIT_KHR });
@@ -345,6 +349,17 @@ void identifyCommandResourceAccesses(
             bufferAccesses,
             data->dstView.getBackingBufferView(),
             { VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR, VK_ACCESS_ACCELERATION_STRUCTURE_WRITE_BIT_KHR });
+        break;
+    }
+    case JobCommandTypes::WriteAccelerationStructureSizes: {
+        auto* data = getCommandData<JobRecordStorage::WriteAccelerationStructureSizesData>(command);
+        for (StoredAccelerationStructureView& view : data->views) {
+            addBufferAccess(
+                bufferAccesses,
+                view.getBackingBufferView(),
+                { VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR,
+                  VK_ACCESS_ACCELERATION_STRUCTURE_READ_BIT_KHR });
+        }
         break;
     }
     case JobCommandTypes::BeginDebugLabel:
@@ -688,9 +703,23 @@ void recordCommand(const JobData* job, PrimaryBufferRecorder& recorder, JobRecor
         copyInfo.pNext = nullptr;
         copyInfo.src = data->srcView.vkGetAccelerationStructureHandle();
         copyInfo.dst = data->dstView.vkGetAccelerationStructureHandle();
-        copyInfo.mode = VK_COPY_ACCELERATION_STRUCTURE_MODE_CLONE_KHR;
+        copyInfo.mode = vkCastConvertibleEnum(data->mode);
 
         vkiCommands.cmdCopyAccelerationStructureKHR(recorder.requestBuffer(), &copyInfo);
+        break;
+    }
+    case JobCommandTypes::WriteAccelerationStructureSizes: {
+        TEPHRA_ASSERT(vkiCommands.cmdWriteAccelerationStructuresPropertiesKHR != nullptr);
+        auto* data = getCommandData<JobRecordStorage::WriteAccelerationStructureSizesData>(command);
+
+        ScratchVector<VkAccelerationStructureHandleKHR> vkHandles;
+        vkHandles.reserve(data->views.size());
+        for (StoredAccelerationStructureView& view : data->views) {
+            vkHandles.push_back(view.vkGetAccelerationStructureHandle());
+        }
+
+        recorder.getQueryRecorder().sampleAccelerationStructureQueriesKHR(
+            &vkiCommands, recorder.requestBuffer(), data->queries, view(vkHandles));
         break;
     }
     case JobCommandTypes::ExportBuffer:

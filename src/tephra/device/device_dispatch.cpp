@@ -409,6 +409,82 @@ OwningPtr<AccelerationStructure> Device::allocateAccelerationStructureKHR(
     return accelerationStructure;
 }
 
+OwningPtr<AccelerationStructure> Device::allocateCompactedAccelerationStructureKHR(
+    const AccelerationStructureView& srcAccelerationStructure,
+    const char* debugName) {
+    auto deviceImpl = static_cast<DeviceContainer*>(this);
+    TEPHRA_DEBUG_SET_CONTEXT(deviceImpl->getDebugTarget(), "allocateCompactedAccelerationStructureKHR", debugName);
+
+    if constexpr (TephraValidationEnabled) {
+        if (srcAccelerationStructure.isNull()) {
+            reportDebugMessage(
+                DebugMessageSeverity::Error,
+                DebugMessageType::Validation,
+                "The 'srcAccelerationStructure' parameter is null.");
+        }
+    }
+
+    auto& srcAccelerationStructureImpl = AccelerationStructureImpl::getAccelerationStructureImpl(
+        srcAccelerationStructure);
+    auto& srcBuilder = *srcAccelerationStructureImpl.getBuilder();
+    auto& sizeQuery = srcAccelerationStructureImpl.getOrCreateCompactedSizeQuery();
+    if (debugName == nullptr)
+        debugName = srcAccelerationStructureImpl.getDebugTarget()->getObjectName();
+
+    if constexpr (TephraValidationEnabled) {
+        const char* srcDebugName = srcAccelerationStructureImpl.getDebugTarget()->getObjectName();
+        if (srcDebugName == nullptr)
+            srcDebugName = "srcAccelerationStructure";
+
+        if (!srcBuilder.getFlags().contains(tp::AccelerationStructureFlag::AllowCompaction)) {
+            reportDebugMessage(
+                DebugMessageSeverity::Error,
+                DebugMessageType::Validation,
+                "The given '",
+                srcDebugName,
+                "' was not created with the 'AllowCompaction' flag.");
+        } else if (sizeQuery.getLastResult().isNull()) {
+            reportDebugMessage(
+                DebugMessageSeverity::Error,
+                DebugMessageType::Validation,
+                "The result of the compacted size query for '",
+                srcDebugName,
+                "' is not ready yet.");
+        }
+    }
+
+    // Create backing buffer to hold the AS
+    auto backingBufferSetup = BufferSetup(
+        sizeQuery.getLastResult().value,
+        BufferUsageMask::None(),
+        VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT,
+        256);
+    auto [bufferHandleLifeguard, allocationHandleLifeguard] = deviceImpl->getMemoryAllocator()->allocateBuffer(
+        backingBufferSetup, MemoryPreference::Device);
+    auto backingBuffer = OwningPtr<Buffer>(new BufferImpl(
+        deviceImpl,
+        backingBufferSetup,
+        std::move(bufferHandleLifeguard),
+        std::move(allocationHandleLifeguard),
+        DebugTarget::makeSilent()));
+
+    auto accelerationStructureLifeguard = vkMakeHandleLifeguard(
+        deviceImpl->getLogicalDevice()->createAccelerationStructureKHR(
+            srcBuilder.getType(), backingBuffer->getDefaultView()));
+    auto debugTarget = DebugTarget(deviceImpl->getDebugTarget(), AccelerationStructureTypeName, debugName);
+
+    // Clone the builder from the source for updates (compacted AS cannot be rebuilt)
+    auto asBuilder = std::make_shared<AccelerationStructureBuilder>(srcBuilder);
+    auto accelerationStructure = OwningPtr<AccelerationStructure>(new AccelerationStructureImpl(
+        deviceImpl,
+        std::move(asBuilder),
+        std::move(accelerationStructureLifeguard),
+        std::move(backingBuffer),
+        std::move(debugTarget)));
+
+    return accelerationStructure;
+}
+
 JobSemaphore Device::enqueueJob(
     const DeviceQueue& queue,
     Job job,

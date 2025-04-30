@@ -291,6 +291,10 @@ public:
         const AccelerationStructureSetup& setup,
         const char* debugName = nullptr);
 
+    OwningPtr<AccelerationStructure> allocateCompactedAccelerationStructureKHR(
+        const AccelerationStructureView& srcAccelerationStructure,
+        const char* debugName = nullptr);
+
     /// Enqueues the given tp::Job to the specified queue, creating and initializing its local resources.
     ///
     /// When the job gets enqueued, all of the job-local resources get created and become accessible, and command

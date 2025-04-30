@@ -26,9 +26,6 @@ public:
     AccelerationStructureBuilder() = default;
     AccelerationStructureBuilder(DeviceContainer* deviceImpl, const AccelerationStructureSetup& setup);
 
-    TEPHRA_MAKE_NONCOPYABLE(AccelerationStructureBuilder);
-    TEPHRA_MAKE_MOVABLE_DEFAULT(AccelerationStructureBuilder);
-
     AccelerationStructureType getType() const {
         return type;
     }
@@ -37,6 +34,7 @@ public:
         return flags;
     }
 
+    // Returns the required size of the backing buffer. Not updated with compacted size
     uint64_t getStorageSize() const {
         return vkBuildSizes.accelerationStructureSize;
     }
@@ -123,6 +121,14 @@ public:
         OwningPtr<Buffer> backingBuffer,
         DebugTarget debugTarget);
 
+    const DebugTarget* getDebugTarget() const {
+        return &debugTarget;
+    }
+
+    DebugTarget* getDebugTarget() {
+        return &debugTarget;
+    }
+
     AccelerationStructureView getView_() {
         return AccelerationStructureView(this);
     }
@@ -135,9 +141,7 @@ public:
         return backingBuffer->getDefaultView();
     }
 
-    const AccelerationStructureQueryKHR& getCompactedSizeQuery() const {
-        return compactedSizeQuery;
-    }
+    AccelerationStructureQueryKHR& getOrCreateCompactedSizeQuery();
 
     std::shared_ptr<AccelerationStructureBuilder>& getBuilder() {
         return builder;

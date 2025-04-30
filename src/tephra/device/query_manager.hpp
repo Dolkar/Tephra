@@ -149,8 +149,8 @@ public:
     void sampleAccelerationStructureQueriesKHR(
         const VulkanCommandInterface* vkiCommands,
         VkCommandBufferHandle vkCommandBuffer,
-        ArrayView<const AccelerationStructureQueryKHR* const> queries,
-        ArrayView<const AccelerationStructureView* const> asViews);
+        ArrayView<const QueryHandle> queries,
+        ArrayView<VkAccelerationStructureHandleKHR> vkAccelerationStructures);
 
     // Adds all used batches to the list to be submitted and resets itself
     void retrieveBatchesAndReset(ScratchVector<QueryBatch*>& batchList);

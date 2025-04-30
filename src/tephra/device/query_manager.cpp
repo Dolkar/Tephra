@@ -41,7 +41,9 @@ void BaseQuery::setMaxHistorySize(uint32_t size) {
 
 void BaseQuery::clear() {
     TEPHRA_ASSERT(!isNull());
-    handle->resultsHistory.clear();
+    for (std::size_t i = 0; i < handle->resultsHistory.size(); i++) {
+        handle->resultsHistory[i] = {};
+    }
 }
 
 BaseQuery::BaseQuery(QueryManager* parentManager, Handle handle) : parentManager(parentManager), handle(handle) {
@@ -276,30 +278,28 @@ void QueryRecorder::sampleTimestampQuery(
 void QueryRecorder::sampleAccelerationStructureQueriesKHR(
     const VulkanCommandInterface* vkiCommands,
     VkCommandBufferHandle vkCommandBuffer,
-    ArrayView<const AccelerationStructureQueryKHR* const> queries,
-    ArrayView<const AccelerationStructureView* const> asViews) {
+    ArrayView<const QueryHandle> queries,
+    ArrayView<VkAccelerationStructureHandleKHR> vkAccelerationStructures) {
     TEPHRA_ASSERT(!jobSemaphore.isNull());
     TEPHRA_ASSERT(!queries.empty());
-    TEPHRA_ASSERT(queries.size() == asViews.size());
+    TEPHRA_ASSERT(queries.size() == vkAccelerationStructures.size());
+    TEPHRA_ASSERT(vkiCommands->cmdWriteAccelerationStructuresPropertiesKHR != nullptr);
 
     // Try to batch up until our max batch size
     uint32_t batchSize = std::min(static_cast<uint32_t>(queries.size()), QueryBatch::MaxSampleCount);
 
-    QueryHandle firstQuery = getQueryHandle(*queries[0]);
+    QueryHandle firstQuery = queries[0];
+    uint32_t firstQueryIndex = ~0;
     QueryBatch* batch = getBatch(firstQuery, batchSize);
 
-    VkAccelerationStructureKHR accelerationStructures[QueryBatch::MaxSampleCount];
-    uint32_t firstQueryIndex = 0;
-
     for (std::size_t i = 0; i < batchSize; i++) {
-        QueryHandle query = getQueryHandle(*queries[i]);
+        QueryHandle query = queries[i];
         TEPHRA_ASSERT(query->type == QueryType::AccelerationStructureInfoKHR);
         // For batching to work, they must all be able to use the same pool, aka have the same subtype
         // Right now we only have compaction, so this should never happen
         TEPHRA_ASSERT(query->batchPool == batch->getPool());
 
-        accelerationStructures[i] = asViews[i]->vkGetAccelerationStructureHandle();
-        uint32_t queryIndex = batch->allocateSamples(firstQuery, 1);
+        uint32_t queryIndex = batch->allocateSamples(query, 1);
         if (i == 0)
             firstQueryIndex = queryIndex;
     }
@@ -307,7 +307,7 @@ void QueryRecorder::sampleAccelerationStructureQueriesKHR(
     vkiCommands->cmdWriteAccelerationStructuresPropertiesKHR(
         vkCommandBuffer,
         batchSize,
-        accelerationStructures,
+        vkCastTypedHandlePtr(vkAccelerationStructures.data()),
         firstQuery->decodeVkQueryType().first,
         batch->vkGetQueryPoolHandle(),
         firstQueryIndex);
@@ -318,7 +318,10 @@ void QueryRecorder::sampleAccelerationStructureQueriesKHR(
             vkiCommands,
             vkCommandBuffer,
             viewRange(queries, QueryBatch::MaxSampleCount, queries.size() - QueryBatch::MaxSampleCount),
-            viewRange(asViews, QueryBatch::MaxSampleCount, asViews.size() - QueryBatch::MaxSampleCount));
+            viewRange(
+                vkAccelerationStructures,
+                QueryBatch::MaxSampleCount,
+                vkAccelerationStructures.size() - QueryBatch::MaxSampleCount));
     }
 }
 

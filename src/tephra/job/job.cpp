@@ -46,30 +46,30 @@ T* recordDelayedCommand(JobRecordStorage& storage, JobCommandTypes type, TArgs&&
     return cmdDataPtr;
 }
 
-inline void markResourceUsage(JobData* jobData, const BufferView& buffer, bool isExport = false) {
+inline void markResourceUsage(JobData* jobData, const BufferView& buffer, bool usedUntilEnd = false) {
     TEPHRA_ASSERT(!buffer.isNull());
     if (buffer.viewsJobLocalBuffer()) {
         jobData->resources.localBuffers.markBufferUsage(buffer, jobData->record.nextCommandIndex);
-        if (isExport) {
+        if (usedUntilEnd) {
             jobData->resources.localBuffers.markBufferUsage(buffer, ~0);
         }
     }
 }
 
-inline void markResourceUsage(JobData* jobData, const ImageView& image, bool isExport = false) {
+inline void markResourceUsage(JobData* jobData, const ImageView& image, bool usedUntilEnd = false) {
     TEPHRA_ASSERT(!image.isNull());
     if (image.viewsJobLocalImage()) {
         jobData->resources.localImages.markImageUsage(image, jobData->record.nextCommandIndex);
-        if (isExport) {
+        if (usedUntilEnd) {
             jobData->resources.localImages.markImageUsage(image, ~0);
         }
     }
 }
 
-inline void markResourceUsage(JobData* jobData, const StoredImageView& image, bool isExport = false) {
+inline void markResourceUsage(JobData* jobData, const StoredImageView& image, bool usedUntilEnd = false) {
     TEPHRA_ASSERT(!image.isNull());
     if (image.getJobLocalView() != nullptr) {
-        markResourceUsage(jobData, *image.getJobLocalView());
+        markResourceUsage(jobData, *image.getJobLocalView(), usedUntilEnd);
     }
 }
 
@@ -540,14 +540,26 @@ void Job::vkCmdImportExternalResource(
 }
 
 // Command only used internally after AS build
-inline void cmdWriteAccelerationStructureSize(tp::JobData* jobData, const AccelerationStructureView& view) {
-    const AccelerationStructureQueryKHR& query = AccelerationStructureImpl::getAccelerationStructureImpl(view)
-                                                     .getCompactedSizeQuery();
+inline void cmdWriteAccelerationStructureSizes(JobData* jobData, ArrayView<AccelerationStructureView> views) {
+    ScratchVector<QueryHandle> queries;
+    queries.resize(views.size());
 
-    // Record it as a delayed command
-    markResourceUsage(jobData, view.getBackingBufferView(), true);
-    recordDelayedCommand<JobRecordStorage::WriteAccelerationStructureSizeData>(
-        jobData->record, JobCommandTypes::WriteAccelerationStructureSize, QueryRecorder::getQueryHandle(query), view);
+    for (std::size_t i = 0; i < views.size(); i++) {
+        AccelerationStructureQueryKHR& query = AccelerationStructureImpl::getAccelerationStructureImpl(views[i])
+                                                   .getOrCreateCompactedSizeQuery();
+        // Clear any previous data
+        query.clear();
+        // Delayed command must mark resources until the end of the job
+        markResourceUsage(jobData, views[i].getBackingBufferView(), true);
+        queries[i] = QueryRecorder::getQueryHandle(query);
+    }
+
+    auto queriesData = jobData->record.cmdBuffer.allocate<QueryHandle>(view(queries));
+    auto viewsData = jobData->record.cmdBuffer.allocate<StoredAccelerationStructureView>(views);
+
+    // Record the query writes as a delayed command
+    recordDelayedCommand<JobRecordStorage::WriteAccelerationStructureSizesData>(
+        jobData->record, JobCommandTypes::WriteAccelerationStructureSizes, queriesData, viewsData);
 };
 
 using AccelerationStructureBuildData = JobRecordStorage::BuildAccelerationStructuresData::SingleBuild;
@@ -638,12 +650,15 @@ void Job::cmdBuildAccelerationStructuresKHR(ArrayParameter<const AccelerationStr
 
     // We also want to query the compacted size for acceleration structures that support it after building
     // Leaving it for the end of the job will help avoid needless barriers
+    ScratchVector<AccelerationStructureView> toCompact;
     for (int i = 0; i < buildInfos.size(); i++) {
         if (buildInfos[i].mode == tp::AccelerationStructureBuildMode::Build &&
             buildsData[i].builder->getFlags().contains(tp::AccelerationStructureFlag::AllowCompaction)) {
-            cmdWriteAccelerationStructureSize(jobData, buildInfos[i].dstView);
+            toCompact.push_back(buildInfos[i].dstView);
         }
     }
+    if (!toCompact.empty())
+        cmdWriteAccelerationStructureSizes(jobData, view(toCompact));
 }
 
 void Job::cmdBuildAccelerationStructuresIndirectKHR(
@@ -679,24 +694,28 @@ void Job::cmdBuildAccelerationStructuresIndirectKHR(
 
     // We also want to query the compacted size for acceleration structures that support it after building
     // Leaving it for the end of the job will help avoid needless barriers
+    ScratchVector<AccelerationStructureView> toCompact;
     for (int i = 0; i < buildInfos.size(); i++) {
         if (buildInfos[i].mode == tp::AccelerationStructureBuildMode::Build &&
             buildsData[i].builder->getFlags().contains(tp::AccelerationStructureFlag::AllowCompaction)) {
-            cmdWriteAccelerationStructureSize(jobData, buildInfos[i].dstView);
+            toCompact.push_back(buildInfos[i].dstView);
         }
     }
+    if (!toCompact.empty())
+        cmdWriteAccelerationStructureSizes(jobData, view(toCompact));
 }
 
 void Job::cmdCopyAccelerationStructureKHR(
     const AccelerationStructureView& srcView,
-    const AccelerationStructureView& dstView) {
+    const AccelerationStructureView& dstView,
+    AccelerationStructureCopyMode mode) {
     TEPHRA_DEBUG_SET_CONTEXT(debugTarget.get(), "cmdCopyAccelerationStructureKHR", nullptr);
 
     markResourceUsage(jobData, srcView.getBackingBufferView());
     markResourceUsage(jobData, dstView.getBackingBufferView());
 
     recordCommand<JobRecordStorage::CopyAccelerationStructureData>(
-        jobData->record, JobCommandTypes::CopyAccelerationStructure, srcView, dstView);
+        jobData->record, JobCommandTypes::CopyAccelerationStructure, srcView, dstView, mode);
 }
 
 Job::Job(Job&& other) noexcept : debugTarget(std::move(other.debugTarget)), jobData(other.jobData) {

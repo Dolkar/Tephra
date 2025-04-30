@@ -242,6 +242,7 @@ void CornellExample::prepareBLAS() {
     std::vector<tp::TriangleGeometryBuildInfo> geomInfos;
     geomInfos.reserve(geometry.size());
     std::vector<tp::AccelerationStructureBuildInfo> buildInfos;
+    std::vector<std::unique_ptr<tp::AccelerationStructure>> srcBlasList;
 
     for (int i = 0; i < geometry.size(); i++) {
         const std::vector<Point>& vertices = geometry[i];
@@ -253,8 +254,11 @@ void CornellExample::prepareBLAS() {
             false,
             tp::GeometryFlag::Opaque);
 
+        // Compacting after build will reduce the final size in memory
         auto blasSetup = tp::AccelerationStructureSetup::BottomLevel(
-            tp::AccelerationStructureFlag::PreferFastTrace, tp::viewOne(triSetup), {});
+            tp::AccelerationStructureFlag::PreferFastTrace | tp::AccelerationStructureFlag::AllowCompaction,
+            tp::viewOne(triSetup),
+            {});
 
         std::string name = "geom" + std::to_string(i);
         auto blas = device->allocateAccelerationStructureKHR(blasSetup, name.c_str());
@@ -271,20 +275,35 @@ void CornellExample::prepareBLAS() {
         buildInfos.push_back(tp::AccelerationStructureBuildInfo::BottomLevel(
             tp::AccelerationStructureBuildMode::Build, *blas, tp::viewOne(geomInfo), {}));
 
-        // And store it for use later
+        srcBlasList.push_back(std::move(blas));
+    }
+
+    // Build and submit
+    buildJob.cmdBuildAccelerationStructuresKHR(tp::view(buildInfos));
+
+    tp::JobSemaphore jobSemaphore = device->enqueueJob(mainQueue, std::move(buildJob));
+    device->submitQueuedJobs(mainQueue);
+
+    // Wait for the build to complete so we can create compacted BLASes
+    device->waitForJobSemaphores({ jobSemaphore });
+
+    // Compact and store the results
+    tp::Job compactionJob = jobResourcePool->createJob();
+
+    for (auto& srcBlas : srcBlasList) {
+        // Debug name gets inherited
+        auto blas = device->allocateCompactedAccelerationStructureKHR(*srcBlas);
+
+        compactionJob.cmdCopyAccelerationStructureKHR(*srcBlas, *blas, tp::AccelerationStructureCopyMode::Compact);
+
+        // We will use it to build a TLAS and also trace through it in a compute shader
+        compactionJob.cmdExportResource(
+            *blas, tp::ReadAccess::AccelerationStructureBuildKHR | tp::ReadAccess::ComputeShaderUniform);
+
         blasList.push_back(std::move(blas));
     }
 
-    // Build, export and submit
-    buildJob.cmdBuildAccelerationStructuresKHR(tp::view(buildInfos));
-
-    for (int i = 0; i < blasList.size(); i++) {
-        // We will use it to build a TLAS and also trace through it in a compute shader
-        buildJob.cmdExportResource(
-            *blasList[i], tp::ReadAccess::AccelerationStructureBuildKHR | tp::ReadAccess::ComputeShaderUniform);
-    }
-
-    device->enqueueJob(mainQueue, std::move(buildJob));
+    device->enqueueJob(mainQueue, std::move(compactionJob));
     device->submitQueuedJobs(mainQueue);
 }
 

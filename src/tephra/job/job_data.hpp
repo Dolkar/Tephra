@@ -38,7 +38,7 @@ enum class JobCommandTypes {
     BuildAccelerationStructures,
     BuildAccelerationStructuresIndirect,
     CopyAccelerationStructure,
-    WriteAccelerationStructureSize,
+    WriteAccelerationStructureSizes,
 };
 
 struct JobResourceStorage {
@@ -220,14 +220,6 @@ struct JobRecordStorage {
         WriteTimestampData(const QueryHandle& query, PipelineStage stage) : query(query), stage(stage) {}
     };
 
-    struct WriteAccelerationStructureSizeData {
-        QueryHandle query;
-        StoredAccelerationStructureView view;
-
-        WriteAccelerationStructureSizeData(const QueryHandle& query, AccelerationStructureView view)
-            : query(query), view(view) {}
-    };
-
     // Shared for regular and indirect build commands
     struct BuildAccelerationStructuresData {
         struct SingleBuild {
@@ -252,9 +244,23 @@ struct JobRecordStorage {
     struct CopyAccelerationStructureData {
         StoredAccelerationStructureView srcView;
         StoredAccelerationStructureView dstView;
+        AccelerationStructureCopyMode mode;
 
-        CopyAccelerationStructureData(const AccelerationStructureView& srcView, const AccelerationStructureView& dstView)
-            : srcView(srcView), dstView(dstView) {}
+        CopyAccelerationStructureData(
+            const AccelerationStructureView& srcView,
+            const AccelerationStructureView& dstView,
+            AccelerationStructureCopyMode mode)
+            : srcView(srcView), dstView(dstView), mode(mode) {}
+    };
+
+    struct WriteAccelerationStructureSizesData {
+        ArrayView<QueryHandle> queries;
+        ArrayView<StoredAccelerationStructureView> views;
+
+        WriteAccelerationStructureSizesData(
+            ArrayView<QueryHandle> queries,
+            ArrayView<StoredAccelerationStructureView> views)
+            : queries(queries), views(views) {}
     };
 
     void addCommand(JobRecordStorage::CommandMetadata* commandPtr);
