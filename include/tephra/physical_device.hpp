@@ -26,7 +26,12 @@ namespace DeviceExtension {
     /// object whose images can be viewed with different formats than what they were created as.
     /// @see @vksymbol{VK_KHR_swapchain_mutable_format}
     const char* const KHR_SwapchainMutableFormat = VK_KHR_SWAPCHAIN_MUTABLE_FORMAT_EXTENSION_NAME;
+    /// Allows the creation and building of tp::AccelerationStructure objects used for ray tracing.
+    /// @see @vksymbol{VK_KHR_acceleration_structure}
     const char* const KHR_AccelerationStructure = VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME;
+    /// Adds support for the `SPV_KHR_ray_query` SPIR-V extension, allowing the use of `rayQuery` calls from within
+    /// various shader stages.
+    /// Requires the tp::DeviceExtension::KHR_AccelerationStructure extension to be present and enabled.
     const char* const KHR_RayQuery = VK_KHR_RAY_QUERY_EXTENSION_NAME;
     /// Adds support for querying the actual amount of memory used by the process as well as the estimated budget of
     /// how much total memory the current process can use at any given time.

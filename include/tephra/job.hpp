@@ -115,6 +115,18 @@ public:
         ArrayParameter<const FutureDescriptor> descriptors,
         const char* debugName = nullptr);
 
+    /// Allocates a job-local acceleration structure for use within this job.
+    /// @param setup
+    ///     The setup structure describing the object.
+    /// @param debugName
+    ///     The debug name identifier for the object.
+    /// @remarks
+    ///     The acceleration structure may only be used for commands within this job or in command lists that execute
+    ///     within it.
+    /// @remarks
+    ///     The acceleration structure is not created until the job is enqueued. As a consequence it cannot be used as
+    ///     a tp::Descriptor while the job is in the recording state. tp::FutureDescriptor with
+    ///     tp::Job::allocateLocalDescriptorSet does not have this limitation.
     AccelerationStructureView allocateLocalAccelerationStructureKHR(
         const AccelerationStructureSetup& setup,
         const char* debugName = nullptr);
@@ -413,7 +425,7 @@ public:
     /// @remarks
     ///     Inline callbacks will be called during the call to tp::Device::submitQueuedJobs in the provided order.
     ///     Device queue thread safety rules apply: No operations on the target queue are permitted inside the callback.
-    /// @see @vksymbol{VkCmdBeginRendering}
+    /// @see @vksymbol{vkCmdBeginRendering}
     void cmdExecuteRenderPass(
         const RenderPassSetup& setup,
         std::variant<ArrayView<RenderList>, RenderInlineCallback> commandRecording,
@@ -509,13 +521,46 @@ public:
         VkPipelineStageFlags vkStageMask,
         VkAccessFlags vkAccessMask);
 
-    // Future remark: Can't build a TLAS and a BLAS it references in the same call
+    // Docs TODO: Explain how input buffers are interpreted for direct vs indirect build
+    // TODO: Remove maxPrimitiveCounts from IndirectInfo? Or add them to regular info ??
+
+    /// Processes acceleration structure builds or updates.
+    /// @param buildInfos
+    ///     The build info structures describing the details of each operation.
+    /// @remarks
+    ///     The individual builds or updates are processed asynchronously, without any synchronization between them.
+    ///     This means that a BLAS and a TLAS that references it cannot be built within the same call.
+    /// @see @vksymbol{vkCmdBuildAccelerationStructuresKHR}
     void cmdBuildAccelerationStructuresKHR(ArrayParameter<const AccelerationStructureBuildInfo> buildInfos);
 
+    /// Processes acceleration structure builds or updates with geometry offsets and counts sourced from a buffer.
+    /// @param buildInfos
+    ///     The build info structures describing the details of each operation.
+    /// @param indirectInfos
+    ///     Additional structures that provide an indirect buffer for each operation from which geometry offsets and
+    ///     counts are sourced from, overriding the values in the associated `buildInfos` structure.
+    /// @remarks
+    ///     The individual builds or updates are processed asynchronously, without any synchronization between them.
+    ///     This means that a BLAS and a TLAS that references it cannot be built within the same call.
+    /// @see @vksymbol{vkCmdBuildAccelerationStructuresIndirectKHR}
     void cmdBuildAccelerationStructuresIndirectKHR(
         ArrayParameter<const AccelerationStructureBuildInfo> buildInfos,
         ArrayParameter<const AccelerationStructureBuildIndirectInfo> indirectInfos);
 
+    /// Copies the contents of one acceleration structure to another, with optional compaction.
+    /// @param srcView
+    ///     The source acceleration structure.
+    /// @param dstView
+    ///     The destination acceleration structure.
+    /// @param mode
+    ///     Specifies the operation as either a plain copy or a copy with compacting.
+    /// @remarks
+    ///     If `mode` tp::AccelerationStructureCopyMode::Clone, then the source and destination acceleration structures
+    ///     must have been created with identical setup structures.
+    ///     If `mode` tp::AccelerationStructureCopyMode::Compact, then the destination acceleration structure must have
+    ///     been created with tp::Device::allocateCompactedAccelerationStructureKHR using the same source acceleration
+    ///     structure.
+    /// @see @vksymbol{vkCmdCopyAccelerationStructureKHR}
     void cmdCopyAccelerationStructureKHR(
         const AccelerationStructureView& srcView,
         const AccelerationStructureView& dstView,

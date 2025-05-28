@@ -39,13 +39,17 @@ struct PCGRand {
 };
 
 float3 sampleCosineHemisphere(float3 n, inout PCGRand rand) {
-    // Random point on a sphere
-    float z = 1.0f - 2.0f * rand.next();
-    float r = sqrt(1.0f - z * z);
-    float phi = 2.0f * Pi * rand.next();
-    float3 randSphere = float3(r * cos(phi), r * sin(phi), z);
+    while (true) {
+        // Random point on a sphere
+        float z = 1.0f - 2.0f * rand.next();
+        float r = sqrt(1.0f - z * z);
+        float phi = 2.0f * Pi * rand.next();
+        float3 randSphere = float3(r * cos(phi), r * sin(phi), z);
 
-    return normalize(n + randSphere);
+        float3 v = n + randSphere;
+        if (length(v) > 0.0)
+            return normalize(v);
+    }
 }
 
 struct RayHit {

@@ -287,10 +287,25 @@ public:
     ///     The debug name identifier for the object.
     OwningPtr<Image> allocateImage(const ImageSetup& setup, const char* debugName = nullptr);
 
+    /// Creates a tp::AccelerationStructure object according to the given setup structure and allocates memory for it.
+    /// @param setup
+    ///     The setup structure describing the object.
+    /// @param debugName
+    ///     The debug name identifier for the object.
     OwningPtr<AccelerationStructure> allocateAccelerationStructureKHR(
         const AccelerationStructureSetup& setup,
         const char* debugName = nullptr);
 
+    /// Creates a tp::AccelerationStructure object capable of holding the compacted data of the given source
+    /// acceleration structure and allocates memory for it.
+    /// @param srcAccelerationStructure
+    ///     The source acceleration structure whose compacted size is to be queried.
+    /// @param debugName
+    ///     The debug name identifier for the object. If empty, the name will be inherited from the source.
+    /// @remarks
+    ///     The source acceleration structure must have been created with the
+    ///     tp::AccelerationStructureFlag::AllowCompaction flag and its last build operation must have completed
+    ///     execution on the device.
     OwningPtr<AccelerationStructure> allocateCompactedAccelerationStructureKHR(
         const AccelerationStructureView& srcAccelerationStructure,
         const char* debugName = nullptr);

@@ -372,17 +372,14 @@ OwningPtr<Image> Device::allocateImage(const ImageSetup& setup, const char* debu
     return image;
 }
 
-OwningPtr<AccelerationStructure> Device::allocateAccelerationStructureKHR(
-    const AccelerationStructureSetup& setup,
+OwningPtr<AccelerationStructure> allocateAccelerationStructureImpl(
+    DeviceContainer* deviceImpl,
+    uint64_t size,
+    std::shared_ptr<AccelerationStructureBuilder> asBuilder,
     const char* debugName) {
-    auto deviceImpl = static_cast<DeviceContainer*>(this);
-    TEPHRA_DEBUG_SET_CONTEXT(deviceImpl->getDebugTarget(), "allocateAccelerationStructureKHR", debugName);
-
-    auto asBuilder = std::make_shared<AccelerationStructureBuilder>(deviceImpl, setup);
-
     // Create backing buffer to hold the AS
     auto backingBufferSetup = BufferSetup(
-        asBuilder->getStorageSize(),
+        size,
         BufferUsageMask::None(),
         VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT,
         0,
@@ -397,10 +394,13 @@ OwningPtr<AccelerationStructure> Device::allocateAccelerationStructureKHR(
         DebugTarget::makeSilent()));
     deviceImpl->getLogicalDevice()->setObjectDebugName(getOwnedPtr(backingBuffer)->vkGetBufferHandle(), debugName);
 
-    auto accelerationStructureLifeguard = vkMakeHandleLifeguard(
-        deviceImpl->getLogicalDevice()->createAccelerationStructureKHR(setup.type, backingBuffer->getDefaultView()));
+    // Create the AS itself
+    auto accelerationStructureLifeguard = deviceImpl->vkMakeHandleLifeguard(
+        deviceImpl->getLogicalDevice()->createAccelerationStructureKHR(
+            asBuilder->getType(), backingBuffer->getDefaultView()));
     auto debugTarget = DebugTarget(deviceImpl->getDebugTarget(), AccelerationStructureTypeName, debugName);
 
+    // Package everything
     auto accelerationStructure = OwningPtr<AccelerationStructure>(new AccelerationStructureImpl(
         deviceImpl,
         std::move(asBuilder),
@@ -409,8 +409,18 @@ OwningPtr<AccelerationStructure> Device::allocateAccelerationStructureKHR(
         std::move(debugTarget)));
     deviceImpl->getLogicalDevice()->setObjectDebugName(
         getOwnedPtr(accelerationStructure)->vkGetAccelerationStructureHandle(), debugName);
-
     return accelerationStructure;
+}
+
+OwningPtr<AccelerationStructure> Device::allocateAccelerationStructureKHR(
+    const AccelerationStructureSetup& setup,
+    const char* debugName) {
+    auto deviceImpl = static_cast<DeviceContainer*>(this);
+    TEPHRA_DEBUG_SET_CONTEXT(deviceImpl->getDebugTarget(), "allocateAccelerationStructureKHR", debugName);
+
+    auto asBuilder = std::make_shared<AccelerationStructureBuilder>(deviceImpl, setup);
+    uint64_t storageSize = asBuilder->getStorageSize();
+    return allocateAccelerationStructureImpl(deviceImpl, storageSize, std::move(asBuilder), debugName);
 }
 
 OwningPtr<AccelerationStructure> Device::allocateCompactedAccelerationStructureKHR(
@@ -457,40 +467,10 @@ OwningPtr<AccelerationStructure> Device::allocateCompactedAccelerationStructureK
         }
     }
 
-    // Create backing buffer to hold the AS
-    auto backingBufferSetup = BufferSetup(
-        sizeQuery.getLastResult().value,
-        BufferUsageMask::None(),
-        VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT,
-        0,
-        256);
-    auto [bufferHandleLifeguard, allocationHandleLifeguard] = deviceImpl->getMemoryAllocator()->allocateBuffer(
-        backingBufferSetup, MemoryPreference::Device);
-    auto backingBuffer = OwningPtr<Buffer>(new BufferImpl(
-        deviceImpl,
-        backingBufferSetup,
-        std::move(bufferHandleLifeguard),
-        std::move(allocationHandleLifeguard),
-        DebugTarget::makeSilent()));
-    deviceImpl->getLogicalDevice()->setObjectDebugName(getOwnedPtr(backingBuffer)->vkGetBufferHandle(), debugName);
-
-    auto accelerationStructureLifeguard = vkMakeHandleLifeguard(
-        deviceImpl->getLogicalDevice()->createAccelerationStructureKHR(
-            srcBuilder.getType(), backingBuffer->getDefaultView()));
-    auto debugTarget = DebugTarget(deviceImpl->getDebugTarget(), AccelerationStructureTypeName, debugName);
-
     // Clone the builder from the source for updates (compacted AS cannot be rebuilt)
     auto asBuilder = std::make_shared<AccelerationStructureBuilder>(srcBuilder);
-    auto accelerationStructure = OwningPtr<AccelerationStructure>(new AccelerationStructureImpl(
-        deviceImpl,
-        std::move(asBuilder),
-        std::move(accelerationStructureLifeguard),
-        std::move(backingBuffer),
-        std::move(debugTarget)));
-    deviceImpl->getLogicalDevice()->setObjectDebugName(
-        getOwnedPtr(accelerationStructure)->vkGetAccelerationStructureHandle(), debugName);
-
-    return accelerationStructure;
+    return allocateAccelerationStructureImpl(
+        deviceImpl, sizeQuery.getLastResult().value, std::move(asBuilder), debugName);
 }
 
 JobSemaphore Device::enqueueJob(

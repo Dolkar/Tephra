@@ -360,7 +360,7 @@ private:
     void fillVkPoolSizes();
 };
 
-/// Represents the non-owning view of a tp::DescriptorSet.
+/// Represents a non-owning view of a tp::DescriptorSet.
 /// @see tp::DescriptorSet::getView
 /// @see tp::Job::allocateLocalDescriptorSet
 class DescriptorSetView {
@@ -409,6 +409,7 @@ struct DescriptorPoolEntry;
 /// @see @vksymbol{VkDescriptorSet}
 class DescriptorSet {
 public:
+    /// Creates a null descriptor set.
     DescriptorSet();
 
     DescriptorSet(VkDescriptorSetHandle vkDescriptorSetHandle, DescriptorPoolEntry* parentDescriptorPoolEntry);

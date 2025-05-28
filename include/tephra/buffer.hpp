@@ -11,7 +11,7 @@ class Buffer;
 class BufferImpl;
 class JobLocalBufferImpl;
 
-/// Represents the view of a contiguous range of tp::Buffer memory.
+/// Represents a non-owning view of a contiguous range of tp::Buffer memory.
 ///
 /// Optionally, it can be made to interpret the data in a particular format for binding
 /// to a tp::Descriptor of the tp::DescriptorType::TexelBuffer or tp::DescriptorType::StorageTexelBuffer types.
@@ -223,7 +223,7 @@ struct BufferSetup {
 
 /// Represents a linear array of data visible to the device.
 ///
-/// They are not used directly, but instead are passed to commands or descriptors through tp::BufferView
+/// It is generally not used directly, but instead gets passed to commands or descriptors through tp::BufferView
 /// objects that view a contiguous range of its data.
 ///
 /// @remarks
