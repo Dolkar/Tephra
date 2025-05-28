@@ -621,12 +621,11 @@ inline AccelerationStructureBuildData prepareASBuild(
     auto triangleGeometriesData = jobData->record.cmdBuffer.allocate<StoredTriangleGeometryBuildInfo>(
         buildInfo.triangleGeometries);
     auto aabbGeometriesData = jobData->record.cmdBuffer.allocate<StoredAABBGeometryBuildInfo>(buildInfo.aabbGeometries);
-    auto maxPrimitiveCountsData = jobData->record.cmdBuffer.allocate<uint32_t>(indirectInfo.maxPrimitiveCounts);
 
     return AccelerationStructureBuildData(
         &builder,
         StoredAccelerationStructureBuildInfo(buildInfo, accessedViewsData, triangleGeometriesData, aabbGeometriesData),
-        StoredAccelerationStructureBuildIndirectInfo(indirectInfo, maxPrimitiveCountsData),
+        StoredAccelerationStructureBuildIndirectInfo(indirectInfo),
         scratchBuffer);
 }
 
@@ -641,7 +640,7 @@ void Job::cmdBuildAccelerationStructuresKHR(ArrayParameter<const AccelerationStr
     }
 
     auto buildsData = jobData->record.cmdBuffer.allocate<AccelerationStructureBuildData>(buildInfos.size());
-    auto unusedIndirectInfo = AccelerationStructureBuildIndirectInfo({}, {});
+    auto unusedIndirectInfo = AccelerationStructureBuildIndirectInfo({});
     for (std::size_t i = 0; i < buildInfos.size(); i++) {
         buildsData[i] = prepareASBuild(jobData, buildInfos[i], unusedIndirectInfo);
     }

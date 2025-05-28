@@ -183,14 +183,14 @@ protected:
 
 /// Information for building an instance geometry of a top-level acceleration structure.
 struct InstanceGeometryBuildInfo {
-    BufferView instanceBuffer; // VkAccelerationStructureInstanceKHR
+    BufferView instanceBuffer;
     bool arrayOfPointers;
     ArrayView<const AccelerationStructureView> accessedViews;
 
     /// @param instanceBuffer
-    ///     A buffer containing a tightly packed array of instance data, either in the form of the
-    ///     @vksymbol{VkAccelerationStructureInstanceKHR} structure if `arrayOfPointers` is `false`, or of pointers
-    ///     to it if `true`.
+    ///     A buffer containing a tightly packed array of instance data, either as the
+    ///     @vksymbol{VkAccelerationStructureInstanceKHR} structure if `arrayOfPointers` is `false`, or as device
+    ///     addresses pointing to the structure if `true`.
     /// @param arrayOfPointers
     ///     Determines if the `instanceBuffer` contains structures or device addresses pointing to structures.
     /// @param accessedViews
@@ -202,6 +202,7 @@ struct InstanceGeometryBuildInfo {
         : instanceBuffer(instanceBuffer), arrayOfPointers(arrayOfPointers), accessedViews(accessedViews) {}
 };
 
+/// Information for building a triangle geometry of a bottom-level acceleration structure.
 struct TriangleGeometryBuildInfo {
     BufferView vertexBuffer;
     uint64_t vertexStride;
@@ -209,6 +210,20 @@ struct TriangleGeometryBuildInfo {
     uint32_t firstVertex;
     BufferView transformBuffer;
 
+    /// @param vertexBuffer
+    ///     A buffer containing vertex data used for the triangle geometry.
+    /// @param vertexStride
+    ///     The stride in bytes between each vertex in `vertexBuffer`. If 0, the size of the vertex format as defined
+    ///     in the associated tp::TriangleGeometrySetup structure will be used as the stride.
+    /// @param indexBuffer
+    ///     An optional buffer containing index data for this geometry. The type of the inde xdata must match what was
+    ///     provided in the associated tp::TriangleGeometrySetup.
+    /// @param firstVertex
+    ///     If index data is provided, this value is added to all indices. Otherwise, the value determines the index
+    ///     of the first vertex used for the geometry.
+    /// @param transformBuffer
+    ///     A buffer containing the transformation matrix from geometry space to the space of the acceleration
+    ///     structure in the form of a @vksymbol{VkTransformMatrixKHR} structure.
     TriangleGeometryBuildInfo(
         BufferView vertexBuffer,
         uint64_t vertexStride = 0,
@@ -222,13 +237,19 @@ struct TriangleGeometryBuildInfo {
           transformBuffer(transformBuffer) {}
 };
 
+/// Information for building an AABB geometry of a bottom-level acceleration structure.
 struct AABBGeometryBuildInfo {
-    BufferView aabbBuffer; // VkAabbPositionsKHR
+    BufferView aabbBuffer;
     uint64_t stride;
 
+    /// @param aabbBuffer
+    ///     A buffer containing axis-aligned bounding box data in the form of a @vksymbol{VkAabbPositionsKHR} structure.
+    /// @param stride
+    ///     The stride in bytes between each element in `aabbBuffer`.
     AABBGeometryBuildInfo(BufferView aabbBuffer, uint64_t stride = 24) : aabbBuffer(aabbBuffer), stride(stride) {}
 };
 
+/// Information for building or updating an acceleration structure.
 struct AccelerationStructureBuildInfo {
     AccelerationStructureBuildMode mode;
     AccelerationStructureView dstView;
@@ -237,12 +258,40 @@ struct AccelerationStructureBuildInfo {
     ArrayView<const AABBGeometryBuildInfo> aabbGeometries;
     AccelerationStructureView srcView;
 
+    /// Creates build information for a top-level acceleration structure.
+    /// @param mode
+    ///     The build operation to perform on this acceleration structure.
+    /// @param dstView
+    ///     The output acceleration structure.
+    /// @param instanceGeometry
+    ///     Build information for the sole instance geometry of the acceleration structure.
+    /// @param srcView
+    ///     For updates, optionally provides the source acceleration structure for the update. It can be omitted for an
+    ///     in-place update.
+    /// @remarks
+    ///     If `srcView` is not null, then the source and destination acceleration structures must have been created
+    ///     with identical setup structures.
     static AccelerationStructureBuildInfo TopLevel(
         AccelerationStructureBuildMode mode,
         AccelerationStructureView dstView,
         InstanceGeometryBuildInfo instanceGeometry,
         AccelerationStructureView srcView = {});
 
+    /// Creates build information for a bottom-level acceleration structure.
+    /// @param mode
+    ///     The build operation to perform on this acceleration structure.
+    /// @param dstView
+    ///     The output acceleration structure.
+    /// @param triangleGeometries
+    ///     Build information for the triangle geometries of the acceleration structure.
+    /// @param aabbGeometries
+    ///     Build information for the AABB geometries fo the acceleration structure.
+    /// @param srcView
+    ///     For updates, optionally provides the source acceleration structure for the update. It can be omitted for an
+    ///     in-place update.
+    /// @remarks
+    ///     If `srcView` is not null, then the source and destination acceleration structures must have been created
+    ///     with identical setup structures.
     static AccelerationStructureBuildInfo BottomLevel(
         AccelerationStructureBuildMode mode,
         AccelerationStructureView dstView,
@@ -251,18 +300,23 @@ struct AccelerationStructureBuildInfo {
         AccelerationStructureView srcView = {});
 };
 
+/// Additional information for an indirect build or update of an acceleration structure.
 struct AccelerationStructureBuildIndirectInfo {
-    ArrayView<const uint32_t> maxPrimitiveCounts;
-    BufferView buildRangeBuffer; // VkAccelerationStructureBuildRangeInfoKHR
+    BufferView buildRangeBuffer;
     uint32_t buildRangeStride;
 
-    AccelerationStructureBuildIndirectInfo(
-        ArrayView<const uint32_t> maxPrimitiveCounts,
-        BufferView buildRangeBuffer,
-        uint32_t buildRangeStride = 16)
-        : maxPrimitiveCounts(maxPrimitiveCounts),
-          buildRangeBuffer(buildRangeBuffer),
-          buildRangeStride(buildRangeStride) {}
+    /// @param buildRangeBuffer
+    ///     Buffer containing build range information for each geometry in the form of
+    ///     @vksymbol{VkAccelerationStructureBuildRangeInfoKHR} structures.
+    /// @param buildRangeStride
+    ///     The stride in bytes between each element in `buildRangeBuffer`.
+    /// @remarks
+    ///     For a top-level acceleration structure, only one element is expected in the `buildRangeBuffer` data.
+    ///     For a bottom-level acceleration structure, the buffer should contain elements for each of the triangle
+    ///     geometries, followed by each of the AABB geometries, as defined in the associated
+    ///     tp::AccelerationStructureSetup when the acceleration structure was created.
+    AccelerationStructureBuildIndirectInfo(BufferView buildRangeBuffer, uint32_t buildRangeStride = 16)
+        : buildRangeBuffer(buildRangeBuffer), buildRangeStride(buildRangeStride) {}
 };
 
 }

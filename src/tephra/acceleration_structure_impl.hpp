@@ -50,6 +50,10 @@ public:
         return vkGeometries.size();
     }
 
+    ArrayView<const uint32_t> getMaxPrimitiveCounts() const {
+        return view(maxPrimitiveCounts);
+    }
+
     // Prepares Vulkan structure for the build command, filling out the passed build ranges
     VkAccelerationStructureBuildGeometryInfoKHR prepareBuild(
         StoredAccelerationStructureBuildInfo& buildInfo,

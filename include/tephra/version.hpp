@@ -53,14 +53,17 @@ struct Version {
     }
 };
 
+/// Equality operator for tp::Version.
 constexpr bool operator==(const Version& lhs, const Version& rhs) {
     return lhs.major == rhs.major && lhs.minor == rhs.minor && lhs.patch == rhs.patch;
 }
 
+/// Inequality operator for tp::Version.
 constexpr bool operator!=(const Version& lhs, const Version& rhs) {
     return !(lhs == rhs);
 }
 
+/// Less-than operator for tp::Version.
 constexpr bool operator<(const Version& lhs, const Version& rhs) {
     if (lhs.major != rhs.major) {
         return lhs.major < rhs.major;
@@ -71,14 +74,17 @@ constexpr bool operator<(const Version& lhs, const Version& rhs) {
     return lhs.patch < rhs.patch;
 }
 
+/// Less-or-equal-than operator for tp::Version.
 constexpr bool operator<=(const Version& lhs, const Version& rhs) {
     return !(rhs < lhs);
 }
 
+/// Greater-than operator for tp::Version.
 constexpr bool operator>(const Version& lhs, const Version& rhs) {
     return rhs < lhs;
 }
 
+/// Greater-or-equal-than operator for tp::Version.
 constexpr bool operator>=(const Version& lhs, const Version& rhs) {
     return !(lhs < rhs);
 }

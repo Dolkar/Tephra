@@ -434,20 +434,6 @@ void AccelerationStructureBuilder::validateBuildIndirectInfo(
         }
     }
 
-    if (indirectInfo.maxPrimitiveCounts.size() != geomCount) {
-        reportDebugMessage(
-            DebugMessageSeverity::Error,
-            DebugMessageType::Validation,
-            "The size of `indirectInfos[",
-            buildIndex,
-            "].maxPrimitiveCounts' (",
-            indirectInfo.maxPrimitiveCounts.size(),
-            ") is different from the expected size (",
-            geomCount,
-            ").");
-        return;
-    }
-
     std::size_t indirectBufferSize = indirectInfo.buildRangeBuffer.getSize();
     std::size_t indirectBufferSizeExpected = geomCount * indirectInfo.buildRangeStride;
     if (indirectBufferSize != indirectBufferSizeExpected)
@@ -461,85 +447,6 @@ void AccelerationStructureBuilder::validateBuildIndirectInfo(
             ") is different from the expected size (",
             indirectBufferSizeExpected,
             ").");
-
-    // Now, for each geometry, check that the buffers are big enough to hold the given maxPrimitiveCounts
-    // Fill these arrays and validate them all at once
-    ScratchVector<std::size_t> primitiveBufferSizes;
-    ScratchVector<std::size_t> primitiveCapacities;
-    primitiveBufferSizes.resize(geomCount);
-    primitiveCapacities.resize(geomCount);
-
-    if (type == AccelerationStructureType::TopLevel) {
-        if (buildInfo.instanceGeometry.instanceBuffer.isNull())
-            return;
-
-        std::size_t bufferSize = buildInfo.instanceGeometry.instanceBuffer.getSize();
-        std::size_t instanceSize = buildInfo.instanceGeometry.arrayOfPointers ?
-            sizeof(DeviceAddress) :
-            sizeof(VkAccelerationStructureInstanceKHR);
-
-        std::size_t maxInstanceCount = bufferSize / instanceSize;
-        TEPHRA_ASSERT(geomCount == 1);
-        primitiveBufferSizes[0] = bufferSize;
-        primitiveCapacities[0] = maxInstanceCount;
-    } else {
-        std::size_t geomIndex = 0;
-        for (std::size_t triGeomIndex = 0; triGeomIndex < buildInfo.triangleGeometries.size(); triGeomIndex++) {
-            const TriangleGeometryBuildInfo& triInfo = buildInfo.triangleGeometries[triGeomIndex];
-            const auto& triGeom = vkGeometries[triGeomIndex].geometry.triangles;
-
-            std::size_t bufferSize = 0;
-            std::size_t maxTriangleCount = 0;
-            if (!triInfo.indexBuffer.isNull()) {
-                bufferSize = triInfo.indexBuffer.getSize();
-                TEPHRA_ASSERT(triGeom.indexType != VK_INDEX_TYPE_NONE_KHR);
-                uint32_t indexSize = triGeom.indexType == VK_INDEX_TYPE_UINT16 ? 2 : 4;
-                maxTriangleCount = bufferSize / (3 * indexSize);
-            } else if (!triInfo.vertexBuffer.isNull()) {
-                bufferSize = triInfo.vertexBuffer.getSize();
-                uint64_t vertexStride = triInfo.vertexStride;
-                // Default to vertex stride derived from format
-                if (vertexStride == 0)
-                    vertexStride = getFormatClassProperties(vkCastConvertibleEnum(triGeom.vertexFormat)).texelBlockBytes;
-                maxTriangleCount = bufferSize / (3 * vertexStride);
-            }
-
-            primitiveBufferSizes[geomIndex] = bufferSize;
-            primitiveCapacities[geomIndex] = maxTriangleCount;
-            geomIndex++;
-        }
-
-        for (std::size_t aabbGeomIndex = 0; aabbGeomIndex < buildInfo.aabbGeometries.size(); aabbGeomIndex++) {
-            const AABBGeometryBuildInfo& aabbInfo = buildInfo.aabbGeometries[aabbGeomIndex];
-            if (!aabbInfo.aabbBuffer.isNull()) {
-                primitiveBufferSizes[geomIndex] = aabbInfo.aabbBuffer.getSize();
-                primitiveCapacities[geomIndex] = aabbInfo.aabbBuffer.getSize() / aabbInfo.stride;
-            }
-            geomIndex++;
-        }
-    }
-
-    for (std::size_t geomIndex = 0; geomIndex < geomCount; geomIndex++) {
-        std::size_t bufferSize = primitiveBufferSizes[geomIndex];
-        std::size_t maxBufferPrimitives = primitiveCapacities[geomIndex];
-
-        if (bufferSize != 0 && indirectInfo.maxPrimitiveCounts[geomIndex] > maxBufferPrimitives) {
-            reportDebugMessage(
-                DebugMessageSeverity::Error,
-                DebugMessageType::Validation,
-                "`indirectInfos[",
-                buildIndex,
-                "].maxPrimitiveCount[",
-                geomIndex,
-                "]' (",
-                indirectInfo.maxPrimitiveCounts[geomIndex],
-                ") is bigger than the maximum number of primitives the corresponding geometry buffer can hold (",
-                maxBufferPrimitives,
-                ", buffer size is ",
-                bufferSize,
-                ").");
-        }
-    }
 }
 
 }

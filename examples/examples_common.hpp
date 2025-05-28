@@ -40,7 +40,7 @@ protected:
     static constexpr const char* vkLayerLunargMonitorName = "VK_LAYER_LUNARG_monitor";
     static const tp::DebugMessageSeverityMask debugSeverity;
 
-    VkSurfaceKHR surface;
+    VkSurfaceKHR surface = nullptr;
     tp::OwningPtr<tp::Swapchain> swapchain;
     uint32_t windowWidth = 800;
     uint32_t windowHeight = 600;

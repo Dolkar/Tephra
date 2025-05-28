@@ -521,24 +521,29 @@ public:
         VkPipelineStageFlags vkStageMask,
         VkAccessFlags vkAccessMask);
 
-    // Docs TODO: Explain how input buffers are interpreted for direct vs indirect build
-    // TODO: Remove maxPrimitiveCounts from IndirectInfo? Or add them to regular info ??
-
     /// Processes acceleration structure builds or updates.
     /// @param buildInfos
     ///     The build info structures describing the details of each operation.
+    /// @remarks
+    ///     The sizes of the input geometry buffer views in tp::AccelerationStructureBuildInfo determine the number
+    ///     of primitives each acceleration structure will be built with for the respective geometry. As such, the
+    ///     size divided by the expected stride of the data must be below the maximum primitive count provided in
+    ///     the associated geometry setup structure that the destination acceleration structure was created with.
     /// @remarks
     ///     The individual builds or updates are processed asynchronously, without any synchronization between them.
     ///     This means that a BLAS and a TLAS that references it cannot be built within the same call.
     /// @see @vksymbol{vkCmdBuildAccelerationStructuresKHR}
     void cmdBuildAccelerationStructuresKHR(ArrayParameter<const AccelerationStructureBuildInfo> buildInfos);
 
-    /// Processes acceleration structure builds or updates with geometry offsets and counts sourced from a buffer.
+    /// Processes acceleration structure builds or updates with primitive counts sourced from an indirect buffer.
     /// @param buildInfos
     ///     The build info structures describing the details of each operation.
     /// @param indirectInfos
     ///     Additional structures that provide an indirect buffer for each operation from which geometry offsets and
     ///     counts are sourced from, overriding the values in the associated `buildInfos` structure.
+    /// @remarks
+    ///     The number of primitives in each geometry that each acceleration structure will be built with is determined
+    ///     by the contents of the build range buffers inside tp::AccelerationStructureBuildIndirectInfo.
     /// @remarks
     ///     The individual builds or updates are processed asynchronously, without any synchronization between them.
     ///     This means that a BLAS and a TLAS that references it cannot be built within the same call.

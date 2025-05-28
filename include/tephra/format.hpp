@@ -65,10 +65,12 @@ struct FormatCapabilities {
     }
 };
 
+/// Equality operator for tp::FormatCapabilities.
 constexpr bool operator==(const FormatCapabilities& lhs, const FormatCapabilities& rhs) {
     return lhs.usageMask == rhs.usageMask && lhs.featureMask == rhs.featureMask;
 }
 
+/// Inequality operator for tp::FormatCapabilities.
 constexpr bool operator!=(const FormatCapabilities& lhs, const FormatCapabilities& rhs) {
     return lhs.usageMask != rhs.usageMask || lhs.featureMask != rhs.featureMask;
 }

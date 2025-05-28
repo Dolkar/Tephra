@@ -680,8 +680,8 @@ void recordCommand(const JobData* job, PrimaryBufferRecorder& recorder, JobRecor
             vkIndirectStrides.push_back(buildData.indirectInfo.buildRangeStride);
             auto it = maxPrimitiveCounts.insert(
                 maxPrimitiveCounts.end(),
-                buildData.indirectInfo.maxPrimitiveCounts.begin(),
-                buildData.indirectInfo.maxPrimitiveCounts.end());
+                buildData.builder->getMaxPrimitiveCounts().begin(),
+                buildData.builder->getMaxPrimitiveCounts().end());
             maxPrimitiveCountPtrs.push_back(&*it);
         }
 

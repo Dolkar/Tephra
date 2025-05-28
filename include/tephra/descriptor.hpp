@@ -140,7 +140,9 @@ private:
     ResourceType resourceType;
 };
 
+/// Equality operator for tp::Descriptor.
 bool operator==(const Descriptor& lhs, const Descriptor& rhs);
+/// Inequality operator for tp::Descriptor.
 inline bool operator!=(const Descriptor& lhs, const Descriptor& rhs) {
     return !(lhs == rhs);
 }

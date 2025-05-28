@@ -163,16 +163,11 @@ struct StoredAccelerationStructureBuildInfo {
 };
 
 struct StoredAccelerationStructureBuildIndirectInfo {
-    ArrayView<uint32_t> maxPrimitiveCounts;
     StoredBufferView buildRangeBuffer;
     uint32_t buildRangeStride;
 
-    StoredAccelerationStructureBuildIndirectInfo(
-        const AccelerationStructureBuildIndirectInfo& info,
-        ArrayView<uint32_t> maxPrimitiveCounts)
-        : maxPrimitiveCounts(maxPrimitiveCounts),
-          buildRangeBuffer(info.buildRangeBuffer),
-          buildRangeStride(info.buildRangeStride) {}
+    StoredAccelerationStructureBuildIndirectInfo(const AccelerationStructureBuildIndirectInfo& info)
+        : buildRangeBuffer(info.buildRangeBuffer), buildRangeStride(info.buildRangeStride) {}
 };
 
 // Caching of AccelerationStructure handles - they depend on buffer, offset, size and type
