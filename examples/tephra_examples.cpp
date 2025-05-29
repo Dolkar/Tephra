@@ -19,12 +19,12 @@ std::unique_ptr<Example> createExample(std::ofstream& logFile, int exampleNumber
     bool debug = true;
 
     switch (exampleNumber) {
-    case 0:
-        return std::make_unique<CubeExample>(logFile, debug);
     case 1:
+        return std::make_unique<CubeExample>(logFile, debug);
+    case 2:
         return std::make_unique<CornellExample>(logFile, RenderingMethod::RayQuery, debug);
     default:
-        showErrorAndExit("Invalid example chosen", "Please provide number in range [0, 1]");
+        showErrorAndExit("Invalid example chosen", "Please provide number in range [1, 2]");
         return nullptr;
     }
 }
@@ -35,7 +35,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR pCmdLine,
     int argc;
     argv = CommandLineToArgvW(GetCommandLineW(), &argc);
 
-    int exampleNumber = 0;
+    int exampleNumber = 1;
     if (argc > 1) {
         exampleNumber = std::abs(std::wcstol(argv[1], nullptr, 10));
     }

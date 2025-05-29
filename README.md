@@ -112,12 +112,13 @@ The following features are already present:
 - Improved image and buffer views
 - Safe delayed destruction of Vulkan handles
 - Timestamp, occlusion and pipeline queries
+- Ray tracing using the ray query API
 - Interoperability with plain Vulkan (WIP)
 - Native support of commonly used Vulkan extensions (WIP)
 - Debug logging, statistics, tests and partial usage validation (WIP)
 
 The following features are planned and will likely be available in the future:
-- Ray tracing features (see raytracing branch)
+- Ray tracing pipeline support (ray tracing with ray queries is already present)
 - Better handling of dynamic pipeline state
 - Improved pipeline building and management
 - Vulkan profiles
@@ -127,6 +128,7 @@ The following features are out of scope for the library and won't be included:
 - Shader compilation and reflection - use the existing Vulkan ecosystem
 - Sparse buffers and images
 - Linear images
+- CPU-side acceleration structure building and serialization
 - Rendering algorithms - this is not a renderer or a game engine
 
 See the [user guide](https://dolkar.github.io/Tephra/user-guide.html) for more detailed explanations and inline code

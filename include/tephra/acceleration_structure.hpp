@@ -85,12 +85,12 @@ struct TriangleGeometrySetup {
     ///     The format of each vertex element.
     /// @param maxVertexIndex
     ///     The largest vertex index present in the index data.
-    /// @indexType
+    /// @param indexType
     ///     The type of each index element.
-    /// @hasTransform
+    /// @param hasTransform
     ///     If true, the geometry will include a transformation matrix from geometry space to the space of the
     ///     acceleration structure.
-    /// @flags
+    /// @param flags
     ///     Additional geometry flags.
     TriangleGeometrySetup(
         uint32_t maxTriangleCount,

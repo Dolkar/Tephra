@@ -1787,6 +1787,22 @@ bool Window::drawFrame() {
 @endcode
 
 <br><hr>
+@section ug-ray-tracing Ray tracing
+
+This section has not been written yet, though documentation for the API already exists. Notable elements are:
+- tp::DeviceExtension::KHR_AccelerationStructure and tp::DeviceExtension::KHR_RayQuery to enable the functionality.
+- tp::Device::allocateAccelerationStructureKHR and tp::Job::allocateLocalAccelerationStructureKHR for creating an
+acceleration structure.
+- The tp::AccelerationStructure itself and how it can be passed to shaders either through a descriptor or as device
+address.
+- tp::Job::cmdBuildAccelerationStructuresKHR and tp::Job::cmdBuildAccelerationStructuresIndirectKHR for building
+the acceleration structures.
+
+The ray tracing API in Vulkan is fairly complex and not all of it can be abstracted by Tephra, mainly the shader part.
+It is recommended to study existing online material like the
+<a href="https://nvpro-samples.github.io/vk_raytracing_tutorial_KHR/">NVIDIA Vulkan Ray Tracing Tutorial</a>.
+
+<br><hr>
 @section ug-other Other functionality
 @subsection ug-other-queries Queries
 
