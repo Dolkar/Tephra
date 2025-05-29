@@ -179,8 +179,7 @@ enum class BufferUsage : uint32_t {
     /// @remarks
     ///     Requires the @vksymbol{VkPhysicalDeviceVulkan12Features}::`bufferDeviceAddress` feature to be enabled.
     DeviceAddress = 1 << 8,
-    /// Allows the use of the buffer as a read-only input to an acceleration structure build operation
-    /// TODO!
+    /// Allows the use of the buffer as a read-only input to an acceleration structure build operation.
     /// @remarks
     ///     Requires the tp::DeviceExtension::KHR_AccelerationStructure device extension to be enabled.
     AccelerationStructureInputKHR = 1 << 9,

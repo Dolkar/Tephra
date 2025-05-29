@@ -579,6 +579,7 @@ struct StencilState {
 };
 TEPHRA_VULKAN_CONVERTIBLE_TO_VK_STRUCT(StencilState, VkStencilOpState);
 
+/// A shader-accessible device memory address.
 using DeviceAddress = VkDeviceAddress;
 
 }

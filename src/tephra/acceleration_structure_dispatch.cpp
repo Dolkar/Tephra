@@ -42,7 +42,7 @@ VkAccelerationStructureHandleKHR AccelerationStructureView::vkGetAccelerationStr
     }
 }
 
-bool tp::operator==(const AccelerationStructureView& lhs, const AccelerationStructureView& rhs) {
+bool operator==(const AccelerationStructureView& lhs, const AccelerationStructureView& rhs) {
     return lhs.accelerationStructure == rhs.accelerationStructure;
 }
 

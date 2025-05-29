@@ -3,7 +3,7 @@
 
 **License**: [MIT](https://github.com/Dolkar/Tephra/blob/main/LICENSE)
 
-**Current version**: [v0.5.3](https://dolkar.github.io/Tephra/changelog.html)
+**Current version**: [v0.6.0](https://dolkar.github.io/Tephra/changelog.html)
 
 **Links**: [User guide](https://dolkar.github.io/Tephra/user-guide.html) | [API Documentation](https://dolkar.github.io/Tephra/annotated.html) |
            [Discussions](https://github.com/Dolkar/Tephra/discussions)
@@ -28,6 +28,14 @@ and relevance. To that end, Tephra provides:
 - Debugging features, usage validation and testing suite (WIP)
 
 _Tephra is being used and partially developed by [Bohemia Interactive Simulations](https://bisimulations.com/)._
+
+<br/>
+<br/>
+<figure>
+    <div align="center"><img height="600" width="600" src="https://github.com/user-attachments/assets/402a48eb-9830-4fa0-a990-57e061845cf5"/></div>
+    <div align="center"><figcaption>Tephra path tracing example</figcaption></div>
+</figure>
+<br/>
 
 ### Comparison to OpenGL / DirectX 11
 

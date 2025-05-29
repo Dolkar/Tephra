@@ -246,7 +246,7 @@ public:
     /// @param debugName
     ///     The debug name identifier for the object.
     /// @remarks
-    ///     The use of this function requires the tp::DeviceExtension::KHR_Swapchain extension to be enabled.
+    ///     Use of this function requires the tp::DeviceExtension::KHR_Swapchain extension to be enabled.
     OwningPtr<Swapchain> createSwapchainKHR(
         const SwapchainSetup& setup,
         Swapchain* oldSwapchain = nullptr,
@@ -292,6 +292,8 @@ public:
     ///     The setup structure describing the object.
     /// @param debugName
     ///     The debug name identifier for the object.
+    /// @remarks
+    ///     Use of this function requires the tp::DeviceExtension::KHR_AccelerationStructure extension to be enabled.
     OwningPtr<AccelerationStructure> allocateAccelerationStructureKHR(
         const AccelerationStructureSetup& setup,
         const char* debugName = nullptr);
@@ -306,6 +308,8 @@ public:
     ///     The source acceleration structure must have been created with the
     ///     tp::AccelerationStructureFlag::AllowCompaction flag and its last build operation must have completed
     ///     execution on the device.
+    /// @remarks
+    ///     Use of this function requires the tp::DeviceExtension::KHR_AccelerationStructure extension to be enabled.
     OwningPtr<AccelerationStructure> allocateCompactedAccelerationStructureKHR(
         const AccelerationStructureView& srcAccelerationStructure,
         const char* debugName = nullptr);
