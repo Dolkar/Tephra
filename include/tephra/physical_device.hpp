@@ -32,6 +32,7 @@ namespace DeviceExtension {
     /// Adds support for the `SPV_KHR_ray_query` SPIR-V extension, allowing the use of `rayQuery` calls from within
     /// various shader stages.
     /// Requires the tp::DeviceExtension::KHR_AccelerationStructure extension to be present and enabled.
+    /// @see @vksymbol{VK_KHR_ray_query}
     const char* const KHR_RayQuery = VK_KHR_RAY_QUERY_EXTENSION_NAME;
     /// Adds support for querying the actual amount of memory used by the process as well as the estimated budget of
     /// how much total memory the current process can use at any given time.
