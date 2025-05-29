@@ -13,13 +13,16 @@ The first example, chosen by default or with `1` as the sole parameter, is a rei
 C++ cube demo</a>, displaying a textured rotating cube.
 
 The second example that runs when passed `2` as the command line parameter, is a ray tracing demo that implements a
-simple path tracer of a Cornell box.
+simple path tracer of a Cornell box. It uses the `trace_ray_query.hlsl` compute shader that needs to be compiled to
+SPIR-V. If you are not using the VS solution, you will need to compile it yourself with DXC
+`-HV 2021 -fvk-use-scalar-layout` and copy it to the target directory. Can't be bothered to learn enough cmake for this,
+sorry.
 
 The examples do not use any third party windowing library, both for ease of distribution and to be a faithful recreation
 of the official cube demo. In your own code, you should preferably use something like GLFW instead, see the
 <a href="https://www.glfw.org/docs/3.3/vulkan_guide.html">GLFW Vulkan guide</a> for details. All the platform-dependent
-code and the window event loop is contained in `/examples/window.hpp`. It is mainly tested on Windows, so if you find
-issues on other platforms, please let me know or submit a PR :).
+code and the window event loop is contained in `/examples/window.hpp`. It is mainly tested on Windows, if you find
+issues on other platforms, please submit a PR :).
 
 The `/examples/examples_common.hpp` file contains an `Example` abstract class with a number of virtual methods used to
 update and render images. This allows the windowing class to run any example that implements that interface. 

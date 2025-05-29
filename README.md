@@ -144,7 +144,7 @@ runnable showcase.
 ## Prerequisities
 
 - Tephra is a C++ library. It makes use of C++17 features, the standard library and C++ exceptions
-- Visual Studio 2022 (see build/Tephra.sln) or CMake 3.15
+- Visual Studio 2022 (see build/Tephra.sln) or CMake 3.15 (limited support of tests and examples)
 - Vulkan headers version 1.4.304 or newer, provided with the SDK [here](https://www.lunarg.com/vulkan-sdk/)
 - Compatible devices must support Vulkan 1.3 or newer
 - While any x64 platform is supported, Tephra is being used and tested mainly on Windows
