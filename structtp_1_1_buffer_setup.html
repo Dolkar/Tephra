@@ -73,22 +73,24 @@
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a52c282a979b85ca7b3835fdc90cbede5" class="m-doc">BufferSetup</a>(</span><span class="m-doc-wrap">uint64_t size,
+              <span class="m-doc-wrap-bumper"><a href="#a6f10dd301db56316ad1fd2f74f21cfd6" class="m-doc">BufferSetup</a>(</span><span class="m-doc-wrap">uint64_t size,
               <a href="namespacetp.html#a9243d20f91ff4e6b0982f4eb736929f2" class="m-doc">BufferUsageMask</a> usage,
               VkBufferUsageFlags vkAdditionalUsage = 0,
-              VmaAllocationCreateFlags vmaAdditionalFlags = 0)</span>
+              VmaAllocationCreateFlags vmaAdditionalFlags = 0,
+              uint32_t additionalAlignment = 1)</span>
             </dt>
             <dd></dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a52c282a979b85ca7b3835fdc90cbede5"><div>
+          <section class="m-doc-details" id="a6f10dd301db56316ad1fd2f74f21cfd6"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> tp::<wbr />BufferSetup::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a52c282a979b85ca7b3835fdc90cbede5" class="m-doc-self">BufferSetup</a>(</span><span class="m-doc-wrap">uint64_t size,
+              <span class="m-doc-wrap-bumper"> tp::<wbr />BufferSetup::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6f10dd301db56316ad1fd2f74f21cfd6" class="m-doc-self">BufferSetup</a>(</span><span class="m-doc-wrap">uint64_t size,
               <a href="namespacetp.html#a9243d20f91ff4e6b0982f4eb736929f2" class="m-doc">BufferUsageMask</a> usage,
               VkBufferUsageFlags vkAdditionalUsage = 0,
-              VmaAllocationCreateFlags vmaAdditionalFlags = 0)</span></span>
+              VmaAllocationCreateFlags vmaAdditionalFlags = 0,
+              uint32_t additionalAlignment = 1)</span></span>
             </h3>
             <table class="m-table m-fullwidth m-flat">
               <thead>
@@ -110,6 +112,10 @@
                 <tr>
                   <td>vmaAdditionalFlags</td>
                   <td>A mask of additional VMA allocation create flags that will be passed to   &lt;a href=&#x27;<a href="https://gpuopen-librariesandsdks.github.io/VulkanMemoryAllocator/html/struct_vma_allocation_create_info.html" class="m-doc-external">https://gpuopen-librariesandsdks.github.io/VulkanMemoryAllocator/html/struct_<wbr />vma_<wbr />allocation_<wbr />create_<wbr />info.html</a>&quot;&gt;VmaAllocationCreateInfo</td>
+                </tr>
+                <tr>
+                  <td>additionalAlignment</td>
+                  <td>Extra user-specified alignment that should be taken into account for this buffer and its views. Must be a power of two.</td>
                 </tr>
               </tbody>
             </table>

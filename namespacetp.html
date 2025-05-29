@@ -87,6 +87,34 @@
           <h2><a href="#nested-classes">Classes</a></h2>
           <dl class="m-doc">
             <dt>
+              struct <a href="structtp_1_1_a_a_b_b_geometry_build_info.html" class="m-doc">AABBGeometryBuildInfo</a>
+            </dt>
+            <dd>Information for building an AABB geometry of a bottom-level acceleration structure.</dd>
+            <dt>
+              struct <a href="structtp_1_1_a_a_b_b_geometry_setup.html" class="m-doc">AABBGeometrySetup</a>
+            </dt>
+            <dd>Top-level acceleration structure geometry containing axis-aligned bounding boxes.</dd>
+            <dt>
+              class <a href="classtp_1_1_acceleration_structure.html" class="m-doc">AccelerationStructure</a>
+            </dt>
+            <dd>Represents an opaque acceleration structure used for hardware-accelerated ray tracing.</dd>
+            <dt>
+              struct <a href="structtp_1_1_acceleration_structure_build_indirect_info.html" class="m-doc">AccelerationStructureBuildIndirectInfo</a>
+            </dt>
+            <dd>Additional information for an indirect build or update of an acceleration structure.</dd>
+            <dt>
+              struct <a href="structtp_1_1_acceleration_structure_build_info.html" class="m-doc">AccelerationStructureBuildInfo</a>
+            </dt>
+            <dd>Information for building or updating an acceleration structure.</dd>
+            <dt>
+              struct <a href="structtp_1_1_acceleration_structure_setup.html" class="m-doc">AccelerationStructureSetup</a>
+            </dt>
+            <dd>Used as configuration for creating a new <a href="classtp_1_1_acceleration_structure.html" class="m-doc">tp::<wbr />AccelerationStructure</a> object.</dd>
+            <dt>
+              class <a href="classtp_1_1_acceleration_structure_view.html" class="m-doc">AccelerationStructureView</a>
+            </dt>
+            <dd>Represents a non-owning view of a <a href="classtp_1_1_acceleration_structure.html" class="m-doc">tp::<wbr />AccelerationStructure</a>.</dd>
+            <dt>
               struct <a href="structtp_1_1_acquired_image_info.html" class="m-doc">AcquiredImageInfo</a>
             </dt>
             <dd>Describes the details of an image acquired from a <a href="classtp_1_1_swapchain.html" class="m-doc">tp::<wbr />Swapchain</a> and its required synchronization semaphores with the acquire and present operations.</dd>
@@ -160,7 +188,7 @@
             <dt>
               class <a href="classtp_1_1_buffer_view.html" class="m-doc">BufferView</a>
             </dt>
-            <dd>Represents the view of a contiguous range of <a href="classtp_1_1_buffer.html" class="m-doc">tp::<wbr />Buffer</a> memory.</dd>
+            <dd>Represents a non-owning view of a contiguous range of <a href="classtp_1_1_buffer.html" class="m-doc">tp::<wbr />Buffer</a> memory.</dd>
             <dt>
               struct <a href="structtp_1_1_clear_value.html" class="m-doc">ClearValue</a>
             </dt>
@@ -246,7 +274,7 @@
             <dt>
               class <a href="classtp_1_1_descriptor_set_view.html" class="m-doc">DescriptorSetView</a>
             </dt>
-            <dd>Represents the non-owning view of a <a href="classtp_1_1_descriptor_set.html" class="m-doc">tp::<wbr />DescriptorSet</a>.</dd>
+            <dd>Represents a non-owning view of a <a href="classtp_1_1_descriptor_set.html" class="m-doc">tp::<wbr />DescriptorSet</a>.</dd>
             <dt>
               class <a href="classtp_1_1_device.html" class="m-doc">Device</a>
             </dt>
@@ -323,7 +351,7 @@
             <dt>
               struct <a href="structtp_1_1_image_setup.html" class="m-doc">ImageSetup</a>
             </dt>
-            <dd>Used as configuration for creating a new <a href="classtp_1_1_image.html" class="m-doc">tp::<wbr />Image</a> object object.</dd>
+            <dd>Used as configuration for creating a new <a href="classtp_1_1_image.html" class="m-doc">tp::<wbr />Image</a> object.</dd>
             <dt>
               struct <a href="structtp_1_1_image_subresource.html" class="m-doc">ImageSubresource</a>
             </dt>
@@ -339,11 +367,19 @@
             <dt>
               class <a href="classtp_1_1_image_view.html" class="m-doc">ImageView</a>
             </dt>
-            <dd>Represents the view of a subresource range of <a href="classtp_1_1_image.html" class="m-doc">tp::<wbr />Image</a>.</dd>
+            <dd>Represents a non-owning view of a subresource range of <a href="classtp_1_1_image.html" class="m-doc">tp::<wbr />Image</a>.</dd>
             <dt>
               struct <a href="structtp_1_1_image_view_setup.html" class="m-doc">ImageViewSetup</a>
             </dt>
             <dd>Used as configuration for creating a new <a href="classtp_1_1_image_view.html" class="m-doc">tp::<wbr />ImageView</a> object.</dd>
+            <dt>
+              struct <a href="structtp_1_1_instance_geometry_build_info.html" class="m-doc">InstanceGeometryBuildInfo</a>
+            </dt>
+            <dd>Information for building an instance geometry of a top-level acceleration structure.</dd>
+            <dt>
+              struct <a href="structtp_1_1_instance_geometry_setup.html" class="m-doc">InstanceGeometrySetup</a>
+            </dt>
+            <dd>Top-level acceleration structure geometry containing references to bottom-level acceleration structures.</dd>
             <dt>
               class <a href="classtp_1_1_job.html" class="m-doc">Job</a>
             </dt>
@@ -522,6 +558,14 @@
             </dt>
             <dd>Too many objects of the same type have already been created.</dd>
             <dt>
+              struct <a href="structtp_1_1_triangle_geometry_build_info.html" class="m-doc">TriangleGeometryBuildInfo</a>
+            </dt>
+            <dd>Information for building a triangle geometry of a bottom-level acceleration structure.</dd>
+            <dt>
+              struct <a href="structtp_1_1_triangle_geometry_setup.html" class="m-doc">TriangleGeometrySetup</a>
+            </dt>
+            <dd>Bottom-level acceleration structure geometry containing triangles.</dd>
+            <dt>
               class <a href="classtp_1_1_unsupported_operation_error.html" class="m-doc">UnsupportedOperationError</a>
             </dt>
             <dd>The operation could not be completed because it is not supported by the platform or device.</dd>
@@ -572,6 +616,29 @@
         <section id="enum-members">
           <h2><a href="#enum-members">Enums</a></h2>
           <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">enum class <a href="#a637bbc82665c44058d0e21ebf219c2b5" class="m-doc">AccelerationStructureBuildMode</a>: uint32_t { </span><span class="m-doc-wrap"><a href="#a637bbc82665c44058d0e21ebf219c2b5ac74c1f42f141c011ca6bd8b1114fc3d0" class="m-doc">Build</a> = VK_BUILD_ACCELERATION_STRUCTURE_MODE_BUILD_KHR,
+              <a href="#a637bbc82665c44058d0e21ebf219c2b5a06933067aafd48425d67bcb01bba5cb6" class="m-doc">Update</a> = VK_BUILD_ACCELERATION_STRUCTURE_MODE_UPDATE_KHR }</span>
+            </dt>
+            <dd>The type of build operation performed on an acceleration structure.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">enum class <a href="#a6e26f095e595e55c1b963c6172e48315" class="m-doc">AccelerationStructureCopyMode</a>: uint32_t { </span><span class="m-doc-wrap"><a href="#a6e26f095e595e55c1b963c6172e48315aff24590464659ee8cdec688128c35f89" class="m-doc">Clone</a> = VK_COPY_ACCELERATION_STRUCTURE_MODE_CLONE_KHR,
+              <a href="#a6e26f095e595e55c1b963c6172e48315ab1fe2c2a59e883740e7ea87667e44a24" class="m-doc">Compact</a> = VK_COPY_ACCELERATION_STRUCTURE_MODE_COMPACT_KHR }</span>
+            </dt>
+            <dd>The type of copy operation performed on an acceleration structure.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">enum class <a href="#aae6c86baa32438aa436cf7fd2433265e" class="m-doc">AccelerationStructureFlag</a>: uint32_t { </span><span class="m-doc-wrap"><a href="#aae6c86baa32438aa436cf7fd2433265ea8ab51429a840a4aabc6a1cad196afd74" class="m-doc">AllowUpdate</a> = VK_BUILD_ACCELERATION_STRUCTURE_ALLOW_UPDATE_BIT_KHR,
+              <a href="#aae6c86baa32438aa436cf7fd2433265ea6c52a1b1f89b40a9115d3c5ba38e098c" class="m-doc">AllowCompaction</a> = VK_BUILD_ACCELERATION_STRUCTURE_ALLOW_COMPACTION_BIT_KHR,
+              <a href="#aae6c86baa32438aa436cf7fd2433265ea860dc783775ff96ea27fc5bac370dffb" class="m-doc">PreferFastTrace</a> = VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_KHR,
+              <a href="#aae6c86baa32438aa436cf7fd2433265ea5a8b4bb923f6f67a8ec04c851929860d" class="m-doc">PreferFastBuild</a> = VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_BUILD_BIT_KHR,
+              <a href="#aae6c86baa32438aa436cf7fd2433265ea17169a95ba75f00986cc45ab316cbc52" class="m-doc">LowMemory</a> = VK_BUILD_ACCELERATION_STRUCTURE_LOW_MEMORY_BIT_KHR }</span>
+            </dt>
+            <dd>Flags for acceleration structure controlling the process how it is built.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">enum class <a href="#a6eacba52f16ea45d2a7ebf97d1524389" class="m-doc">AccelerationStructureType</a>: uint32_t { </span><span class="m-doc-wrap"><a href="#a6eacba52f16ea45d2a7ebf97d1524389adaa4ad87b52566898a9a6df85657c082" class="m-doc">TopLevel</a> = VK_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL_KHR,
+              <a href="#a6eacba52f16ea45d2a7ebf97d1524389ad60fec05ff0af3dfad320140e55c5868" class="m-doc">BottomLevel</a> = VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_KHR }</span>
+            </dt>
+            <dd>Type of ray tracing acceleration structure. Top level contains references to bottom level acceleration structures, which then contain the actual geometry.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">enum class <a href="#aa57e260754413ae9a64d57adb264c384" class="m-doc">AttachmentLoadOp</a>: uint32_t { </span><span class="m-doc-wrap"><a href="#aa57e260754413ae9a64d57adb264c384af19dbf2edb3a0bd74b0524d960ff21eb" class="m-doc">Load</a> = VK_ATTACHMENT_LOAD_OP_LOAD,
               <a href="#aa57e260754413ae9a64d57adb264c384adc30bc0c7914db5918da4263fce93ad2" class="m-doc">Clear</a> = VK_ATTACHMENT_LOAD_OP_CLEAR,
@@ -631,7 +698,8 @@
               <a href="#aab7f7936c98d373925f0e1728496c63da7c3895116254ff0417e58b6286de27c0" class="m-doc">IndexBuffer</a> = 1 &lt;&lt; 5,
               <a href="#aab7f7936c98d373925f0e1728496c63da10461f19cdb5aadba2fc9986be6400bd" class="m-doc">VertexBuffer</a> = 1 &lt;&lt; 6,
               <a href="#aab7f7936c98d373925f0e1728496c63da7e5abafe55b7f7e20d417fe9c967d69e" class="m-doc">IndirectBuffer</a> = 1 &lt;&lt; 7,
-              <a href="#aab7f7936c98d373925f0e1728496c63daa85fec0d8738bc31273f1a5d6d10e618" class="m-doc">DeviceAddress</a> = 1 &lt;&lt; 8 }</span>
+              <a href="#aab7f7936c98d373925f0e1728496c63daa85fec0d8738bc31273f1a5d6d10e618" class="m-doc">DeviceAddress</a> = 1 &lt;&lt; 8,
+              <a href="#aab7f7936c98d373925f0e1728496c63dac3644c9eba070bfe6d17bbe090848187" class="m-doc">AccelerationStructureInputKHR</a> = 1 &lt;&lt; 9 }</span>
             </dt>
             <dd>The allowed usage of a <a href="classtp_1_1_buffer.html" class="m-doc">tp::<wbr />Buffer</a>.</dd>
             <dt>
@@ -716,7 +784,8 @@
               <a href="#a3dccbef68c07e939a1f37825018d2c67a88f133adfed6c854e5731cdffbf208cf" class="m-doc">UniformBuffer</a> = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
               <a href="#a3dccbef68c07e939a1f37825018d2c67a439f57c2c466c89db942b3de48298b2b" class="m-doc">StorageBuffer</a> = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
               <a href="#a3dccbef68c07e939a1f37825018d2c67a517b91f0588b3bf6c80ff3b19b2a7f57" class="m-doc">UniformBufferDynamic</a> = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
-              <a href="#a3dccbef68c07e939a1f37825018d2c67ada8c94227ee0e3b5cd40da12d594ad55" class="m-doc">StorageBufferDynamic</a> = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC }</span>
+              <a href="#a3dccbef68c07e939a1f37825018d2c67ada8c94227ee0e3b5cd40da12d594ad55" class="m-doc">StorageBufferDynamic</a> = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC,
+              <a href="#a3dccbef68c07e939a1f37825018d2c67ab71cbf0f3a72c48b0f1efb5c9edf521d" class="m-doc">AccelerationStructureKHR</a> = VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR }</span>
             </dt>
             <dd>Specifies how a certain resource is to be accessed from within a shader.</dd>
             <dt>
@@ -1023,6 +1092,11 @@
             </dt>
             <dd>The usage of a resource using a particular format.</dd>
             <dt>
+              <span class="m-doc-wrap-bumper">enum class <a href="#a1349df1219b7ce011c582632f2d291ad" class="m-doc">GeometryFlag</a>: uint32_t { </span><span class="m-doc-wrap"><a href="#a1349df1219b7ce011c582632f2d291adafaa90538de35640e4b1e31ccf35b6eb5" class="m-doc">Opaque</a> = VK_GEOMETRY_OPAQUE_BIT_KHR,
+              <a href="#a1349df1219b7ce011c582632f2d291adaa82e8e1364bc9f3a4d9e73bad2e430cb" class="m-doc">NoDuplicateAnyHitInvocation</a> = VK_GEOMETRY_NO_DUPLICATE_ANY_HIT_INVOCATION_BIT_KHR }</span>
+            </dt>
+            <dd>Additional flags for acceleration structure geometries.</dd>
+            <dt>
               <span class="m-doc-wrap-bumper">enum class <a href="#ab98e45acd8507475443cd54a645ca76b" class="m-doc">ImageAspect</a>: uint32_t { </span><span class="m-doc-wrap"><a href="#ab98e45acd8507475443cd54a645ca76bacb5feb1b7314637725a2e73bdc9f7295" class="m-doc">Color</a> = VK_IMAGE_ASPECT_COLOR_BIT,
               <a href="#ab98e45acd8507475443cd54a645ca76ba675056ad1441b6375b2c5abd48c27ef1" class="m-doc">Depth</a> = VK_IMAGE_ASPECT_DEPTH_BIT,
               <a href="#ab98e45acd8507475443cd54a645ca76bad821e7ccd4d4c25a491ba1a9ea248895" class="m-doc">Stencil</a> = VK_IMAGE_ASPECT_STENCIL_BIT,
@@ -1063,7 +1137,8 @@
             <dd>The dimensionality of an image view.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">enum class <a href="#afea3b5dc483f1a9ae7d17decbf3252a5" class="m-doc">IndexType</a>: uint32_t { </span><span class="m-doc-wrap"><a href="#afea3b5dc483f1a9ae7d17decbf3252a5a8bd950a9d7779b83f5c30046c9aaf1cf" class="m-doc">UInt16</a> = VK_INDEX_TYPE_UINT16,
-              <a href="#afea3b5dc483f1a9ae7d17decbf3252a5ae7956ed7be1c5025a27ed3cb42a396bd" class="m-doc">UInt32</a> = VK_INDEX_TYPE_UINT32 }</span>
+              <a href="#afea3b5dc483f1a9ae7d17decbf3252a5ae7956ed7be1c5025a27ed3cb42a396bd" class="m-doc">UInt32</a> = VK_INDEX_TYPE_UINT32,
+              <a href="#afea3b5dc483f1a9ae7d17decbf3252a5ae9559543973e58a6e6773e6d01024215" class="m-doc">NoneKHR</a> = VK_INDEX_TYPE_NONE_KHR }</span>
             </dt>
             <dd>The type of values of an index buffer.</dd>
             <dt>
@@ -1201,6 +1276,7 @@
               <a href="#a2a231ee79583b288a3be330f401bf174ad253344c54f0c09801a16a5a84fb628f" class="m-doc">ComputeShaderStorage</a> = 1 &lt;&lt; 21,
               <a href="#a2a231ee79583b288a3be330f401bf174a261def3b0ac3b30093354c6c51acae81" class="m-doc">ComputeShaderSampled</a> = 1 &lt;&lt; 22,
               <a href="#a2a231ee79583b288a3be330f401bf174ab86dc285fc92c2769bb5cc9963821ee8" class="m-doc">ComputeShaderUniform</a> = 1 &lt;&lt; 23,
+              <a href="#a2a231ee79583b288a3be330f401bf174ab89f9570f3451babc575a9214e96a609" class="m-doc">AccelerationStructureBuildKHR</a> = 1ull &lt;&lt; 61,
               <a href="#a2a231ee79583b288a3be330f401bf174ae53d1b98a6b6b169a92a8cac08ac0534" class="m-doc">ImagePresentKHR</a> = 1ull &lt;&lt; 62,
               <a href="#a2a231ee79583b288a3be330f401bf174a88183b946cc5f0e8c96b2e66e1c74a7e" class="m-doc">Unknown</a> = 1ull &lt;&lt; 63 }</span>
             </dt>
@@ -1351,6 +1427,10 @@
           <h2><a href="#typedef-members">Typedefs</a></h2>
           <dl class="m-doc">
             <dt>
+              using <a href="#a160e586bcdd2466c3a29fb6671d8aaa5" class="m-doc">AccelerationStructureFlagMask</a> = <a href="classtp_1_1_enum_bit_mask.html" class="m-doc">EnumBitMask</a>&lt;<a href="namespacetp.html#aae6c86baa32438aa436cf7fd2433265e" class="m-doc">AccelerationStructureFlag</a>&gt;
+            </dt>
+            <dd></dd>
+            <dt>
               using <a href="#a9243d20f91ff4e6b0982f4eb736929f2" class="m-doc">BufferUsageMask</a> = <a href="classtp_1_1_enum_bit_mask.html" class="m-doc">EnumBitMask</a>&lt;<a href="namespacetp.html#aab7f7936c98d373925f0e1728496c63d" class="m-doc">BufferUsage</a>&gt;
             </dt>
             <dd></dd>
@@ -1394,12 +1474,20 @@
               using <a href="#a46dbc8014026e307237a97d958a5ca5f" class="m-doc">DescriptorSetFlagMask</a> = <a href="classtp_1_1_enum_bit_mask.html" class="m-doc">EnumBitMask</a>&lt;<a href="namespacetp.html#afeffbd775f102eab953d2e15c407f65c" class="m-doc">DescriptorSetFlag</a>&gt;
             </dt>
             <dd></dd>
+            <dt id="a44928c7a17be2c7370000d16a223c955">
+              using <a href="#a44928c7a17be2c7370000d16a223c955" class="m-doc-self">DeviceAddress</a> = VkDeviceAddress
+            </dt>
+            <dd>A shader-accessible device memory address.</dd>
             <dt>
               using <a href="#a20d57edd9c8971de8f89955fb20b8512" class="m-doc">FormatFeatureMask</a> = <a href="classtp_1_1_enum_bit_mask.html" class="m-doc">EnumBitMask</a>&lt;<a href="namespacetp.html#a810f0af83c826b971537fa367f479c2c" class="m-doc">FormatFeature</a>&gt;
             </dt>
             <dd></dd>
             <dt>
               using <a href="#ad50c846c9dc5ebc6bf29c2b6b3f5feac" class="m-doc">FormatUsageMask</a> = <a href="classtp_1_1_enum_bit_mask.html" class="m-doc">EnumBitMask</a>&lt;<a href="namespacetp.html#aa73f5415779ee4a54698b9167399ce95" class="m-doc">FormatUsage</a>&gt;
+            </dt>
+            <dd></dd>
+            <dt>
+              using <a href="#aeb2c3b5f837a7acb4c1b321699dc09bc" class="m-doc">GeometryFlagMask</a> = <a href="classtp_1_1_enum_bit_mask.html" class="m-doc">EnumBitMask</a>&lt;<a href="namespacetp.html#a1349df1219b7ce011c582632f2d291ad" class="m-doc">GeometryFlag</a>&gt;
             </dt>
             <dd></dd>
             <dt>
@@ -1525,6 +1613,21 @@
               <span class="m-doc-wrap-bumper">auto <a href="#ac3403e6b46916887af481dbed58f1fb1" class="m-doc-self">getVkRenderingInfoExtStructureType</a>(</span><span class="m-doc-wrap">) -&gt; VkStructureType <span class="m-label m-flat m-danger">deleted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Returns the   <a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkStructureType.html" class="m-doc-external">VkStructureType</a> enum value corresponding to the given Vulkan structure type. These structures extend   <a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkRenderingInfo.html" class="m-doc-external">VkRenderingInfo</a> and can be used in <a href="structtp_1_1_render_pass_setup.html" class="m-doc">tp::<wbr />RenderPassSetup</a>.</dd>
+            <dt id="a205636c92f77467fa799df88974b7ccf">
+              <span class="m-doc-wrap-bumper">auto <a href="#a205636c92f77467fa799df88974b7ccf" class="m-doc-self">operator!=</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_acceleration_structure_view.html" class="m-doc">AccelerationStructureView</a>&amp; lhs,
+              const <a href="classtp_1_1_acceleration_structure_view.html" class="m-doc">AccelerationStructureView</a>&amp; rhs) -&gt; bool</span>
+            </dt>
+            <dd>Inequality operator for <a href="classtp_1_1_acceleration_structure_view.html" class="m-doc">tp::<wbr />AccelerationStructureView</a>.</dd>
+            <dt id="a048f0f3b15e7cfbc652bce4bddf26223">
+              <span class="m-doc-wrap-bumper">auto <a href="#a048f0f3b15e7cfbc652bce4bddf26223" class="m-doc-self">operator!=</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_attachment_blend_state.html" class="m-doc">AttachmentBlendState</a>&amp; lhs,
+              const <a href="structtp_1_1_attachment_blend_state.html" class="m-doc">AttachmentBlendState</a>&amp; rhs) -&gt; bool</span>
+            </dt>
+            <dd>Inequality operator for <a href="structtp_1_1_attachment_blend_state.html" class="m-doc">tp::<wbr />AttachmentBlendState</a>.</dd>
+            <dt id="aa27c6cb8e09e277e181e2a9c75fd7780">
+              <span class="m-doc-wrap-bumper">auto <a href="#aa27c6cb8e09e277e181e2a9c75fd7780" class="m-doc-self">operator!=</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_blend_state.html" class="m-doc">BlendState</a>&amp; lhs,
+              const <a href="structtp_1_1_blend_state.html" class="m-doc">BlendState</a>&amp; rhs) -&gt; bool</span>
+            </dt>
+            <dd>Inequality operator for <a href="structtp_1_1_blend_state.html" class="m-doc">tp::<wbr />BlendState</a>.</dd>
             <dt id="afbac767ca250ef4495e83a45f8bc82b0">
               <span class="m-doc-wrap-bumper">auto <a href="#afbac767ca250ef4495e83a45f8bc82b0" class="m-doc-self">operator!=</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_buffer.html" class="m-doc">Buffer</a>&amp; lhs,
               const <a href="classtp_1_1_buffer.html" class="m-doc">Buffer</a>&amp; rhs) -&gt; bool</span>
@@ -1535,6 +1638,16 @@
               const <a href="classtp_1_1_buffer_view.html" class="m-doc">BufferView</a>&amp; rhs) -&gt; bool</span>
             </dt>
             <dd>Inequality operator for <a href="classtp_1_1_buffer_view.html" class="m-doc">tp::<wbr />BufferView</a>.</dd>
+            <dt id="af729cc737c9db4fcff910fa24cd1ba19">
+              <span class="m-doc-wrap-bumper">auto <a href="#af729cc737c9db4fcff910fa24cd1ba19" class="m-doc-self">operator!=</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_descriptor.html" class="m-doc">Descriptor</a>&amp; lhs,
+              const <a href="classtp_1_1_descriptor.html" class="m-doc">Descriptor</a>&amp; rhs) -&gt; bool</span>
+            </dt>
+            <dd>Inequality operator for <a href="classtp_1_1_descriptor.html" class="m-doc">tp::<wbr />Descriptor</a>.</dd>
+            <dt id="aa4796be5e3973341c4aaf75093d6571f">
+              <span class="m-doc-wrap-bumper">auto <a href="#aa4796be5e3973341c4aaf75093d6571f" class="m-doc-self">operator!=</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_descriptor_set_view.html" class="m-doc">DescriptorSetView</a>&amp; lhs,
+              const <a href="classtp_1_1_descriptor_set_view.html" class="m-doc">DescriptorSetView</a>&amp; rhs) -&gt; bool</span>
+            </dt>
+            <dd>Inequality operator for <a href="classtp_1_1_descriptor_set_view.html" class="m-doc">tp::<wbr />DescriptorSetView</a>.</dd>
             <dt id="aebc3835df2e83a7dfbf8507c628d82cd">
               <span class="m-doc-wrap-bumper">auto <a href="#aebc3835df2e83a7dfbf8507c628d82cd" class="m-doc-self">operator!=</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_device_queue.html" class="m-doc">DeviceQueue</a>&amp; lhs,
               const <a href="structtp_1_1_device_queue.html" class="m-doc">DeviceQueue</a>&amp; rhs) -&gt; bool <span class="m-label m-flat m-primary">constexpr</span></span>
@@ -1545,6 +1658,11 @@
               const <a href="structtp_1_1_external_semaphore.html" class="m-doc">ExternalSemaphore</a>&amp; rhs) -&gt; bool <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Inequality operator for <a href="structtp_1_1_external_semaphore.html" class="m-doc">tp::<wbr />ExternalSemaphore</a>.</dd>
+            <dt id="a0860437a184e103bd079d5ab91bd9f9a">
+              <span class="m-doc-wrap-bumper">auto <a href="#a0860437a184e103bd079d5ab91bd9f9a" class="m-doc-self">operator!=</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_format_capabilities.html" class="m-doc">FormatCapabilities</a>&amp; lhs,
+              const <a href="structtp_1_1_format_capabilities.html" class="m-doc">FormatCapabilities</a>&amp; rhs) -&gt; bool <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Inequality operator for <a href="structtp_1_1_format_capabilities.html" class="m-doc">tp::<wbr />FormatCapabilities</a>.</dd>
             <dt id="ad181240a4418cd7546c5c74405c3d13a">
               <span class="m-doc-wrap-bumper">auto <a href="#ad181240a4418cd7546c5c74405c3d13a" class="m-doc-self">operator!=</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_image.html" class="m-doc">Image</a>&amp; lhs,
               const <a href="classtp_1_1_image.html" class="m-doc">Image</a>&amp; rhs) -&gt; bool</span>
@@ -1560,12 +1678,42 @@
               const <a href="structtp_1_1_job_semaphore.html" class="m-doc">JobSemaphore</a>&amp; rhs) -&gt; bool <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Inequality operator for <a href="structtp_1_1_job_semaphore.html" class="m-doc">tp::<wbr />JobSemaphore</a>.</dd>
+            <dt id="aed16a49e8c95745af65822ee6cb0558e">
+              <span class="m-doc-wrap-bumper">auto <a href="#aed16a49e8c95745af65822ee6cb0558e" class="m-doc-self">operator!=</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_version.html" class="m-doc">Version</a>&amp; lhs,
+              const <a href="structtp_1_1_version.html" class="m-doc">Version</a>&amp; rhs) -&gt; bool <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Inequality operator for <a href="structtp_1_1_version.html" class="m-doc">tp::<wbr />Version</a>.</dd>
             <dt id="a0f221f3aa5cc6c52295b968faeb707dd">
               <div class="m-doc-template">template&lt;typename T, VkObjectType Id&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#a0f221f3aa5cc6c52295b968faeb707dd" class="m-doc-self">operator!=</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_vk_object_handle.html" class="m-doc">VkObjectHandle</a>&lt;T, Id&gt;&amp; lhs,
               const <a href="structtp_1_1_vk_object_handle.html" class="m-doc">VkObjectHandle</a>&lt;T, Id&gt;&amp; rhs) -&gt; bool <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Inequality operator for <a href="structtp_1_1_vk_object_handle.html" class="m-doc">tp::<wbr />VkObjectHandle</a>.</dd>
+            <dt id="a8492476d3fa3a211786cc75838ae707f">
+              <span class="m-doc-wrap-bumper">auto <a href="#a8492476d3fa3a211786cc75838ae707f" class="m-doc-self">operator&lt;</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_version.html" class="m-doc">Version</a>&amp; lhs,
+              const <a href="structtp_1_1_version.html" class="m-doc">Version</a>&amp; rhs) -&gt; bool <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Less-than operator for <a href="structtp_1_1_version.html" class="m-doc">tp::<wbr />Version</a>.</dd>
+            <dt id="a0e621747a84272862e70c7a15cae5ee8">
+              <span class="m-doc-wrap-bumper">auto <a href="#a0e621747a84272862e70c7a15cae5ee8" class="m-doc-self">operator&lt;=</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_version.html" class="m-doc">Version</a>&amp; lhs,
+              const <a href="structtp_1_1_version.html" class="m-doc">Version</a>&amp; rhs) -&gt; bool <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Less-or-equal-than operator for <a href="structtp_1_1_version.html" class="m-doc">tp::<wbr />Version</a>.</dd>
+            <dt id="a4c3fdaf29592d33de7642674f7bf31d7">
+              <span class="m-doc-wrap-bumper">auto <a href="#a4c3fdaf29592d33de7642674f7bf31d7" class="m-doc-self">operator==</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_acceleration_structure_view.html" class="m-doc">AccelerationStructureView</a>&amp; lhs,
+              const <a href="classtp_1_1_acceleration_structure_view.html" class="m-doc">AccelerationStructureView</a>&amp; rhs) -&gt; bool</span>
+            </dt>
+            <dd>Equality operator for <a href="classtp_1_1_acceleration_structure_view.html" class="m-doc">tp::<wbr />AccelerationStructureView</a>.</dd>
+            <dt id="a7d819affe72d34c796df2a6adf5f1249">
+              <span class="m-doc-wrap-bumper">auto <a href="#a7d819affe72d34c796df2a6adf5f1249" class="m-doc-self">operator==</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_attachment_blend_state.html" class="m-doc">AttachmentBlendState</a>&amp; lhs,
+              const <a href="structtp_1_1_attachment_blend_state.html" class="m-doc">AttachmentBlendState</a>&amp; rhs) -&gt; bool</span>
+            </dt>
+            <dd>Equality operator for <a href="structtp_1_1_attachment_blend_state.html" class="m-doc">tp::<wbr />AttachmentBlendState</a>.</dd>
+            <dt id="a4dccde2c2eb0f20a55708f2f4fbb0c98">
+              <span class="m-doc-wrap-bumper">auto <a href="#a4dccde2c2eb0f20a55708f2f4fbb0c98" class="m-doc-self">operator==</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_blend_state.html" class="m-doc">BlendState</a>&amp; lhs,
+              const <a href="structtp_1_1_blend_state.html" class="m-doc">BlendState</a>&amp; rhs) -&gt; bool</span>
+            </dt>
+            <dd>Equality operator for <a href="structtp_1_1_blend_state.html" class="m-doc">tp::<wbr />BlendState</a>.</dd>
             <dt id="a3fcf620bce34942d7a32bc554006e87c">
               <span class="m-doc-wrap-bumper">auto <a href="#a3fcf620bce34942d7a32bc554006e87c" class="m-doc-self">operator==</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_buffer.html" class="m-doc">Buffer</a>&amp; lhs,
               const <a href="classtp_1_1_buffer.html" class="m-doc">Buffer</a>&amp; rhs) -&gt; bool</span>
@@ -1576,6 +1724,16 @@
               const <a href="classtp_1_1_buffer_view.html" class="m-doc">BufferView</a>&amp; rhs) -&gt; bool</span>
             </dt>
             <dd>Equality operator for <a href="classtp_1_1_buffer_view.html" class="m-doc">tp::<wbr />BufferView</a>.</dd>
+            <dt id="a0403867334fb756229532bb213789c6b">
+              <span class="m-doc-wrap-bumper">auto <a href="#a0403867334fb756229532bb213789c6b" class="m-doc-self">operator==</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_descriptor.html" class="m-doc">Descriptor</a>&amp; lhs,
+              const <a href="classtp_1_1_descriptor.html" class="m-doc">Descriptor</a>&amp; rhs) -&gt; bool</span>
+            </dt>
+            <dd>Equality operator for <a href="classtp_1_1_descriptor.html" class="m-doc">tp::<wbr />Descriptor</a>.</dd>
+            <dt id="a7c444b941425e33f0f44a7c0439347f7">
+              <span class="m-doc-wrap-bumper">auto <a href="#a7c444b941425e33f0f44a7c0439347f7" class="m-doc-self">operator==</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_descriptor_set_view.html" class="m-doc">DescriptorSetView</a>&amp; lhs,
+              const <a href="classtp_1_1_descriptor_set_view.html" class="m-doc">DescriptorSetView</a>&amp; rhs) -&gt; bool</span>
+            </dt>
+            <dd>Equality operator for <a href="classtp_1_1_descriptor_set_view.html" class="m-doc">tp::<wbr />DescriptorSetView</a>.</dd>
             <dt id="a182b724a320db5fc95fbfc92ede47a5c">
               <span class="m-doc-wrap-bumper">auto <a href="#a182b724a320db5fc95fbfc92ede47a5c" class="m-doc-self">operator==</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_device_queue.html" class="m-doc">DeviceQueue</a>&amp; lhs,
               const <a href="structtp_1_1_device_queue.html" class="m-doc">DeviceQueue</a>&amp; rhs) -&gt; bool <span class="m-label m-flat m-primary">constexpr</span></span>
@@ -1586,6 +1744,11 @@
               const <a href="structtp_1_1_external_semaphore.html" class="m-doc">ExternalSemaphore</a>&amp; rhs) -&gt; bool <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Equality operator for <a href="structtp_1_1_external_semaphore.html" class="m-doc">tp::<wbr />ExternalSemaphore</a>.</dd>
+            <dt id="a047ff9654a47da0f766bb9f30d94456a">
+              <span class="m-doc-wrap-bumper">auto <a href="#a047ff9654a47da0f766bb9f30d94456a" class="m-doc-self">operator==</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_format_capabilities.html" class="m-doc">FormatCapabilities</a>&amp; lhs,
+              const <a href="structtp_1_1_format_capabilities.html" class="m-doc">FormatCapabilities</a>&amp; rhs) -&gt; bool <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Equality operator for <a href="structtp_1_1_format_capabilities.html" class="m-doc">tp::<wbr />FormatCapabilities</a>.</dd>
             <dt id="a803fc4b90ad7ae2278a954fcb5324248">
               <span class="m-doc-wrap-bumper">auto <a href="#a803fc4b90ad7ae2278a954fcb5324248" class="m-doc-self">operator==</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_image.html" class="m-doc">Image</a>&amp; lhs,
               const <a href="classtp_1_1_image.html" class="m-doc">Image</a>&amp; rhs) -&gt; bool</span>
@@ -1601,12 +1764,27 @@
               const <a href="structtp_1_1_job_semaphore.html" class="m-doc">JobSemaphore</a>&amp; rhs) -&gt; bool <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Equality operator for <a href="structtp_1_1_job_semaphore.html" class="m-doc">tp::<wbr />JobSemaphore</a>.</dd>
+            <dt id="a286952df383267ee1b3750de217da6d8">
+              <span class="m-doc-wrap-bumper">auto <a href="#a286952df383267ee1b3750de217da6d8" class="m-doc-self">operator==</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_version.html" class="m-doc">Version</a>&amp; lhs,
+              const <a href="structtp_1_1_version.html" class="m-doc">Version</a>&amp; rhs) -&gt; bool <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Equality operator for <a href="structtp_1_1_version.html" class="m-doc">tp::<wbr />Version</a>.</dd>
             <dt id="ada3dc95e4d136f680b2795e0907d9ed4">
               <div class="m-doc-template">template&lt;typename T, VkObjectType Id&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#ada3dc95e4d136f680b2795e0907d9ed4" class="m-doc-self">operator==</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_vk_object_handle.html" class="m-doc">VkObjectHandle</a>&lt;T, Id&gt;&amp; lhs,
               const <a href="structtp_1_1_vk_object_handle.html" class="m-doc">VkObjectHandle</a>&lt;T, Id&gt;&amp; rhs) -&gt; bool <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Equality operator for <a href="structtp_1_1_vk_object_handle.html" class="m-doc">tp::<wbr />VkObjectHandle</a>.</dd>
+            <dt id="ab54536821d9e66da3b6cfd979a19894a">
+              <span class="m-doc-wrap-bumper">auto <a href="#ab54536821d9e66da3b6cfd979a19894a" class="m-doc-self">operator&gt;</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_version.html" class="m-doc">Version</a>&amp; lhs,
+              const <a href="structtp_1_1_version.html" class="m-doc">Version</a>&amp; rhs) -&gt; bool <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Greater-than operator for <a href="structtp_1_1_version.html" class="m-doc">tp::<wbr />Version</a>.</dd>
+            <dt id="ad48cd90e7579ee2022eb015e385853b8">
+              <span class="m-doc-wrap-bumper">auto <a href="#ad48cd90e7579ee2022eb015e385853b8" class="m-doc-self">operator&gt;=</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_version.html" class="m-doc">Version</a>&amp; lhs,
+              const <a href="structtp_1_1_version.html" class="m-doc">Version</a>&amp; rhs) -&gt; bool <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Greater-or-equal-than operator for <a href="structtp_1_1_version.html" class="m-doc">tp::<wbr />Version</a>.</dd>
             <dt id="ac25c30fd113465e9cb1a1d9a6cfcbe4d">
               <div class="m-doc-template">template&lt;typename T&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#ac25c30fd113465e9cb1a1d9a6cfcbe4d" class="m-doc-self">view</a>(</span><span class="m-doc-wrap">T* ptr,
@@ -1629,6 +1807,120 @@
         </section>
         <section>
           <h2>Enum documentation</h2>
+          <section class="m-doc-details" id="a637bbc82665c44058d0e21ebf219c2b5"><div>
+            <h3>
+              enum class tp::<wbr /><a href="#a637bbc82665c44058d0e21ebf219c2b5" class="m-doc-self">AccelerationStructureBuildMode</a>: uint32_t
+            </h3>
+            <p>The type of build operation performed on an acceleration structure.</p>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkBuildAccelerationStructureModeKHR.html" class="m-doc-external">VkBuildAccelerationStructureModeKHR</a></p></aside>
+            <table class="m-table m-fullwidth m-flat m-doc">
+              <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><a href="#a637bbc82665c44058d0e21ebf219c2b5ac74c1f42f141c011ca6bd8b1114fc3d0" class="m-doc-self" id="a637bbc82665c44058d0e21ebf219c2b5ac74c1f42f141c011ca6bd8b1114fc3d0">Build</a></td>
+                  <td>
+                  <p>Builds the acceleration structure from scratch according to the given geometry.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#a637bbc82665c44058d0e21ebf219c2b5a06933067aafd48425d67bcb01bba5cb6" class="m-doc-self" id="a637bbc82665c44058d0e21ebf219c2b5a06933067aafd48425d67bcb01bba5cb6">Update</a></td>
+                  <td>
+                  <p>Updates an already built acceleration structure according to the given modified geometry.</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a6e26f095e595e55c1b963c6172e48315"><div>
+            <h3>
+              enum class tp::<wbr /><a href="#a6e26f095e595e55c1b963c6172e48315" class="m-doc-self">AccelerationStructureCopyMode</a>: uint32_t
+            </h3>
+            <p>The type of copy operation performed on an acceleration structure.</p>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkCopyAccelerationStructureModeKHR.html" class="m-doc-external">VkCopyAccelerationStructureModeKHR</a></p></aside>
+            <table class="m-table m-fullwidth m-flat m-doc">
+              <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><a href="#a6e26f095e595e55c1b963c6172e48315aff24590464659ee8cdec688128c35f89" class="m-doc-self" id="a6e26f095e595e55c1b963c6172e48315aff24590464659ee8cdec688128c35f89">Clone</a></td>
+                  <td>
+                  <p>Makes an identical copy of the source acceleration structure.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#a6e26f095e595e55c1b963c6172e48315ab1fe2c2a59e883740e7ea87667e44a24" class="m-doc-self" id="a6e26f095e595e55c1b963c6172e48315ab1fe2c2a59e883740e7ea87667e44a24">Compact</a></td>
+                  <td>
+                  <p>Makes a compacted copy of the source acceleration structure.</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aae6c86baa32438aa436cf7fd2433265e"><div>
+            <h3>
+              enum class tp::<wbr /><a href="#aae6c86baa32438aa436cf7fd2433265e" class="m-doc-self">AccelerationStructureFlag</a>: uint32_t
+            </h3>
+            <p>Flags for acceleration structure controlling the process how it is built.</p>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkBuildAccelerationStructureFlagBitsKHR.html" class="m-doc-external">VkBuildAccelerationStructureFlagBitsKHR</a></p></aside>
+            <table class="m-table m-fullwidth m-flat m-doc">
+              <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><a href="#aae6c86baa32438aa436cf7fd2433265ea8ab51429a840a4aabc6a1cad196afd74" class="m-doc-self" id="aae6c86baa32438aa436cf7fd2433265ea8ab51429a840a4aabc6a1cad196afd74">AllowUpdate</a></td>
+                  <td>
+                  <p>Allows the acceleration structure to be updated after a build with <a href="namespacetp.html#a637bbc82665c44058d0e21ebf219c2b5a06933067aafd48425d67bcb01bba5cb6" class="m-doc">tp::<wbr />AccelerationStructureBuildMode::<wbr />Update</a>.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#aae6c86baa32438aa436cf7fd2433265ea6c52a1b1f89b40a9115d3c5ba38e098c" class="m-doc-self" id="aae6c86baa32438aa436cf7fd2433265ea6c52a1b1f89b40a9115d3c5ba38e098c">AllowCompaction</a></td>
+                  <td>
+                  <p>Allows the acceleration structure to be compacted after a build with <a href="namespacetp.html#a6e26f095e595e55c1b963c6172e48315ab1fe2c2a59e883740e7ea87667e44a24" class="m-doc">tp::<wbr />AccelerationStructureCopyMode::<wbr />Compact</a>.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#aae6c86baa32438aa436cf7fd2433265ea860dc783775ff96ea27fc5bac370dffb" class="m-doc-self" id="aae6c86baa32438aa436cf7fd2433265ea860dc783775ff96ea27fc5bac370dffb">PreferFastTrace</a></td>
+                  <td>
+                  <p>The build operations will try to prioritize build quality over build performance.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#aae6c86baa32438aa436cf7fd2433265ea5a8b4bb923f6f67a8ec04c851929860d" class="m-doc-self" id="aae6c86baa32438aa436cf7fd2433265ea5a8b4bb923f6f67a8ec04c851929860d">PreferFastBuild</a></td>
+                  <td>
+                  <p>The build operations will try to prioritize build performance over build quality.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#aae6c86baa32438aa436cf7fd2433265ea17169a95ba75f00986cc45ab316cbc52" class="m-doc-self" id="aae6c86baa32438aa436cf7fd2433265ea17169a95ba75f00986cc45ab316cbc52">LowMemory</a></td>
+                  <td>
+                  <p>The build operations will try to prioritize low memory usage of scratch memory and the final compacted size.</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a6eacba52f16ea45d2a7ebf97d1524389"><div>
+            <h3>
+              enum class tp::<wbr /><a href="#a6eacba52f16ea45d2a7ebf97d1524389" class="m-doc-self">AccelerationStructureType</a>: uint32_t
+            </h3>
+            <p>Type of ray tracing acceleration structure. Top level contains references to bottom level acceleration structures, which then contain the actual geometry.</p>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkAccelerationStructureTypeKHR.html" class="m-doc-external">VkAccelerationStructureTypeKHR</a></p></aside>
+            <table class="m-table m-fullwidth m-flat m-doc">
+              <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><a href="#a6eacba52f16ea45d2a7ebf97d1524389adaa4ad87b52566898a9a6df85657c082" class="m-doc-self" id="a6eacba52f16ea45d2a7ebf97d1524389adaa4ad87b52566898a9a6df85657c082">TopLevel</a></td>
+                  <td>
+                  <p>A top-level acceleration structure (a TLAS) containing instance geometries that refer to bottom-level acceleration structures.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#a6eacba52f16ea45d2a7ebf97d1524389ad60fec05ff0af3dfad320140e55c5868" class="m-doc-self" id="a6eacba52f16ea45d2a7ebf97d1524389ad60fec05ff0af3dfad320140e55c5868">BottomLevel</a></td>
+                  <td>
+                  <p>A bottom-level acceleration structure (a BLAS) containing the triangle or AABB geometry to be intersected.</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="aa57e260754413ae9a64d57adb264c384"><div>
             <h3>
               enum class tp::<wbr /><a href="#aa57e260754413ae9a64d57adb264c384" class="m-doc-self">AttachmentLoadOp</a>: uint32_t
@@ -1764,8 +2056,15 @@
                 <tr>
                   <td><a href="#aab7f7936c98d373925f0e1728496c63daa85fec0d8738bc31273f1a5d6d10e618" class="m-doc-self" id="aab7f7936c98d373925f0e1728496c63daa85fec0d8738bc31273f1a5d6d10e618">DeviceAddress</a></td>
                   <td>
-                  <p>Allows the use of <a href="classtp_1_1_buffer.html#a64154fc86785f52a233711674831f9f8" class="m-doc">tp::<wbr />Buffer::<wbr />getDeviceAddress</a> and <a href="classtp_1_1_buffer_view.html#afc740414807f8b5e6028f0f06c89ee57" class="m-doc">tp::<wbr />BufferView::<wbr />getDeviceAddress</a> to access the buffer from shaders through its address.</p>
+                  <p>Allows the use of <a href="classtp_1_1_buffer.html#a30489a98e910127db8ef81f86d4610ec" class="m-doc">tp::<wbr />Buffer::<wbr />getDeviceAddress</a> and <a href="classtp_1_1_buffer_view.html#a647b5f57d950fc1d490fa868a29295f1" class="m-doc">tp::<wbr />BufferView::<wbr />getDeviceAddress</a> to access the buffer from shaders through its address.</p>
 <aside class="m-note m-default"><h4>Remark</h4><p>Requires the   <a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkPhysicalDeviceVulkan12Features.html" class="m-doc-external">VkPhysicalDeviceVulkan12Features</a>::<code>bufferDeviceAddress</code> feature to be enabled.</p></aside>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#aab7f7936c98d373925f0e1728496c63dac3644c9eba070bfe6d17bbe090848187" class="m-doc-self" id="aab7f7936c98d373925f0e1728496c63dac3644c9eba070bfe6d17bbe090848187">AccelerationStructureInputKHR</a></td>
+                  <td>
+                  <p>Allows the use of the buffer as a read-only input to an acceleration structure build operation.</p>
+<aside class="m-note m-default"><h4>Remark</h4><p>Requires the <a href="namespacetp_1_1_device_extension.html#a737fd708c0ae0e31d4675669cff4364f" class="m-doc">tp::<wbr />DeviceExtension::<wbr />KHR_AccelerationStructure</a> device extension to be enabled.</p></aside>
                   </td>
                 </tr>
               </tbody>
@@ -1941,7 +2240,7 @@
               enum class tp::<wbr /><a href="#a3dccbef68c07e939a1f37825018d2c67" class="m-doc-self">DescriptorType</a>: uint32_t
             </h3>
             <p>Specifies how a certain resource is to be accessed from within a shader.</p>
-<p>In terms of the type of access, descriptors can be categorized by their <a href="namespacetp.html#a3dccbef68c07e939a1f37825018d2c67" class="m-doc">tp::<wbr />DescriptorType</a> into:</p><p>Sampled descriptors, providing read-only access with format conversions:</p><ul><li><a href="namespacetp.html#a3dccbef68c07e939a1f37825018d2c67a8cfe077ac9aea5235b0c3fda85914029" class="m-doc">tp::<wbr />DescriptorType::<wbr />CombinedImageSampler</a></li><li><a href="namespacetp.html#a3dccbef68c07e939a1f37825018d2c67a4520c597ce328c250d1ca5192047d71d" class="m-doc">tp::<wbr />DescriptorType::<wbr />SampledImage</a></li><li><a href="namespacetp.html#a3dccbef68c07e939a1f37825018d2c67a87f4470e128117163f6071e645f404a9" class="m-doc">tp::<wbr />DescriptorType::<wbr />TexelBuffer</a></li></ul><p>Storage descriptors, providing read, write and atomic access:</p><ul><li><a href="namespacetp.html#a3dccbef68c07e939a1f37825018d2c67aa078fa7ad769f9e7b53b8c42e3b7bbab" class="m-doc">tp::<wbr />DescriptorType::<wbr />StorageImage</a></li><li><a href="namespacetp.html#a3dccbef68c07e939a1f37825018d2c67a439f57c2c466c89db942b3de48298b2b" class="m-doc">tp::<wbr />DescriptorType::<wbr />StorageBuffer</a></li><li><a href="namespacetp.html#a3dccbef68c07e939a1f37825018d2c67ada8c94227ee0e3b5cd40da12d594ad55" class="m-doc">tp::<wbr />DescriptorType::<wbr />StorageBufferDynamic</a></li><li><a href="namespacetp.html#a3dccbef68c07e939a1f37825018d2c67aae1f93780c3073aeadaf118d550f0c65" class="m-doc">tp::<wbr />DescriptorType::<wbr />StorageTexelBuffer</a></li></ul><p>Uniform buffer descriptors, providing read-only access to uniform buffers:</p><ul><li><a href="namespacetp.html#a3dccbef68c07e939a1f37825018d2c67a88f133adfed6c854e5731cdffbf208cf" class="m-doc">tp::<wbr />DescriptorType::<wbr />UniformBuffer</a></li><li><a href="namespacetp.html#a3dccbef68c07e939a1f37825018d2c67a517b91f0588b3bf6c80ff3b19b2a7f57" class="m-doc">tp::<wbr />DescriptorType::<wbr />UniformBufferDynamic</a></li></ul><p><a href="classtp_1_1_sampler.html" class="m-doc">Sampler</a> descriptors:</p><ul><li><a href="namespacetp.html#a3dccbef68c07e939a1f37825018d2c67a5bca2f066df1fe641b2b779db2a63c0a" class="m-doc">tp::<wbr />DescriptorType::<wbr />Sampler</a></li></ul><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkDescriptorType.html" class="m-doc-external">VkDescriptorType</a></p></aside>
+<p>In terms of the type of access, descriptors can be categorized by their <a href="namespacetp.html#a3dccbef68c07e939a1f37825018d2c67" class="m-doc">tp::<wbr />DescriptorType</a> into:</p><p>Sampled descriptors, providing read-only access with format conversions:</p><ul><li><a href="namespacetp.html#a3dccbef68c07e939a1f37825018d2c67a8cfe077ac9aea5235b0c3fda85914029" class="m-doc">tp::<wbr />DescriptorType::<wbr />CombinedImageSampler</a></li><li><a href="namespacetp.html#a3dccbef68c07e939a1f37825018d2c67a4520c597ce328c250d1ca5192047d71d" class="m-doc">tp::<wbr />DescriptorType::<wbr />SampledImage</a></li><li><a href="namespacetp.html#a3dccbef68c07e939a1f37825018d2c67a87f4470e128117163f6071e645f404a9" class="m-doc">tp::<wbr />DescriptorType::<wbr />TexelBuffer</a></li></ul><p>Storage descriptors, providing read, write and atomic access:</p><ul><li><a href="namespacetp.html#a3dccbef68c07e939a1f37825018d2c67aa078fa7ad769f9e7b53b8c42e3b7bbab" class="m-doc">tp::<wbr />DescriptorType::<wbr />StorageImage</a></li><li><a href="namespacetp.html#a3dccbef68c07e939a1f37825018d2c67a439f57c2c466c89db942b3de48298b2b" class="m-doc">tp::<wbr />DescriptorType::<wbr />StorageBuffer</a></li><li><a href="namespacetp.html#a3dccbef68c07e939a1f37825018d2c67ada8c94227ee0e3b5cd40da12d594ad55" class="m-doc">tp::<wbr />DescriptorType::<wbr />StorageBufferDynamic</a></li><li><a href="namespacetp.html#a3dccbef68c07e939a1f37825018d2c67aae1f93780c3073aeadaf118d550f0c65" class="m-doc">tp::<wbr />DescriptorType::<wbr />StorageTexelBuffer</a></li></ul><p>Uniform descriptors, providing read-only access to uniform buffers and acceleration structures:</p><ul><li><a href="namespacetp.html#a3dccbef68c07e939a1f37825018d2c67a88f133adfed6c854e5731cdffbf208cf" class="m-doc">tp::<wbr />DescriptorType::<wbr />UniformBuffer</a></li><li><a href="namespacetp.html#a3dccbef68c07e939a1f37825018d2c67a517b91f0588b3bf6c80ff3b19b2a7f57" class="m-doc">tp::<wbr />DescriptorType::<wbr />UniformBufferDynamic</a></li><li><a href="namespacetp.html#a3dccbef68c07e939a1f37825018d2c67ab71cbf0f3a72c48b0f1efb5c9edf521d" class="m-doc">tp::<wbr />DescriptorType::<wbr />AccelerationStructureKHR</a></li></ul><p><a href="classtp_1_1_sampler.html" class="m-doc">Sampler</a> descriptors:</p><ul><li><a href="namespacetp.html#a3dccbef68c07e939a1f37825018d2c67a5bca2f066df1fe641b2b779db2a63c0a" class="m-doc">tp::<wbr />DescriptorType::<wbr />Sampler</a></li></ul><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkDescriptorType.html" class="m-doc-external">VkDescriptorType</a></p></aside>
             <table class="m-table m-fullwidth m-flat m-doc">
               <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
               <tbody>
@@ -2003,6 +2302,12 @@
                   <td><a href="#a3dccbef68c07e939a1f37825018d2c67ada8c94227ee0e3b5cd40da12d594ad55" class="m-doc-self" id="a3dccbef68c07e939a1f37825018d2c67ada8c94227ee0e3b5cd40da12d594ad55">StorageBufferDynamic</a></td>
                   <td>
                   <p>A descriptor for a <a href="classtp_1_1_buffer_view.html" class="m-doc">tp::<wbr />BufferView</a> object as a read/write buffer with a dynamic offset.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#a3dccbef68c07e939a1f37825018d2c67ab71cbf0f3a72c48b0f1efb5c9edf521d" class="m-doc-self" id="a3dccbef68c07e939a1f37825018d2c67ab71cbf0f3a72c48b0f1efb5c9edf521d">AccelerationStructureKHR</a></td>
+                  <td>
+                  <p>A descriptor for a read-only <a href="classtp_1_1_acceleration_structure.html" class="m-doc">tp::<wbr />AccelerationStructure</a> object.</p>
                   </td>
                 </tr>
               </tbody>
@@ -2305,6 +2610,13 @@
               </tbody>
             </table>
           </div></section>
+          <section class="m-doc-details" id="a1349df1219b7ce011c582632f2d291ad"><div>
+            <h3>
+              enum class tp::<wbr /><a href="#a1349df1219b7ce011c582632f2d291ad" class="m-doc-self">GeometryFlag</a>: uint32_t
+            </h3>
+            <p>Additional flags for acceleration structure geometries.</p>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkGeometryFlagBitsKHR.html" class="m-doc-external">VkGeometryFlagBitsKHR</a></p></aside>
+          </div></section>
           <section class="m-doc-details" id="ab98e45acd8507475443cd54a645ca76b"><div>
             <h3>
               enum class tp::<wbr /><a href="#ab98e45acd8507475443cd54a645ca76b" class="m-doc-self">ImageAspect</a>: uint32_t
@@ -2485,6 +2797,27 @@
             </h3>
             <p>The type of values of an index buffer.</p>
 <aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkIndexType.html" class="m-doc-external">VkIndexType</a></p></aside>
+            <table class="m-table m-fullwidth m-flat m-doc">
+              <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><a href="#afea3b5dc483f1a9ae7d17decbf3252a5a8bd950a9d7779b83f5c30046c9aaf1cf" class="m-doc-self" id="afea3b5dc483f1a9ae7d17decbf3252a5a8bd950a9d7779b83f5c30046c9aaf1cf">UInt16</a></td>
+                  <td>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#afea3b5dc483f1a9ae7d17decbf3252a5ae7956ed7be1c5025a27ed3cb42a396bd" class="m-doc-self" id="afea3b5dc483f1a9ae7d17decbf3252a5ae7956ed7be1c5025a27ed3cb42a396bd">UInt32</a></td>
+                  <td>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#afea3b5dc483f1a9ae7d17decbf3252a5ae9559543973e58a6e6773e6d01024215" class="m-doc-self" id="afea3b5dc483f1a9ae7d17decbf3252a5ae9559543973e58a6e6773e6d01024215">NoneKHR</a></td>
+                  <td>
+                  <p>Specifies that no indices will be used. Can only be used in <a href="structtp_1_1_triangle_geometry_setup.html" class="m-doc">tp::<wbr />TriangleGeometrySetup</a>.</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div></section>
           <section class="m-doc-details" id="a5df1d5c2318a4fed95fbba467fd86ee3"><div>
             <h3>
@@ -2918,7 +3251,7 @@
                 <tr>
                   <td><a href="#a2a231ee79583b288a3be330f401bf174a7672b5339841b330fe7555481d83a331" class="m-doc-self" id="a2a231ee79583b288a3be330f401bf174a7672b5339841b330fe7555481d83a331">TessellationControlShaderUniform</a></td>
                   <td>
-                  <p>Tessellation control shader read access through uniform buffer descriptors.</p>
+                  <p>Tessellation control shader read access through uniform descriptors.</p>
                   </td>
                 </tr>
                 <tr>
@@ -2936,7 +3269,7 @@
                 <tr>
                   <td><a href="#a2a231ee79583b288a3be330f401bf174a6a259996379194d135ce6928d066f07b" class="m-doc-self" id="a2a231ee79583b288a3be330f401bf174a6a259996379194d135ce6928d066f07b">TessellationEvaluationShaderUniform</a></td>
                   <td>
-                  <p>Tessellation evaluation shader read access through uniform buffer descriptors.</p>
+                  <p>Tessellation evaluation shader read access through uniform descriptors.</p>
                   </td>
                 </tr>
                 <tr>
@@ -2954,7 +3287,7 @@
                 <tr>
                   <td><a href="#a2a231ee79583b288a3be330f401bf174a4fe2cbaa3b60a6ae241e3329f3877194" class="m-doc-self" id="a2a231ee79583b288a3be330f401bf174a4fe2cbaa3b60a6ae241e3329f3877194">GeometryShaderUniform</a></td>
                   <td>
-                  <p>Geometry shader read access through uniform buffer descriptors.</p>
+                  <p>Geometry shader read access through uniform descriptors.</p>
                   </td>
                 </tr>
                 <tr>
@@ -2972,7 +3305,7 @@
                 <tr>
                   <td><a href="#a2a231ee79583b288a3be330f401bf174a6e9b8f5d54d739af311093df56d6cf02" class="m-doc-self" id="a2a231ee79583b288a3be330f401bf174a6e9b8f5d54d739af311093df56d6cf02">FragmentShaderUniform</a></td>
                   <td>
-                  <p>Fragment shader read access through uniform buffer descriptors.</p>
+                  <p>Fragment shader read access through uniform descriptors.</p>
                   </td>
                 </tr>
                 <tr>
@@ -2990,7 +3323,13 @@
                 <tr>
                   <td><a href="#a2a231ee79583b288a3be330f401bf174ab86dc285fc92c2769bb5cc9963821ee8" class="m-doc-self" id="a2a231ee79583b288a3be330f401bf174ab86dc285fc92c2769bb5cc9963821ee8">ComputeShaderUniform</a></td>
                   <td>
-                  <p>Compute shader read access through uniform buffer descriptors.</p>
+                  <p>Compute shader read access through uniform descriptors.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#a2a231ee79583b288a3be330f401bf174ab89f9570f3451babc575a9214e96a609" class="m-doc-self" id="a2a231ee79583b288a3be330f401bf174ab89f9570f3451babc575a9214e96a609">AccelerationStructureBuildKHR</a></td>
+                  <td>
+                  <p>Acceleration structure read access to the bottom-level acceleration structures referenced in instance buffers of <a href="classtp_1_1_job.html#a66c9b6230cefdbd60010853ce3d22809" class="m-doc">tp::<wbr />Job::<wbr />cmdBuildAccelerationStructuresKHR</a> or cmdBuildAccelerationStructuresIndirectKHR.</p>
                   </td>
                 </tr>
                 <tr>
@@ -3559,6 +3898,12 @@
         </section>
         <section>
           <h2>Typedef documentation</h2>
+          <section class="m-doc-details" id="a160e586bcdd2466c3a29fb6671d8aaa5"><div>
+            <h3>
+              using tp::<wbr /><a href="#a160e586bcdd2466c3a29fb6671d8aaa5" class="m-doc-self">AccelerationStructureFlagMask</a> = <a href="classtp_1_1_enum_bit_mask.html" class="m-doc">EnumBitMask</a>&lt;<a href="namespacetp.html#aae6c86baa32438aa436cf7fd2433265e" class="m-doc">AccelerationStructureFlag</a>&gt;
+            </h3>
+<p>A bitmask of <a href="namespacetp.html#aae6c86baa32438aa436cf7fd2433265e" class="m-doc">tp::<wbr />AccelerationStructureFlag</a> values.</p>
+          </div></section>
           <section class="m-doc-details" id="a9243d20f91ff4e6b0982f4eb736929f2"><div>
             <h3>
               using tp::<wbr /><a href="#a9243d20f91ff4e6b0982f4eb736929f2" class="m-doc-self">BufferUsageMask</a> = <a href="classtp_1_1_enum_bit_mask.html" class="m-doc">EnumBitMask</a>&lt;<a href="namespacetp.html#aab7f7936c98d373925f0e1728496c63d" class="m-doc">BufferUsage</a>&gt;
@@ -3638,6 +3983,12 @@
               using tp::<wbr /><a href="#ad50c846c9dc5ebc6bf29c2b6b3f5feac" class="m-doc-self">FormatUsageMask</a> = <a href="classtp_1_1_enum_bit_mask.html" class="m-doc">EnumBitMask</a>&lt;<a href="namespacetp.html#aa73f5415779ee4a54698b9167399ce95" class="m-doc">FormatUsage</a>&gt;
             </h3>
 <p>A bitmask of <a href="namespacetp.html#aa73f5415779ee4a54698b9167399ce95" class="m-doc">tp::<wbr />FormatUsage</a> values.</p>
+          </div></section>
+          <section class="m-doc-details" id="aeb2c3b5f837a7acb4c1b321699dc09bc"><div>
+            <h3>
+              using tp::<wbr /><a href="#aeb2c3b5f837a7acb4c1b321699dc09bc" class="m-doc-self">GeometryFlagMask</a> = <a href="classtp_1_1_enum_bit_mask.html" class="m-doc">EnumBitMask</a>&lt;<a href="namespacetp.html#a1349df1219b7ce011c582632f2d291ad" class="m-doc">GeometryFlag</a>&gt;
+            </h3>
+<p>A bitmask of <a href="namespacetp.html#a1349df1219b7ce011c582632f2d291ad" class="m-doc">tp::<wbr />GeometryFlag</a> values.</p>
           </div></section>
           <section class="m-doc-details" id="a0fe966afb33a555bb7e24efa3d35d414"><div>
             <h3>

@@ -65,6 +65,7 @@
               <ul>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
+                <li><a href="#friends">Friends</a></li>
               </ul>
             </li>
           </ul>
@@ -77,6 +78,10 @@
               <span class="m-doc-wrap-bumper"><a href="#a756ddd70648e462e7ee7c4cb667d4db3" class="m-doc-self">Descriptor</a>(</span><span class="m-doc-wrap">)</span>
             </dt>
             <dd>Creates a null descriptor.</dd>
+            <dt id="a01369f01ceed8ad1ac74e1cbcccb5cb5">
+              <span class="m-doc-wrap-bumper"><a href="#a01369f01ceed8ad1ac74e1cbcccb5cb5" class="m-doc-self">Descriptor</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_acceleration_structure_view.html" class="m-doc">AccelerationStructureView</a>&amp; accelerationStructureView)</span>
+            </dt>
+            <dd>Creates an acceleration structure descriptor.</dd>
             <dt>
               <span class="m-doc-wrap-bumper"><a href="#aa39c3d85195858e7d0ac1d7ab69cf2cc" class="m-doc">Descriptor</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_buffer_view.html" class="m-doc">BufferView</a>&amp; bufferView)</span>
             </dt>
@@ -103,6 +108,16 @@
               <span class="m-doc-wrap-bumper">auto <a href="#a6ebe0f80b9dbe764614fff5b0d0c2d79" class="m-doc-self">isNull</a>(</span><span class="m-doc-wrap">) const -&gt; bool</span>
             </dt>
             <dd>Returns <code>true</code> if the descriptor is null and does not refer to any resource.</dd>
+          </dl>
+        </section>
+        <section id="friends">
+          <h2><a href="#friends">Friends</a></h2>
+          <dl class="m-doc">
+            <dt id="aa0df13e3bd7f8714477218097f32cdf7">
+              <span class="m-doc-wrap-bumper">auto <a href="#aa0df13e3bd7f8714477218097f32cdf7" class="m-doc-self">operator==</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_descriptor.html" class="m-doc">Descriptor</a>&amp;,
+              const <a href="classtp_1_1_descriptor.html" class="m-doc">Descriptor</a>&amp;) -&gt; bool</span>
+            </dt>
+            <dd>Equality operator for <a href="classtp_1_1_descriptor.html" class="m-doc">tp::<wbr />Descriptor</a>.</dd>
           </dl>
         </section>
         <section>

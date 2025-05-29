@@ -87,11 +87,21 @@
             </dt>
             <dd>Stores a function that will be called after all currently enqueued or submitted jobs have finished executing on the device, allowing it to free external resources that were used up until this point in time.</dd>
             <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8f5a197a7e410d13235cd6afc0953140" class="m-doc">allocateAccelerationStructureKHR</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_acceleration_structure_setup.html" class="m-doc">AccelerationStructureSetup</a>&amp; setup,
+              const char* debugName = nullptr) -&gt; <a href="namespacetp.html#ae6eb5f06ba3b55ca0acded49e2f6b754" class="m-doc">OwningPtr</a>&lt;<a href="classtp_1_1_acceleration_structure.html" class="m-doc">AccelerationStructure</a>&gt;</span>
+            </dt>
+            <dd>Creates a <a href="classtp_1_1_acceleration_structure.html" class="m-doc">tp::<wbr />AccelerationStructure</a> object according to the given setup structure and allocates memory for it.</dd>
+            <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#ab1f7c9dd53018893e062d06b01719c97" class="m-doc">allocateBuffer</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_buffer_setup.html" class="m-doc">BufferSetup</a>&amp; setup,
               const <a href="structtp_1_1_memory_preference.html" class="m-doc">MemoryPreference</a>&amp; memoryPreference,
               const char* debugName = nullptr) -&gt; <a href="namespacetp.html#ae6eb5f06ba3b55ca0acded49e2f6b754" class="m-doc">OwningPtr</a>&lt;<a href="classtp_1_1_buffer.html" class="m-doc">Buffer</a>&gt;</span>
             </dt>
             <dd>Creates a <a href="classtp_1_1_buffer.html" class="m-doc">tp::<wbr />Buffer</a> object according to the given setup structure and allocates memory for it according to the memory preference.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a284c77818a498dc1b5daa15e0ca0c9ea" class="m-doc">allocateCompactedAccelerationStructureKHR</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_acceleration_structure_view.html" class="m-doc">AccelerationStructureView</a>&amp; srcAccelerationStructure,
+              const char* debugName = nullptr) -&gt; <a href="namespacetp.html#ae6eb5f06ba3b55ca0acded49e2f6b754" class="m-doc">OwningPtr</a>&lt;<a href="classtp_1_1_acceleration_structure.html" class="m-doc">AccelerationStructure</a>&gt;</span>
+            </dt>
+            <dd>Creates a <a href="classtp_1_1_acceleration_structure.html" class="m-doc">tp::<wbr />AccelerationStructure</a> object capable of holding the compacted data of the given source acceleration structure and allocates memory for it.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a7e9b856dc12cb80a9e140f6c8f3a0aab" class="m-doc">allocateImage</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_image_setup.html" class="m-doc">ImageSetup</a>&amp; setup,
               const char* debugName = nullptr) -&gt; <a href="namespacetp.html#ae6eb5f06ba3b55ca0acded49e2f6b754" class="m-doc">OwningPtr</a>&lt;<a href="classtp_1_1_image.html" class="m-doc">Image</a>&gt;</span>
@@ -197,16 +207,16 @@
             </dt>
             <dd>Updates the status of job semaphores, retrieves query results, triggers the freeing of resources and calls cleanup callbacks for any jobs that have finished executing since the last update.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ab0c1d0f65c291890e9b51d34d84528da" class="m-doc">vkCreateExternalBuffer</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_buffer_setup.html" class="m-doc">BufferSetup</a>&amp; setup,
-              <a href="classtp_1_1_lifeguard.html" class="m-doc">Lifeguard</a>&lt;<a href="structtp_1_1_vk_object_handle.html" class="m-doc">VkBufferHandle</a>&gt;&amp;&amp; bufferHandle,
-              <a href="classtp_1_1_lifeguard.html" class="m-doc">Lifeguard</a>&lt;<a href="structtp_1_1_vk_object_handle.html" class="m-doc">VmaAllocationHandle</a>&gt;&amp;&amp; memoryAllocationHandle,
+              <span class="m-doc-wrap-bumper">auto <a href="#a92d6369a9564def5f34d07db496d290f" class="m-doc">vkCreateExternalBuffer</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_buffer_setup.html" class="m-doc">BufferSetup</a>&amp; setup,
+              <a href="classtp_1_1_lifeguard.html" class="m-doc">Lifeguard</a>&lt;<a href="structtp_1_1_vk_object_handle.html" class="m-doc">VkBufferHandle</a>&gt; bufferHandle,
+              <a href="classtp_1_1_lifeguard.html" class="m-doc">Lifeguard</a>&lt;<a href="structtp_1_1_vk_object_handle.html" class="m-doc">VmaAllocationHandle</a>&gt; memoryAllocationHandle,
               const char* debugName = nullptr) -&gt; <a href="namespacetp.html#ae6eb5f06ba3b55ca0acded49e2f6b754" class="m-doc">OwningPtr</a>&lt;<a href="classtp_1_1_buffer.html" class="m-doc">Buffer</a>&gt;</span>
             </dt>
             <dd>Creates a <a href="classtp_1_1_buffer.html" class="m-doc">tp::<wbr />Buffer</a> object out of a raw Vulkan buffer handle and an optional VMA memory allocation handle.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a75969925a0cbafbdfdc8c4163cfa0f5e" class="m-doc">vkCreateExternalImage</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_image_setup.html" class="m-doc">ImageSetup</a>&amp; setup,
-              <a href="classtp_1_1_lifeguard.html" class="m-doc">Lifeguard</a>&lt;<a href="structtp_1_1_vk_object_handle.html" class="m-doc">VkImageHandle</a>&gt;&amp;&amp; imageHandle,
-              <a href="classtp_1_1_lifeguard.html" class="m-doc">Lifeguard</a>&lt;<a href="structtp_1_1_vk_object_handle.html" class="m-doc">VmaAllocationHandle</a>&gt;&amp;&amp; memoryAllocationHandle,
+              <span class="m-doc-wrap-bumper">auto <a href="#a99d21c8cc5ea00a0e0dc1b0c803e6f28" class="m-doc">vkCreateExternalImage</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_image_setup.html" class="m-doc">ImageSetup</a>&amp; setup,
+              <a href="classtp_1_1_lifeguard.html" class="m-doc">Lifeguard</a>&lt;<a href="structtp_1_1_vk_object_handle.html" class="m-doc">VkImageHandle</a>&gt; imageHandle,
+              <a href="classtp_1_1_lifeguard.html" class="m-doc">Lifeguard</a>&lt;<a href="structtp_1_1_vk_object_handle.html" class="m-doc">VmaAllocationHandle</a>&gt; memoryAllocationHandle,
               const char* debugName = nullptr) -&gt; <a href="namespacetp.html#ae6eb5f06ba3b55ca0acded49e2f6b754" class="m-doc">OwningPtr</a>&lt;<a href="classtp_1_1_image.html" class="m-doc">Image</a>&gt;</span>
             </dt>
             <dd>Creates a <a href="classtp_1_1_image.html" class="m-doc">tp::<wbr />Image</a> object out of a raw Vulkan image handle and an optional VMA memory allocation handle.</dd>
@@ -263,6 +273,29 @@
             </table>
 <aside class="m-note m-default"><h4>Remark</h4><p>The function will <strong>not</strong> be called the moment the semaphores become signalled. Their status is only checked occasionally as part of various other API calls. This update can be triggered explicitly through <a href="classtp_1_1_device.html#a6eb4dffbd9761d0b283a2d563930228c" class="m-doc">tp::<wbr />Device::<wbr />updateDeviceProgress</a>.</p><p>Other device methods that operate on queues (e.g. enqueuing a follow-up job) must <strong>not</strong> be called from within the callback function.</p></aside>
           </div></section>
+          <section class="m-doc-details" id="a8f5a197a7e410d13235cd6afc0953140"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="namespacetp.html#ae6eb5f06ba3b55ca0acded49e2f6b754" class="m-doc">OwningPtr</a>&lt;<a href="classtp_1_1_acceleration_structure.html" class="m-doc">AccelerationStructure</a>&gt; tp::<wbr />Device::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8f5a197a7e410d13235cd6afc0953140" class="m-doc-self">allocateAccelerationStructureKHR</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_acceleration_structure_setup.html" class="m-doc">AccelerationStructureSetup</a>&amp; setup,
+              const char* debugName = nullptr)</span></span>
+            </h3>
+            <p>Creates a <a href="classtp_1_1_acceleration_structure.html" class="m-doc">tp::<wbr />AccelerationStructure</a> object according to the given setup structure and allocates memory for it.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">setup</td>
+                  <td>The setup structure describing the object.</td>
+                </tr>
+                <tr>
+                  <td>debugName</td>
+                  <td>The debug name identifier for the object.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>Remark</h4><p>Use of this function requires the <a href="namespacetp_1_1_device_extension.html#a737fd708c0ae0e31d4675669cff4364f" class="m-doc">tp::<wbr />DeviceExtension::<wbr />KHR_AccelerationStructure</a> extension to be enabled.</p></aside>
+          </div></section>
           <section class="m-doc-details" id="ab1f7c9dd53018893e062d06b01719c97"><div>
             <h3>
               <span class="m-doc-wrap-bumper"><a href="namespacetp.html#ae6eb5f06ba3b55ca0acded49e2f6b754" class="m-doc">OwningPtr</a>&lt;<a href="classtp_1_1_buffer.html" class="m-doc">Buffer</a>&gt; tp::<wbr />Device::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab1f7c9dd53018893e062d06b01719c97" class="m-doc-self">allocateBuffer</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_buffer_setup.html" class="m-doc">BufferSetup</a>&amp; setup,
@@ -289,6 +322,29 @@
                 </tr>
               </tbody>
             </table>
+          </div></section>
+          <section class="m-doc-details" id="a284c77818a498dc1b5daa15e0ca0c9ea"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="namespacetp.html#ae6eb5f06ba3b55ca0acded49e2f6b754" class="m-doc">OwningPtr</a>&lt;<a href="classtp_1_1_acceleration_structure.html" class="m-doc">AccelerationStructure</a>&gt; tp::<wbr />Device::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a284c77818a498dc1b5daa15e0ca0c9ea" class="m-doc-self">allocateCompactedAccelerationStructureKHR</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_acceleration_structure_view.html" class="m-doc">AccelerationStructureView</a>&amp; srcAccelerationStructure,
+              const char* debugName = nullptr)</span></span>
+            </h3>
+            <p>Creates a <a href="classtp_1_1_acceleration_structure.html" class="m-doc">tp::<wbr />AccelerationStructure</a> object capable of holding the compacted data of the given source acceleration structure and allocates memory for it.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">srcAccelerationStructure</td>
+                  <td>The source acceleration structure whose compacted size is to be queried.</td>
+                </tr>
+                <tr>
+                  <td>debugName</td>
+                  <td>The debug name identifier for the object. If empty, the name will be inherited from the source.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>Remark</h4><p>The source acceleration structure must have been created with the <a href="namespacetp.html#aae6c86baa32438aa436cf7fd2433265ea6c52a1b1f89b40a9115d3c5ba38e098c" class="m-doc">tp::<wbr />AccelerationStructureFlag::<wbr />AllowCompaction</a> flag and its last build operation must have completed execution on the device.</p><p>Use of this function requires the <a href="namespacetp_1_1_device_extension.html#a737fd708c0ae0e31d4675669cff4364f" class="m-doc">tp::<wbr />DeviceExtension::<wbr />KHR_AccelerationStructure</a> extension to be enabled.</p></aside>
           </div></section>
           <section class="m-doc-details" id="a7e9b856dc12cb80a9e140f6c8f3a0aab"><div>
             <h3>
@@ -572,7 +628,7 @@
                 </tr>
               </tbody>
             </table>
-<aside class="m-note m-default"><h4>Remark</h4><p>The use of this function requires the <a href="namespacetp_1_1_device_extension.html#adc15a5a63bec60fa63cc6ea59d1ea392" class="m-doc">tp::<wbr />DeviceExtension::<wbr />KHR_Swapchain</a> extension to be enabled.</p></aside>
+<aside class="m-note m-default"><h4>Remark</h4><p>Use of this function requires the <a href="namespacetp_1_1_device_extension.html#adc15a5a63bec60fa63cc6ea59d1ea392" class="m-doc">tp::<wbr />DeviceExtension::<wbr />KHR_Swapchain</a> extension to be enabled.</p></aside>
           </div></section>
           <section class="m-doc-details" id="a764da9eba4cb9fdee7d10e4766c66b9e"><div>
             <h3>
@@ -721,11 +777,11 @@
             </table>
 <aside class="m-note m-default"><h4>Remark</h4><p>This method is <strong>not</strong> thread-safe between calls with the same <code>queue</code> parameter. However, through the use of the <code>lastJobToSubmit</code> parameter, it is safe to enqueue jobs asynchronously to submitting them within the same queue.</p></aside>
           </div></section>
-          <section class="m-doc-details" id="ab0c1d0f65c291890e9b51d34d84528da"><div>
+          <section class="m-doc-details" id="a92d6369a9564def5f34d07db496d290f"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="namespacetp.html#ae6eb5f06ba3b55ca0acded49e2f6b754" class="m-doc">OwningPtr</a>&lt;<a href="classtp_1_1_buffer.html" class="m-doc">Buffer</a>&gt; tp::<wbr />Device::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab0c1d0f65c291890e9b51d34d84528da" class="m-doc-self">vkCreateExternalBuffer</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_buffer_setup.html" class="m-doc">BufferSetup</a>&amp; setup,
-              <a href="classtp_1_1_lifeguard.html" class="m-doc">Lifeguard</a>&lt;<a href="structtp_1_1_vk_object_handle.html" class="m-doc">VkBufferHandle</a>&gt;&amp;&amp; bufferHandle,
-              <a href="classtp_1_1_lifeguard.html" class="m-doc">Lifeguard</a>&lt;<a href="structtp_1_1_vk_object_handle.html" class="m-doc">VmaAllocationHandle</a>&gt;&amp;&amp; memoryAllocationHandle,
+              <span class="m-doc-wrap-bumper"><a href="namespacetp.html#ae6eb5f06ba3b55ca0acded49e2f6b754" class="m-doc">OwningPtr</a>&lt;<a href="classtp_1_1_buffer.html" class="m-doc">Buffer</a>&gt; tp::<wbr />Device::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a92d6369a9564def5f34d07db496d290f" class="m-doc-self">vkCreateExternalBuffer</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_buffer_setup.html" class="m-doc">BufferSetup</a>&amp; setup,
+              <a href="classtp_1_1_lifeguard.html" class="m-doc">Lifeguard</a>&lt;<a href="structtp_1_1_vk_object_handle.html" class="m-doc">VkBufferHandle</a>&gt; bufferHandle,
+              <a href="classtp_1_1_lifeguard.html" class="m-doc">Lifeguard</a>&lt;<a href="structtp_1_1_vk_object_handle.html" class="m-doc">VmaAllocationHandle</a>&gt; memoryAllocationHandle,
               const char* debugName = nullptr)</span></span>
             </h3>
             <p>Creates a <a href="classtp_1_1_buffer.html" class="m-doc">tp::<wbr />Buffer</a> object out of a raw Vulkan buffer handle and an optional VMA memory allocation handle.</p>
@@ -752,13 +808,13 @@
                 </tr>
               </tbody>
             </table>
-<aside class="m-note m-default"><h4>Remark</h4><p><code>bufferHandle</code> must have been created from the same Vulkan device as returned by <a href="classtp_1_1_device.html#a0c36ebc5af1d5a1e12ed2427481bc843" class="m-doc">tp::<wbr />Device::<wbr />vkGetDeviceHandle</a>. <code>memoryAllocationHandle</code> must have</p><p>The lifeguard handles can be either owning or non-owning, which determines whether the handles will be properly disposed of when the buffer is destroyed. See <a href="classtp_1_1_device.html#a1100041005d269717f7489e9037d6b1f" class="m-doc">tp::<wbr />Device::<wbr />vkMakeHandleLifeguard</a> or <a href="classtp_1_1_lifeguard.html#a2a3f1ed8111198255e0a353bcb861ccd" class="m-doc">tp::<wbr />Lifeguard::<wbr />NonOwning</a>.</p></aside>
+<aside class="m-note m-default"><h4>Remark</h4><p><code>bufferHandle</code> and <code>memoryAllocationHandle</code> must have been created from the same Vulkan device as returned by <a href="classtp_1_1_device.html#a0c36ebc5af1d5a1e12ed2427481bc843" class="m-doc">tp::<wbr />Device::<wbr />vkGetDeviceHandle</a>.</p><p>The lifeguard handles can be either owning or non-owning, which determines whether the handles will be properly disposed of when the buffer is destroyed. See <a href="classtp_1_1_device.html#a1100041005d269717f7489e9037d6b1f" class="m-doc">tp::<wbr />Device::<wbr />vkMakeHandleLifeguard</a> or <a href="classtp_1_1_lifeguard.html#a2a3f1ed8111198255e0a353bcb861ccd" class="m-doc">tp::<wbr />Lifeguard::<wbr />NonOwning</a>.</p></aside>
           </div></section>
-          <section class="m-doc-details" id="a75969925a0cbafbdfdc8c4163cfa0f5e"><div>
+          <section class="m-doc-details" id="a99d21c8cc5ea00a0e0dc1b0c803e6f28"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="namespacetp.html#ae6eb5f06ba3b55ca0acded49e2f6b754" class="m-doc">OwningPtr</a>&lt;<a href="classtp_1_1_image.html" class="m-doc">Image</a>&gt; tp::<wbr />Device::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a75969925a0cbafbdfdc8c4163cfa0f5e" class="m-doc-self">vkCreateExternalImage</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_image_setup.html" class="m-doc">ImageSetup</a>&amp; setup,
-              <a href="classtp_1_1_lifeguard.html" class="m-doc">Lifeguard</a>&lt;<a href="structtp_1_1_vk_object_handle.html" class="m-doc">VkImageHandle</a>&gt;&amp;&amp; imageHandle,
-              <a href="classtp_1_1_lifeguard.html" class="m-doc">Lifeguard</a>&lt;<a href="structtp_1_1_vk_object_handle.html" class="m-doc">VmaAllocationHandle</a>&gt;&amp;&amp; memoryAllocationHandle,
+              <span class="m-doc-wrap-bumper"><a href="namespacetp.html#ae6eb5f06ba3b55ca0acded49e2f6b754" class="m-doc">OwningPtr</a>&lt;<a href="classtp_1_1_image.html" class="m-doc">Image</a>&gt; tp::<wbr />Device::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a99d21c8cc5ea00a0e0dc1b0c803e6f28" class="m-doc-self">vkCreateExternalImage</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_image_setup.html" class="m-doc">ImageSetup</a>&amp; setup,
+              <a href="classtp_1_1_lifeguard.html" class="m-doc">Lifeguard</a>&lt;<a href="structtp_1_1_vk_object_handle.html" class="m-doc">VkImageHandle</a>&gt; imageHandle,
+              <a href="classtp_1_1_lifeguard.html" class="m-doc">Lifeguard</a>&lt;<a href="structtp_1_1_vk_object_handle.html" class="m-doc">VmaAllocationHandle</a>&gt; memoryAllocationHandle,
               const char* debugName = nullptr)</span></span>
             </h3>
             <p>Creates a <a href="classtp_1_1_image.html" class="m-doc">tp::<wbr />Image</a> object out of a raw Vulkan image handle and an optional VMA memory allocation handle.</p>
@@ -785,7 +841,7 @@
                 </tr>
               </tbody>
             </table>
-<aside class="m-note m-default"><h4>Remark</h4><p>The lifeguard handles can be either owning or non-owning, which determines whether the handles will be properly disposed of when the image is destroyed. See <a href="classtp_1_1_device.html#a1100041005d269717f7489e9037d6b1f" class="m-doc">tp::<wbr />Device::<wbr />vkMakeHandleLifeguard</a> or <a href="classtp_1_1_lifeguard.html#a2a3f1ed8111198255e0a353bcb861ccd" class="m-doc">tp::<wbr />Lifeguard::<wbr />NonOwning</a>.</p></aside>
+<aside class="m-note m-default"><h4>Remark</h4><p><code>imageHandle</code> and <code>memoryAllocationHandle</code> must have been created from the same Vulkan device as returned by <a href="classtp_1_1_device.html#a0c36ebc5af1d5a1e12ed2427481bc843" class="m-doc">tp::<wbr />Device::<wbr />vkGetDeviceHandle</a>.</p><p>The lifeguard handles can be either owning or non-owning, which determines whether the handles will be properly disposed of when the image is destroyed. See <a href="classtp_1_1_device.html#a1100041005d269717f7489e9037d6b1f" class="m-doc">tp::<wbr />Device::<wbr />vkMakeHandleLifeguard</a> or <a href="classtp_1_1_lifeguard.html#a2a3f1ed8111198255e0a353bcb861ccd" class="m-doc">tp::<wbr />Lifeguard::<wbr />NonOwning</a>.</p></aside>
           </div></section>
           <section class="m-doc-details" id="a832e021603ef88a515b25c3c71eb03ac"><div>
             <h3>

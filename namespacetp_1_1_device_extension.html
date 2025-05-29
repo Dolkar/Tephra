@@ -68,7 +68,7 @@
             </li>
           </ul>
         </nav>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="structtp_1_1_device_setup.html" class="m-doc">tp::<wbr />DeviceSetup</a></p></aside>
+<aside class="m-note m-default"><h4>Remark</h4><p>Most Vulkan extensions also have their associated feature struct with features that also need to be enabled to use their functionality. For extensions defined here, this is done for you.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="structtp_1_1_device_setup.html" class="m-doc">tp::<wbr />DeviceSetup</a></p></aside>
         <section id="var-members">
           <h2><a href="#var-members">Variables</a></h2>
           <dl class="m-doc">
@@ -76,6 +76,14 @@
               const char*const <a href="#af54c1e8bb13e8c8ce99068916b1c437f" class="m-doc">EXT_MemoryBudget</a>
             </dt>
             <dd>Adds support for querying the actual amount of memory used by the process as well as the estimated budget of how much total memory the current process can use at any given time.</dd>
+            <dt>
+              const char*const <a href="#a737fd708c0ae0e31d4675669cff4364f" class="m-doc">KHR_AccelerationStructure</a>
+            </dt>
+            <dd>Allows the creation and building of <a href="classtp_1_1_acceleration_structure.html" class="m-doc">tp::<wbr />AccelerationStructure</a> objects used for ray tracing.</dd>
+            <dt>
+              const char*const <a href="#a9254c86f3100971531e44215ee8290ee" class="m-doc">KHR_RayQuery</a>
+            </dt>
+            <dd>Adds support for the <code>SPV_KHR_ray_query</code> SPIR-V extension, allowing the use of <code>rayQuery</code> calls from within various shader stages. Requires the <a href="namespacetp_1_1_device_extension.html#a737fd708c0ae0e31d4675669cff4364f" class="m-doc">tp::<wbr />DeviceExtension::<wbr />KHR_AccelerationStructure</a> extension to be present and enabled.</dd>
             <dt>
               const char*const <a href="#adc15a5a63bec60fa63cc6ea59d1ea392" class="m-doc">KHR_Swapchain</a>
             </dt>
@@ -94,6 +102,20 @@
             </h3>
             <p>Adds support for querying the actual amount of memory used by the process as well as the estimated budget of how much total memory the current process can use at any given time.</p>
 <aside class="m-note m-default"><h4>See also</h4><p><a href="structtp_1_1_memory_heap_statistics.html" class="m-doc">tp::<wbr />MemoryHeapStatistics</a>.</p><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VK_EXT_memory_budget.html" class="m-doc-external">VK_<wbr />EXT_<wbr />memory_<wbr />budget</a></p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a737fd708c0ae0e31d4675669cff4364f"><div>
+            <h3>
+              const char*const tp::<wbr />DeviceExtension::<wbr /><a href="#a737fd708c0ae0e31d4675669cff4364f" class="m-doc-self">KHR_AccelerationStructure</a>
+            </h3>
+            <p>Allows the creation and building of <a href="classtp_1_1_acceleration_structure.html" class="m-doc">tp::<wbr />AccelerationStructure</a> objects used for ray tracing.</p>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VK_KHR_acceleration_structure.html" class="m-doc-external">VK_<wbr />KHR_<wbr />acceleration_<wbr />structure</a></p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a9254c86f3100971531e44215ee8290ee"><div>
+            <h3>
+              const char*const tp::<wbr />DeviceExtension::<wbr /><a href="#a9254c86f3100971531e44215ee8290ee" class="m-doc-self">KHR_RayQuery</a>
+            </h3>
+            <p>Adds support for the <code>SPV_KHR_ray_query</code> SPIR-V extension, allowing the use of <code>rayQuery</code> calls from within various shader stages. Requires the <a href="namespacetp_1_1_device_extension.html#a737fd708c0ae0e31d4675669cff4364f" class="m-doc">tp::<wbr />DeviceExtension::<wbr />KHR_AccelerationStructure</a> extension to be present and enabled.</p>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VK_KHR_ray_query.html" class="m-doc-external">VK_<wbr />KHR_<wbr />ray_<wbr />query</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="adc15a5a63bec60fa63cc6ea59d1ea392"><div>
             <h3>

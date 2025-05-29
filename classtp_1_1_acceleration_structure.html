@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>tp::BaseQuery class | Tephra Documentation</title>
+  <title>tp::AccelerationStructure class | Tephra Documentation</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark-tephra.css" />
   <link rel="stylesheet" href="m-documentation.css" />
@@ -54,91 +54,77 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="namespacetp.html">tp</a>::<wbr/></span>BaseQuery <span class="m-thin">class</span>
+          <span class="m-breadcrumb"><a href="namespacetp.html">tp</a>::<wbr/></span>AccelerationStructure <span class="m-thin">class</span>
         </h1>
-        <p>Base class implementing the shared functionality of device queries.</p>
+        <p>Represents an opaque acceleration structure used for hardware-accelerated ray tracing.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#derived-classes">Derived classes</a></li>
+                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-        <section id="derived-classes">
-          <h2><a href="#derived-classes">Derived classes</a></h2>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkAccelerationStructureKHR.html" class="m-doc-external">VkAccelerationStructureKHR</a></p></aside>
+        <section id="base-classes">
+          <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              class <a href="classtp_1_1_render_query.html" class="m-doc">RenderQuery</a>
+              class <a href="classtp_1_1_ownable.html" class="m-doc">Ownable</a>
             </dt>
-            <dd>Query for measuring some statistic over a range of render commands.</dd>
+            <dd>A customizable base class that is used for objects returned by the API in an OwningPtr.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
             <dt>
-              class <a href="classtp_1_1_timestamp_query.html" class="m-doc">TimestampQuery</a>
+              <span class="m-doc-wrap-bumper"><a href="#a84dc5ddf64a8ce62d391c966e4a3fa5a" class="m-doc">operator const AccelerationStructureView</a>(</span><span class="m-doc-wrap">) const</span>
             </dt>
-            <dd>Query for measuring execution time on the device timeline.</dd>
+            <dd>Casting operator returning the associated <a href="classtp_1_1_acceleration_structure_view.html" class="m-doc">tp::<wbr />AccelerationStructureView</a> object.</dd>
           </dl>
         </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
+            <dt id="adccb1eceaf1cc72adee70c1ea78683fc">
+              <span class="m-doc-wrap-bumper">auto <a href="#adccb1eceaf1cc72adee70c1ea78683fc" class="m-doc-self">getBackingBufferView</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="classtp_1_1_buffer_view.html" class="m-doc">BufferView</a></span>
+            </dt>
+            <dd>Returns a view of the backing buffer that is used as storage for the acceleration structure data.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#afbc0b574105e1b76502aa015d5dc385d" class="m-doc">clear</a>(</span><span class="m-doc-wrap">)</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2f8df4a912c69fc1832d3d7b8686ab92" class="m-doc">getDeviceAddress</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespacetp.html#a44928c7a17be2c7370000d16a223c955" class="m-doc">DeviceAddress</a></span>
             </dt>
-            <dd>Throws away all previous results.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aa0d2edf4f77241739806c2b60f2c4a8c" class="m-doc">getJobResult</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_job_semaphore.html" class="m-doc">JobSemaphore</a>&amp; jobSemaphore) const -&gt; <a href="structtp_1_1_query_result.html" class="m-doc">QueryResult</a></span>
+            <dd>Returns the device address of the acceleration structure that can then be used for ray tracing and acceleration structure build operations.</dd>
+            <dt id="af07c36c2f4a3ab675f83b185402671b2">
+              <span class="m-doc-wrap-bumper">auto <a href="#af07c36c2f4a3ab675f83b185402671b2" class="m-doc-self">getView</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="classtp_1_1_acceleration_structure_view.html" class="m-doc">AccelerationStructureView</a></span>
             </dt>
-            <dd>Returns the result written during the execution of the given job, or a null result if not available. By default, any result older than the last result may be forgotten at any point. Use <a href="classtp_1_1_base_query.html#a184cfa93d73c99ddd7ebacd0666bd794" class="m-doc">tp::<wbr />BaseQuery::<wbr />setMaxHistorySize</a> to set the number of past results that should be stored and retrievable through this method.</dd>
-            <dt id="a55d8539281cdfc44d475239df0c0420f">
-              <span class="m-doc-wrap-bumper">auto <a href="#a55d8539281cdfc44d475239df0c0420f" class="m-doc-self">getLastResult</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="structtp_1_1_query_result.html" class="m-doc">QueryResult</a></span>
+            <dd>Returns a view of this acceleration structure.</dd>
+            <dt id="a1698e992fc899aca3f9065a317917541">
+              <span class="m-doc-wrap-bumper">auto <a href="#a1698e992fc899aca3f9065a317917541" class="m-doc-self">vkGetAccelerationStructureHandle</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="structtp_1_1_vk_object_handle.html" class="m-doc">VkAccelerationStructureHandleKHR</a></span>
             </dt>
-            <dd>Returns the last (largest timestamp) result written for this query, or a null result if none are available.</dd>
-            <dt id="a038eea9f7e966d6594ec03b3c55f0e6e">
-              <span class="m-doc-wrap-bumper">auto <a href="#a038eea9f7e966d6594ec03b3c55f0e6e" class="m-doc-self">isNull</a>(</span><span class="m-doc-wrap">) const -&gt; bool</span>
-            </dt>
-            <dd>Returns <code>true</code> if the query is null and not valid for use.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#a184cfa93d73c99ddd7ebacd0666bd794" class="m-doc">setMaxHistorySize</a>(</span><span class="m-doc-wrap">uint32_t size)</span>
-            </dt>
-            <dd>Sets the maximum number of past stored results that can be retrieved with <a href="classtp_1_1_base_query.html#aa0d2edf4f77241739806c2b60f2c4a8c" class="m-doc">tp::<wbr />BaseQuery::<wbr />getJobResult</a>.</dd>
+            <dd>Returns the associated   <a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkAccelerationStructureKHR.html" class="m-doc-external">VkAccelerationStructureKHR</a> handle.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="afbc0b574105e1b76502aa015d5dc385d"><div>
+          <section class="m-doc-details" id="a84dc5ddf64a8ce62d391c966e4a3fa5a"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void tp::<wbr />BaseQuery::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afbc0b574105e1b76502aa015d5dc385d" class="m-doc-self">clear</a>(</span><span class="m-doc-wrap">)</span></span>
+              <span class="m-doc-wrap-bumper"> tp::<wbr />AccelerationStructure::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a84dc5ddf64a8ce62d391c966e4a3fa5a" class="m-doc-self">operator const AccelerationStructureView</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
-            <p>Throws away all previous results.</p>
-<aside class="m-note m-default"><h4>Remark</h4><p>This function may not be called while the query is in use (pending a result).</p></aside>
+            <p>Casting operator returning the associated <a href="classtp_1_1_acceleration_structure_view.html" class="m-doc">tp::<wbr />AccelerationStructureView</a> object.</p>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="classtp_1_1_acceleration_structure.html#af07c36c2f4a3ab675f83b185402671b2" class="m-doc">tp::<wbr />AccelerationStructure::<wbr />getView</a></p></aside>
           </div></section>
-          <section class="m-doc-details" id="aa0d2edf4f77241739806c2b60f2c4a8c"><div>
+          <section class="m-doc-details" id="a2f8df4a912c69fc1832d3d7b8686ab92"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="structtp_1_1_query_result.html" class="m-doc">QueryResult</a> tp::<wbr />BaseQuery::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa0d2edf4f77241739806c2b60f2c4a8c" class="m-doc-self">getJobResult</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_job_semaphore.html" class="m-doc">JobSemaphore</a>&amp; jobSemaphore) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="namespacetp.html#a44928c7a17be2c7370000d16a223c955" class="m-doc">DeviceAddress</a> tp::<wbr />AccelerationStructure::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2f8df4a912c69fc1832d3d7b8686ab92" class="m-doc-self">getDeviceAddress</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
-            <p>Returns the result written during the execution of the given job, or a null result if not available. By default, any result older than the last result may be forgotten at any point. Use <a href="classtp_1_1_base_query.html#a184cfa93d73c99ddd7ebacd0666bd794" class="m-doc">tp::<wbr />BaseQuery::<wbr />setMaxHistorySize</a> to set the number of past results that should be stored and retrievable through this method.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">jobSemaphore</td>
-                  <td>The semaphore that identifies the job for which a result should be retrieved.</td>
-                </tr>
-              </tbody>
-            </table>
-          </div></section>
-          <section class="m-doc-details" id="a184cfa93d73c99ddd7ebacd0666bd794"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">void tp::<wbr />BaseQuery::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a184cfa93d73c99ddd7ebacd0666bd794" class="m-doc-self">setMaxHistorySize</a>(</span><span class="m-doc-wrap">uint32_t size)</span></span>
-            </h3>
-            <p>Sets the maximum number of past stored results that can be retrieved with <a href="classtp_1_1_base_query.html#aa0d2edf4f77241739806c2b60f2c4a8c" class="m-doc">tp::<wbr />BaseQuery::<wbr />getJobResult</a>.</p>
-<aside class="m-note m-default"><h4>Remark</h4><p>This function may not be called while the query is in use (pending a result).</p></aside>
+            <p>Returns the device address of the acceleration structure that can then be used for ray tracing and acceleration structure build operations.</p>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/vkGetAccelerationStructureDeviceAddressKHR.html" class="m-doc-external">vkGetAccelerationStructureDeviceAddressKHR</a></p></aside>
           </div></section>
         </section>
       </div>

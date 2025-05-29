@@ -73,6 +73,11 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a01610c84a9b949800789bd91db3586e6" class="m-doc">allocateLocalAccelerationStructureKHR</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_acceleration_structure_setup.html" class="m-doc">AccelerationStructureSetup</a>&amp; setup,
+              const char* debugName = nullptr) -&gt; <a href="classtp_1_1_acceleration_structure_view.html" class="m-doc">AccelerationStructureView</a></span>
+            </dt>
+            <dd>Allocates a job-local acceleration structure for use within this job.</dd>
+            <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a10e5565ef8b6c2553c9d4572ac223852" class="m-doc">allocateLocalBuffer</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_buffer_setup.html" class="m-doc">BufferSetup</a>&amp; setup,
               const char* debugName = nullptr) -&gt; <a href="classtp_1_1_buffer_view.html" class="m-doc">BufferView</a></span>
             </dt>
@@ -107,6 +112,15 @@
             </dt>
             <dd>Copies regions of one image&#x27;s contents to another, potentially performing format conversion, arbitrary scaling and filtering.</dd>
             <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#aabdd4bbed0d6c9988558c18fad671c89" class="m-doc">cmdBuildAccelerationStructuresIndirectKHR</a>(</span><span class="m-doc-wrap"><a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const <a href="structtp_1_1_acceleration_structure_build_info.html" class="m-doc">AccelerationStructureBuildInfo</a>&gt; buildInfos,
+              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const <a href="structtp_1_1_acceleration_structure_build_indirect_info.html" class="m-doc">AccelerationStructureBuildIndirectInfo</a>&gt; indirectInfos)</span>
+            </dt>
+            <dd>Processes acceleration structure builds or updates with primitive counts sourced from an indirect buffer.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a66c9b6230cefdbd60010853ce3d22809" class="m-doc">cmdBuildAccelerationStructuresKHR</a>(</span><span class="m-doc-wrap"><a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const <a href="structtp_1_1_acceleration_structure_build_info.html" class="m-doc">AccelerationStructureBuildInfo</a>&gt; buildInfos)</span>
+            </dt>
+            <dd>Processes acceleration structure builds or updates.</dd>
+            <dt>
               <span class="m-doc-wrap-bumper">void <a href="#a4aed4f4ac99e3090785561c937170f5b" class="m-doc">cmdClearImage</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_image_view.html" class="m-doc">ImageView</a>&amp; dstImage,
               <a href="structtp_1_1_clear_value.html" class="m-doc">ClearValue</a> value)</span>
             </dt>
@@ -117,6 +131,12 @@
               <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const <a href="structtp_1_1_image_subresource_range.html" class="m-doc">ImageSubresourceRange</a>&gt; ranges)</span>
             </dt>
             <dd>Clears ranges of contents of the image to a fixed value.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a6ec272bb9c77057ec07d7f12b3e41287" class="m-doc">cmdCopyAccelerationStructureKHR</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_acceleration_structure_view.html" class="m-doc">AccelerationStructureView</a>&amp; srcView,
+              const <a href="classtp_1_1_acceleration_structure_view.html" class="m-doc">AccelerationStructureView</a>&amp; dstView,
+              <a href="namespacetp.html#a6e26f095e595e55c1b963c6172e48315" class="m-doc">AccelerationStructureCopyMode</a> mode)</span>
+            </dt>
+            <dd>Copies the contents of one acceleration structure to another, with optional compaction.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">void <a href="#a013f09d33bc1bd883c1fe64460d50e2c" class="m-doc">cmdCopyBuffer</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_buffer_view.html" class="m-doc">BufferView</a>&amp; srcBuffer,
               const <a href="classtp_1_1_buffer_view.html" class="m-doc">BufferView</a>&amp; dstBuffer,
@@ -166,6 +186,12 @@
               const char* debugName = nullptr)</span>
             </dt>
             <dd>Forms a render pass that executes lists of render commands.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a78d8908408b389c50446c808b4e2bb60" class="m-doc">cmdExportResource</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_acceleration_structure_view.html" class="m-doc">AccelerationStructureView</a>&amp; accelerationStructure,
+              <a href="namespacetp.html#a35126e5e403003db788eb060b78e88bf" class="m-doc">ReadAccessMask</a> readAccessMask,
+              <a href="namespacetp.html#a8b32a8b4b40aee5fed67bc3c3d63ead7" class="m-doc">QueueType</a> targetQueueType = <a href="namespacetp.html#a8b32a8b4b40aee5fed67bc3c3d63ead7aec0fc0100c4fc1ce4eea230c3dc10360" class="m-doc">QueueType::<wbr />Undefined</a>)</span>
+            </dt>
+            <dd>Prepares an acceleration structure for future read-only usages.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">void <a href="#a967f5a891d8e50cb73d0f6b7c6cec066" class="m-doc">cmdExportResource</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_buffer_view.html" class="m-doc">BufferView</a>&amp; buffer,
               <a href="namespacetp.html#a35126e5e403003db788eb060b78e88bf" class="m-doc">ReadAccessMask</a> readAccessMask,
@@ -240,6 +266,29 @@
         </section>
         <section>
           <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a01610c84a9b949800789bd91db3586e6"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="classtp_1_1_acceleration_structure_view.html" class="m-doc">AccelerationStructureView</a> tp::<wbr />Job::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a01610c84a9b949800789bd91db3586e6" class="m-doc-self">allocateLocalAccelerationStructureKHR</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_acceleration_structure_setup.html" class="m-doc">AccelerationStructureSetup</a>&amp; setup,
+              const char* debugName = nullptr)</span></span>
+            </h3>
+            <p>Allocates a job-local acceleration structure for use within this job.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">setup</td>
+                  <td>The setup structure describing the object.</td>
+                </tr>
+                <tr>
+                  <td>debugName</td>
+                  <td>The debug name identifier for the object.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>Remark</h4><p>The acceleration structure may only be used for commands within this job or in command lists that execute within it.</p><p>The acceleration structure is not created until the job is enqueued. As a consequence it cannot be used as a <a href="classtp_1_1_descriptor.html" class="m-doc">tp::<wbr />Descriptor</a> while the job is in the recording state. <a href="classtp_1_1_future_descriptor.html" class="m-doc">tp::<wbr />FutureDescriptor</a> with <a href="classtp_1_1_job.html#ac6bb755680a758beacd00637176b8f9e" class="m-doc">tp::<wbr />Job::<wbr />allocateLocalDescriptorSet</a> does not have this limitation.</p></aside>
+          </div></section>
           <section class="m-doc-details" id="a10e5565ef8b6c2553c9d4572ac223852"><div>
             <h3>
               <span class="m-doc-wrap-bumper"><a href="classtp_1_1_buffer_view.html" class="m-doc">BufferView</a> tp::<wbr />Job::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a10e5565ef8b6c2553c9d4572ac223852" class="m-doc-self">allocateLocalBuffer</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_buffer_setup.html" class="m-doc">BufferSetup</a>&amp; setup,
@@ -398,6 +447,47 @@
             </table>
 <aside class="m-note m-default"><h4>Remark</h4><p>The images must not be multisampled. Use <a href="classtp_1_1_job.html#ac74a3929dfcfb91e412f39a1539c09d5" class="m-doc">tp::<wbr />Job::<wbr />cmdResolveImage</a> for that purpose.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/vkCmdBlitImage.html" class="m-doc-external">vkCmdBlitImage</a></p></aside>
           </div></section>
+          <section class="m-doc-details" id="aabdd4bbed0d6c9988558c18fad671c89"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />Job::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aabdd4bbed0d6c9988558c18fad671c89" class="m-doc-self">cmdBuildAccelerationStructuresIndirectKHR</a>(</span><span class="m-doc-wrap"><a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const <a href="structtp_1_1_acceleration_structure_build_info.html" class="m-doc">AccelerationStructureBuildInfo</a>&gt; buildInfos,
+              <a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const <a href="structtp_1_1_acceleration_structure_build_indirect_info.html" class="m-doc">AccelerationStructureBuildIndirectInfo</a>&gt; indirectInfos)</span></span>
+            </h3>
+            <p>Processes acceleration structure builds or updates with primitive counts sourced from an indirect buffer.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">buildInfos</td>
+                  <td>The build info structures describing the details of each operation.</td>
+                </tr>
+                <tr>
+                  <td>indirectInfos</td>
+                  <td>Additional structures that provide an indirect buffer for each operation from which geometry offsets and counts are sourced from, overriding the values in the associated <code>buildInfos</code> structure.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>Remark</h4><p>The number of primitives in each geometry that each acceleration structure will be built with is determined by the contents of the build range buffers inside <a href="structtp_1_1_acceleration_structure_build_indirect_info.html" class="m-doc">tp::<wbr />AccelerationStructureBuildIndirectInfo</a>.</p><p>The individual builds or updates are processed asynchronously, without any synchronization between them. This means that a BLAS and a TLAS that references it cannot be built within the same call.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/vkCmdBuildAccelerationStructuresIndirectKHR.html" class="m-doc-external">vkCmdBuildAccelerationStructuresIndirectKHR</a></p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a66c9b6230cefdbd60010853ce3d22809"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />Job::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a66c9b6230cefdbd60010853ce3d22809" class="m-doc-self">cmdBuildAccelerationStructuresKHR</a>(</span><span class="m-doc-wrap"><a href="classtp_1_1_array_parameter.html" class="m-doc">ArrayParameter</a>&lt;const <a href="structtp_1_1_acceleration_structure_build_info.html" class="m-doc">AccelerationStructureBuildInfo</a>&gt; buildInfos)</span></span>
+            </h3>
+            <p>Processes acceleration structure builds or updates.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">buildInfos</td>
+                  <td>The build info structures describing the details of each operation.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>Remark</h4><p>The sizes of the input geometry buffer views in <a href="structtp_1_1_acceleration_structure_build_info.html" class="m-doc">tp::<wbr />AccelerationStructureBuildInfo</a> determine the number of primitives each acceleration structure will be built with for the respective geometry. As such, the size divided by the expected stride of the data must be below the maximum primitive count provided in the associated geometry setup structure that the destination acceleration structure was created with.</p><p>The individual builds or updates are processed asynchronously, without any synchronization between them. This means that a BLAS and a TLAS that references it cannot be built within the same call.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/vkCmdBuildAccelerationStructuresKHR.html" class="m-doc-external">vkCmdBuildAccelerationStructuresKHR</a></p></aside>
+          </div></section>
           <section class="m-doc-details" id="a4aed4f4ac99e3090785561c937170f5b"><div>
             <h3>
               <span class="m-doc-wrap-bumper">void tp::<wbr />Job::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4aed4f4ac99e3090785561c937170f5b" class="m-doc-self">cmdClearImage</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_image_view.html" class="m-doc">ImageView</a>&amp; dstImage,
@@ -448,6 +538,34 @@
               </tbody>
             </table>
 <aside class="m-note m-default"><h4>Remark</h4><p>Clearing images as part of a render pass may be more efficient.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/vkCmdClearColorImage.html" class="m-doc-external">vkCmdClearColorImage</a></p><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/vkCmdClearDepthStencilImage.html" class="m-doc-external">vkCmdClearDepthStencilImage</a></p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a6ec272bb9c77057ec07d7f12b3e41287"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />Job::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6ec272bb9c77057ec07d7f12b3e41287" class="m-doc-self">cmdCopyAccelerationStructureKHR</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_acceleration_structure_view.html" class="m-doc">AccelerationStructureView</a>&amp; srcView,
+              const <a href="classtp_1_1_acceleration_structure_view.html" class="m-doc">AccelerationStructureView</a>&amp; dstView,
+              <a href="namespacetp.html#a6e26f095e595e55c1b963c6172e48315" class="m-doc">AccelerationStructureCopyMode</a> mode)</span></span>
+            </h3>
+            <p>Copies the contents of one acceleration structure to another, with optional compaction.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">srcView</td>
+                  <td>The source acceleration structure.</td>
+                </tr>
+                <tr>
+                  <td>dstView</td>
+                  <td>The destination acceleration structure.</td>
+                </tr>
+                <tr>
+                  <td>mode</td>
+                  <td>Specifies the operation as either a plain copy or a copy with compacting.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>Remark</h4><p>If <code>mode</code> <a href="namespacetp.html#a6e26f095e595e55c1b963c6172e48315aff24590464659ee8cdec688128c35f89" class="m-doc">tp::<wbr />AccelerationStructureCopyMode::<wbr />Clone</a>, then the source and destination acceleration structures must have been created with identical setup structures. If <code>mode</code> <a href="namespacetp.html#a6e26f095e595e55c1b963c6172e48315ab1fe2c2a59e883740e7ea87667e44a24" class="m-doc">tp::<wbr />AccelerationStructureCopyMode::<wbr />Compact</a>, then the destination acceleration structure must have been created with <a href="classtp_1_1_device.html#a284c77818a498dc1b5daa15e0ca0c9ea" class="m-doc">tp::<wbr />Device::<wbr />allocateCompactedAccelerationStructureKHR</a> using the same source acceleration structure.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/vkCmdCopyAccelerationStructureKHR.html" class="m-doc-external">vkCmdCopyAccelerationStructureKHR</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="a013f09d33bc1bd883c1fe64460d50e2c"><div>
             <h3>
@@ -661,7 +779,34 @@
                 </tr>
               </tbody>
             </table>
-<aside class="m-note m-default"><h4>Remark</h4><p>Any usage of non-attachment resources inside the render pass beyond accesses that the resources were previously exported for must be specified inside the <code>setup</code> structure.</p><p>The dependencies between the render pass and the rest of the <a href="classtp_1_1_job.html" class="m-doc">tp::<wbr />Job</a> are synchronized automatically. Dependencies between commands executed within the same render pass are not, except for guarantees provided by the rasterization order.</p><p>Inline callbacks will be called during the call to <a href="classtp_1_1_device.html#a93761a656dd28cfb569419c90ff66e3f" class="m-doc">tp::<wbr />Device::<wbr />submitQueuedJobs</a> in the provided order. <a href="classtp_1_1_device.html" class="m-doc">Device</a> queue thread safety rules apply: No operations on the target queue are permitted inside the callback.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkCmdBeginRendering.html" class="m-doc-external">VkCmdBeginRendering</a></p></aside>
+<aside class="m-note m-default"><h4>Remark</h4><p>Any usage of non-attachment resources inside the render pass beyond accesses that the resources were previously exported for must be specified inside the <code>setup</code> structure.</p><p>The dependencies between the render pass and the rest of the <a href="classtp_1_1_job.html" class="m-doc">tp::<wbr />Job</a> are synchronized automatically. Dependencies between commands executed within the same render pass are not, except for guarantees provided by the rasterization order.</p><p>Inline callbacks will be called during the call to <a href="classtp_1_1_device.html#a93761a656dd28cfb569419c90ff66e3f" class="m-doc">tp::<wbr />Device::<wbr />submitQueuedJobs</a> in the provided order. <a href="classtp_1_1_device.html" class="m-doc">Device</a> queue thread safety rules apply: No operations on the target queue are permitted inside the callback.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/vkCmdBeginRendering.html" class="m-doc-external">vkCmdBeginRendering</a></p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a78d8908408b389c50446c808b4e2bb60"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void tp::<wbr />Job::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a78d8908408b389c50446c808b4e2bb60" class="m-doc-self">cmdExportResource</a>(</span><span class="m-doc-wrap">const <a href="classtp_1_1_acceleration_structure_view.html" class="m-doc">AccelerationStructureView</a>&amp; accelerationStructure,
+              <a href="namespacetp.html#a35126e5e403003db788eb060b78e88bf" class="m-doc">ReadAccessMask</a> readAccessMask,
+              <a href="namespacetp.html#a8b32a8b4b40aee5fed67bc3c3d63ead7" class="m-doc">QueueType</a> targetQueueType = <a href="namespacetp.html#a8b32a8b4b40aee5fed67bc3c3d63ead7aec0fc0100c4fc1ce4eea230c3dc10360" class="m-doc">QueueType::<wbr />Undefined</a>)</span></span>
+            </h3>
+            <p>Prepares an acceleration structure for future read-only usages.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">accelerationStructure</td>
+                  <td>The acceleration structure to be exported.</td>
+                </tr>
+                <tr>
+                  <td>readAccessMask</td>
+                  <td>The mask of future read-only accesses.</td>
+                </tr>
+                <tr>
+                  <td>targetQueueType</td>
+                  <td>If not <a href="namespacetp.html#a8b32a8b4b40aee5fed67bc3c3d63ead7aec0fc0100c4fc1ce4eea230c3dc10360" class="m-doc">tp::<wbr />QueueType::<wbr />Undefined</a>, the resource is made accessible to all of the queues of the given type.</td>
+                </tr>
+              </tbody>
+            </table>
           </div></section>
           <section class="m-doc-details" id="a967f5a891d8e50cb73d0f6b7c6cec066"><div>
             <h3>

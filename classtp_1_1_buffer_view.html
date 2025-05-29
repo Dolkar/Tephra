@@ -56,7 +56,7 @@
         <h1>
           <span class="m-breadcrumb"><a href="namespacetp.html">tp</a>::<wbr/></span>BufferView <span class="m-thin">class</span>
         </h1>
-        <p>Represents the view of a contiguous range of <a href="classtp_1_1_buffer.html" class="m-doc">tp::<wbr />Buffer</a> memory.</p>
+        <p>Represents a non-owning view of a contiguous range of <a href="classtp_1_1_buffer.html" class="m-doc">tp::<wbr />Buffer</a> memory.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -90,7 +90,7 @@
             </dt>
             <dd>Creates a texel buffer view of the viewed buffer relative to this view.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#afc740414807f8b5e6028f0f06c89ee57" class="m-doc">getDeviceAddress</a>(</span><span class="m-doc-wrap">) const -&gt; VkDeviceAddress</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a647b5f57d950fc1d490fa868a29295f1" class="m-doc">getDeviceAddress</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespacetp.html#a44928c7a17be2c7370000d16a223c955" class="m-doc">DeviceAddress</a></span>
             </dt>
             <dd>Returns the device address of the buffer view that can then be used for accessing it in shaders.</dd>
             <dt id="a5ec4120a17ceec2e1c5a4307a7981bb2">
@@ -176,9 +176,9 @@
             </table>
 <aside class="m-note m-default"><h4>Remark</h4><p>The range of the new view must be fully contained inside this view, meaning the <code>offset + size</code> must be less or equal the size of the current view.</p><p>The viewed buffer must have been created with <a href="namespacetp.html#aab7f7936c98d373925f0e1728496c63da87f4470e128117163f6071e645f404a9" class="m-doc">tp::<wbr />BufferUsage::<wbr />TexelBuffer</a>.</p><p>This is effectively a shorthand for <a href="classtp_1_1_buffer.html#a7a734124870af6f998f062d973b47977" class="m-doc">tp::<wbr />Buffer::<wbr />createTexelView</a>. This means that it isn&#x27;t thread safe with respect to the underlying buffer. For job-local buffer views, this extends to the parent <a href="classtp_1_1_job_resource_pool.html" class="m-doc">tp::<wbr />JobResourcePool</a>.</p></aside>
           </div></section>
-          <section class="m-doc-details" id="afc740414807f8b5e6028f0f06c89ee57"><div>
+          <section class="m-doc-details" id="a647b5f57d950fc1d490fa868a29295f1"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">VkDeviceAddress tp::<wbr />BufferView::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afc740414807f8b5e6028f0f06c89ee57" class="m-doc-self">getDeviceAddress</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="namespacetp.html#a44928c7a17be2c7370000d16a223c955" class="m-doc">DeviceAddress</a> tp::<wbr />BufferView::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a647b5f57d950fc1d490fa868a29295f1" class="m-doc-self">getDeviceAddress</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Returns the device address of the buffer view that can then be used for accessing it in shaders.</p>
 <aside class="m-note m-default"><h4>Remark</h4><p>The viewed buffer must have been created with <a href="namespacetp.html#aab7f7936c98d373925f0e1728496c63daa85fec0d8738bc31273f1a5d6d10e618" class="m-doc">tp::<wbr />BufferUsage::<wbr />DeviceAddress</a> buffer usage.</p><p>If the viewed buffer is a job-local buffer, a valid address will only be returned after the <a href="classtp_1_1_job.html" class="m-doc">tp::<wbr />Job</a> has been enqueued.</p></aside>

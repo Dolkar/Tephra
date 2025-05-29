@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>tp::BaseQuery class | Tephra Documentation</title>
+  <title>tp::InstanceGeometryBuildInfo struct | Tephra Documentation</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark-tephra.css" />
   <link rel="stylesheet" href="m-documentation.css" />
@@ -54,91 +54,58 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="namespacetp.html">tp</a>::<wbr/></span>BaseQuery <span class="m-thin">class</span>
+          <span class="m-breadcrumb"><a href="namespacetp.html">tp</a>::<wbr/></span>InstanceGeometryBuildInfo <span class="m-thin">struct</span>
         </h1>
-        <p>Base class implementing the shared functionality of device queries.</p>
+        <p>Information for building an instance geometry of a top-level acceleration structure.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#derived-classes">Derived classes</a></li>
-                <li><a href="#pub-methods">Public functions</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-        <section id="derived-classes">
-          <h2><a href="#derived-classes">Derived classes</a></h2>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              class <a href="classtp_1_1_render_query.html" class="m-doc">RenderQuery</a>
+              <span class="m-doc-wrap-bumper"><a href="#aff972afec1d8993326356fb026473418" class="m-doc">InstanceGeometryBuildInfo</a>(</span><span class="m-doc-wrap"><a href="classtp_1_1_buffer_view.html" class="m-doc">BufferView</a> instanceBuffer,
+              bool arrayOfPointers = false,
+              <a href="classtp_1_1_array_view.html" class="m-doc">ArrayView</a>&lt;const <a href="classtp_1_1_acceleration_structure_view.html" class="m-doc">AccelerationStructureView</a>&gt; accessedViews = {})</span>
             </dt>
-            <dd>Query for measuring some statistic over a range of render commands.</dd>
-            <dt>
-              class <a href="classtp_1_1_timestamp_query.html" class="m-doc">TimestampQuery</a>
-            </dt>
-            <dd>Query for measuring execution time on the device timeline.</dd>
-          </dl>
-        </section>
-        <section id="pub-methods">
-          <h2><a href="#pub-methods">Public functions</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#afbc0b574105e1b76502aa015d5dc385d" class="m-doc">clear</a>(</span><span class="m-doc-wrap">)</span>
-            </dt>
-            <dd>Throws away all previous results.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aa0d2edf4f77241739806c2b60f2c4a8c" class="m-doc">getJobResult</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_job_semaphore.html" class="m-doc">JobSemaphore</a>&amp; jobSemaphore) const -&gt; <a href="structtp_1_1_query_result.html" class="m-doc">QueryResult</a></span>
-            </dt>
-            <dd>Returns the result written during the execution of the given job, or a null result if not available. By default, any result older than the last result may be forgotten at any point. Use <a href="classtp_1_1_base_query.html#a184cfa93d73c99ddd7ebacd0666bd794" class="m-doc">tp::<wbr />BaseQuery::<wbr />setMaxHistorySize</a> to set the number of past results that should be stored and retrievable through this method.</dd>
-            <dt id="a55d8539281cdfc44d475239df0c0420f">
-              <span class="m-doc-wrap-bumper">auto <a href="#a55d8539281cdfc44d475239df0c0420f" class="m-doc-self">getLastResult</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="structtp_1_1_query_result.html" class="m-doc">QueryResult</a></span>
-            </dt>
-            <dd>Returns the last (largest timestamp) result written for this query, or a null result if none are available.</dd>
-            <dt id="a038eea9f7e966d6594ec03b3c55f0e6e">
-              <span class="m-doc-wrap-bumper">auto <a href="#a038eea9f7e966d6594ec03b3c55f0e6e" class="m-doc-self">isNull</a>(</span><span class="m-doc-wrap">) const -&gt; bool</span>
-            </dt>
-            <dd>Returns <code>true</code> if the query is null and not valid for use.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#a184cfa93d73c99ddd7ebacd0666bd794" class="m-doc">setMaxHistorySize</a>(</span><span class="m-doc-wrap">uint32_t size)</span>
-            </dt>
-            <dd>Sets the maximum number of past stored results that can be retrieved with <a href="classtp_1_1_base_query.html#aa0d2edf4f77241739806c2b60f2c4a8c" class="m-doc">tp::<wbr />BaseQuery::<wbr />getJobResult</a>.</dd>
+            <dd></dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="afbc0b574105e1b76502aa015d5dc385d"><div>
+          <section class="m-doc-details" id="aff972afec1d8993326356fb026473418"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void tp::<wbr />BaseQuery::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afbc0b574105e1b76502aa015d5dc385d" class="m-doc-self">clear</a>(</span><span class="m-doc-wrap">)</span></span>
+              <span class="m-doc-wrap-bumper"> tp::<wbr />InstanceGeometryBuildInfo::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aff972afec1d8993326356fb026473418" class="m-doc-self">InstanceGeometryBuildInfo</a>(</span><span class="m-doc-wrap"><a href="classtp_1_1_buffer_view.html" class="m-doc">BufferView</a> instanceBuffer,
+              bool arrayOfPointers = false,
+              <a href="classtp_1_1_array_view.html" class="m-doc">ArrayView</a>&lt;const <a href="classtp_1_1_acceleration_structure_view.html" class="m-doc">AccelerationStructureView</a>&gt; accessedViews = {})</span></span>
             </h3>
-            <p>Throws away all previous results.</p>
-<aside class="m-note m-default"><h4>Remark</h4><p>This function may not be called while the query is in use (pending a result).</p></aside>
-          </div></section>
-          <section class="m-doc-details" id="aa0d2edf4f77241739806c2b60f2c4a8c"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper"><a href="structtp_1_1_query_result.html" class="m-doc">QueryResult</a> tp::<wbr />BaseQuery::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa0d2edf4f77241739806c2b60f2c4a8c" class="m-doc-self">getJobResult</a>(</span><span class="m-doc-wrap">const <a href="structtp_1_1_job_semaphore.html" class="m-doc">JobSemaphore</a>&amp; jobSemaphore) const</span></span>
-            </h3>
-            <p>Returns the result written during the execution of the given job, or a null result if not available. By default, any result older than the last result may be forgotten at any point. Use <a href="classtp_1_1_base_query.html#a184cfa93d73c99ddd7ebacd0666bd794" class="m-doc">tp::<wbr />BaseQuery::<wbr />setMaxHistorySize</a> to set the number of past results that should be stored and retrievable through this method.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
               </thead>
               <tbody>
                 <tr>
-                  <td style="width: 1%">jobSemaphore</td>
-                  <td>The semaphore that identifies the job for which a result should be retrieved.</td>
+                  <td style="width: 1%">instanceBuffer</td>
+                  <td>A buffer containing a tightly packed array of instance data, either as the   <a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkAccelerationStructureInstanceKHR.html" class="m-doc-external">VkAccelerationStructureInstanceKHR</a> structure if <code>arrayOfPointers</code> is <code>false</code>, or as device addresses pointing to the structure if <code>true</code>.</td>
+                </tr>
+                <tr>
+                  <td>arrayOfPointers</td>
+                  <td>Determines if the <code>instanceBuffer</code> contains structures or device addresses pointing to structures.</td>
+                </tr>
+                <tr>
+                  <td>accessedViews</td>
+                  <td>A list of all potentially referenced bottom-level acceleration structures for synchronization purposes.</td>
                 </tr>
               </tbody>
             </table>
-          </div></section>
-          <section class="m-doc-details" id="a184cfa93d73c99ddd7ebacd0666bd794"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">void tp::<wbr />BaseQuery::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a184cfa93d73c99ddd7ebacd0666bd794" class="m-doc-self">setMaxHistorySize</a>(</span><span class="m-doc-wrap">uint32_t size)</span></span>
-            </h3>
-            <p>Sets the maximum number of past stored results that can be retrieved with <a href="classtp_1_1_base_query.html#aa0d2edf4f77241739806c2b60f2c4a8c" class="m-doc">tp::<wbr />BaseQuery::<wbr />getJobResult</a>.</p>
-<aside class="m-note m-default"><h4>Remark</h4><p>This function may not be called while the query is in use (pending a result).</p></aside>
           </div></section>
         </section>
       </div>
