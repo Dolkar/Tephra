@@ -24,7 +24,7 @@ set(TEPHRA_SOURCES
     ${SOURCE_PATH}/tephra/job/job_compile.cpp
     ${SOURCE_PATH}/tephra/job/job_data.cpp
     ${SOURCE_PATH}/tephra/job/local_acceleration_structures.cpp
-    ${SOURCE_PATH}/tephra/job/local_acceleration_structure_allocator.hpp
+    ${SOURCE_PATH}/tephra/job/local_acceleration_structure_allocator.cpp
     ${SOURCE_PATH}/tephra/job/local_buffers.cpp
     ${SOURCE_PATH}/tephra/job/local_buffer_allocator.cpp
     ${SOURCE_PATH}/tephra/job/local_descriptor_sets.cpp
