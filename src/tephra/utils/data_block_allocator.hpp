@@ -1,6 +1,7 @@
 #pragma once
 
 #include "math.hpp"
+#include <tephra/tools/array.hpp>
 #include <deque>
 #include <memory>
 
@@ -9,9 +10,10 @@ namespace tp {
 template <std::size_t BlockSize = 4096, std::size_t AlignSize = alignof(max_align_t)>
 class DataBlockAllocator {
 public:
-    // Allocates memory for count number of T sized objects. The memory is not initialized.
+    // Allocates memory for count number of T sized objects. The objects are not constructed and the memory is not
+    // initialized.
     template <typename T = std::byte>
-    T* allocate(std::size_t count) {
+    ArrayView<T> allocate(std::size_t count) {
         std::size_t requiredSize = count * sizeof(T);
 
         if (requiredSize > BlockSize) {
@@ -20,13 +22,13 @@ public:
                 dynamicBlocks.emplace_back();
             }
             DynamicBlockType& dynamicBlock = dynamicBlocks[tailDynamicBlock++];
-            return dynamicBlock.template reallocate<T>(count);
+            return ArrayView<T>(dynamicBlock.template reallocate<T>(count), count);
         }
 
         // Suballocate from the static sized blocks
         std::size_t padding = tailOffset % AlignSize == 0 ? 0 : AlignSize - (tailOffset % AlignSize);
 
-        // Switch to the next tail block
+        // Switch to the next block
         if (tailOffset + padding + requiredSize > BlockSize) {
             tailBlock++;
             tailOffset = 0;
@@ -42,7 +44,28 @@ public:
         T* ptr = reinterpret_cast<T*>(reinterpret_cast<std::byte*>(blocks[tailBlock].get()) + tailOffset);
         tailOffset += requiredSize;
 
-        return ptr;
+        return ArrayView<T>(ptr, count);
+    }
+
+    // Helper that copies the given array to the allocator and returns a view to it
+    template <typename T, typename TSrc>
+    ArrayView<T> allocate(ArrayParameter<const TSrc> data) {
+        if (data.empty())
+            return {};
+
+        ArrayView<T> copyView = allocate<T>(data.size());
+
+        T* ptr = copyView.data();
+        for (auto& element : data) {
+            new (ptr++) T{ element };
+        }
+
+        return copyView;
+    }
+
+    template <typename T, typename TSrc>
+    ArrayView<T> allocate(ArrayView<TSrc> data) {
+        return allocate<T>(ArrayParameter<const TSrc>(data));
     }
 
     // Makes the allocator start anew, overwriting the previously allocated memory

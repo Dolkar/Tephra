@@ -42,15 +42,18 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     assert(globalWindow != nullptr);
 
     switch (uMsg) {
-    case WM_CLOSE: PostQuitMessage(0); break;
+    case WM_CLOSE:
+        PostQuitMessage(0);
+        break;
     case WM_PAINT:
-        if (globalWindow->example != nullptr) {
+        if (globalWindow->example != nullptr && !globalWindow->quit) {
             try {
                 globalWindow->example->drawFrame();
             } catch (const tp::SurfaceLostError&) {
                 globalWindow->example->releaseSurface();
                 globalWindow->create_surface();
             } catch (const tp::RuntimeError& e) {
+                globalWindow->quit = true;
                 showErrorAndExit("Frame draw failed", e.what());
             }
         }
@@ -58,7 +61,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     case WM_GETMINMAXINFO: // set window's minimum size
         ((MINMAXINFO*)lParam)->ptMinTrackSize = globalWindow->minsize;
         return 0;
-    case WM_ERASEBKGND: return 1;
+    case WM_ERASEBKGND:
+        return 1;
     case WM_SIZE:
         // Resize the application to the new window size, except when
         // it was minimized. Vulkan doesn't support images or swapchains
@@ -71,11 +75,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
         break;
     case WM_KEYDOWN:
         switch (wParam) {
-        case VK_ESCAPE: PostQuitMessage(0); break;
-        case VK_SPACE: globalWindow->pause = !globalWindow->pause; break;
+        case VK_ESCAPE:
+            PostQuitMessage(0);
+            break;
+        case VK_SPACE:
+            globalWindow->pause = !globalWindow->pause;
+            break;
         }
         return 0;
-    default: break;
+    default:
+        break;
     }
 
     return (DefWindowProc(hWnd, uMsg, wParam, lParam));
@@ -86,12 +95,8 @@ static void handle_ping(void* data, wl_shell_surface* shell_surface, uint32_t se
     wl_shell_surface_pong(shell_surface, serial);
 }
 
-static void handle_configure(
-    void* data,
-    wl_shell_surface* shell_surface,
-    uint32_t edges,
-    int32_t width,
-    int32_t height) {}
+static void handle_configure(void* data, wl_shell_surface* shell_surface, uint32_t edges, int32_t width, int32_t height) {
+}
 
 static void handle_popup_done(void* data, wl_shell_surface* shell_surface) {}
 
@@ -143,11 +148,8 @@ static void keyboard_handle_enter(
     struct wl_surface* surface,
     struct wl_array* keys) {}
 
-static void keyboard_handle_leave(
-    void* data,
-    struct wl_keyboard* keyboard,
-    uint32_t serial,
-    struct wl_surface* surface) {}
+static void keyboard_handle_leave(void* data, struct wl_keyboard* keyboard, uint32_t serial, struct wl_surface* surface) {
+}
 
 static void keyboard_handle_key(
     void* data,
@@ -271,17 +273,26 @@ WindowManager::WindowManager()
 }
 
 #if defined(VK_USE_PLATFORM_WIN32_KHR)
-void WindowManager::init(HINSTANCE hInstance) {
+void WindowManager::init(HINSTANCE hInstance, Example* example) {
+    this->example = example;
+    example->getWindowSize(&width, &height);
+
     globalWindow = this;
     connection = hInstance;
     create_window();
 }
 #elif defined(VK_USE_PLATFORM_METAL_EXT)
-void WindowManager::init(void* caMetalLayer) {
+void WindowManager::init(void* caMetalLayer, Example* example) {
+    this->example = example;
+    example->getWindowSize(&width, &height);
+
     caMetalLayer = caMetalLayer;
 }
 #else
-void WindowManager::init() {
+void WindowManager::init(Example* example) {
+    this->example = example;
+    example->getWindowSize(&width, &height);
+
     #if defined(VK_USE_PLATFORM_XCB_KHR)
     const xcb_setup_t* setup;
     xcb_screen_iterator_t iter;
@@ -295,8 +306,7 @@ void WindowManager::init() {
     connection = xcb_connect(nullptr, &scr);
     if (xcb_connection_has_error(connection) > 0) {
         showErrorAndExit(
-            "Window initialization failed",
-            "Cannot find a compatible Vulkan installable client driver (ICD).");
+            "Window initialization failed", "Cannot find a compatible Vulkan installable client driver (ICD).");
     }
 
     setup = xcb_get_setup(connection);
@@ -310,8 +320,7 @@ void WindowManager::init() {
 
     if (display == nullptr) {
         showErrorAndExit(
-            "Window initialization failed",
-            "Cannot find a compatible Vulkan installable client driver (ICD).");
+            "Window initialization failed", "Cannot find a compatible Vulkan installable client driver (ICD).");
     }
 
     registry = wl_display_get_registry(display);
@@ -424,13 +433,10 @@ void WindowManager::create_surface() {
     }
 }
 
-void WindowManager::run(Example* example, uint32_t frameCount) {
-    this->example = example;
-
+void WindowManager::run(uint32_t frameCount) {
     create_surface();
 
 #if defined(VK_USE_PLATFORM_WIN32_KHR)
-    this->example = example;
     MSG msg;
     // Ensure wParam is initialized.
     msg.wParam = 0;
@@ -639,10 +645,7 @@ void WindowManager::create_window() {
     XVisualInfo* visualInfo = XGetVisualInfo(display, visualMask, &vInfoTemplate, &numberOfVisuals);
 
     Colormap colormap = XCreateColormap(
-        display,
-        RootWindow(display, vInfoTemplate.screen),
-        visualInfo->visual,
-        AllocNone);
+        display, RootWindow(display, vInfoTemplate.screen), visualInfo->visual, AllocNone);
 
     XSetWindowAttributes windowAttributes = {};
     windowAttributes.colormap = colormap;
@@ -701,14 +704,7 @@ void WindowManager::create_window() {
     atom_wm_delete_window = xcb_intern_atom_reply(connection, cookie2, 0);
 
     xcb_change_property(
-        connection,
-        XCB_PROP_MODE_REPLACE,
-        xcb_window,
-        (*reply).atom,
-        4,
-        32,
-        1,
-        &(*atom_wm_delete_window).atom);
+        connection, XCB_PROP_MODE_REPLACE, xcb_window, (*reply).atom, 4, 32, 1, &(*atom_wm_delete_window).atom);
 
     free(reply);
 
@@ -761,8 +757,7 @@ void WindowManager::create_window() {
     ret = dfb->CreateInputEventBuffer(dfb, DICAPS_KEYS, DFB_FALSE, &event_buffer);
     if (ret) {
         showErrorAndExit(
-            "Window initialization failed",
-            "CreateInputEventBuffer failed to create DirectFB event buffer interface!");
+            "Window initialization failed", "CreateInputEventBuffer failed to create DirectFB event buffer interface!");
     }
 #endif
 }
@@ -792,7 +787,8 @@ void WindowManager::handle_xlib_event(const XEvent* event) {
             has_resized = true;
         }
         break;
-    default: break;
+    default:
+        break;
     }
 }
 #elif defined(VK_USE_PLATFORM_XCB_KHR)
@@ -828,7 +824,8 @@ void WindowManager::handle_xcb_event(const xcb_generic_event_t* event) {
             has_resized = true;
         }
     } break;
-    default: break;
+    default:
+        break;
     }
 }
 
@@ -844,7 +841,8 @@ void WindowManager::handle_directfb_event(const DFBInputEvent* event) {
     case DIKS_SPACE: // space bar
         pause = !pause;
         break;
-    default: break;
+    default:
+        break;
     }
 }
 

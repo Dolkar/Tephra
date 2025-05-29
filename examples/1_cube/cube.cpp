@@ -1,14 +1,8 @@
 #include "cube.hpp"
 #include "cube_data.hpp"
 #include "linmath.h"
-#include "assert.h"
 
-const char* vkLayerLunargMonitorName = "VK_LAYER_LUNARG_monitor";
-
-tp::Format colorFormat = tp::Format::COL32_B8G8R8A8_UNORM;
 tp::Format depthFormat = tp::Format::DEPTH16_D16_UNORM;
-tp::DebugMessageSeverityMask debugSeverity = tp::DebugMessageSeverity::Verbose | tp::DebugMessageSeverity::Information |
-    tp::DebugMessageSeverity::Warning | tp::DebugMessageSeverity::Error;
 
 CubeExample::CubeExample(std::ostream& debugStream, bool debugMode)
     : debugHandler(debugStream, debugSeverity), mainQueue(tp::QueueType::Graphics) {
@@ -69,10 +63,6 @@ CubeExample::CubeExample(std::ostream& debugStream, bool debugMode)
     cubeRotation = 0.0f;
 }
 
-const tp::Application* CubeExample::getApplication() const {
-    return application.get();
-}
-
 void CubeExample::update() {
     const float spinAngle = 2.0f;
 
@@ -88,7 +78,7 @@ void CubeExample::drawFrame() {
 
     if (swapchain->getStatus() != tp::SwapchainStatus::Optimal) {
         // Recreate out of date or suboptimal swapchain
-        prepareSwapchain();
+        prepareSwapchain(physicalDevice, device.get(), mainQueue, swapchainFormat);
     }
 
     // Acquire a swapchain image to draw the frame to
@@ -190,12 +180,10 @@ void CubeExample::drawFrame() {
 }
 
 void CubeExample::resize(VkSurfaceKHR surface, uint32_t width, uint32_t height) {
-    this->surface = surface;
-    this->width = width;
-    this->height = height;
+    Example::resize(surface, width, height);
 
     // Recreate the swapchain
-    prepareSwapchain();
+    prepareSwapchain(physicalDevice, device.get(), mainQueue, swapchainFormat);
 
     // Also trim the job resource pool to free temporary resources used for the previous resolution
     jobResourcePool->trim();
@@ -287,67 +275,17 @@ void CubeExample::preparePipeline() {
     auto vertShaderSetup = tp::ShaderStageSetup(&vertShader, "main");
     auto fragShaderSetup = tp::ShaderStageSetup(&fragShader, "main");
 
-    auto pipelineSetup = tp::GraphicsPipelineSetup(
-        &pipelineLayout, vertShaderSetup, fragShaderSetup, "Cube Pipeline");
+    auto pipelineSetup = tp::GraphicsPipelineSetup(&pipelineLayout, vertShaderSetup, fragShaderSetup, "Cube Pipeline");
 
     // Describe what it will render into
     pipelineSetup.setDepthStencilAttachment(depthFormat);
-    pipelineSetup.setColorAttachments({ colorFormat });
+    pipelineSetup.setColorAttachments({ swapchainFormat });
 
     // Back face culling with depth test & write
     pipelineSetup.setCullMode(tp::CullModeFlag::BackFace);
     pipelineSetup.setDepthTest(true, tp::CompareOp::LessOrEqual, true);
 
     device->compileGraphicsPipelines({ &pipelineSetup }, nullptr, { &pipeline });
-}
-
-void CubeExample::prepareSwapchain() {
-    tp::SurfaceCapabilities capabilities = physicalDevice->querySurfaceCapabilitiesKHR(surface);
-
-    bool supportsQueue = false;
-    for (tp::QueueType queueType : capabilities.supportedQueueTypes) {
-        if (mainQueue.type == queueType)
-            supportsQueue = true;
-    }
-    if (!supportsQueue) {
-        showErrorAndExit("Swapchain creation failed", "Surface not supported on this device and queue.");
-    }
-
-    // Prefer the extent specified by the surface over what's provided by the windowing system
-    if (capabilities.currentExtent.width != ~0) {
-        width = capabilities.currentExtent.width;
-        height = capabilities.currentExtent.height;
-    }
-
-    // Prefer triple buffering
-    uint32_t minImageCount = 3;
-    if (capabilities.maxImageCount != 0 && capabilities.maxImageCount < minImageCount)
-        minImageCount = capabilities.maxImageCount;
-
-    // Prefer RelaxedFIFO if available, otherwise fallback to FIFO, which is always supported
-    auto presentMode = tp::PresentMode::FIFO;
-    for (tp::PresentMode m : capabilities.supportedPresentModes) {
-        if (m == tp::PresentMode::RelaxedFIFO) {
-            presentMode = tp::PresentMode::RelaxedFIFO;
-            break;
-        }
-    }
-
-    // Check if the swapchain supports the format we used to build the pipelines
-    bool supportsRequiredFormat = false;
-    for (tp::Format format : capabilities.supportedFormatsSRGB) {
-        if (format == colorFormat)
-            supportsRequiredFormat = true;
-    }
-    if (!supportsRequiredFormat) {
-        showErrorAndExit("Swapchain creation failed", "Surface doesn't support the required format.");
-    }
-
-    auto swapchainSetup = tp::SwapchainSetup(
-        surface, presentMode, minImageCount, tp::ImageUsage::ColorAttachment, colorFormat, { width, height });
-
-    // Reuse old swapchain
-    swapchain = device->createSwapchainKHR(swapchainSetup, swapchain.get());
 }
 
 void CubeExample::fillUniformBufferData(vktexcube_vs_uniform* data) {

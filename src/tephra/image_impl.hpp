@@ -40,8 +40,8 @@ public:
     ImageImpl(
         DeviceContainer* deviceImpl,
         ImageSetup imageSetup,
-        Lifeguard<VkImageHandle>&& imageHandle,
-        Lifeguard<VmaAllocationHandle>&& memoryAllocationHandle,
+        Lifeguard<VkImageHandle> imageHandle,
+        Lifeguard<VmaAllocationHandle> memoryAllocationHandle,
         DebugTarget debugTarget);
 
     const DebugTarget* getDebugTarget() const {

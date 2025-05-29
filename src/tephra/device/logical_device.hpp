@@ -3,6 +3,7 @@
 #include "../vulkan/interface.hpp"
 #include "../application/instance.hpp"
 #include "../common_impl.hpp"
+#include <tephra/acceleration_structure.hpp>
 #include <tephra/physical_device.hpp>
 #include <tephra/swapchain.hpp>
 #include <tephra/device.hpp>
@@ -17,6 +18,7 @@ enum class Functionality {
     DebugUtilsEXT = 1 << 0,
     MemoryBudgetEXT = 1 << 1,
     BufferDeviceAddress = 1 << 2,
+    AccelerationStructureKHR = 1 << 3,
 };
 TEPHRA_MAKE_ENUM_BIT_MASK(FunctionalityMask, Functionality)
 
@@ -127,7 +129,7 @@ public:
 
     void destroyBufferView(VkBufferViewHandle vkBufferViewHandle) noexcept;
 
-    VkDeviceAddress getBufferDeviceAddress(VkBufferHandle vkBufferHandle) noexcept;
+    DeviceAddress getBufferDeviceAddress(VkBufferHandle vkBufferHandle) noexcept;
 
     // Memory allocator is responsible for creating images, use that instead
     VkImageHandle createImage(const VkImageCreateInfo& vkCreateInfo);
@@ -197,6 +199,19 @@ public:
         ArrayParameter<const VkSemaphoreHandle> vkSemaphoreHandles,
         ArrayView<VkResult> vkResults);
 
+    VkAccelerationStructureHandleKHR createAccelerationStructureKHR(
+        AccelerationStructureType type,
+        const BufferView& buffer);
+
+    void destroyAccelerationStructureKHR(VkAccelerationStructureHandleKHR vkAccelerationStructureHandle) noexcept;
+
+    VkAccelerationStructureBuildSizesInfoKHR getAccelerationStructureBuildSizes(
+        const VkAccelerationStructureBuildGeometryInfoKHR& vkBuildInfo,
+        const uint32_t* pMaxPrimitiveCounts);
+
+    DeviceAddress getAccelerationStructureDeviceAddress(
+        VkAccelerationStructureHandleKHR vkAccelerationStructureHandle) const;
+
     template <typename Interface>
     Interface loadDeviceInterface() const {
         return instance->loadDeviceInterface<Interface>(vkDeviceHandle);
@@ -221,8 +236,6 @@ private:
     const PhysicalDevice* physicalDevice;
     const QueueMap* queueMap;
     FunctionalityMask functionalityMask;
-
-    VulkanSwapchainInterfaceKHR vkiSwapchainKHR;
 };
 
 }

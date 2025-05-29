@@ -10,14 +10,38 @@ namespace tp {
 
 static constexpr VkAccessFlags WriteAccessBits = VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT |
     VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT | VK_ACCESS_TRANSFER_WRITE_BIT | VK_ACCESS_HOST_WRITE_BIT |
-    VK_ACCESS_MEMORY_WRITE_BIT;
+    VK_ACCESS_MEMORY_WRITE_BIT | VK_ACCESS_ACCELERATION_STRUCTURE_WRITE_BIT_KHR |
+    VK_ACCESS_COMMAND_PREPROCESS_WRITE_BIT_NV;
+
+// Describes the Vulkan properties of a resource access
+struct ResourceAccess {
+    VkPipelineStageFlags stageMask;
+    VkAccessFlags accessMask;
+
+    ResourceAccess() : ResourceAccess(0, 0) {}
+
+    ResourceAccess(VkPipelineStageFlags stageMask, VkAccessFlags accessMask)
+        : stageMask(stageMask), accessMask(accessMask) {}
+
+    bool isReadOnly() const {
+        return (accessMask & WriteAccessBits) == 0;
+    }
+
+    bool isNull() const {
+        return stageMask == 0;
+    }
+
+    ResourceAccess& operator|=(const ResourceAccess& other);
+};
+
+ResourceAccess operator|(const ResourceAccess& a, const ResourceAccess& b);
 
 // Returns the optimal Vulkan image layout for the given descriptor type. For non-image descriptor types, returns
 // VK_IMAGE_LAYOUT_UNDEFINED
 VkImageLayout vkGetImageLayoutForDescriptor(DescriptorType descriptorType, bool aliasStorageImage);
 
 // Converts the Tephra read access mask provided by the user into useable vulkan synchronization flags
-void convertReadAccessToVkAccess(ReadAccessMask readMask, VkPipelineStageFlags* stageMask, VkAccessFlags* accessMask);
+ResourceAccess convertReadAccessToVkAccess(ReadAccessMask readMask);
 
 // Returns the optimal Vulkan image layout for a read access mask. Assumes the mask contains only accesses with the same
 // optimal image layout.
@@ -44,29 +68,6 @@ void convertRenderAccessToVkAccess(
 // Returns the optimal Vulkan image layout for a render access mask. Assumes the mask contains only accesses with the
 // same optimal image layout.
 VkImageLayout vkGetImageLayoutFromRenderAccess(RenderAccessMask renderMask);
-
-// Describes the Vulkan properties of a resource access
-struct ResourceAccess {
-    VkPipelineStageFlags stageMask;
-    VkAccessFlags accessMask;
-
-    ResourceAccess() : ResourceAccess(0, 0) {}
-
-    ResourceAccess(VkPipelineStageFlags stageMask, VkAccessFlags accessMask)
-        : stageMask(stageMask), accessMask(accessMask) {}
-
-    bool isReadOnly() const {
-        return (accessMask & WriteAccessBits) == 0;
-    }
-
-    bool isNull() const {
-        return stageMask == 0;
-    }
-
-    ResourceAccess& operator|=(const ResourceAccess& other);
-};
-
-ResourceAccess operator|(const ResourceAccess& a, const ResourceAccess& b);
 
 // Structure representing the extent of an access to a buffer resource
 // Defines < and > operators in such a way that neither of them returns true if two ranges overlap

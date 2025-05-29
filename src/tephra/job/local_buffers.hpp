@@ -52,7 +52,7 @@ public:
 
     BufferView createTexelView(uint64_t offset, uint64_t size, Format format);
 
-    VkDeviceAddress getDeviceAddress() const;
+    DeviceAddress getDeviceAddress() const;
 
     uint64_t getRequiredViewAlignment() const;
 
@@ -95,6 +95,11 @@ public:
         return std::get<ResolvedView>(storedView).size;
     }
 
+    DeviceAddress getDeviceAddress() {
+        resolve();
+        return std::get<ResolvedView>(storedView).deviceAddress;
+    }
+
     VkBufferHandle vkResolveBufferHandle(uint64_t* offset) {
         resolve();
         *offset = std::get<ResolvedView>(storedView).offset;
@@ -105,11 +110,13 @@ private:
     struct ResolvedView {
         uint64_t size;
         uint64_t offset;
+        DeviceAddress deviceAddress;
         VkBufferHandle vkBufferHandle;
 
         explicit ResolvedView(const BufferView& view) {
             size = view.getSize();
             offset = 0;
+            deviceAddress = view.getDeviceAddress();
             vkBufferHandle = view.vkResolveBufferHandle(&offset);
         }
     };
@@ -138,9 +145,9 @@ class JobResourcePoolContainer;
 
 class JobLocalBuffers {
 public:
-    explicit JobLocalBuffers(JobResourcePoolContainer* resourcePoolImpl) : resourcePoolImpl(resourcePoolImpl) {}
+    explicit JobLocalBuffers(DeviceContainer* deviceImpl) : deviceImpl(deviceImpl) {}
 
-    BufferView acquireNewBuffer(BufferSetup setup, const char* debugName);
+    BufferView acquireNewBuffer(BufferSetup setup, DebugTarget debugTarget);
 
     void createPendingBufferViews();
 
@@ -155,7 +162,7 @@ private:
 
     uint64_t getLocalBufferIndex(const BufferView& bufferView) const;
 
-    JobResourcePoolContainer* resourcePoolImpl;
+    DeviceContainer* deviceImpl;
     std::deque<JobLocalBufferImpl> buffers; // The local buffers implementing access through views
     std::deque<BufferView> pendingBufferViews; // Buffer views that need vkBufferViews assigned
     std::deque<ResourceUsageRange> usageRanges; // The usages of the local buffers within the job

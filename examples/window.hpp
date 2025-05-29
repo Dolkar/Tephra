@@ -40,14 +40,14 @@ public:
     WindowManager();
 
 #if defined(VK_USE_PLATFORM_WIN32_KHR)
-    void init(HINSTANCE hInstance);
+    void init(HINSTANCE hInstance, Example* example);
 #elif defined(VK_USE_PLATFORM_METAL_EXT)
-    void init(void* caMetalLayer);
+    void init(void* caMetalLayer, Example* example);
 #else
-    void init();
+    void init(Example* example);
 #endif
 
-    void run(Example* example, uint32_t frameCount = UINT32_MAX);
+    void run(uint32_t frameCount = UINT32_MAX);
 
     void cleanup();
 

@@ -5,14 +5,24 @@
 
 @section e-examples Examples
 
-Examples showcasing the use of the Tephra library are present in the `/examples` folder. So far there is just one -
-a reimplementation of the
+Examples showcasing the use of the Tephra library are present in the `/examples` folder. They are packaged into a single
+executable that can switch between demos with a numeric command line parameter when ran.
+
+The first example, chosen by default or with `1` as the sole parameter, is a reimplementation of the
 <a href="https://github.com/KhronosGroup/Vulkan-LoaderAndValidationLayers/blob/master/demos/cube.cpp">official Vulkan
-C++ cube demo</a>, which displays a textured rotating cube. The Tephra implementation follows its example and does not
-make use of any third party windowing library. In your own code, you should preferably use something like GLFW instead,
-see the <a href="https://www.glfw.org/docs/3.3/vulkan_guide.html">GLFW Vulkan guide</a> for details. All the
-platform-dependent code and the window event loop is contained in `/examples/window.hpp`. It has only been tested on
-Windows, so if you find it not working on other platforms, please let me know or submit a PR :).
+C++ cube demo</a>, displaying a textured rotating cube.
+
+The second example that runs when passed `2` as the command line parameter, is a ray tracing demo that implements a
+simple path tracer of a Cornell box. It uses the `trace_ray_query.hlsl` compute shader that needs to be compiled to
+SPIR-V. If you are not using the VS solution, you will need to compile it yourself with DXC
+`-HV 2021 -fvk-use-scalar-layout` and copy it to the target directory. Can't be bothered to learn enough cmake for this,
+sorry.
+
+The examples do not use any third party windowing library, both for ease of distribution and to be a faithful recreation
+of the official cube demo. In your own code, you should preferably use something like GLFW instead, see the
+<a href="https://www.glfw.org/docs/3.3/vulkan_guide.html">GLFW Vulkan guide</a> for details. All the platform-dependent
+code and the window event loop is contained in `/examples/window.hpp`. It is mainly tested on Windows, if you find
+issues on other platforms, please submit a PR :).
 
 The `/examples/examples_common.hpp` file contains an `Example` abstract class with a number of virtual methods used to
 update and render images. This allows the windowing class to run any example that implements that interface. 
@@ -55,5 +65,10 @@ barriers is checked to match expectations
 @subsection e-tests-compute Compute Tests
 Tests for compute passes, inline and deferred recording of tp::ComputeList objects, and their proper synchronization
 within a job. Properly functioning pipelines and descriptors are also required for this.
+
+@subsection e-tests-complex Complex Tests
+More complex tests of specific behavior or use cases can also be added. For example, the streaming compute test checks
+the capability of asynchronously and continuously streaming data to the GPU, processing it there and reading the results
+back. It tests both for correctness and for minimal memory allocation.
 
 **/

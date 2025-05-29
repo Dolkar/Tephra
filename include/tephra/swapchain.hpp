@@ -43,7 +43,7 @@ struct SwapchainSetup {
     ///     The number of array layers the swapchain images should have.
     /// @param imageCompatibleFormatsKHR
     ///     The list of additional compatible formats that the tp::ImageView objects viewing the swapchain images are
-    ///     permitted to have. Requires DeviceExtension::KHR_SwapchainMutableFormat.
+    ///     permitted to have. Requires tp::DeviceExtension::KHR_SwapchainMutableFormat.
     /// @param clipped
     ///     Specifies whether the implementation is allowed to discard rendering operations that affect regions of the
     ///     surface that are not visible.

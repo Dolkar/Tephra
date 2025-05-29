@@ -57,7 +57,7 @@ class Image;
 class ImageImpl;
 class JobLocalImageImpl;
 
-/// Represents the view of a subresource range of tp::Image.
+/// Represents a non-owning view of a subresource range of tp::Image.
 ///
 /// Optionally, it can be made to interpret the data in a different format than that of the
 /// viewed tp::Image or with a different tp::ComponentMapping.
@@ -158,7 +158,7 @@ inline bool operator!=(const ImageView& lhs, const ImageView& rhs) {
     return !(lhs == rhs);
 }
 
-/// Used as configuration for creating a new tp::Image object object.
+/// Used as configuration for creating a new tp::Image object.
 /// @see tp::Device::allocateImage
 struct ImageSetup {
     ImageType type;
@@ -227,8 +227,8 @@ struct ImageSetup {
 
 /// Represents a multidimensional array of data interpreted as textures or attachments.
 ///
-/// They are not used directly, but instead are passed to commands or descriptors through
-/// tp::ImageView objects that view a contiguous range of its data.
+/// It is generally not used directly, but instead gets passed to commands or descriptors through tp::ImageView objects
+/// that view a contiguous range of its data.
 ///
 /// @see tp::Device::allocateImage
 /// @see @vksymbol{VkImage}

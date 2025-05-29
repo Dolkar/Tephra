@@ -145,6 +145,17 @@ VulkanDeviceInterface::VulkanDeviceInterface(const VulkanInstanceInterface& vkiI
     getQueryPoolResults = LOAD_DEVICE_PROCEDURE(vkGetQueryPoolResults);
     resetQueryPool = LOAD_DEVICE_PROCEDURE(vkResetQueryPool);
 
+    createSwapchainKHR = LOAD_DEVICE_EXT_PROCEDURE(vkCreateSwapchainKHR);
+    destroySwapchainKHR = LOAD_DEVICE_EXT_PROCEDURE(vkDestroySwapchainKHR);
+    getSwapchainImagesKHR = LOAD_DEVICE_EXT_PROCEDURE(vkGetSwapchainImagesKHR);
+    acquireNextImageKHR = LOAD_DEVICE_EXT_PROCEDURE(vkAcquireNextImageKHR);
+    queuePresentKHR = LOAD_DEVICE_EXT_PROCEDURE(vkQueuePresentKHR);
+
+    createAccelerationStructureKHR = LOAD_DEVICE_EXT_PROCEDURE(vkCreateAccelerationStructureKHR);
+    destroyAccelerationStructureKHR = LOAD_DEVICE_EXT_PROCEDURE(vkDestroyAccelerationStructureKHR);
+    getAccelerationStructureBuildSizesKHR = LOAD_DEVICE_EXT_PROCEDURE(vkGetAccelerationStructureBuildSizesKHR);
+    getAccelerationStructureDeviceAddressKHR = LOAD_DEVICE_EXT_PROCEDURE(vkGetAccelerationStructureDeviceAddressKHR);
+
     setDebugUtilsObjectNameEXT = LOAD_DEVICE_EXT_PROCEDURE(vkSetDebugUtilsObjectNameEXT);
     setDebugUtilsObjectTagEXT = LOAD_DEVICE_EXT_PROCEDURE(vkSetDebugUtilsObjectTagEXT);
 }
@@ -224,23 +235,15 @@ VulkanCommandInterface::VulkanCommandInterface(
     cmdBeginRendering = LOAD_DEVICE_PROCEDURE(vkCmdBeginRendering);
     cmdEndRendering = LOAD_DEVICE_PROCEDURE(vkCmdEndRendering);
 
+    cmdBuildAccelerationStructuresKHR = LOAD_DEVICE_EXT_PROCEDURE(vkCmdBuildAccelerationStructuresKHR);
+    cmdBuildAccelerationStructuresIndirectKHR = LOAD_DEVICE_EXT_PROCEDURE(vkCmdBuildAccelerationStructuresIndirectKHR);
+    cmdCopyAccelerationStructureKHR = LOAD_DEVICE_EXT_PROCEDURE(vkCmdCopyAccelerationStructureKHR);
+    cmdWriteAccelerationStructuresPropertiesKHR = LOAD_DEVICE_EXT_PROCEDURE(
+        vkCmdWriteAccelerationStructuresPropertiesKHR);
+
     cmdBeginDebugUtilsLabelEXT = LOAD_DEVICE_EXT_PROCEDURE(vkCmdBeginDebugUtilsLabelEXT);
     cmdInsertDebugUtilsLabelEXT = LOAD_DEVICE_EXT_PROCEDURE(vkCmdInsertDebugUtilsLabelEXT);
     cmdEndDebugUtilsLabelEXT = LOAD_DEVICE_EXT_PROCEDURE(vkCmdEndDebugUtilsLabelEXT);
-}
-
-VulkanSwapchainInterfaceKHR::VulkanSwapchainInterfaceKHR(
-    const VulkanInstanceInterface& vkiInstance,
-    VkDeviceHandle vkDeviceHandle) {
-    createSwapchainKHR = LOAD_DEVICE_EXT_PROCEDURE(vkCreateSwapchainKHR);
-    destroySwapchainKHR = LOAD_DEVICE_EXT_PROCEDURE(vkDestroySwapchainKHR);
-    getSwapchainImagesKHR = LOAD_DEVICE_EXT_PROCEDURE(vkGetSwapchainImagesKHR);
-    acquireNextImageKHR = LOAD_DEVICE_EXT_PROCEDURE(vkAcquireNextImageKHR);
-    queuePresentKHR = LOAD_DEVICE_EXT_PROCEDURE(vkQueuePresentKHR);
-}
-
-bool VulkanSwapchainInterfaceKHR::isLoaded() const {
-    return createSwapchainKHR != nullptr;
 }
 
 }

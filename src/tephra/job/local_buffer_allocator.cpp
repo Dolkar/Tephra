@@ -36,7 +36,8 @@ void JobLocalBufferAllocator::allocateJobBuffers(
         assignInfo.firstUsage = bufLocalUsage.firstUsage;
         assignInfo.lastUsage = bufLocalUsage.lastUsage;
         assignInfo.size = bufferSetup.size;
-        assignInfo.usageMask = bufferSetup.usage;
+        assignInfo.alignment = BufferImpl::getRequiredViewAlignment_(
+            deviceImpl, bufferSetup.usage, bufferSetup.additionalAlignment);
         assignInfo.resourcePtr = &bufferResources->buffers[i];
         assignInfos.push_back(assignInfo);
     }
@@ -85,15 +86,20 @@ std::unique_ptr<Buffer> JobLocalBufferAllocator::allocateBackingBuffer(
     DeviceContainer* deviceImpl,
     uint64_t sizeToAllocate,
     const MemoryPreference& memoryPreference) {
+    BufferSetup backingBufferSetup = BufferSetup(sizeToAllocate, BufferUsageMask::None());
+
     // Assume that buffer usage only affects alignment, meaning it's ok to include usages that aren't actually needed,
     // provided that the allocated buffers are large enough.
-    BufferUsageMask usageMask = BufferUsage::ImageTransfer | BufferUsage::HostMapped | BufferUsage::TexelBuffer |
+    backingBufferSetup.usage = BufferUsage::ImageTransfer | BufferUsage::HostMapped | BufferUsage::TexelBuffer |
         BufferUsage::UniformBuffer | BufferUsage::StorageBuffer | BufferUsage::IndexBuffer | BufferUsage::VertexBuffer |
         BufferUsage::IndirectBuffer;
     if (deviceImpl->getLogicalDevice()->isFunctionalityAvailable(tp::Functionality::BufferDeviceAddress))
-        usageMask |= BufferUsage::DeviceAddress;
+        backingBufferSetup.usage |= BufferUsage::DeviceAddress;
+    if (deviceImpl->getLogicalDevice()->isFunctionalityAvailable(tp::Functionality::AccelerationStructureKHR)) {
+        backingBufferSetup.usage |= BufferUsage::AccelerationStructureInputKHR;
+        backingBufferSetup.vkAdditionalUsage |= VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR;
+    }
 
-    BufferSetup backingBufferSetup = BufferSetup(sizeToAllocate, usageMask);
     auto [bufferHandleLifeguard, allocationHandleLifeguard] = deviceImpl->getMemoryAllocator()->allocateBuffer(
         backingBufferSetup, memoryPreference);
 
@@ -128,10 +134,8 @@ uint64_t JobLocalBufferAllocator::allocateJobBufferGroup(
     uint64_t leftoverSize = 0;
 
     for (int i = 0; i < buffersToAlloc.size(); i++) {
-        uint64_t requiredAlignment = BufferImpl::getRequiredViewAlignment_(deviceImpl, buffersToAlloc[i].usageMask);
-
         auto [backingBufferIndex, offset] = suballocator.allocate(
-            buffersToAlloc[i].size, ResourceUsageRange(buffersToAlloc[i]), requiredAlignment);
+            buffersToAlloc[i].size, ResourceUsageRange(buffersToAlloc[i]), buffersToAlloc[i].alignment);
         if (backingBufferIndex < backingBuffers.size()) {
             // The allocation fits - assign and update timestamp
             auto& [backingBuffer, lastUseTimestamp] = backingBuffers[backingBufferIndex];

@@ -36,7 +36,14 @@ QueryResult BaseQuery::getJobResult(const JobSemaphore& jobSemaphore) const {
 
 void BaseQuery::setMaxHistorySize(uint32_t size) {
     TEPHRA_ASSERT(!isNull());
-    handle->maxResultsHistorySize = tp::max(size, QueryRecord::MinMaxResultsHistorySize);
+    handle->resultsHistory.resize(tp::max(size, QueryRecord::MinMaxResultsHistorySize));
+}
+
+void BaseQuery::clear() {
+    TEPHRA_ASSERT(!isNull());
+    for (std::size_t i = 0; i < handle->resultsHistory.size(); i++) {
+        handle->resultsHistory[i] = {};
+    }
 }
 
 BaseQuery::BaseQuery(QueryManager* parentManager, Handle handle) : parentManager(parentManager), handle(handle) {
@@ -86,6 +93,9 @@ std::pair<VkQueryType, VkQueryPipelineStatisticFlagBits> QueryRecord::decodeVkQu
             return {};
         }
     }
+    case QueryType::AccelerationStructureInfoKHR:
+        // Right now assume only one subtype - compacted size query
+        return { VK_QUERY_TYPE_ACCELERATION_STRUCTURE_COMPACTED_SIZE_KHR, VkQueryPipelineStatisticFlagBits() };
     default:
         TEPHRA_ASSERTD(false, "Unexpected QueryType");
         return {};
@@ -98,15 +108,11 @@ void QueryRecord::updateResults(ArrayView<uint64_t> sampleData, const JobSemapho
 
     // Find the oldest result to overwrite
     QueryResult* resultToUpdate = resultsHistory.data();
-    if (resultsHistory.size() >= maxResultsHistorySize) {
-        for (std::size_t i = 1; i < resultsHistory.size(); i++) {
-            QueryResult* result = &resultsHistory[i];
-            // Null job semaphores have timestamp 0, so they'll be treated as oldest
-            if (result->jobSemaphore.timestamp <= resultToUpdate->jobSemaphore.timestamp)
-                resultToUpdate = result;
-        }
-    } else {
-        resultToUpdate = &resultsHistory.emplace_back();
+    for (std::size_t i = 1; i < resultsHistory.size(); i++) {
+        QueryResult* result = &resultsHistory[i];
+        // Null job semaphores have timestamp 0, so they'll be treated as oldest
+        if (result->jobSemaphore.timestamp <= resultToUpdate->jobSemaphore.timestamp)
+            resultToUpdate = result;
     }
 
     if (semaphore.timestamp < resultToUpdate->jobSemaphore.timestamp)
@@ -126,6 +132,10 @@ void QueryRecord::updateResults(ArrayView<uint64_t> sampleData, const JobSemapho
         // Render query types should be summed together
         for (uint64_t value : sampleData)
             newResultValue += value;
+        break;
+    case QueryType::AccelerationStructureInfoKHR:
+        TEPHRA_ASSERT(sampleData.size() == 1);
+        newResultValue = sampleData[0];
         break;
     default:
         TEPHRA_ASSERTD(false, "Unexpected QueryType");
@@ -265,6 +275,56 @@ void QueryRecorder::sampleTimestampQuery(
     query->lastPendingSampleTimestamp = jobSemaphore.timestamp;
 }
 
+void QueryRecorder::sampleAccelerationStructureQueriesKHR(
+    const VulkanCommandInterface* vkiCommands,
+    VkCommandBufferHandle vkCommandBuffer,
+    ArrayView<const QueryHandle> queries,
+    ArrayView<VkAccelerationStructureHandleKHR> vkAccelerationStructures) {
+    TEPHRA_ASSERT(!jobSemaphore.isNull());
+    TEPHRA_ASSERT(!queries.empty());
+    TEPHRA_ASSERT(queries.size() == vkAccelerationStructures.size());
+    TEPHRA_ASSERT(vkiCommands->cmdWriteAccelerationStructuresPropertiesKHR != nullptr);
+
+    // Try to batch up until our max batch size
+    uint32_t batchSize = std::min(static_cast<uint32_t>(queries.size()), QueryBatch::MaxSampleCount);
+
+    QueryHandle firstQuery = queries[0];
+    uint32_t firstQueryIndex = ~0;
+    QueryBatch* batch = getBatch(firstQuery, batchSize);
+
+    for (std::size_t i = 0; i < batchSize; i++) {
+        QueryHandle query = queries[i];
+        TEPHRA_ASSERT(query->type == QueryType::AccelerationStructureInfoKHR);
+        // For batching to work, they must all be able to use the same pool, aka have the same subtype
+        // Right now we only have compaction, so this should never happen
+        TEPHRA_ASSERT(query->batchPool == batch->getPool());
+
+        uint32_t queryIndex = batch->allocateSamples(query, 1);
+        if (i == 0)
+            firstQueryIndex = queryIndex;
+    }
+
+    vkiCommands->cmdWriteAccelerationStructuresPropertiesKHR(
+        vkCommandBuffer,
+        batchSize,
+        vkCastTypedHandlePtr(vkAccelerationStructures.data()),
+        firstQuery->decodeVkQueryType().first,
+        batch->vkGetQueryPoolHandle(),
+        firstQueryIndex);
+
+    // Tail recursion to handle the rest
+    if (queries.size() > QueryBatch::MaxSampleCount) {
+        sampleAccelerationStructureQueriesKHR(
+            vkiCommands,
+            vkCommandBuffer,
+            viewRange(queries, QueryBatch::MaxSampleCount, queries.size() - QueryBatch::MaxSampleCount),
+            viewRange(
+                vkAccelerationStructures,
+                QueryBatch::MaxSampleCount,
+                vkAccelerationStructures.size() - QueryBatch::MaxSampleCount));
+    }
+}
+
 void QueryRecorder::retrieveBatchesAndReset(ScratchVector<QueryBatch*>& batchList) {
     for (QueryBatch* batch : usedBatches)
         batchList.push_back(batch);
@@ -328,6 +388,15 @@ void QueryManager::createRenderQueries(
         QueryType type = QueryType::Render;
         RenderQueryType subType = queryTypes[i];
         *queries[i] = RenderQuery(this, createQueryRecord(type, subType));
+    }
+}
+
+void QueryManager::createAccelerationStructureQueriesKHR(ArrayParameter<AccelerationStructureQueryKHR* const> queries) {
+    std::lock_guard<Mutex> lock(recordMutex);
+
+    for (std::size_t i = 0; i < queries.size(); i++) {
+        QueryType type = QueryType::AccelerationStructureInfoKHR;
+        *queries[i] = AccelerationStructureQueryKHR(this, createQueryRecord(type, {}));
     }
 }
 
@@ -401,7 +470,7 @@ QueryHandle QueryManager::createQueryRecord(QueryType type, std::variant<std::mo
     query->subType = subType;
     auto [vkType, pipelineStatistics] = query->decodeVkQueryType();
     query->batchPool = &getOrCreatePool(vkType, pipelineStatistics);
-    query->maxResultsHistorySize = QueryRecord::MinMaxResultsHistorySize;
+    query->resultsHistory.resize(QueryRecord::MinMaxResultsHistorySize);
     query->lastResultIndex = 0;
     query->beginScopeVkQueryPool = {};
     query->beginScopeQueryIndex = ~0u;

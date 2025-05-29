@@ -6,13 +6,11 @@
 
 namespace tp {
 
-LogicalDevice::LogicalDevice(Instance* instance, QueueMap* queueMap, const DeviceSetup& setup)
-    : instance(instance), physicalDevice(setup.physicalDevice), queueMap(queueMap) {
-    // Make a copy of feature map so we can make changes to it
-    VkFeatureMap vkFeatureMap;
-    if (setup.vkFeatureMap != nullptr)
-        vkFeatureMap = *setup.vkFeatureMap;
-
+// Translates user-supplied extensions and features to ones that will actually be used to create the device
+inline FunctionalityMask processExtensions(
+    Instance* instance,
+    VkFeatureMap& vkFeatureMap,
+    ScratchVector<const char*>& vkExtensions) {
     // Add own required features - these are guaranteed to be supported
     auto& vk12Features = vkFeatureMap.get<VkPhysicalDeviceVulkan12Features>();
     vk12Features.hostQueryReset = VK_TRUE;
@@ -20,6 +18,46 @@ LogicalDevice::LogicalDevice(Instance* instance, QueueMap* queueMap, const Devic
     auto& vk13Features = vkFeatureMap.get<VkPhysicalDeviceVulkan13Features>();
     vk13Features.dynamicRendering = VK_TRUE;
     vk13Features.synchronization2 = VK_TRUE;
+
+    // Add required features and extensions
+    if (containsString(view(vkExtensions), DeviceExtension::KHR_AccelerationStructure)) {
+        vkFeatureMap.get<VkPhysicalDeviceAccelerationStructureFeaturesKHR>().accelerationStructure = true;
+        vkFeatureMap.get<VkPhysicalDeviceVulkan12Features>().bufferDeviceAddress = true;
+
+        if (!containsString(view(vkExtensions), VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME))
+            vkExtensions.push_back(VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME);
+    }
+    if (containsString(view(vkExtensions), DeviceExtension::KHR_RayQuery)) {
+        vkFeatureMap.get<VkPhysicalDeviceRayQueryFeaturesKHR>().rayQuery = true;
+    }
+
+    // Store functionality availability for easy access
+    FunctionalityMask functionalityMask = {};
+    if (instance->isFunctionalityAvailable(InstanceFunctionality::DebugUtilsEXT))
+        functionalityMask |= Functionality::DebugUtilsEXT;
+    if (containsString(view(vkExtensions), DeviceExtension::EXT_MemoryBudget))
+        functionalityMask |= Functionality::MemoryBudgetEXT;
+    if (containsString(view(vkExtensions), DeviceExtension::KHR_AccelerationStructure))
+        functionalityMask |= Functionality::AccelerationStructureKHR;
+    if (vkFeatureMap.get<VkPhysicalDeviceVulkan12Features>().bufferDeviceAddress)
+        functionalityMask |= Functionality::BufferDeviceAddress;
+
+    return functionalityMask;
+}
+
+LogicalDevice::LogicalDevice(Instance* instance, QueueMap* queueMap, const DeviceSetup& setup)
+    : instance(instance), physicalDevice(setup.physicalDevice), queueMap(queueMap) {
+    // Make a copy of feature map and extensiosn so we can make changes to them
+    VkFeatureMap vkFeatureMap;
+    if (setup.vkFeatureMap != nullptr)
+        vkFeatureMap = *setup.vkFeatureMap;
+
+    ScratchVector<const char*> vkExtensions;
+    vkExtensions.insert(vkExtensions.begin(), setup.extensions.begin(), setup.extensions.end());
+    auto& vk13Features = vkFeatureMap.get<VkPhysicalDeviceVulkan13Features>();
+    vk13Features.dynamicRendering = VK_TRUE;
+
+    functionalityMask = processExtensions(instance, vkFeatureMap, vkExtensions);
 
     // Chain feature structures to extended structure pointer
     void* vkCreateInfoExtPtr = setup.vkCreateInfoExtPtr;
@@ -30,22 +68,13 @@ LogicalDevice::LogicalDevice(Instance* instance, QueueMap* queueMap, const Devic
 
     // Create the logical device
     VulkanDeviceCreateInfo createInfo;
-    createInfo.extensions = setup.extensions;
+    createInfo.extensions = view(vkExtensions);
     createInfo.queueFamilyCounts = queueMap->getQueueFamilyCounts();
     createInfo.vkCreateInfoExtPtr = vkCreateInfoExtPtr;
     vkDeviceHandle = instance->createVulkanDevice(physicalDevice->vkGetPhysicalDeviceHandle(), createInfo);
 
     // Load device interfaces
     vkiDevice = instance->loadDeviceInterface<VulkanDeviceInterface>(vkDeviceHandle);
-    vkiSwapchainKHR = instance->loadDeviceInterface<VulkanSwapchainInterfaceKHR>(vkDeviceHandle);
-
-    // Store functionality availability for easy access
-    if (instance->isFunctionalityAvailable(InstanceFunctionality::DebugUtilsEXT))
-        functionalityMask |= Functionality::DebugUtilsEXT;
-    if (containsString(setup.extensions, DeviceExtension::EXT_MemoryBudget))
-        functionalityMask |= Functionality::MemoryBudgetEXT;
-    if (vkFeatureMap.get<VkPhysicalDeviceVulkan12Features>().bufferDeviceAddress)
-        functionalityMask |= Functionality::BufferDeviceAddress;
 
     // Assign Vulkan queue handles
     ScratchVector<VkQueueHandle> vkQueueHandles;
@@ -234,6 +263,7 @@ void LogicalDevice::updateDescriptorSet(
     ArrayParameter<const Descriptor> descriptors) {
     ScratchVector<VkWriteDescriptorSet> descriptorWrites;
     descriptorWrites.reserve(descriptors.size());
+    ScratchDeque<VkWriteDescriptorSetAccelerationStructureKHR> descriptorAsWrites;
 
     int descriptorIndex = 0;
     for (const DescriptorBinding& binding : bindings) {
@@ -246,17 +276,37 @@ void LogicalDevice::updateDescriptorSet(
         // TODO: Currently one descriptor per write - is this any slower?
         descWrite.descriptorCount = 1;
         descWrite.descriptorType = vkCastConvertibleEnum(binding.descriptorType);
-
         TEPHRA_ASSERT(descriptors.size() >= descriptorIndex + binding.arraySize);
-        for (uint32_t i = 0; i < binding.arraySize; i++) {
-            descWrite.dstArrayElement = i;
-            const Descriptor& descriptor = descriptors[descriptorIndex++];
 
-            if (!descriptor.isNull()) {
-                descWrite.pImageInfo = descriptor.vkResolveDescriptorImageInfo();
-                descWrite.pBufferInfo = descriptor.vkResolveDescriptorBufferInfo();
-                descWrite.pTexelBufferView = descriptor.vkResolveDescriptorBufferViewHandle();
-                descriptorWrites.push_back(descWrite);
+        if (binding.descriptorType == DescriptorType::AccelerationStructureKHR) {
+            VkWriteDescriptorSetAccelerationStructureKHR descAsWrite;
+            descAsWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_KHR;
+            descAsWrite.pNext = nullptr;
+            descAsWrite.accelerationStructureCount = descWrite.descriptorCount;
+
+            for (uint32_t i = 0; i < binding.arraySize; i++) {
+                descWrite.dstArrayElement = i;
+                const Descriptor& descriptor = descriptors[descriptorIndex++];
+
+                if (!descriptor.isNull()) {
+                    descAsWrite.pAccelerationStructures = descriptor.vkResolveAccelerationStructureHandle();
+
+                    descriptorAsWrites.push_back(descAsWrite);
+                    descWrite.pNext = &descriptorAsWrites.back();
+                    descriptorWrites.push_back(descWrite);
+                }
+            }
+        } else {
+            for (uint32_t i = 0; i < binding.arraySize; i++) {
+                descWrite.dstArrayElement = i;
+                const Descriptor& descriptor = descriptors[descriptorIndex++];
+
+                if (!descriptor.isNull()) {
+                    descWrite.pImageInfo = descriptor.vkResolveDescriptorImageInfo();
+                    descWrite.pBufferInfo = descriptor.vkResolveDescriptorBufferInfo();
+                    descWrite.pTexelBufferView = descriptor.vkResolveDescriptorBufferViewHandle();
+                    descriptorWrites.push_back(descWrite);
+                }
             }
         }
     }
@@ -405,7 +455,7 @@ void LogicalDevice::destroyBufferView(VkBufferViewHandle vkBufferViewHandle) noe
     vkiDevice.destroyBufferView(vkDeviceHandle, vkBufferViewHandle, nullptr);
 }
 
-VkDeviceAddress LogicalDevice::getBufferDeviceAddress(VkBufferHandle vkBufferHandle) noexcept {
+DeviceAddress LogicalDevice::getBufferDeviceAddress(VkBufferHandle vkBufferHandle) noexcept {
     VkBufferDeviceAddressInfo addressInfo;
     addressInfo.sType = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO;
     addressInfo.pNext = nullptr;
@@ -640,7 +690,7 @@ VkSwapchainHandleKHR LogicalDevice::createSwapchainKHR(
     const SwapchainSetup& setup,
     VkSwapchainHandleKHR vkOldSwapchainHandle,
     ScratchVector<VkImageHandle>* vkSwapchainImageHandles) {
-    if (!vkiSwapchainKHR.isLoaded()) {
+    if (vkiDevice.createSwapchainKHR == nullptr) {
         throw UnsupportedOperationError(
             "Functionality of the KHR_Swapchain extension is being used, but its interface could not be loaded. Has it "
             "been enabled?");
@@ -705,13 +755,13 @@ VkSwapchainHandleKHR LogicalDevice::createSwapchainKHR(
     }
 
     VkSwapchainKHR vkSwapchainHandle;
-    throwRetcodeErrors(vkiSwapchainKHR.createSwapchainKHR(vkDeviceHandle, &createInfo, nullptr, &vkSwapchainHandle));
+    throwRetcodeErrors(vkiDevice.createSwapchainKHR(vkDeviceHandle, &createInfo, nullptr, &vkSwapchainHandle));
 
     // Get swapchain image handles
     uint32_t count;
-    throwRetcodeErrors(vkiSwapchainKHR.getSwapchainImagesKHR(vkDeviceHandle, vkSwapchainHandle, &count, nullptr));
+    throwRetcodeErrors(vkiDevice.getSwapchainImagesKHR(vkDeviceHandle, vkSwapchainHandle, &count, nullptr));
     vkSwapchainImageHandles->resize(count);
-    throwRetcodeErrors(vkiSwapchainKHR.getSwapchainImagesKHR(
+    throwRetcodeErrors(vkiDevice.getSwapchainImagesKHR(
         vkDeviceHandle, vkSwapchainHandle, &count, vkCastTypedHandlePtr(vkSwapchainImageHandles->data())));
     vkSwapchainImageHandles->resize(count);
 
@@ -723,7 +773,7 @@ void LogicalDevice::waitForDeviceIdle() const {
 }
 
 void LogicalDevice::destroySwapchainKHR(VkSwapchainHandleKHR vkSwapchainHandle) noexcept {
-    vkiSwapchainKHR.destroySwapchainKHR(vkDeviceHandle, vkSwapchainHandle, nullptr);
+    vkiDevice.destroySwapchainKHR(vkDeviceHandle, vkSwapchainHandle, nullptr);
 }
 
 VkResult LogicalDevice::acquireNextImageKHR(
@@ -731,7 +781,7 @@ VkResult LogicalDevice::acquireNextImageKHR(
     Timeout timeout,
     VkSemaphoreHandle vkSemaphoreHandle,
     uint32_t* imageIndex) {
-    return throwRetcodeErrors(vkiSwapchainKHR.acquireNextImageKHR(
+    return throwRetcodeErrors(vkiDevice.acquireNextImageKHR(
         vkDeviceHandle, vkSwapchainHandle, timeout.nanoseconds, vkSemaphoreHandle, VK_NULL_HANDLE, imageIndex));
 }
 
@@ -761,7 +811,62 @@ void LogicalDevice::queuePresentKHR(
     if (queueInfo.queueHandleMutex != nullptr)
         lock = std::unique_lock<Mutex>(*queueInfo.queueHandleMutex);
 
-    throwRetcodeErrors(vkiSwapchainKHR.queuePresentKHR(queueInfo.vkQueueHandle, &presentInfo));
+    throwRetcodeErrors(vkiDevice.queuePresentKHR(queueInfo.vkQueueHandle, &presentInfo));
+}
+
+VkAccelerationStructureHandleKHR LogicalDevice::createAccelerationStructureKHR(
+    AccelerationStructureType type,
+    const BufferView& buffer) {
+    if (vkiDevice.createAccelerationStructureKHR == nullptr) {
+        throw UnsupportedOperationError(
+            "Functionality of the KHR_AccelerationStructure extension is being used, but its interface could not be "
+            "loaded. Has it been enabled?");
+    }
+
+    VkAccelerationStructureCreateInfoKHR createInfo;
+    createInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_CREATE_INFO_KHR;
+    createInfo.pNext = nullptr;
+    createInfo.createFlags = 0;
+    createInfo.buffer = buffer.vkResolveBufferHandle(&createInfo.offset);
+    createInfo.size = buffer.getSize();
+    createInfo.type = vkCastConvertibleEnum(type);
+    createInfo.deviceAddress = 0;
+
+    VkAccelerationStructureKHR vkAccelerationHandle;
+    throwRetcodeErrors(
+        vkiDevice.createAccelerationStructureKHR(vkDeviceHandle, &createInfo, nullptr, &vkAccelerationHandle));
+    return VkAccelerationStructureHandleKHR(vkAccelerationHandle);
+}
+
+void LogicalDevice::destroyAccelerationStructureKHR(
+    VkAccelerationStructureHandleKHR vkAccelerationStructureHandle) noexcept {
+    vkiDevice.destroyAccelerationStructureKHR(vkDeviceHandle, vkAccelerationStructureHandle, nullptr);
+}
+
+VkAccelerationStructureBuildSizesInfoKHR LogicalDevice::getAccelerationStructureBuildSizes(
+    const VkAccelerationStructureBuildGeometryInfoKHR& vkBuildInfo,
+    const uint32_t* pMaxPrimitiveCounts) {
+    // Unlike other functions, it is more convenient to create the structure elsewhere, so here we just wrap
+    // Our AS are always device-only
+    VkAccelerationStructureBuildTypeKHR buildType = VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR;
+
+    VkAccelerationStructureBuildSizesInfoKHR sizeInfo;
+    sizeInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_SIZES_INFO_KHR;
+    sizeInfo.pNext = nullptr;
+
+    vkiDevice.getAccelerationStructureBuildSizesKHR(
+        vkDeviceHandle, buildType, &vkBuildInfo, pMaxPrimitiveCounts, &sizeInfo);
+    return sizeInfo;
+}
+
+DeviceAddress LogicalDevice::getAccelerationStructureDeviceAddress(
+    VkAccelerationStructureHandleKHR vkAccelerationStructureHandle) const {
+    VkAccelerationStructureDeviceAddressInfoKHR addressInfo;
+    addressInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_DEVICE_ADDRESS_INFO_KHR;
+    addressInfo.pNext = nullptr;
+    addressInfo.accelerationStructure = vkAccelerationStructureHandle;
+
+    return vkiDevice.getAccelerationStructureDeviceAddressKHR(vkDeviceHandle, &addressInfo);
 }
 
 LogicalDevice::~LogicalDevice() {

@@ -8,8 +8,8 @@ namespace tp {
 BufferImpl::BufferImpl(
     DeviceContainer* deviceImpl,
     const BufferSetup& bufferSetup,
-    Lifeguard<VkBufferHandle>&& bufferHandle,
-    Lifeguard<VmaAllocationHandle>&& memoryAllocationHandle,
+    Lifeguard<VkBufferHandle> bufferHandle,
+    Lifeguard<VmaAllocationHandle> memoryAllocationHandle,
     DebugTarget debugTarget)
     : debugTarget(std::move(debugTarget)),
       deviceImpl(deviceImpl),
@@ -24,6 +24,9 @@ BufferImpl::BufferImpl(
     } else {
         coherentlyMappedMemoryPtr = nullptr;
     }
+
+    if (bufferSetup.usage.containsAny(BufferUsage::DeviceAddress | BufferUsage::AccelerationStructureInputKHR))
+        deviceAddress = deviceImpl->getLogicalDevice()->getBufferDeviceAddress(this->bufferHandle.vkGetHandle());
 }
 
 MemoryLocation BufferImpl::getMemoryLocation_() const {
@@ -69,10 +72,6 @@ BufferView BufferImpl::createTexelView_(uint64_t offset, uint64_t size, Format f
     return BufferView(this, offset, size, format);
 }
 
-VkDeviceAddress BufferImpl::getDeviceAddress_() const {
-    return deviceImpl->getLogicalDevice()->getBufferDeviceAddress(bufferHandle.vkGetHandle());
-}
-
 void BufferImpl::destroyHandles(bool immediately) {
     if (bufferHandle.isNull())
         return;
@@ -112,11 +111,16 @@ BufferImpl& BufferImpl::getBufferImpl(const BufferView& bufferView) {
     return *std::get<BufferImpl*>(bufferView.buffer);
 }
 
-uint64_t BufferImpl::getRequiredViewAlignment_(const DeviceContainer* deviceImpl, BufferUsageMask usage) {
+uint64_t BufferImpl::getRequiredViewAlignment_(
+    const DeviceContainer* deviceImpl,
+    BufferUsageMask usage,
+    uint32_t userAlignment) {
     const VkPhysicalDeviceLimits& deviceLimits = deviceImpl->getPhysicalDevice()
                                                      ->vkQueryProperties<VkPhysicalDeviceLimits>();
 
     uint64_t alignment = 4; // General minimum alignment
+    alignment = tp::max(alignment, static_cast<uint64_t>(userAlignment));
+
     if (usage.contains(BufferUsage::ImageTransfer)) {
         // Buffer-Image copies require alignment to match texel block size. As there is no way for us to know
         // what sort of copies will be done with the buffer, so let's be conservative
@@ -140,6 +144,14 @@ uint64_t BufferImpl::getRequiredViewAlignment_(const DeviceContainer* deviceImpl
     if (usage.contains(BufferUsage::VertexBuffer)) {
         uint64_t maxVertexAlignment = 8ull; // Conservative assumption of using 64-bit components
         alignment = tp::max(alignment, maxVertexAlignment);
+    }
+    if (usage.contains(BufferUsage::DeviceAddress)) {
+        uint64_t maxDeviceAddressAlignment = 16ull; // Default buffer reference alignment
+        alignment = tp::max(alignment, maxDeviceAddressAlignment);
+    }
+    if (usage.contains(BufferUsage::AccelerationStructureInputKHR)) {
+        uint64_t accelerationStructureInputAlignment = 16ull;
+        alignment = tp::max(alignment, accelerationStructureInputAlignment);
     }
 
     return alignment;

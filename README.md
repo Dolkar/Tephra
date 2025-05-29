@@ -3,7 +3,7 @@
 
 **License**: [MIT](https://github.com/Dolkar/Tephra/blob/main/LICENSE)
 
-**Current version**: [v0.5.3](https://dolkar.github.io/Tephra/changelog.html)
+**Current version**: [v0.6.0](https://dolkar.github.io/Tephra/changelog.html)
 
 **Links**: [User guide](https://dolkar.github.io/Tephra/user-guide.html) | [API Documentation](https://dolkar.github.io/Tephra/annotated.html) |
            [Discussions](https://github.com/Dolkar/Tephra/discussions)
@@ -28,6 +28,12 @@ and relevance. To that end, Tephra provides:
 - Debugging features, usage validation and testing suite (WIP)
 
 _Tephra is being used and partially developed by [Bohemia Interactive Simulations](https://bisimulations.com/)._
+
+<br/>
+<br/>
+<div align="center"><img height="600" width="600" src="https://github.com/user-attachments/assets/402a48eb-9830-4fa0-a990-57e061845cf5"/></div>
+<div align="center">Tephra path tracing example</div>
+<br/>
 
 ### Comparison to OpenGL / DirectX 11
 
@@ -112,12 +118,13 @@ The following features are already present:
 - Improved image and buffer views
 - Safe delayed destruction of Vulkan handles
 - Timestamp, occlusion and pipeline queries
+- Ray tracing using the ray query API
 - Interoperability with plain Vulkan (WIP)
 - Native support of commonly used Vulkan extensions (WIP)
 - Debug logging, statistics, tests and partial usage validation (WIP)
 
 The following features are planned and will likely be available in the future:
-- Ray tracing features (see raytracing branch)
+- Ray tracing pipeline support (ray tracing with ray queries is already present)
 - Better handling of dynamic pipeline state
 - Improved pipeline building and management
 - Vulkan profiles
@@ -127,6 +134,7 @@ The following features are out of scope for the library and won't be included:
 - Shader compilation and reflection - use the existing Vulkan ecosystem
 - Sparse buffers and images
 - Linear images
+- CPU-side acceleration structure building and serialization
 - Rendering algorithms - this is not a renderer or a game engine
 
 See the [user guide](https://dolkar.github.io/Tephra/user-guide.html) for more detailed explanations and inline code
@@ -136,7 +144,7 @@ runnable showcase.
 ## Prerequisities
 
 - Tephra is a C++ library. It makes use of C++17 features, the standard library and C++ exceptions
-- Visual Studio 2022 (see build/Tephra.sln) or CMake 3.15
+- Visual Studio 2022 (see build/Tephra.sln) or CMake 3.15 (limited support of tests and examples)
 - Vulkan headers version 1.4.304 or newer, provided with the SDK [here](https://www.lunarg.com/vulkan-sdk/)
 - Compatible devices must support Vulkan 1.3 or newer
 - While any x64 platform is supported, Tephra is being used and tested mainly on Windows

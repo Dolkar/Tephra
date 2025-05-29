@@ -5,6 +5,7 @@
 #include "../job/render_pass.hpp"
 #include "../buffer_impl.hpp"
 #include "../image_impl.hpp"
+#include "../acceleration_structure_impl.hpp"
 #include "../pipeline_builder.hpp"
 #include "../descriptor_pool_impl.hpp"
 #include "../swapchain_impl.hpp"
@@ -17,6 +18,7 @@ namespace tp {
 constexpr const char* DeviceTypeName = "Device";
 constexpr const char* BufferTypeName = "Buffer";
 constexpr const char* ImageTypeName = "Image";
+constexpr const char* AccelerationStructureTypeName = "AccelerationStructure";
 constexpr const char* DescriptorPoolTypeName = "DescriptorPool";
 constexpr const char* JobResourcePoolTypeName = "JobResourcePool";
 constexpr const char* SwapchainTypeName = "Swapchain";
@@ -370,6 +372,107 @@ OwningPtr<Image> Device::allocateImage(const ImageSetup& setup, const char* debu
     return image;
 }
 
+OwningPtr<AccelerationStructure> allocateAccelerationStructureImpl(
+    DeviceContainer* deviceImpl,
+    uint64_t size,
+    std::shared_ptr<AccelerationStructureBuilder> asBuilder,
+    const char* debugName) {
+    // Create backing buffer to hold the AS
+    auto backingBufferSetup = BufferSetup(
+        size,
+        BufferUsageMask::None(),
+        VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT,
+        0,
+        256);
+    auto [bufferHandleLifeguard, allocationHandleLifeguard] = deviceImpl->getMemoryAllocator()->allocateBuffer(
+        backingBufferSetup, MemoryPreference::Device);
+    auto backingBuffer = OwningPtr<Buffer>(new BufferImpl(
+        deviceImpl,
+        backingBufferSetup,
+        std::move(bufferHandleLifeguard),
+        std::move(allocationHandleLifeguard),
+        DebugTarget::makeSilent()));
+    deviceImpl->getLogicalDevice()->setObjectDebugName(getOwnedPtr(backingBuffer)->vkGetBufferHandle(), debugName);
+
+    // Create the AS itself
+    auto accelerationStructureLifeguard = deviceImpl->vkMakeHandleLifeguard(
+        deviceImpl->getLogicalDevice()->createAccelerationStructureKHR(
+            asBuilder->getType(), backingBuffer->getDefaultView()));
+    auto debugTarget = DebugTarget(deviceImpl->getDebugTarget(), AccelerationStructureTypeName, debugName);
+
+    // Package everything
+    auto accelerationStructure = OwningPtr<AccelerationStructure>(new AccelerationStructureImpl(
+        deviceImpl,
+        std::move(asBuilder),
+        std::move(accelerationStructureLifeguard),
+        std::move(backingBuffer),
+        std::move(debugTarget)));
+    deviceImpl->getLogicalDevice()->setObjectDebugName(
+        getOwnedPtr(accelerationStructure)->vkGetAccelerationStructureHandle(), debugName);
+    return accelerationStructure;
+}
+
+OwningPtr<AccelerationStructure> Device::allocateAccelerationStructureKHR(
+    const AccelerationStructureSetup& setup,
+    const char* debugName) {
+    auto deviceImpl = static_cast<DeviceContainer*>(this);
+    TEPHRA_DEBUG_SET_CONTEXT(deviceImpl->getDebugTarget(), "allocateAccelerationStructureKHR", debugName);
+
+    auto asBuilder = std::make_shared<AccelerationStructureBuilder>(deviceImpl, setup);
+    uint64_t storageSize = asBuilder->getStorageSize();
+    return allocateAccelerationStructureImpl(deviceImpl, storageSize, std::move(asBuilder), debugName);
+}
+
+OwningPtr<AccelerationStructure> Device::allocateCompactedAccelerationStructureKHR(
+    const AccelerationStructureView& srcAccelerationStructure,
+    const char* debugName) {
+    auto deviceImpl = static_cast<DeviceContainer*>(this);
+    TEPHRA_DEBUG_SET_CONTEXT(deviceImpl->getDebugTarget(), "allocateCompactedAccelerationStructureKHR", debugName);
+
+    if constexpr (TephraValidationEnabled) {
+        if (srcAccelerationStructure.isNull()) {
+            reportDebugMessage(
+                DebugMessageSeverity::Error,
+                DebugMessageType::Validation,
+                "The 'srcAccelerationStructure' parameter is null.");
+        }
+    }
+
+    auto& srcAccelerationStructureImpl = AccelerationStructureImpl::getAccelerationStructureImpl(
+        srcAccelerationStructure);
+    auto& srcBuilder = *srcAccelerationStructureImpl.getBuilder();
+    auto& sizeQuery = srcAccelerationStructureImpl.getOrCreateCompactedSizeQuery();
+    if (debugName == nullptr)
+        debugName = srcAccelerationStructureImpl.getDebugTarget()->getObjectName();
+
+    if constexpr (TephraValidationEnabled) {
+        const char* srcDebugName = srcAccelerationStructureImpl.getDebugTarget()->getObjectName();
+        if (srcDebugName == nullptr)
+            srcDebugName = "srcAccelerationStructure";
+
+        if (!srcBuilder.getFlags().contains(tp::AccelerationStructureFlag::AllowCompaction)) {
+            reportDebugMessage(
+                DebugMessageSeverity::Error,
+                DebugMessageType::Validation,
+                "The given '",
+                srcDebugName,
+                "' was not created with the 'AllowCompaction' flag.");
+        } else if (sizeQuery.getLastResult().isNull()) {
+            reportDebugMessage(
+                DebugMessageSeverity::Error,
+                DebugMessageType::Validation,
+                "The result of the compacted size query for '",
+                srcDebugName,
+                "' is not ready yet.");
+        }
+    }
+
+    // Clone the builder from the source for updates (compacted AS cannot be rebuilt)
+    auto asBuilder = std::make_shared<AccelerationStructureBuilder>(srcBuilder);
+    return allocateAccelerationStructureImpl(
+        deviceImpl, sizeQuery.getLastResult().value, std::move(asBuilder), debugName);
+}
+
 JobSemaphore Device::enqueueJob(
     const DeviceQueue& queue,
     Job job,
@@ -619,8 +722,8 @@ void Device::updateDeviceProgress() {
 
 OwningPtr<Buffer> Device::vkCreateExternalBuffer(
     const BufferSetup& setup,
-    Lifeguard<VkBufferHandle>&& bufferHandle,
-    Lifeguard<VmaAllocationHandle>&& memoryAllocationHandle,
+    Lifeguard<VkBufferHandle> bufferHandle,
+    Lifeguard<VmaAllocationHandle> memoryAllocationHandle,
     const char* debugName) {
     auto deviceImpl = static_cast<DeviceContainer*>(this);
     TEPHRA_DEBUG_SET_CONTEXT(deviceImpl->getDebugTarget(), "vkCreateExternalBuffer", nullptr);
@@ -636,8 +739,8 @@ OwningPtr<Buffer> Device::vkCreateExternalBuffer(
 
 OwningPtr<Image> Device::vkCreateExternalImage(
     const ImageSetup& setup,
-    Lifeguard<VkImageHandle>&& imageHandle,
-    Lifeguard<VmaAllocationHandle>&& memoryAllocationHandle,
+    Lifeguard<VkImageHandle> imageHandle,
+    Lifeguard<VmaAllocationHandle> memoryAllocationHandle,
     const char* debugName) {
     auto deviceImpl = static_cast<DeviceContainer*>(this);
     TEPHRA_DEBUG_SET_CONTEXT(deviceImpl->getDebugTarget(), "vkCreateExternalImage", nullptr);

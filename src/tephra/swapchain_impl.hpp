@@ -11,7 +11,7 @@ public:
     SwapchainImpl(
         DeviceContainer* deviceImpl,
         const SwapchainSetup& setup,
-        Lifeguard<VkSwapchainHandleKHR>&& swapchainHandle,
+        Lifeguard<VkSwapchainHandleKHR> swapchainHandle,
         ArrayParameter<const VkImageHandle> vkSwapchainImageHandles,
         DebugTarget debugTarget);
 

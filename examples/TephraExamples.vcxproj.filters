@@ -1,65 +1,60 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    <Filter Include="2_Cornell_Pt">
+      <UniqueIdentifier>{868e7b23-fd0d-4a85-94a6-16c2bbf6e2d4}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
-    </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
-    <Filter Include="Header Files\1_Cube">
+    <Filter Include="1_Cube">
       <UniqueIdentifier>{7fad28a5-eb11-40b7-8d4b-2e4746d8bb2f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\1_Cube">
-      <UniqueIdentifier>{52138d8b-1039-484a-beb1-35ddd7137699}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="tephra_examples.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="window.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="examples_common.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="1_cube\cube.cpp">
-      <Filter>Source Files\1_Cube</Filter>
+      <Filter>1_Cube</Filter>
+    </ClCompile>
+    <ClCompile Include="examples_common.cpp" />
+    <ClCompile Include="tephra_examples.cpp" />
+    <ClCompile Include="window.cpp" />
+    <ClCompile Include="2_cornell_pt\cornell.cpp">
+      <Filter>2_Cornell_Pt</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="examples_common.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="window.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="1_cube\cube.hpp">
-      <Filter>Header Files\1_Cube</Filter>
+      <Filter>1_Cube</Filter>
     </ClInclude>
     <ClInclude Include="1_cube\cube_data.hpp">
-      <Filter>Header Files\1_Cube</Filter>
+      <Filter>1_Cube</Filter>
     </ClInclude>
     <ClInclude Include="1_cube\linmath.h">
-      <Filter>Header Files\1_Cube</Filter>
+      <Filter>1_Cube</Filter>
     </ClInclude>
     <ClInclude Include="1_cube\lunarg.ppm.h">
-      <Filter>Header Files\1_Cube</Filter>
+      <Filter>1_Cube</Filter>
+    </ClInclude>
+    <ClInclude Include="examples_common.hpp" />
+    <ClInclude Include="window.hpp" />
+    <ClInclude Include="2_cornell_pt\cornell.hpp">
+      <Filter>2_Cornell_Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="2_cornell_pt\cornell_data.hpp">
+      <Filter>2_Cornell_Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="2_cornell_pt\trace_shared.h">
+      <Filter>2_Cornell_Pt</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="1_cube\cube.frag.inc">
-      <Filter>Header Files\1_Cube</Filter>
+      <Filter>1_Cube</Filter>
     </None>
     <None Include="1_cube\cube.vert.inc">
-      <Filter>Header Files\1_Cube</Filter>
+      <Filter>1_Cube</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="2_cornell_pt\trace_ray_query.hlsl">
+      <Filter>2_Cornell_Pt</Filter>
+    </CustomBuild>
   </ItemGroup>
 </Project>

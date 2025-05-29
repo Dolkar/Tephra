@@ -14,7 +14,8 @@ enum class Descriptor::ResourceType {
     Image = 2,
     CombinedImageSampler = 3,
     Buffer = 4,
-    TexelBufferView = 5
+    TexelBufferView = 5,
+    AccelerationStructure = 6
 };
 
 DescriptorBinding::DescriptorBinding()
@@ -103,6 +104,10 @@ ReadAccessMask DescriptorBinding::getReadAccessMask() const {
         break;
     case DescriptorType::UniformBuffer:
     case DescriptorType::UniformBufferDynamic:
+        accessTypeIndex = uniformAccessIndex;
+        break;
+    case DescriptorType::AccelerationStructureKHR:
+        // Has its own dedicated Vulkan access mask which it will be translated to on export
         accessTypeIndex = uniformAccessIndex;
         break;
     case DescriptorType::Sampler:
@@ -198,6 +203,17 @@ Descriptor::Descriptor(const Sampler& sampler) {
     }
 }
 
+Descriptor::Descriptor(const AccelerationStructureView& accelerationStructureView) {
+    VkAccelerationStructureHandleKHR vkHandle = accelerationStructureView.vkGetAccelerationStructureHandle();
+    if (!vkHandle.isNull()) {
+        vkDescriptorAccelerationStructureHandle = vkHandle;
+        resourceType = ResourceType::AccelerationStructure;
+    } else {
+        resourceType = ResourceType::Invalid;
+        vkDescriptorBufferInfo = {};
+    }
+}
+
 bool Descriptor::isNull() const {
     return resourceType == ResourceType::None;
 }
@@ -220,6 +236,8 @@ bool operator==(const Descriptor& lhs, const Descriptor& rhs) {
             lhs.vkDescriptorBufferInfo.range == rhs.vkDescriptorBufferInfo.range;
     case Descriptor::ResourceType::TexelBufferView:
         return lhs.vkDescriptorBufferViewHandle == rhs.vkDescriptorBufferViewHandle;
+    case Descriptor::ResourceType::AccelerationStructure:
+        return lhs.vkDescriptorAccelerationStructureHandle == rhs.vkDescriptorAccelerationStructureHandle;
     case Descriptor::ResourceType::None:
         return true;
     case Descriptor::ResourceType::Invalid:
@@ -228,7 +246,8 @@ bool operator==(const Descriptor& lhs, const Descriptor& rhs) {
     }
 }
 
-FutureDescriptor::FutureDescriptor() : resourceType(Descriptor::ResourceType::None) {}
+// Initialize descriptorImageView as the largest member of the union
+FutureDescriptor::FutureDescriptor() : resourceType(Descriptor::ResourceType::None), descriptorImageView() {}
 
 FutureDescriptor::FutureDescriptor(BufferView bufferView) : descriptorBufferView(std::move(bufferView)) {
     if (descriptorBufferView.getFormat() != Format::Undefined)
@@ -246,7 +265,11 @@ FutureDescriptor::FutureDescriptor(ImageView imageView, const Sampler* sampler)
       resourceType(Descriptor::ResourceType::CombinedImageSampler) {}
 
 FutureDescriptor::FutureDescriptor(const Sampler* sampler)
-    : descriptorSampler(sampler), resourceType(Descriptor::ResourceType::Sampler) {}
+    : descriptorSampler(sampler), descriptorImageView(), resourceType(Descriptor::ResourceType::Sampler) {}
+
+FutureDescriptor::FutureDescriptor(AccelerationStructureView accelerationStructureView)
+    : descriptorAccelerationStructureView(std::move(accelerationStructureView)),
+      resourceType(Descriptor::ResourceType::AccelerationStructure) {}
 
 Descriptor FutureDescriptor::resolve() const {
     static const Sampler nullSampler = {};
@@ -261,6 +284,8 @@ Descriptor FutureDescriptor::resolve() const {
         return Descriptor(descriptorBufferView);
     case Descriptor::ResourceType::TexelBufferView:
         return Descriptor(descriptorBufferView);
+    case Descriptor::ResourceType::AccelerationStructure:
+        return Descriptor(descriptorAccelerationStructureView);
     case Descriptor::ResourceType::Invalid:
     case Descriptor::ResourceType::None:
         return Descriptor();
@@ -289,6 +314,8 @@ bool operator==(const FutureDescriptor& lhs, const FutureDescriptor& rhs) {
         return lhs.descriptorBufferView == rhs.descriptorBufferView;
     case Descriptor::ResourceType::TexelBufferView:
         return lhs.descriptorBufferView == rhs.descriptorBufferView;
+    case Descriptor::ResourceType::AccelerationStructure:
+        return lhs.descriptorAccelerationStructureView == rhs.descriptorAccelerationStructureView;
     case Descriptor::ResourceType::None:
         return true;
     case Descriptor::ResourceType::Invalid:
@@ -298,8 +325,8 @@ bool operator==(const FutureDescriptor& lhs, const FutureDescriptor& rhs) {
 }
 
 DescriptorSetLayout::DescriptorSetLayout(
-    Lifeguard<VkDescriptorSetLayoutHandle>&& descriptorSetLayoutHandle,
-    Lifeguard<VkDescriptorUpdateTemplateHandle>&& descriptorUpdateTemplateHandle,
+    Lifeguard<VkDescriptorSetLayoutHandle> descriptorSetLayoutHandle,
+    Lifeguard<VkDescriptorUpdateTemplateHandle> descriptorUpdateTemplateHandle,
     ArrayParameter<const DescriptorBinding> descriptorBindings_)
     : descriptorSetLayoutHandle(std::move(descriptorSetLayoutHandle)),
       descriptorUpdateTemplateHandle(std::move(descriptorUpdateTemplateHandle)) {
@@ -417,6 +444,11 @@ const VkBufferView* Descriptor::vkResolveDescriptorBufferViewHandle() const {
     return resourceType == ResourceType::TexelBufferView ? &vkDescriptorBufferViewHandle.vkRawHandle : nullptr;
 }
 
+const VkAccelerationStructureKHR* Descriptor::vkResolveAccelerationStructureHandle() const {
+    return resourceType == ResourceType::AccelerationStructure ? &vkDescriptorAccelerationStructureHandle.vkRawHandle :
+                                                                 nullptr;
+}
+
 #ifdef TEPHRA_ENABLE_DEBUG_TEPHRA_VALIDATION
     #include <string>
 std::string resourceTypeToString(Descriptor::ResourceType resourceType) {
@@ -431,6 +463,8 @@ std::string resourceTypeToString(Descriptor::ResourceType resourceType) {
         return "Buffer";
     case Descriptor::ResourceType::TexelBufferView:
         return "TexelBufferView";
+    case Descriptor::ResourceType::AccelerationStructure:
+        return "AccelerationStructure";
     case Descriptor::ResourceType::None:
         return "None";
     default:
@@ -460,6 +494,8 @@ Descriptor::ResourceType getExpectedResourceType(DescriptorType descriptorType) 
         return Descriptor::ResourceType::Buffer;
     case DescriptorType::StorageBufferDynamic:
         return Descriptor::ResourceType::Buffer;
+    case DescriptorType::AccelerationStructureKHR:
+        return Descriptor::ResourceType::AccelerationStructure;
     default:
         TEPHRA_ASSERT(descriptorType == IgnoredDescriptorType);
         return Descriptor::ResourceType::None;

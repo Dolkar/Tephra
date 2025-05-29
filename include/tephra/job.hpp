@@ -2,6 +2,7 @@
 
 #include <tephra/physical_device.hpp>
 #include <tephra/descriptor.hpp>
+#include <tephra/acceleration_structure.hpp>
 #include <tephra/buffer.hpp>
 #include <tephra/image.hpp>
 #include <tephra/memory.hpp>
@@ -114,6 +115,22 @@ public:
         ArrayParameter<const FutureDescriptor> descriptors,
         const char* debugName = nullptr);
 
+    /// Allocates a job-local acceleration structure for use within this job.
+    /// @param setup
+    ///     The setup structure describing the object.
+    /// @param debugName
+    ///     The debug name identifier for the object.
+    /// @remarks
+    ///     The acceleration structure may only be used for commands within this job or in command lists that execute
+    ///     within it.
+    /// @remarks
+    ///     The acceleration structure is not created until the job is enqueued. As a consequence it cannot be used as
+    ///     a tp::Descriptor while the job is in the recording state. tp::FutureDescriptor with
+    ///     tp::Job::allocateLocalDescriptorSet does not have this limitation.
+    AccelerationStructureView allocateLocalAccelerationStructureKHR(
+        const AccelerationStructureSetup& setup,
+        const char* debugName = nullptr);
+
     /// Creates a command pool for use with tp::ComputeList and tp::RenderList within this job.
     /// @param debugName
     ///     The debug name identifier for the object.
@@ -186,6 +203,18 @@ public:
     void cmdExportResource(
         const ImageView& image,
         const ImageSubresourceRange& range,
+        ReadAccessMask readAccessMask,
+        QueueType targetQueueType = QueueType::Undefined);
+
+    /// Prepares an acceleration structure for future read-only usages.
+    /// @param accelerationStructure
+    ///     The acceleration structure to be exported.
+    /// @param readAccessMask
+    ///     The mask of future read-only accesses.
+    /// @param targetQueueType
+    ///     If not tp::QueueType::Undefined, the resource is made accessible to all of the queues of the given type.
+    void cmdExportResource(
+        const AccelerationStructureView& accelerationStructure,
         ReadAccessMask readAccessMask,
         QueueType targetQueueType = QueueType::Undefined);
 
@@ -396,7 +425,7 @@ public:
     /// @remarks
     ///     Inline callbacks will be called during the call to tp::Device::submitQueuedJobs in the provided order.
     ///     Device queue thread safety rules apply: No operations on the target queue are permitted inside the callback.
-    /// @see @vksymbol{VkCmdBeginRendering}
+    /// @see @vksymbol{vkCmdBeginRendering}
     void cmdExecuteRenderPass(
         const RenderPassSetup& setup,
         std::variant<ArrayView<RenderList>, RenderInlineCallback> commandRecording,
@@ -491,6 +520,56 @@ public:
         VkImageLayout vkImageLayout,
         VkPipelineStageFlags vkStageMask,
         VkAccessFlags vkAccessMask);
+
+    /// Processes acceleration structure builds or updates.
+    /// @param buildInfos
+    ///     The build info structures describing the details of each operation.
+    /// @remarks
+    ///     The sizes of the input geometry buffer views in tp::AccelerationStructureBuildInfo determine the number
+    ///     of primitives each acceleration structure will be built with for the respective geometry. As such, the
+    ///     size divided by the expected stride of the data must be below the maximum primitive count provided in
+    ///     the associated geometry setup structure that the destination acceleration structure was created with.
+    /// @remarks
+    ///     The individual builds or updates are processed asynchronously, without any synchronization between them.
+    ///     This means that a BLAS and a TLAS that references it cannot be built within the same call.
+    /// @see @vksymbol{vkCmdBuildAccelerationStructuresKHR}
+    void cmdBuildAccelerationStructuresKHR(ArrayParameter<const AccelerationStructureBuildInfo> buildInfos);
+
+    /// Processes acceleration structure builds or updates with primitive counts sourced from an indirect buffer.
+    /// @param buildInfos
+    ///     The build info structures describing the details of each operation.
+    /// @param indirectInfos
+    ///     Additional structures that provide an indirect buffer for each operation from which geometry offsets and
+    ///     counts are sourced from, overriding the values in the associated `buildInfos` structure.
+    /// @remarks
+    ///     The number of primitives in each geometry that each acceleration structure will be built with is determined
+    ///     by the contents of the build range buffers inside tp::AccelerationStructureBuildIndirectInfo.
+    /// @remarks
+    ///     The individual builds or updates are processed asynchronously, without any synchronization between them.
+    ///     This means that a BLAS and a TLAS that references it cannot be built within the same call.
+    /// @see @vksymbol{vkCmdBuildAccelerationStructuresIndirectKHR}
+    void cmdBuildAccelerationStructuresIndirectKHR(
+        ArrayParameter<const AccelerationStructureBuildInfo> buildInfos,
+        ArrayParameter<const AccelerationStructureBuildIndirectInfo> indirectInfos);
+
+    /// Copies the contents of one acceleration structure to another, with optional compaction.
+    /// @param srcView
+    ///     The source acceleration structure.
+    /// @param dstView
+    ///     The destination acceleration structure.
+    /// @param mode
+    ///     Specifies the operation as either a plain copy or a copy with compacting.
+    /// @remarks
+    ///     If `mode` tp::AccelerationStructureCopyMode::Clone, then the source and destination acceleration structures
+    ///     must have been created with identical setup structures.
+    ///     If `mode` tp::AccelerationStructureCopyMode::Compact, then the destination acceleration structure must have
+    ///     been created with tp::Device::allocateCompactedAccelerationStructureKHR using the same source acceleration
+    ///     structure.
+    /// @see @vksymbol{vkCmdCopyAccelerationStructureKHR}
+    void cmdCopyAccelerationStructureKHR(
+        const AccelerationStructureView& srcView,
+        const AccelerationStructureView& dstView,
+        AccelerationStructureCopyMode mode);
 
     TEPHRA_MAKE_NONCOPYABLE(Job);
     TEPHRA_MAKE_MOVABLE(Job);

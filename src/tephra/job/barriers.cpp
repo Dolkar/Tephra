@@ -10,9 +10,9 @@ VkPipelineStageFlags combineFlags(ArrayParameter<const VkPipelineStageFlags> fla
     return mask;
 }
 
-const uint64_t GraphicsPipelineStageCount = 12;
+// Logical order of pipeline stages excluding top-of-pipe and bottom-of-pipe
+const uint64_t GraphicsPipelineStageCount = 10;
 const VkPipelineStageFlags GraphicsPipelineStagesArray[GraphicsPipelineStageCount] = {
-    VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
     VK_PIPELINE_STAGE_DRAW_INDIRECT_BIT,
     VK_PIPELINE_STAGE_VERTEX_INPUT_BIT,
     VK_PIPELINE_STAGE_VERTEX_SHADER_BIT,
@@ -22,33 +22,28 @@ const VkPipelineStageFlags GraphicsPipelineStagesArray[GraphicsPipelineStageCoun
     VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT,
     VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
     VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT,
-    VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-    VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT
+    VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
 };
 const ArrayView<const VkPipelineStageFlags> GraphicsPipelineStages{ GraphicsPipelineStagesArray,
                                                                     GraphicsPipelineStageCount };
 const VkPipelineStageFlags GraphicsPipelineStagesMask = combineFlags(GraphicsPipelineStages);
 
-const uint64_t ComputePipelineStageCount = 4;
+VkPipelineStageFlags getGraphicsPipelineStageMask() {
+    return GraphicsPipelineStagesMask;
+}
+
+const uint64_t ComputePipelineStageCount = 2;
 const VkPipelineStageFlags ComputePipelineStagesArray[ComputePipelineStageCount] = {
-    VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
     VK_PIPELINE_STAGE_DRAW_INDIRECT_BIT,
-    VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
-    VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT
+    VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT
 };
 const ArrayView<const VkPipelineStageFlags> ComputePipelineStages{ ComputePipelineStagesArray,
                                                                    ComputePipelineStageCount };
 const VkPipelineStageFlags ComputePipelineStagesMask = combineFlags(ComputePipelineStages);
 
-const uint64_t TransferPipelineStageCount = 3;
-const VkPipelineStageFlags TransferPipelineStagesArray[TransferPipelineStageCount] = {
-    VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
-    VK_PIPELINE_STAGE_TRANSFER_BIT,
-    VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT
-};
-const ArrayView<const VkPipelineStageFlags> TransferPipelineStages{ TransferPipelineStagesArray,
-                                                                    TransferPipelineStageCount };
-const VkPipelineStageFlags TransferPipelineStagesMask = combineFlags(TransferPipelineStages);
+VkPipelineStageFlags getComputePipelineStageMask() {
+    return ComputePipelineStagesMask;
+}
 
 VkBufferMemoryBarrier BufferDependency::toMemoryBarrier() const {
     TEPHRA_ASSERT((srcQueueFamilyIndex == VK_QUEUE_FAMILY_IGNORED) == (srcQueueFamilyIndex == dstQueueFamilyIndex));
@@ -226,6 +221,17 @@ void Barrier::updateExtendedStageMasks() {
     extSrcStageMask = srcStageMask;
     extDstStageMask = dstStageMask;
 
+    // Handle top-of-pipe & bottom-of-pipe
+    if (containsAllBits(srcStageMask, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT))
+        extSrcStageMask = ~0;
+    if (srcStageMask != 0)
+        extSrcStageMask |= VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+
+    if (containsAllBits(dstStageMask, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT))
+        extDstStageMask = ~0;
+    if (dstStageMask != 0)
+        extDstStageMask |= VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+
     VkPipelineStageFlags accumMask = 0;
     for (VkPipelineStageFlags stage : GraphicsPipelineStages) {
         if (containsAllBits(dstStageMask, stage)) {
@@ -240,16 +246,6 @@ void Barrier::updateExtendedStageMasks() {
     for (VkPipelineStageFlags stage : ComputePipelineStages) {
         if (containsAllBits(dstStageMask, stage)) {
             extDstStageMask |= ComputePipelineStagesMask & (~accumMask);
-        }
-        accumMask |= stage;
-        if (containsAllBits(srcStageMask, stage)) {
-            extSrcStageMask |= accumMask;
-        }
-    }
-    accumMask = 0;
-    for (VkPipelineStageFlags stage : TransferPipelineStages) {
-        if (containsAllBits(dstStageMask, stage)) {
-            extDstStageMask |= TransferPipelineStagesMask & (~accumMask);
         }
         accumMask |= stage;
         if (containsAllBits(srcStageMask, stage)) {

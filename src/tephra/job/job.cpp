@@ -2,62 +2,74 @@
 #include "resource_pool_container.hpp"
 #include "compute_pass.hpp"
 #include "render_pass.hpp"
+#include "accesses.hpp"
 #include "../device/device_container.hpp"
 #include "../swapchain_impl.hpp"
+#include "../acceleration_structure_impl.hpp"
 #include <tephra/job.hpp>
 
 namespace tp {
 
 constexpr const char* ComputeListTypeName = "ComputeList";
 constexpr const char* RenderListTypeName = "RenderList";
+constexpr const char* JobLocalBufferTypeName = "JobLocalBuffer";
+constexpr const char* JobLocalImageTypeName = "JobLocalImage";
+constexpr const char* JobLocalAccelerationStructureTypeName = "JobLocalAccelerationStructure";
 
 template <typename T, typename... TArgs>
-T* recordCommand(JobRecordStorage& storage, JobCommandTypes type, TArgs&&... args) {
+std::pair<JobRecordStorage::CommandMetadata*, T*> allocateCommand(
+    JobRecordStorage& storage,
+    JobCommandTypes type,
+    TArgs&&... args) {
     std::size_t allocSize = sizeof(JobRecordStorage::CommandMetadata) + sizeof(T);
-    std::byte* ptr = storage.cmdBuffer.allocate(allocSize);
+    ArrayView<std::byte> bytes = storage.cmdBuffer.allocate(allocSize);
 
-    auto metadataPtr = new (ptr) JobRecordStorage::CommandMetadata;
+    auto metadataPtr = new (bytes.data()) JobRecordStorage::CommandMetadata;
     metadataPtr->commandType = type;
     metadataPtr->nextCommand = nullptr;
 
-    if (storage.lastCommandPtr != nullptr) {
-        storage.lastCommandPtr->nextCommand = metadataPtr;
-    }
-    storage.lastCommandPtr = metadataPtr;
-
-    if (storage.commandCount == 0) {
-        storage.firstCommandPtr = metadataPtr;
-    }
-    storage.commandCount++;
-
-    auto cmdDataPtr = ptr + sizeof(JobRecordStorage::CommandMetadata);
-    return new (cmdDataPtr) T(std::forward<TArgs>(args)...);
+    auto cmdDataPtr = bytes.data() + sizeof(JobRecordStorage::CommandMetadata);
+    return { metadataPtr, new (cmdDataPtr) T(std::forward<TArgs>(args)...) };
 }
 
-inline void markResourceUsage(JobData* jobData, const BufferView& buffer, bool isExport = false) {
+template <typename T, typename... TArgs>
+T* recordCommand(JobRecordStorage& storage, JobCommandTypes type, TArgs&&... args) {
+    auto [metadataPtr, cmdDataPtr] = allocateCommand<T>(storage, type, std::forward<TArgs>(args)...);
+    storage.addCommand(metadataPtr);
+    return cmdDataPtr;
+}
+
+template <typename T, typename... TArgs>
+T* recordDelayedCommand(JobRecordStorage& storage, JobCommandTypes type, TArgs&&... args) {
+    auto [metadataPtr, cmdDataPtr] = allocateCommand<T>(storage, type, std::forward<TArgs>(args)...);
+    storage.addDelayedCommand(metadataPtr);
+    return cmdDataPtr;
+}
+
+inline void markResourceUsage(JobData* jobData, const BufferView& buffer, bool usedUntilEnd = false) {
     TEPHRA_ASSERT(!buffer.isNull());
     if (buffer.viewsJobLocalBuffer()) {
-        jobData->resources.localBuffers.markBufferUsage(buffer, jobData->record.commandCount);
-        if (isExport) {
+        jobData->resources.localBuffers.markBufferUsage(buffer, jobData->record.nextCommandIndex);
+        if (usedUntilEnd) {
             jobData->resources.localBuffers.markBufferUsage(buffer, ~0);
         }
     }
 }
 
-inline void markResourceUsage(JobData* jobData, const ImageView& image, bool isExport = false) {
+inline void markResourceUsage(JobData* jobData, const ImageView& image, bool usedUntilEnd = false) {
     TEPHRA_ASSERT(!image.isNull());
     if (image.viewsJobLocalImage()) {
-        jobData->resources.localImages.markImageUsage(image, jobData->record.commandCount);
-        if (isExport) {
+        jobData->resources.localImages.markImageUsage(image, jobData->record.nextCommandIndex);
+        if (usedUntilEnd) {
             jobData->resources.localImages.markImageUsage(image, ~0);
         }
     }
 }
 
-inline void markResourceUsage(JobData* jobData, const StoredImageView& image, bool isExport = false) {
+inline void markResourceUsage(JobData* jobData, const StoredImageView& image, bool usedUntilEnd = false) {
     TEPHRA_ASSERT(!image.isNull());
     if (image.getJobLocalView() != nullptr) {
-        markResourceUsage(jobData, *image.getJobLocalView());
+        markResourceUsage(jobData, *image.getJobLocalView(), usedUntilEnd);
     }
 }
 
@@ -69,6 +81,13 @@ Job::Job(JobData* jobData, DebugTarget debugTarget) : debugTarget(std::move(debu
 }
 
 void Job::finalize() {
+    // Patch delayed commands to the end of the command list
+    if (jobData->record.firstDelayedCommandPtr != nullptr) {
+        TEPHRA_ASSERT(jobData->record.lastCommandPtr != nullptr);
+        jobData->record.lastCommandPtr->nextCommand = jobData->record.firstDelayedCommandPtr;
+        jobData->record.lastCommandPtr = jobData->record.lastDelayedCommandPtr;
+    }
+
     if (debugTarget->getObjectName() != nullptr)
         cmdEndDebugLabel();
 }
@@ -76,13 +95,17 @@ void Job::finalize() {
 BufferView Job::allocateLocalBuffer(const BufferSetup& setup, const char* debugName) {
     TEPHRA_DEBUG_SET_CONTEXT(debugTarget.get(), "allocateLocalBuffer", debugName);
 
-    return jobData->resources.localBuffers.acquireNewBuffer(setup, debugName);
+    DebugTarget debugTarget = DebugTarget(
+        jobData->resourcePoolImpl->getDebugTarget(), JobLocalBufferTypeName, debugName);
+    return jobData->resources.localBuffers.acquireNewBuffer(setup, std::move(debugTarget));
 }
 
 ImageView Job::allocateLocalImage(const ImageSetup& setup, const char* debugName) {
     TEPHRA_DEBUG_SET_CONTEXT(debugTarget.get(), "allocateLocalImage", debugName);
 
-    return jobData->resources.localImages.acquireNewImage(setup, debugName);
+    DebugTarget debugTarget = DebugTarget(
+        jobData->resourcePoolImpl->getDebugTarget(), JobLocalImageTypeName, debugName);
+    return jobData->resources.localImages.acquireNewImage(setup, std::move(debugTarget));
 }
 
 BufferView Job::allocatePreinitializedBuffer(
@@ -101,6 +124,30 @@ DescriptorSetView Job::allocateLocalDescriptorSet(
     const char* debugName) {
     TEPHRA_DEBUG_SET_CONTEXT(debugTarget.get(), "allocateLocalDescriptorSet", debugName);
     return jobData->resources.localDescriptorSets.prepareNewDescriptorSet(descriptorSetLayout, descriptors, debugName);
+}
+
+AccelerationStructureView Job::allocateLocalAccelerationStructureKHR(
+    const AccelerationStructureSetup& setup,
+    const char* debugName) {
+    TEPHRA_DEBUG_SET_CONTEXT(debugTarget.get(), "allocateLocalAccelerationStructureKHR", debugName);
+
+    DeviceContainer* deviceImpl = jobData->resourcePoolImpl->getParentDeviceImpl();
+    AccelerationStructureBuilder* asBuilder = jobData->resourcePoolImpl->getAccelerationStructurePool()->acquireBuilder(
+        setup, jobData->jobIdInPool);
+
+    // Create a local backing buffer to hold the AS
+    auto backingBufferSetup = BufferSetup(
+        asBuilder->getStorageSize(),
+        BufferUsageMask::None(),
+        VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR,
+        0,
+        256);
+    auto backingBuffer = jobData->resources.localBuffers.acquireNewBuffer(
+        backingBufferSetup, DebugTarget::makeSilent());
+
+    DebugTarget debugTarget = DebugTarget(
+        jobData->resourcePoolImpl->getDebugTarget(), JobLocalAccelerationStructureTypeName, debugName);
+    return jobData->resources.localAccelerationStructures.acquireNew(asBuilder, backingBuffer, std::move(debugTarget));
 }
 
 CommandPool* Job::createCommandPool(const char* debugName) {
@@ -128,8 +175,9 @@ void Job::cmdExportResource(const BufferView& buffer, ReadAccessMask readAccessM
 
     markResourceUsage(jobData, buffer, true);
 
+    ResourceAccess access = convertReadAccessToVkAccess(readAccessMask);
     recordCommand<JobRecordStorage::ExportBufferData>(
-        jobData->record, JobCommandTypes::ExportBuffer, buffer, readAccessMask, queueFamilyIndex);
+        jobData->record, JobCommandTypes::ExportBuffer, buffer, access, queueFamilyIndex);
 }
 
 void Job::cmdExportResource(const ImageView& image, ReadAccessMask readAccessMask, QueueType targetQueueType) {
@@ -151,8 +199,41 @@ void Job::cmdExportResource(
 
     markResourceUsage(jobData, image, true);
 
+    ResourceAccess access = convertReadAccessToVkAccess(readAccessMask);
+    VkImageLayout vkImageLayout = vkGetImageLayoutFromReadAccess(readAccessMask);
     recordCommand<JobRecordStorage::ExportImageData>(
-        jobData->record, JobCommandTypes::ExportImage, image, range, readAccessMask, queueFamilyIndex);
+        jobData->record, JobCommandTypes::ExportImage, image, range, access, vkImageLayout, queueFamilyIndex);
+}
+
+void Job::cmdExportResource(
+    const AccelerationStructureView& accelerationStructure,
+    ReadAccessMask readAccessMask,
+    QueueType targetQueueType) {
+    TEPHRA_DEBUG_SET_CONTEXT(debugTarget.get(), "cmdExportResource", nullptr);
+
+    uint32_t queueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    if (targetQueueType != QueueType::Undefined) {
+        const DeviceContainer* deviceImpl = jobData->resourcePoolImpl->getParentDeviceImpl();
+        queueFamilyIndex = deviceImpl->getPhysicalDevice()->getQueueTypeInfo(targetQueueType).queueFamilyIndex;
+    }
+
+    markResourceUsage(jobData, accelerationStructure.getBackingBufferView(), true);
+
+    ResourceAccess access = convertReadAccessToVkAccess(readAccessMask);
+    // To avoid adding extra read access flags for each stage, we treat acceleration structure accesses like uniform
+    // accesses and translate them here
+    if (containsAllBits(access.accessMask, VK_ACCESS_UNIFORM_READ_BIT)) {
+        access.accessMask &= ~VK_ACCESS_UNIFORM_READ_BIT;
+        access.accessMask |= VK_ACCESS_ACCELERATION_STRUCTURE_READ_BIT_KHR;
+    }
+
+    // There is no need for a separate "export acceleration structure" command, we can just export its backing buffer
+    recordCommand<JobRecordStorage::ExportBufferData>(
+        jobData->record,
+        JobCommandTypes::ExportBuffer,
+        accelerationStructure.getBackingBufferView(),
+        access,
+        queueFamilyIndex);
 }
 
 void Job::cmdDiscardContents(const ImageView& image) {
@@ -179,8 +260,8 @@ void Job::cmdUpdateBuffer(const BufferView& dstBuffer, ArrayParameter<const std:
 
     markResourceUsage(jobData, dstBuffer);
 
-    void* cmdBufData = jobData->record.cmdBuffer.allocate(data.size());
-    memcpy(cmdBufData, data.data(), data.size());
+    auto cmdBufData = jobData->record.cmdBuffer.allocate(data.size());
+    memcpy(cmdBufData.data(), data.data(), data.size());
 
     recordCommand<JobRecordStorage::UpdateBufferData>(
         jobData->record, JobCommandTypes::UpdateBuffer, dstBuffer, cmdBufData);
@@ -195,18 +276,9 @@ void Job::cmdCopyBuffer(
     markResourceUsage(jobData, srcBuffer);
     markResourceUsage(jobData, dstBuffer);
 
-    BufferCopyRegion* copyRegionsData = jobData->record.cmdBuffer.allocate<BufferCopyRegion>(copyRegions.size());
-
+    auto copyRegionsData = jobData->record.cmdBuffer.allocate<BufferCopyRegion>(copyRegions);
     recordCommand<JobRecordStorage::CopyBufferData>(
-        jobData->record,
-        JobCommandTypes::CopyBuffer,
-        srcBuffer,
-        dstBuffer,
-        ArrayView<BufferCopyRegion>(copyRegionsData, copyRegions.size()));
-
-    for (auto& region : copyRegions) {
-        new (copyRegionsData++) BufferCopyRegion{ region };
-    }
+        jobData->record, JobCommandTypes::CopyBuffer, srcBuffer, dstBuffer, copyRegionsData);
 }
 
 void Job::cmdCopyImage(
@@ -218,18 +290,9 @@ void Job::cmdCopyImage(
     markResourceUsage(jobData, srcImage);
     markResourceUsage(jobData, dstImage);
 
-    ImageCopyRegion* copyRegionsData = jobData->record.cmdBuffer.allocate<ImageCopyRegion>(copyRegions.size());
-
+    auto copyRegionsData = jobData->record.cmdBuffer.allocate<ImageCopyRegion>(copyRegions);
     recordCommand<JobRecordStorage::CopyImageData>(
-        jobData->record,
-        JobCommandTypes::CopyImage,
-        srcImage,
-        dstImage,
-        ArrayView<ImageCopyRegion>(copyRegionsData, copyRegions.size()));
-
-    for (auto& region : copyRegions) {
-        new (copyRegionsData++) ImageCopyRegion{ region };
-    }
+        jobData->record, JobCommandTypes::CopyImage, srcImage, dstImage, copyRegionsData);
 }
 
 void Job::cmdCopyBufferToImage(
@@ -239,7 +302,7 @@ void Job::cmdCopyBufferToImage(
     TEPHRA_DEBUG_SET_CONTEXT(debugTarget.get(), "cmdCopyBufferToImage", nullptr);
 
     if constexpr (TephraValidationEnabled) {
-        // check buffer usage for ImageTransfer
+        // Check buffer usage for ImageTransfer
         const tp::BufferSetup* bufSetup;
         if (srcBuffer.viewsJobLocalBuffer()) {
             bufSetup = &JobLocalBufferImpl::getBufferImpl(srcBuffer).getBufferSetup();
@@ -257,19 +320,9 @@ void Job::cmdCopyBufferToImage(
     markResourceUsage(jobData, srcBuffer);
     markResourceUsage(jobData, dstImage);
 
-    BufferImageCopyRegion* copyRegionsData = jobData->record.cmdBuffer.allocate<BufferImageCopyRegion>(
-        copyRegions.size());
-
+    auto copyRegionsData = jobData->record.cmdBuffer.allocate<BufferImageCopyRegion>(copyRegions);
     recordCommand<JobRecordStorage::CopyBufferImageData>(
-        jobData->record,
-        JobCommandTypes::CopyBufferToImage,
-        srcBuffer,
-        dstImage,
-        ArrayView<BufferImageCopyRegion>(copyRegionsData, copyRegions.size()));
-
-    for (auto& region : copyRegions) {
-        new (copyRegionsData++) BufferImageCopyRegion{ region };
-    }
+        jobData->record, JobCommandTypes::CopyBufferToImage, srcBuffer, dstImage, copyRegionsData);
 }
 
 void Job::cmdCopyImageToBuffer(
@@ -279,7 +332,7 @@ void Job::cmdCopyImageToBuffer(
     TEPHRA_DEBUG_SET_CONTEXT(debugTarget.get(), "cmdCopyImageToBuffer", nullptr);
 
     if constexpr (TephraValidationEnabled) {
-        // check buffer usage for ImageTransfer
+        // Check buffer usage for ImageTransfer
         const tp::BufferSetup* bufSetup;
         if (dstBuffer.viewsJobLocalBuffer()) {
             bufSetup = &JobLocalBufferImpl::getBufferImpl(dstBuffer).getBufferSetup();
@@ -297,19 +350,9 @@ void Job::cmdCopyImageToBuffer(
     markResourceUsage(jobData, srcImage);
     markResourceUsage(jobData, dstBuffer);
 
-    BufferImageCopyRegion* copyRegionsData = jobData->record.cmdBuffer.allocate<BufferImageCopyRegion>(
-        copyRegions.size());
-
+    auto copyRegionsData = jobData->record.cmdBuffer.allocate<BufferImageCopyRegion>(copyRegions);
     recordCommand<JobRecordStorage::CopyBufferImageData>(
-        jobData->record,
-        JobCommandTypes::CopyImageToBuffer,
-        dstBuffer,
-        srcImage,
-        ArrayView<BufferImageCopyRegion>(copyRegionsData, copyRegions.size()));
-
-    for (auto& region : copyRegions) {
-        new (copyRegionsData++) BufferImageCopyRegion{ region };
-    }
+        jobData->record, JobCommandTypes::CopyImageToBuffer, dstBuffer, srcImage, copyRegionsData);
 }
 
 void Job::cmdBlitImage(
@@ -322,19 +365,9 @@ void Job::cmdBlitImage(
     markResourceUsage(jobData, srcImage);
     markResourceUsage(jobData, dstImage);
 
-    ImageBlitRegion* blitRegionsData = jobData->record.cmdBuffer.allocate<ImageBlitRegion>(blitRegions.size());
-
+    auto blitRegionsData = jobData->record.cmdBuffer.allocate<ImageBlitRegion>(blitRegions);
     recordCommand<JobRecordStorage::BlitImageData>(
-        jobData->record,
-        JobCommandTypes::BlitImage,
-        srcImage,
-        dstImage,
-        ArrayView<ImageBlitRegion>(blitRegionsData, blitRegions.size()),
-        filter);
-
-    for (auto& region : blitRegions) {
-        new (blitRegionsData++) ImageBlitRegion{ region };
-    }
+        jobData->record, JobCommandTypes::BlitImage, srcImage, dstImage, blitRegionsData, filter);
 }
 
 void Job::cmdClearImage(const ImageView& dstImage, ClearValue value) {
@@ -346,18 +379,9 @@ void Job::cmdClearImage(const ImageView& dstImage, ClearValue value, ArrayParame
 
     markResourceUsage(jobData, dstImage);
 
-    ImageSubresourceRange* rangesData = jobData->record.cmdBuffer.allocate<ImageSubresourceRange>(ranges.size());
-
+    auto rangesData = jobData->record.cmdBuffer.allocate<ImageSubresourceRange>(ranges);
     recordCommand<JobRecordStorage::ClearImageData>(
-        jobData->record,
-        JobCommandTypes::ClearImage,
-        dstImage,
-        value,
-        ArrayView<ImageSubresourceRange>(rangesData, ranges.size()));
-
-    for (auto& range : ranges) {
-        new (rangesData++) ImageSubresourceRange{ range };
-    }
+        jobData->record, JobCommandTypes::ClearImage, dstImage, value, rangesData);
 }
 
 void Job::cmdResolveImage(
@@ -370,18 +394,10 @@ void Job::cmdResolveImage(
     markResourceUsage(jobData, dstImage);
 
     // Reuse copy image data since it's identical for resolve
-    ImageCopyRegion* resolveRegionsData = jobData->record.cmdBuffer.allocate<ImageCopyRegion>(resolveRegions.size());
+    auto resolveRegionsData = jobData->record.cmdBuffer.allocate<ImageCopyRegion>(resolveRegions);
 
     recordCommand<JobRecordStorage::CopyImageData>(
-        jobData->record,
-        JobCommandTypes::ResolveImage,
-        srcImage,
-        dstImage,
-        ArrayView<ImageCopyRegion>(resolveRegionsData, resolveRegions.size()));
-
-    for (auto& region : resolveRegions) {
-        new (resolveRegionsData++) ImageCopyRegion{ region };
-    }
+        jobData->record, JobCommandTypes::ResolveImage, srcImage, dstImage, resolveRegionsData);
 }
 
 void Job::cmdExecuteComputePass(
@@ -520,8 +536,186 @@ void Job::vkCmdImportExternalResource(
         JobCommandTypes::ImportExternalImage,
         image,
         range,
-        vkImageLayout,
-        ResourceAccess(vkStageMask, vkAccessMask));
+        ResourceAccess(vkStageMask, vkAccessMask),
+        vkImageLayout);
+}
+
+// Command only used internally after AS build
+inline void cmdWriteAccelerationStructureSizes(JobData* jobData, ArrayParameter<const AccelerationStructureView> views) {
+    ScratchVector<QueryHandle> queries;
+    queries.resize(views.size());
+
+    for (std::size_t i = 0; i < views.size(); i++) {
+        AccelerationStructureQueryKHR& query = AccelerationStructureImpl::getAccelerationStructureImpl(views[i])
+                                                   .getOrCreateCompactedSizeQuery();
+        // Clear any previous data
+        query.clear();
+        // Delayed command must mark resources until the end of the job
+        markResourceUsage(jobData, views[i].getBackingBufferView(), true);
+        queries[i] = QueryRecorder::getQueryHandle(query);
+    }
+
+    auto queriesData = jobData->record.cmdBuffer.allocate<QueryHandle>(view(queries));
+    auto viewsData = jobData->record.cmdBuffer.allocate<StoredAccelerationStructureView>(views);
+
+    // Record the query writes as a delayed command
+    recordDelayedCommand<JobRecordStorage::WriteAccelerationStructureSizesData>(
+        jobData->record, JobCommandTypes::WriteAccelerationStructureSizes, queriesData, viewsData);
+};
+
+using AccelerationStructureBuildData = JobRecordStorage::BuildAccelerationStructuresData::SingleBuild;
+inline AccelerationStructureBuildData prepareASBuild(
+    tp::JobData* jobData,
+    const AccelerationStructureBuildInfo& buildInfo,
+    const AccelerationStructureBuildIndirectInfo& indirectInfo) {
+    // Mark input buffers as used
+    markResourceUsage(jobData, buildInfo.dstView.getBackingBufferView());
+
+    if (!buildInfo.srcView.isNull())
+        markResourceUsage(jobData, buildInfo.srcView.getBackingBufferView());
+
+    if (!buildInfo.instanceGeometry.instanceBuffer.isNull())
+        markResourceUsage(jobData, buildInfo.instanceGeometry.instanceBuffer);
+
+    for (const AccelerationStructureView& accessedView : buildInfo.instanceGeometry.accessedViews) {
+        markResourceUsage(jobData, accessedView.getBackingBufferView());
+    }
+
+    for (const TriangleGeometryBuildInfo& triangles : buildInfo.triangleGeometries) {
+        markResourceUsage(jobData, triangles.vertexBuffer);
+        if (!triangles.indexBuffer.isNull())
+            markResourceUsage(jobData, triangles.indexBuffer);
+        if (!triangles.transformBuffer.isNull())
+            markResourceUsage(jobData, triangles.transformBuffer);
+    }
+
+    for (const AABBGeometryBuildInfo& aabbs : buildInfo.aabbGeometries) {
+        markResourceUsage(jobData, aabbs.aabbBuffer);
+    }
+
+    if (!indirectInfo.buildRangeBuffer.isNull())
+        markResourceUsage(jobData, indirectInfo.buildRangeBuffer);
+
+    // Get the dedicated builder for this AS
+    auto& builder = AccelerationStructureBuilder::getBuilderFromView(buildInfo.dstView);
+    if (!buildInfo.dstView.viewsJobLocalAccelerationStructure()) {
+        // Borrow ownership of the builder of the used persistent AS into a separate storage
+        auto& asImpl = AccelerationStructureImpl::getAccelerationStructureImpl(buildInfo.dstView);
+        jobData->resources.usedASBuilders.push_back(asImpl.getBuilder());
+    }
+
+    // Allocate scratch buffer for the build
+    uint64_t scratchBufferSize = builder.getScratchBufferSize(buildInfo.mode);
+
+    auto scratchBufferSetup = BufferSetup(
+        scratchBufferSize, BufferUsage::StorageBuffer | BufferUsage::DeviceAddress, 0, 0, 256);
+    BufferView scratchBuffer = jobData->resources.localBuffers.acquireNewBuffer(
+        scratchBufferSetup, DebugTarget::makeSilent());
+
+    // Immediately mark the scratch buffer as used
+    markResourceUsage(jobData, scratchBuffer);
+
+    // Copy the data as stored resources
+    auto accessedViewsData = jobData->record.cmdBuffer.allocate<StoredAccelerationStructureView>(
+        buildInfo.instanceGeometry.accessedViews);
+    auto triangleGeometriesData = jobData->record.cmdBuffer.allocate<StoredTriangleGeometryBuildInfo>(
+        buildInfo.triangleGeometries);
+    auto aabbGeometriesData = jobData->record.cmdBuffer.allocate<StoredAABBGeometryBuildInfo>(buildInfo.aabbGeometries);
+
+    return AccelerationStructureBuildData(
+        &builder,
+        StoredAccelerationStructureBuildInfo(buildInfo, accessedViewsData, triangleGeometriesData, aabbGeometriesData),
+        StoredAccelerationStructureBuildIndirectInfo(indirectInfo),
+        scratchBuffer);
+}
+
+void Job::cmdBuildAccelerationStructuresKHR(ArrayParameter<const AccelerationStructureBuildInfo> buildInfos) {
+    TEPHRA_DEBUG_SET_CONTEXT(debugTarget.get(), "cmdBuildAccelerationStructuresKHR", nullptr);
+
+    if constexpr (TephraValidationEnabled) {
+        for (std::size_t i = 0; i < buildInfos.size(); i++) {
+            auto& builder = AccelerationStructureBuilder::getBuilderFromView(buildInfos[i].dstView);
+            builder.validateBuildInfo(buildInfos[i], i);
+        }
+    }
+
+    auto buildsData = jobData->record.cmdBuffer.allocate<AccelerationStructureBuildData>(buildInfos.size());
+    auto unusedIndirectInfo = AccelerationStructureBuildIndirectInfo({});
+    for (std::size_t i = 0; i < buildInfos.size(); i++) {
+        buildsData[i] = prepareASBuild(jobData, buildInfos[i], unusedIndirectInfo);
+    }
+
+    recordCommand<JobRecordStorage::BuildAccelerationStructuresData>(
+        jobData->record, JobCommandTypes::BuildAccelerationStructures, buildsData);
+
+    // We also want to query the compacted size for acceleration structures that support it after building
+    // Leaving it for the end of the job will help avoid needless barriers
+    ScratchVector<AccelerationStructureView> toCompact;
+    for (std::size_t i = 0; i < buildInfos.size(); i++) {
+        if (buildInfos[i].mode == tp::AccelerationStructureBuildMode::Build &&
+            buildsData[i].builder->getFlags().contains(tp::AccelerationStructureFlag::AllowCompaction)) {
+            toCompact.push_back(buildInfos[i].dstView);
+        }
+    }
+    if (!toCompact.empty())
+        cmdWriteAccelerationStructureSizes(jobData, view(toCompact));
+}
+
+void Job::cmdBuildAccelerationStructuresIndirectKHR(
+    ArrayParameter<const AccelerationStructureBuildInfo> buildInfos,
+    ArrayParameter<const AccelerationStructureBuildIndirectInfo> indirectInfos) {
+    TEPHRA_DEBUG_SET_CONTEXT(debugTarget.get(), "cmdBuildAccelerationStructuresIndirectKHR", nullptr);
+
+    if constexpr (TephraValidationEnabled) {
+        if (buildInfos.size() != indirectInfos.size()) {
+            reportDebugMessage(
+                DebugMessageSeverity::Error,
+                DebugMessageType::Validation,
+                "The sizes of the 'buildInfos' (",
+                buildInfos.size(),
+                ") and 'indirectInfos' (",
+                indirectInfos.size(),
+                ") arrays do not match.");
+        }
+
+        for (std::size_t i = 0; i < buildInfos.size(); i++) {
+            auto& builder = AccelerationStructureBuilder::getBuilderFromView(buildInfos[i].dstView);
+            builder.validateBuildIndirectInfo(buildInfos[i], indirectInfos[i], i);
+        }
+    }
+
+    auto buildsData = jobData->record.cmdBuffer.allocate<AccelerationStructureBuildData>(buildInfos.size());
+    for (std::size_t i = 0; i < buildInfos.size(); i++) {
+        buildsData[i] = prepareASBuild(jobData, buildInfos[i], indirectInfos[i]);
+    }
+
+    recordCommand<JobRecordStorage::BuildAccelerationStructuresData>(
+        jobData->record, JobCommandTypes::BuildAccelerationStructuresIndirect, buildsData);
+
+    // We also want to query the compacted size for acceleration structures that support it after building
+    // Leaving it for the end of the job will help avoid needless barriers
+    ScratchVector<AccelerationStructureView> toCompact;
+    for (std::size_t i = 0; i < buildInfos.size(); i++) {
+        if (buildInfos[i].mode == tp::AccelerationStructureBuildMode::Build &&
+            buildsData[i].builder->getFlags().contains(tp::AccelerationStructureFlag::AllowCompaction)) {
+            toCompact.push_back(buildInfos[i].dstView);
+        }
+    }
+    if (!toCompact.empty())
+        cmdWriteAccelerationStructureSizes(jobData, view(toCompact));
+}
+
+void Job::cmdCopyAccelerationStructureKHR(
+    const AccelerationStructureView& srcView,
+    const AccelerationStructureView& dstView,
+    AccelerationStructureCopyMode mode) {
+    TEPHRA_DEBUG_SET_CONTEXT(debugTarget.get(), "cmdCopyAccelerationStructureKHR", nullptr);
+
+    markResourceUsage(jobData, srcView.getBackingBufferView());
+    markResourceUsage(jobData, dstView.getBackingBufferView());
+
+    recordCommand<JobRecordStorage::CopyAccelerationStructureData>(
+        jobData->record, JobCommandTypes::CopyAccelerationStructure, srcView, dstView, mode);
 }
 
 Job::Job(Job&& other) noexcept : debugTarget(std::move(other.debugTarget)), jobData(other.jobData) {

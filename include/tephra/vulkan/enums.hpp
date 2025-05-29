@@ -100,9 +100,10 @@ TEPHRA_VULKAN_COMPATIBLE_ENUM(DeviceType, VkPhysicalDeviceType);
 ///     - tp::DescriptorType::StorageBufferDynamic
 ///     - tp::DescriptorType::StorageTexelBuffer
 ///
-/// Uniform buffer descriptors, providing read-only access to uniform buffers:
+/// Uniform descriptors, providing read-only access to uniform buffers and acceleration structures:
 ///     - tp::DescriptorType::UniformBuffer
 ///     - tp::DescriptorType::UniformBufferDynamic
+///     - tp::DescriptorType::AccelerationStructureKHR
 ///
 /// Sampler descriptors:
 ///     - tp::DescriptorType::Sampler
@@ -130,7 +131,9 @@ enum class DescriptorType : uint32_t {
     /// A descriptor for a tp::BufferView object as a read-only uniform (constant) buffer with a dynamic offset.
     UniformBufferDynamic = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
     /// A descriptor for a tp::BufferView object as a read/write buffer with a dynamic offset.
-    StorageBufferDynamic = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC
+    StorageBufferDynamic = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC,
+    /// A descriptor for a read-only tp::AccelerationStructure object.
+    AccelerationStructureKHR = VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR
 };
 TEPHRA_VULKAN_COMPATIBLE_ENUM(DescriptorType, VkDescriptorType);
 
@@ -466,6 +469,8 @@ TEPHRA_VULKAN_COMPATIBLE_ENUM(AttachmentStoreOp, VkAttachmentStoreOp);
 enum class IndexType : uint32_t {
     UInt16 = VK_INDEX_TYPE_UINT16,
     UInt32 = VK_INDEX_TYPE_UINT32,
+    /// Specifies that no indices will be used. Can only be used in tp::TriangleGeometrySetup
+    NoneKHR = VK_INDEX_TYPE_NONE_KHR
 };
 TEPHRA_VULKAN_COMPATIBLE_ENUM(IndexType, VkIndexType);
 
@@ -576,6 +581,64 @@ enum class PipelineStage : uint32_t {
     BottomOfPipe = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
 };
 TEPHRA_VULKAN_COMPATIBLE_ENUM(PipelineStage, VkPipelineStageFlagBits);
+
+/// Type of ray tracing acceleration structure. Top level contains references to bottom level acceleration structures,
+/// which then contain the actual geometry.
+/// @see @vksymbol{VkAccelerationStructureTypeKHR}
+enum class AccelerationStructureType : uint32_t {
+    /// A top-level acceleration structure (a TLAS) containing instance geometries that refer to bottom-level
+    /// acceleration structures.
+    TopLevel = VK_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL_KHR,
+    /// A bottom-level acceleration structure (a BLAS) containing the triangle or AABB geometry to be intersected.
+    BottomLevel = VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_KHR,
+};
+TEPHRA_VULKAN_COMPATIBLE_ENUM(AccelerationStructureType, VkAccelerationStructureTypeKHR);
+
+/// Flags for acceleration structure controlling the process how it is built.
+/// @see @vksymbol{VkBuildAccelerationStructureFlagBitsKHR}
+enum class AccelerationStructureFlag : uint32_t {
+    /// Allows the acceleration structure to be updated after a build with tp::AccelerationStructureBuildMode::Update.
+    AllowUpdate = VK_BUILD_ACCELERATION_STRUCTURE_ALLOW_UPDATE_BIT_KHR,
+    /// Allows the acceleration structure to be compacted after a build with tp::AccelerationStructureCopyMode::Compact.
+    AllowCompaction = VK_BUILD_ACCELERATION_STRUCTURE_ALLOW_COMPACTION_BIT_KHR,
+    /// The build operations will try to prioritize build quality over build performance.
+    PreferFastTrace = VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_KHR,
+    /// The build operations will try to prioritize build performance over build quality.
+    PreferFastBuild = VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_BUILD_BIT_KHR,
+    /// The build operations will try to prioritize low memory usage of scratch memory and the final compacted size.
+    LowMemory = VK_BUILD_ACCELERATION_STRUCTURE_LOW_MEMORY_BIT_KHR,
+};
+TEPHRA_VULKAN_COMPATIBLE_ENUM(AccelerationStructureFlag, VkBuildAccelerationStructureFlagBitsKHR);
+TEPHRA_MAKE_ENUM_BIT_MASK(AccelerationStructureFlagMask, AccelerationStructureFlag);
+
+/// The type of build operation performed on an acceleration structure.
+/// @see @vksymbol{VkBuildAccelerationStructureModeKHR}
+enum class AccelerationStructureBuildMode : uint32_t {
+    /// Builds the acceleration structure from scratch according to the given geometry.
+    Build = VK_BUILD_ACCELERATION_STRUCTURE_MODE_BUILD_KHR,
+    /// Updates an already built acceleration structure according to the given modified geometry.
+    Update = VK_BUILD_ACCELERATION_STRUCTURE_MODE_UPDATE_KHR,
+};
+TEPHRA_VULKAN_COMPATIBLE_ENUM(AccelerationStructureBuildMode, VkBuildAccelerationStructureModeKHR);
+
+/// The type of copy operation performed on an acceleration structure.
+/// @see @vksymbol{VkCopyAccelerationStructureModeKHR}
+enum class AccelerationStructureCopyMode : uint32_t {
+    /// Makes an identical copy of the source acceleration structure.
+    Clone = VK_COPY_ACCELERATION_STRUCTURE_MODE_CLONE_KHR,
+    /// Makes a compacted copy of the source acceleration structure.
+    Compact = VK_COPY_ACCELERATION_STRUCTURE_MODE_COMPACT_KHR,
+};
+TEPHRA_VULKAN_COMPATIBLE_ENUM(AccelerationStructureCopyMode, VkCopyAccelerationStructureModeKHR);
+
+/// Additional flags for acceleration structure geometries.
+/// @see @vksymbol{VkGeometryFlagBitsKHR}
+enum class GeometryFlag : uint32_t {
+    Opaque = VK_GEOMETRY_OPAQUE_BIT_KHR,
+    NoDuplicateAnyHitInvocation = VK_GEOMETRY_NO_DUPLICATE_ANY_HIT_INVOCATION_BIT_KHR,
+};
+TEPHRA_VULKAN_COMPATIBLE_ENUM(GeometryFlag, VkGeometryFlagBitsKHR);
+TEPHRA_MAKE_ENUM_BIT_MASK(GeometryFlagMask, GeometryFlag);
 
 /// The formats that data can be stored in inside buffers and images.
 /// @see @vksymbol{VkFormat}

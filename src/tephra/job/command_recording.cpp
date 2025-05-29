@@ -1,7 +1,9 @@
 #include "command_recording.hpp"
 #include "compute_pass.hpp"
 #include "render_pass.hpp"
+
 #include "resource_pool_container.hpp"
+#include "../acceleration_structure_impl.hpp"
 #include "../device/device_container.hpp"
 #include "../device/command_pool.hpp"
 
@@ -279,6 +281,87 @@ void identifyCommandResourceAccesses(
         }
         break;
     }
+    case JobCommandTypes::BuildAccelerationStructures:
+    case JobCommandTypes::BuildAccelerationStructuresIndirect: {
+        auto* data = getCommandData<JobRecordStorage::BuildAccelerationStructuresData>(command);
+        const auto asBuildStage = VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR;
+        const auto asBuildInput = ResourceAccess(asBuildStage, VK_ACCESS_SHADER_READ_BIT);
+
+        for (auto& buildData : data->builds) {
+            StoredAccelerationStructureBuildInfo& buildInfo = buildData.buildInfo;
+            StoredBufferView& dstBuffer = buildInfo.dstView.getBackingBufferView();
+            bool inPlaceUpdate = buildInfo.mode == AccelerationStructureBuildMode::Update &&
+                !buildInfo.srcView.isNull() &&
+                buildInfo.srcView.vkGetAccelerationStructureHandle() ==
+                    buildInfo.dstView.vkGetAccelerationStructureHandle();
+
+            VkAccessFlags dstAccess = VK_ACCESS_ACCELERATION_STRUCTURE_WRITE_BIT_KHR;
+            // Destination structure could also be read from in case of an in-place update
+            if (inPlaceUpdate)
+                dstAccess |= VK_ACCESS_ACCELERATION_STRUCTURE_READ_BIT_KHR;
+            addBufferAccess(bufferAccesses, dstBuffer, { asBuildStage, dstAccess });
+
+            if (!buildInfo.srcView.isNull() && !inPlaceUpdate) {
+                StoredBufferView& srcBuffer = buildInfo.srcView.getBackingBufferView();
+                addBufferAccess(
+                    bufferAccesses, srcBuffer, { asBuildStage, VK_ACCESS_ACCELERATION_STRUCTURE_READ_BIT_KHR });
+            }
+
+            if (!buildInfo.instanceGeometry.instanceBuffer.isNull())
+                addBufferAccess(bufferAccesses, buildInfo.instanceGeometry.instanceBuffer, asBuildInput);
+
+            for (StoredAccelerationStructureView& accessedView : buildInfo.instanceGeometry.accessedViews) {
+                StoredBufferView& srcBuffer = accessedView.getBackingBufferView();
+                addBufferAccess(
+                    bufferAccesses, srcBuffer, { asBuildStage, VK_ACCESS_ACCELERATION_STRUCTURE_READ_BIT_KHR });
+            }
+
+            for (StoredTriangleGeometryBuildInfo& triangles : buildInfo.triangleGeometries) {
+                addBufferAccess(bufferAccesses, triangles.vertexBuffer, asBuildInput);
+                if (!triangles.indexBuffer.isNull())
+                    addBufferAccess(bufferAccesses, triangles.indexBuffer, asBuildInput);
+                if (!triangles.transformBuffer.isNull())
+                    addBufferAccess(bufferAccesses, triangles.transformBuffer, asBuildInput);
+            }
+
+            for (StoredAABBGeometryBuildInfo& aabbs : buildInfo.aabbGeometries) {
+                addBufferAccess(bufferAccesses, aabbs.aabbBuffer, asBuildInput);
+            }
+
+            StoredBufferView& indirectBuffer = buildData.indirectInfo.buildRangeBuffer;
+            if (!indirectBuffer.isNull())
+                addBufferAccess(bufferAccesses, indirectBuffer, { asBuildStage, VK_ACCESS_INDIRECT_COMMAND_READ_BIT });
+
+            const auto scratchAccess = VK_ACCESS_ACCELERATION_STRUCTURE_READ_BIT_KHR |
+                VK_ACCESS_ACCELERATION_STRUCTURE_WRITE_BIT_KHR;
+            addBufferAccess(bufferAccesses, buildData.scratchBuffer, { asBuildStage, scratchAccess });
+        }
+        break;
+    }
+    case JobCommandTypes::CopyAccelerationStructure: {
+        auto* data = getCommandData<JobRecordStorage::CopyAccelerationStructureData>(command);
+        addBufferAccess(
+            bufferAccesses,
+            data->srcView.getBackingBufferView(),
+            { VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR, VK_ACCESS_ACCELERATION_STRUCTURE_READ_BIT_KHR });
+
+        addBufferAccess(
+            bufferAccesses,
+            data->dstView.getBackingBufferView(),
+            { VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR, VK_ACCESS_ACCELERATION_STRUCTURE_WRITE_BIT_KHR });
+        break;
+    }
+    case JobCommandTypes::WriteAccelerationStructureSizes: {
+        auto* data = getCommandData<JobRecordStorage::WriteAccelerationStructureSizesData>(command);
+        for (StoredAccelerationStructureView& view : data->views) {
+            addBufferAccess(
+                bufferAccesses,
+                view.getBackingBufferView(),
+                { VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR,
+                  VK_ACCESS_ACCELERATION_STRUCTURE_READ_BIT_KHR });
+        }
+        break;
+    }
     case JobCommandTypes::BeginDebugLabel:
     case JobCommandTypes::InsertDebugLabel:
     case JobCommandTypes::EndDebugLabel:
@@ -307,7 +390,11 @@ void recordCommand(const JobData* job, PrimaryBufferRecorder& recorder, JobRecor
         uint64_t dstOffset;
         VkBufferHandle vkDstBufferHandle = data->dstBuffer.vkResolveBufferHandle(&dstOffset);
         vkiCommands.cmdUpdateBuffer(
-            recorder.requestBuffer(), vkDstBufferHandle, dstOffset, data->dstBuffer.getSize(), data->data);
+            recorder.requestBuffer(),
+            vkDstBufferHandle,
+            dstOffset,
+            data->dstBuffer.getSize(),
+            data->data.data()); // mmmmm data
         break;
     }
     case JobCommandTypes::CopyBuffer: {
@@ -523,6 +610,116 @@ void recordCommand(const JobData* job, PrimaryBufferRecorder& recorder, JobRecor
         auto* data = getCommandData<JobRecordStorage::WriteTimestampData>(command);
         recorder.getQueryRecorder().sampleTimestampQuery(
             &vkiCommands, recorder.requestBuffer(), data->query, data->stage, 1);
+        break;
+    }
+    case JobCommandTypes::BuildAccelerationStructures: {
+        TEPHRA_ASSERT(vkiCommands.cmdBuildAccelerationStructuresKHR != nullptr);
+        auto* data = getCommandData<JobRecordStorage::BuildAccelerationStructuresData>(command);
+
+        // Prepare and aggregate vulkan structures for all builds
+        ScratchVector<VkAccelerationStructureBuildGeometryInfoKHR> vkBuildInfos;
+        ScratchVector<const VkAccelerationStructureBuildRangeInfoKHR*> vkRangeInfosPtrs;
+        ScratchVector<VkAccelerationStructureBuildRangeInfoKHR> vkRangeInfos;
+        vkBuildInfos.reserve(data->builds.size());
+        vkRangeInfosPtrs.reserve(data->builds.size());
+
+        std::size_t totalGeometryCount = 0;
+        for (std::size_t i = 0; i < data->builds.size(); i++) {
+            totalGeometryCount += data->builds[i].builder->getGeometryCount();
+        }
+        vkRangeInfos.resize(totalGeometryCount);
+
+        std::size_t vkRangeInfoOffset = 0;
+        for (std::size_t i = 0; i < data->builds.size(); i++) {
+            auto& buildData = data->builds[i];
+            // Grab a set of range infos for the builder to fill
+            std::size_t geometryCount = buildData.builder->getGeometryCount();
+            auto vkRangeInfoView = viewRange(vkRangeInfos, vkRangeInfoOffset, geometryCount);
+            vkRangeInfoOffset += geometryCount;
+
+            vkBuildInfos.push_back(
+                buildData.builder->prepareBuild(buildData.buildInfo, buildData.scratchBuffer, vkRangeInfoView));
+            vkRangeInfosPtrs.push_back(vkRangeInfoView.data());
+        }
+
+        vkiCommands.cmdBuildAccelerationStructuresKHR(
+            recorder.requestBuffer(),
+            static_cast<uint32_t>(vkBuildInfos.size()),
+            vkBuildInfos.data(),
+            vkRangeInfosPtrs.data());
+        break;
+    }
+    case JobCommandTypes::BuildAccelerationStructuresIndirect: {
+        TEPHRA_ASSERT(vkiCommands.cmdBuildAccelerationStructuresKHR != nullptr);
+        auto* data = getCommandData<JobRecordStorage::BuildAccelerationStructuresData>(command);
+
+        // Prepare and aggregate vulkan structures for all builds
+        ScratchVector<VkAccelerationStructureBuildGeometryInfoKHR> vkBuildInfos;
+        ScratchVector<VkDeviceAddress> vkIndirectDeviceAddresses;
+        ScratchVector<uint32_t> vkIndirectStrides;
+        ScratchVector<const uint32_t*> maxPrimitiveCountPtrs;
+        ScratchVector<uint32_t> maxPrimitiveCounts;
+
+        vkBuildInfos.reserve(data->builds.size());
+        vkIndirectDeviceAddresses.reserve(data->builds.size());
+        vkIndirectStrides.reserve(data->builds.size());
+        maxPrimitiveCountPtrs.reserve(data->builds.size());
+
+        std::size_t totalGeometryCount = 0;
+        for (std::size_t i = 0; i < data->builds.size(); i++) {
+            totalGeometryCount += data->builds[i].builder->getGeometryCount();
+        }
+        maxPrimitiveCounts.reserve(totalGeometryCount);
+
+        for (std::size_t i = 0; i < data->builds.size(); i++) {
+            auto& buildData = data->builds[i];
+            vkBuildInfos.push_back(
+                buildData.builder->prepareBuildIndirect(buildData.buildInfo, buildData.scratchBuffer));
+
+            vkIndirectDeviceAddresses.push_back(buildData.indirectInfo.buildRangeBuffer.getDeviceAddress());
+            vkIndirectStrides.push_back(buildData.indirectInfo.buildRangeStride);
+            auto it = maxPrimitiveCounts.insert(
+                maxPrimitiveCounts.end(),
+                buildData.builder->getMaxPrimitiveCounts().begin(),
+                buildData.builder->getMaxPrimitiveCounts().end());
+            maxPrimitiveCountPtrs.push_back(&*it);
+        }
+
+        vkiCommands.cmdBuildAccelerationStructuresIndirectKHR(
+            recorder.requestBuffer(),
+            static_cast<uint32_t>(vkBuildInfos.size()),
+            vkBuildInfos.data(),
+            vkIndirectDeviceAddresses.data(),
+            vkIndirectStrides.data(),
+            maxPrimitiveCountPtrs.data());
+        break;
+    }
+    case JobCommandTypes::CopyAccelerationStructure: {
+        TEPHRA_ASSERT(vkiCommands.cmdCopyAccelerationStructureKHR != nullptr);
+        auto* data = getCommandData<JobRecordStorage::CopyAccelerationStructureData>(command);
+
+        VkCopyAccelerationStructureInfoKHR copyInfo;
+        copyInfo.sType = VK_STRUCTURE_TYPE_COPY_ACCELERATION_STRUCTURE_INFO_KHR;
+        copyInfo.pNext = nullptr;
+        copyInfo.src = data->srcView.vkGetAccelerationStructureHandle();
+        copyInfo.dst = data->dstView.vkGetAccelerationStructureHandle();
+        copyInfo.mode = vkCastConvertibleEnum(data->mode);
+
+        vkiCommands.cmdCopyAccelerationStructureKHR(recorder.requestBuffer(), &copyInfo);
+        break;
+    }
+    case JobCommandTypes::WriteAccelerationStructureSizes: {
+        TEPHRA_ASSERT(vkiCommands.cmdWriteAccelerationStructuresPropertiesKHR != nullptr);
+        auto* data = getCommandData<JobRecordStorage::WriteAccelerationStructureSizesData>(command);
+
+        ScratchVector<VkAccelerationStructureHandleKHR> vkHandles;
+        vkHandles.reserve(data->views.size());
+        for (StoredAccelerationStructureView& view : data->views) {
+            vkHandles.push_back(view.vkGetAccelerationStructureHandle());
+        }
+
+        recorder.getQueryRecorder().sampleAccelerationStructureQueriesKHR(
+            &vkiCommands, recorder.requestBuffer(), data->queries, view(vkHandles));
         break;
     }
     case JobCommandTypes::ExportBuffer:

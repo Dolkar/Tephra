@@ -6,6 +6,30 @@ version increments.
 
 @tableofcontents
 
+@section v0-6-0 In-dev version 0.6.0
+Released 2025-05-29
+- Added ray tracing functionality
+    - Added tp::DeviceExtension::KHR_AccelerationStructure and tp::DeviceExtension::KHR_RayQuery. Ray tracing pipeline
+      support pending.
+    - Added tp::AccelerationStructure, tp::AccelerationStructureView and associated structures.
+    - Added tp::Device::allocateAccelerationStructureKHR, tp::Device::allocateCompactedAccelerationStructureKHR
+      and tp::Job::allocateLocalAccelerationStructureKHR.
+    - Added tp::Job::cmdBuildAccelerationStructuresKHR, tp::Job::cmdBuildAccelerationStructuresIndirectKHR and
+      tp::Job::cmdCopyAccelerationStructureKHR.
+    - Added acceleration structure descriptors and tp::DescriptorType::AccelerationStructureKHR.
+- Added the ability to specify an additional memory alignment requirement to tp::BufferSetup.
+- Added tp::BaseQuery::clear as a way to clear previous query results and clarified when
+  tp::BaseQuery::setMaxHistorySize is allowed to be used.
+- Some internal refactoring of command recording and job compilation.
+
+@subsection v0-6-0-breaking Breaking changes
+@m_class{m-note m-warning}
+
+@parblock
+- `VkPhysicalDeviceCudaKernelLaunchFeaturesNV` and `VkPhysicalDeviceCudaKernelLaunchPropertiesNV` were removed following
+  a breaking change in Vulkan SDK 1.4.310.
+@endparblock
+
 @section v0-5-3 In-dev version 0.5.3
 Released 2025-04-07
 - Updated lists of Vulkan features and properties for extensions added up to the 1.4.304 API version. This also

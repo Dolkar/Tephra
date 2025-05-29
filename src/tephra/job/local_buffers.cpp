@@ -30,7 +30,7 @@ BufferView JobLocalBufferImpl::createTexelView(uint64_t offset, uint64_t size, F
     }
 }
 
-VkDeviceAddress JobLocalBufferImpl::getDeviceAddress() const {
+DeviceAddress JobLocalBufferImpl::getDeviceAddress() const {
     if (hasUnderlyingBuffer()) {
         return underlyingBuffer->getDeviceAddress() + underlyingBufferOffset;
     } else {
@@ -39,7 +39,7 @@ VkDeviceAddress JobLocalBufferImpl::getDeviceAddress() const {
 }
 
 uint64_t JobLocalBufferImpl::getRequiredViewAlignment() const {
-    return BufferImpl::getRequiredViewAlignment_(deviceImpl, bufferSetup.usage);
+    return BufferImpl::getRequiredViewAlignment_(deviceImpl, bufferSetup.usage, bufferSetup.additionalAlignment);
 }
 
 void JobLocalBufferImpl::createPendingBufferViews(std::deque<BufferView>& jobPendingBufferViews) {
@@ -70,9 +70,8 @@ JobLocalBufferImpl& JobLocalBufferImpl::getBufferImpl(const BufferView& bufferVi
     return *std::get<JobLocalBufferImpl*>(bufferView.buffer);
 }
 
-BufferView JobLocalBuffers::acquireNewBuffer(BufferSetup setup, const char* debugName) {
-    DeviceContainer* deviceImpl = resourcePoolImpl->getParentDeviceImpl();
-    DebugTarget debugTarget = DebugTarget(resourcePoolImpl->getDebugTarget(), "JobLocalBuffer", debugName);
+BufferView JobLocalBuffers::acquireNewBuffer(BufferSetup setup, DebugTarget debugTarget) {
+    TEPHRA_ASSERT(setup.size != 0);
     buffers.emplace_back(deviceImpl, setup, buffers.size(), &pendingBufferViews, std::move(debugTarget));
     usageRanges.emplace_back();
     return buffers.back().getDefaultView();

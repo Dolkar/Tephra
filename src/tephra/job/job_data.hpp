@@ -1,6 +1,7 @@
 #pragma once
 
 #include "accesses.hpp"
+#include "local_acceleration_structures.hpp"
 #include "local_buffers.hpp"
 #include "local_images.hpp"
 #include "local_descriptor_sets.hpp"
@@ -34,13 +35,21 @@ enum class JobCommandTypes {
     InsertDebugLabel,
     EndDebugLabel,
     WriteTimestamp,
+    BuildAccelerationStructures,
+    BuildAccelerationStructuresIndirect,
+    CopyAccelerationStructure,
+    WriteAccelerationStructureSizes,
 };
 
 struct JobResourceStorage {
     JobLocalBuffers localBuffers;
     JobLocalImages localImages;
+    JobLocalAccelerationStructures localAccelerationStructures;
     JobLocalDescriptorSets localDescriptorSets;
     std::vector<CommandPool*> commandPools;
+    // TODO: We need to extend the lifetime of AS builders used in this job, but DataBlockAllocator currently
+    // doesn't call destructors of the type-erased blocks
+    std::vector<std::shared_ptr<AccelerationStructureBuilder>> usedASBuilders;
 
     explicit JobResourceStorage(JobResourcePoolContainer* resourcePoolImpl);
 
@@ -55,25 +64,31 @@ struct JobRecordStorage {
 
     struct ExportBufferData {
         StoredBufferView buffer;
-        ReadAccessMask readAccessMask;
+        ResourceAccess access;
         uint32_t dstQueueFamilyIndex;
 
-        ExportBufferData(const BufferView& buffer, ReadAccessMask readAccessMask, uint32_t dstQueueFamilyIndex)
-            : buffer(buffer), readAccessMask(readAccessMask), dstQueueFamilyIndex(dstQueueFamilyIndex) {}
+        ExportBufferData(const BufferView& buffer, ResourceAccess access, uint32_t dstQueueFamilyIndex)
+            : buffer(buffer), access(access), dstQueueFamilyIndex(dstQueueFamilyIndex) {}
     };
 
     struct ExportImageData {
         StoredImageView image;
         ImageAccessRange range;
-        ReadAccessMask readAccessMask;
+        ResourceAccess access;
+        VkImageLayout vkImageLayout;
         uint32_t dstQueueFamilyIndex;
 
         ExportImageData(
             const ImageView& image,
             ImageAccessRange range,
-            ReadAccessMask readAccessMask,
+            ResourceAccess access,
+            VkImageLayout vkImageLayout,
             uint32_t dstQueueFamilyIndex)
-            : image(image), range(range), readAccessMask(readAccessMask), dstQueueFamilyIndex(dstQueueFamilyIndex) {}
+            : image(image),
+              range(range),
+              access(access),
+              vkImageLayout(vkImageLayout),
+              dstQueueFamilyIndex(dstQueueFamilyIndex) {}
     };
 
     struct DiscardImageContentsData {
@@ -93,9 +108,10 @@ struct JobRecordStorage {
 
     struct UpdateBufferData {
         StoredBufferView dstBuffer;
-        const void* data;
+        ArrayView<const std::byte> data;
 
-        UpdateBufferData(const BufferView& dstBuffer, const void* data) : dstBuffer(dstBuffer), data(data) {}
+        UpdateBufferData(const BufferView& dstBuffer, ArrayView<const std::byte> data)
+            : dstBuffer(dstBuffer), data(data) {}
     };
 
     struct CopyBufferData {
@@ -173,15 +189,15 @@ struct JobRecordStorage {
     struct ImportExternalImageData {
         StoredImageView image;
         ImageAccessRange range;
-        VkImageLayout vkImageLayout;
         ResourceAccess access;
+        VkImageLayout vkImageLayout;
 
         ImportExternalImageData(
             const ImageView& image,
             ImageAccessRange range,
-            VkImageLayout vkImageLayout,
-            ResourceAccess access)
-            : image(image), range(range), vkImageLayout(vkImageLayout), access(access) {}
+            ResourceAccess access,
+            VkImageLayout vkImageLayout)
+            : image(image), range(range), access(access), vkImageLayout(vkImageLayout) {}
     };
 
     struct DebugLabelData {
@@ -204,12 +220,60 @@ struct JobRecordStorage {
         WriteTimestampData(const QueryHandle& query, PipelineStage stage) : query(query), stage(stage) {}
     };
 
+    // Shared for regular and indirect build commands
+    struct BuildAccelerationStructuresData {
+        struct SingleBuild {
+            AccelerationStructureBuilder* builder;
+            StoredAccelerationStructureBuildInfo buildInfo;
+            StoredAccelerationStructureBuildIndirectInfo indirectInfo;
+            StoredBufferView scratchBuffer;
+
+            SingleBuild(
+                AccelerationStructureBuilder* builder,
+                StoredAccelerationStructureBuildInfo buildInfo,
+                StoredAccelerationStructureBuildIndirectInfo indirectInfo,
+                StoredBufferView scratchBuffer)
+                : builder(builder), buildInfo(buildInfo), indirectInfo(indirectInfo), scratchBuffer(scratchBuffer) {}
+        };
+
+        ArrayView<SingleBuild> builds;
+
+        BuildAccelerationStructuresData(ArrayView<SingleBuild> builds) : builds(builds) {}
+    };
+
+    struct CopyAccelerationStructureData {
+        StoredAccelerationStructureView srcView;
+        StoredAccelerationStructureView dstView;
+        AccelerationStructureCopyMode mode;
+
+        CopyAccelerationStructureData(
+            const AccelerationStructureView& srcView,
+            const AccelerationStructureView& dstView,
+            AccelerationStructureCopyMode mode)
+            : srcView(srcView), dstView(dstView), mode(mode) {}
+    };
+
+    struct WriteAccelerationStructureSizesData {
+        ArrayView<QueryHandle> queries;
+        ArrayView<StoredAccelerationStructureView> views;
+
+        WriteAccelerationStructureSizesData(
+            ArrayView<QueryHandle> queries,
+            ArrayView<StoredAccelerationStructureView> views)
+            : queries(queries), views(views) {}
+    };
+
+    void addCommand(JobRecordStorage::CommandMetadata* commandPtr);
+    void addDelayedCommand(JobRecordStorage::CommandMetadata* commandPtr);
+
     void clear();
 
-    uint64_t commandCount = 0;
+    uint64_t nextCommandIndex = 0;
     DataBlockAllocator<> cmdBuffer;
     CommandMetadata* firstCommandPtr = nullptr;
     CommandMetadata* lastCommandPtr = nullptr;
+    CommandMetadata* firstDelayedCommandPtr = nullptr;
+    CommandMetadata* lastDelayedCommandPtr = nullptr;
 
     std::size_t computePassCount = 0;
     std::deque<ComputePass> computePassStorage;

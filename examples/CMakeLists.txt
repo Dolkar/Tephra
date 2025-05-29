@@ -4,6 +4,7 @@
     ${CMAKE_SOURCE_DIR}/examples/window.cpp
     
     ${CMAKE_SOURCE_DIR}/examples/1_cube/cube.cpp
+    ${CMAKE_SOURCE_DIR}/examples/2_cornell_pt/cornell.cpp
 )
 
 add_executable(TephraExamples ${EXAMPLE_SOURCES})

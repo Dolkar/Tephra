@@ -11,7 +11,7 @@ class Buffer;
 class BufferImpl;
 class JobLocalBufferImpl;
 
-/// Represents the view of a contiguous range of tp::Buffer memory.
+/// Represents a non-owning view of a contiguous range of tp::Buffer memory.
 ///
 /// Optionally, it can be made to interpret the data in a particular format for binding
 /// to a tp::Descriptor of the tp::DescriptorType::TexelBuffer or tp::DescriptorType::StorageTexelBuffer types.
@@ -108,7 +108,7 @@ public:
     /// @remarks
     ///     If the viewed buffer is a job-local buffer, a valid address will only be returned after the tp::Job has
     ///     been enqueued.
-    VkDeviceAddress getDeviceAddress() const;
+    DeviceAddress getDeviceAddress() const;
 
     /// Returns the associated Vulkan @vksymbol{VkBufferView} handle of a texel buffer view, `VK_NULL_HANDLE` otherwise.
     /// @remarks
@@ -178,7 +178,11 @@ enum class BufferUsage : uint32_t {
     /// from shaders through its address.
     /// @remarks
     ///     Requires the @vksymbol{VkPhysicalDeviceVulkan12Features}::`bufferDeviceAddress` feature to be enabled.
-    DeviceAddress = 1 << 8
+    DeviceAddress = 1 << 8,
+    /// Allows the use of the buffer as a read-only input to an acceleration structure build operation.
+    /// @remarks
+    ///     Requires the tp::DeviceExtension::KHR_AccelerationStructure device extension to be enabled.
+    AccelerationStructureInputKHR = 1 << 9,
 };
 TEPHRA_MAKE_ENUM_BIT_MASK(BufferUsageMask, BufferUsage);
 
@@ -189,6 +193,7 @@ struct BufferSetup {
     BufferUsageMask usage;
     VkBufferUsageFlags vkAdditionalUsage;
     VmaAllocationCreateFlags vmaAdditionalFlags;
+    uint32_t additionalAlignment;
 
     /// @param size
     ///     The size of the new buffer in bytes.
@@ -199,17 +204,25 @@ struct BufferSetup {
     /// @param vmaAdditionalFlags
     ///     A mask of additional VMA allocation create flags that will be passed to
     ///     @vmasymbol{VmaAllocationCreateInfo,struct_vma_allocation_create_info}
+    /// @param additionalAlignment
+    ///     Extra user-specified alignment that should be taken into account for this buffer and its views.
+    ///     Must be a power of two.
     BufferSetup(
         uint64_t size,
         BufferUsageMask usage,
         VkBufferUsageFlags vkAdditionalUsage = 0,
-        VmaAllocationCreateFlags vmaAdditionalFlags = 0)
-        : size(size), usage(usage), vkAdditionalUsage(vkAdditionalUsage), vmaAdditionalFlags(vmaAdditionalFlags) {}
+        VmaAllocationCreateFlags vmaAdditionalFlags = 0,
+        uint32_t additionalAlignment = 1)
+        : size(size),
+          usage(usage),
+          vkAdditionalUsage(vkAdditionalUsage),
+          vmaAdditionalFlags(vmaAdditionalFlags),
+          additionalAlignment(additionalAlignment) {}
 };
 
 /// Represents a linear array of data visible to the device.
 ///
-/// They are not used directly, but instead are passed to commands or descriptors through tp::BufferView
+/// It is generally not used directly, but instead gets passed to commands or descriptors through tp::BufferView
 /// objects that view a contiguous range of its data.
 ///
 /// @remarks
@@ -270,7 +283,7 @@ public:
     /// @remarks
     ///     The buffer must have been created with tp::BufferUsage::DeviceAddress buffer usage.
     /// @see @vksymbol{vkGetBufferDeviceAddress}
-    VkDeviceAddress getDeviceAddress() const;
+    DeviceAddress getDeviceAddress() const;
 
     /// Returns the associated @vmasymbol{VmaAllocation,struct_vma_allocation} handle.
     VmaAllocationHandle vmaGetMemoryAllocationHandle() const;

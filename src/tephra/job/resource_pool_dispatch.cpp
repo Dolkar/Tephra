@@ -49,6 +49,7 @@ JobResourcePoolContainer::JobResourcePoolContainer(
       jobsAcquiredCount(0),
       localBufferPool(deviceImpl, setup.bufferOverallocationBehavior, setup.flags),
       localImagePool(deviceImpl, setup.flags),
+      localAccelerationStructurePool(deviceImpl),
       preinitBufferPool(deviceImpl, setup.preinitBufferOverallocationBehavior, setup.flags),
       localDescriptorPool(
           deviceImpl,
@@ -67,6 +68,7 @@ uint64_t JobResourcePoolContainer::trim_(const JobSemaphore& latestTrimmed) {
     tryFreeSubmittedJobs();
     localBufferPool.trim(upToTimestamp);
     localImagePool.trim(upToTimestamp);
+    localAccelerationStructurePool.trim(upToTimestamp);
     // Preinitialized buffers don't support time limited trimming, will just free everything unused
     preinitBufferPool.trim();
     // Descriptor set pool doesn't support trimming at all
@@ -84,6 +86,7 @@ JobResourcePoolStatistics JobResourcePoolContainer::getStatistics_() const {
     stats.imageAllocationBytes = localImagePool.getTotalSize();
     stats.preinitBufferAllocationCount = preinitBufferPool.getAllocationCount();
     stats.preinitBufferAllocationBytes = preinitBufferPool.getTotalSize();
+    // Acceleration structures don't need to be added here because their storage is already accounted for in buffers
     return stats;
 }
 
@@ -115,6 +118,8 @@ void JobResourcePoolContainer::allocateJobResources(Job& job) {
     resourcePool->tryFreeSubmittedJobs();
     resourcePool->localBufferPool.allocateJobBuffers(&jobData->resources.localBuffers, jobTimestamp, jobName);
     resourcePool->localImagePool.allocateJobImages(&jobData->resources.localImages, jobTimestamp, jobName);
+    resourcePool->localAccelerationStructurePool.acquireJobResources(
+        &jobData->resources.localAccelerationStructures, jobTimestamp);
     resourcePool->preinitBufferPool.finalizeJobAllocations(jobData->jobIdInPool, jobName);
     jobData->resources.localDescriptorSets.allocatePreparedDescriptorSets();
 
@@ -128,6 +133,9 @@ void JobResourcePoolContainer::queueReleaseJob(JobData* jobData) {
     JobResourcePoolContainer* resourcePool = jobData->resourcePoolImpl;
     if (resourcePool == nullptr)
         return; // Orphaned job, nothing to do
+
+    // Acceleration structure builders can be released right away - they are not needed after the submit
+    resourcePool->getAccelerationStructurePool()->releaseBuilders(jobData->jobIdInPool);
 
     std::lock_guard<Mutex> mutexLock(resourcePool->jobReleaseQueueMutex);
     // Keep the queue approximately sorted by how early we can release the jobs

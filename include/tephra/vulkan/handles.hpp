@@ -65,6 +65,8 @@ using VkDescriptorUpdateTemplateHandle =
 using VkDeviceHandle = VkObjectHandle<VkDevice, VK_OBJECT_TYPE_DEVICE>;
 using VkImageHandle = VkObjectHandle<VkImage, VK_OBJECT_TYPE_IMAGE>;
 using VkImageViewHandle = VkObjectHandle<VkImageView, VK_OBJECT_TYPE_IMAGE_VIEW>;
+using VkAccelerationStructureHandleKHR =
+    VkObjectHandle<VkAccelerationStructureKHR, VK_OBJECT_TYPE_ACCELERATION_STRUCTURE_KHR>;
 using VkInstanceHandle = VkObjectHandle<VkInstance, VK_OBJECT_TYPE_INSTANCE>;
 using VkPhysicalDeviceHandle = VkObjectHandle<VkPhysicalDevice, VK_OBJECT_TYPE_PHYSICAL_DEVICE>;
 using VkPipelineCacheHandle = VkObjectHandle<VkPipelineCache, VK_OBJECT_TYPE_PIPELINE_CACHE>;

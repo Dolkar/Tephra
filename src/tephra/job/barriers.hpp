@@ -6,6 +6,9 @@
 
 namespace tp {
 
+VkPipelineStageFlags getGraphicsPipelineStageMask();
+VkPipelineStageFlags getComputePipelineStageMask();
+
 class BufferImpl;
 
 // Specifies a memory dependency on a buffer range between two accesses

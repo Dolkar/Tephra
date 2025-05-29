@@ -165,9 +165,7 @@ class JobResourcePoolContainer;
 
 class JobLocalImages {
 public:
-    explicit JobLocalImages(JobResourcePoolContainer* resourcePoolImpl) : resourcePoolImpl(resourcePoolImpl) {}
-
-    ImageView acquireNewImage(ImageSetup setup, const char* debugName);
+    ImageView acquireNewImage(ImageSetup setup, DebugTarget debugTarget);
 
     void createPendingImageViews();
 
@@ -186,7 +184,6 @@ private:
 
     uint64_t getLocalImageIndex(const ImageView& imageView) const;
 
-    JobResourcePoolContainer* resourcePoolImpl;
     std::deque<JobLocalImageImpl> images; // The local images implementing access through views
     std::deque<ImageView> pendingImageViews; // Image views that need vkImageViews assigned
     std::deque<ResourceUsageRange> usageRanges; // The usages of the local images within the job

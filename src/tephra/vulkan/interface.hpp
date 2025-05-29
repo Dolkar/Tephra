@@ -132,6 +132,17 @@ public:
     PFN_vkGetQueryPoolResults getQueryPoolResults = nullptr;
     PFN_vkResetQueryPool resetQueryPool = nullptr;
 
+    PFN_vkCreateSwapchainKHR createSwapchainKHR = nullptr;
+    PFN_vkDestroySwapchainKHR destroySwapchainKHR = nullptr;
+    PFN_vkGetSwapchainImagesKHR getSwapchainImagesKHR = nullptr;
+    PFN_vkAcquireNextImageKHR acquireNextImageKHR = nullptr;
+    PFN_vkQueuePresentKHR queuePresentKHR = nullptr;
+
+    PFN_vkCreateAccelerationStructureKHR createAccelerationStructureKHR = nullptr;
+    PFN_vkDestroyAccelerationStructureKHR destroyAccelerationStructureKHR = nullptr;
+    PFN_vkGetAccelerationStructureBuildSizesKHR getAccelerationStructureBuildSizesKHR = nullptr;
+    PFN_vkGetAccelerationStructureDeviceAddressKHR getAccelerationStructureDeviceAddressKHR = nullptr;
+
     PFN_vkSetDebugUtilsObjectNameEXT setDebugUtilsObjectNameEXT = nullptr;
     PFN_vkSetDebugUtilsObjectTagEXT setDebugUtilsObjectTagEXT = nullptr;
 };
@@ -216,23 +227,14 @@ public:
     PFN_vkCmdBeginRendering cmdBeginRendering = nullptr;
     PFN_vkCmdEndRendering cmdEndRendering = nullptr;
 
+    PFN_vkCmdBuildAccelerationStructuresKHR cmdBuildAccelerationStructuresKHR = nullptr;
+    PFN_vkCmdBuildAccelerationStructuresIndirectKHR cmdBuildAccelerationStructuresIndirectKHR = nullptr;
+    PFN_vkCmdCopyAccelerationStructureKHR cmdCopyAccelerationStructureKHR = nullptr;
+    PFN_vkCmdWriteAccelerationStructuresPropertiesKHR cmdWriteAccelerationStructuresPropertiesKHR = nullptr;
+
     PFN_vkCmdBeginDebugUtilsLabelEXT cmdBeginDebugUtilsLabelEXT = nullptr;
     PFN_vkCmdInsertDebugUtilsLabelEXT cmdInsertDebugUtilsLabelEXT = nullptr;
     PFN_vkCmdEndDebugUtilsLabelEXT cmdEndDebugUtilsLabelEXT = nullptr;
-};
-
-class VulkanSwapchainInterfaceKHR {
-public:
-    VulkanSwapchainInterfaceKHR() {}
-    VulkanSwapchainInterfaceKHR(const VulkanInstanceInterface& vkiInstance, VkDeviceHandle vkDeviceHandle);
-
-    PFN_vkCreateSwapchainKHR createSwapchainKHR = nullptr;
-    PFN_vkDestroySwapchainKHR destroySwapchainKHR = nullptr;
-    PFN_vkGetSwapchainImagesKHR getSwapchainImagesKHR = nullptr;
-    PFN_vkAcquireNextImageKHR acquireNextImageKHR = nullptr;
-    PFN_vkQueuePresentKHR queuePresentKHR = nullptr;
-
-    bool isLoaded() const;
 };
 
 }

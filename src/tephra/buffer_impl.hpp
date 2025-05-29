@@ -31,8 +31,8 @@ public:
     BufferImpl(
         DeviceContainer* deviceImpl,
         const BufferSetup& bufferSetup,
-        Lifeguard<VkBufferHandle>&& bufferHandle,
-        Lifeguard<VmaAllocationHandle>&& memoryAllocationHandle,
+        Lifeguard<VkBufferHandle> bufferHandle,
+        Lifeguard<VmaAllocationHandle> memoryAllocationHandle,
         DebugTarget debugTarget);
 
     const DebugTarget* getDebugTarget() const {
@@ -62,7 +62,7 @@ public:
     }
 
     uint64_t getRequiredViewAlignment_() const {
-        return getRequiredViewAlignment_(deviceImpl, bufferSetup.usage);
+        return getRequiredViewAlignment_(deviceImpl, bufferSetup.usage, bufferSetup.additionalAlignment);
     }
 
     void* beginHostAccess(uint64_t offset, uint64_t size, MemoryAccess accessType);
@@ -71,7 +71,9 @@ public:
 
     BufferView createTexelView_(uint64_t offset, uint64_t size, Format format);
 
-    VkDeviceAddress getDeviceAddress_() const;
+    DeviceAddress getDeviceAddress_() const {
+        return deviceAddress;
+    }
 
     VmaAllocationHandle vmaGetMemoryAllocationHandle_() const {
         return memoryAllocationHandle.vkGetHandle();
@@ -89,7 +91,10 @@ public:
 
     static BufferImpl& getBufferImpl(const BufferView& bufferView);
 
-    static uint64_t getRequiredViewAlignment_(const DeviceContainer* deviceImpl, BufferUsageMask usage);
+    static uint64_t getRequiredViewAlignment_(
+        const DeviceContainer* deviceImpl,
+        BufferUsageMask usage,
+        uint32_t userAlignment);
 
     TEPHRA_MAKE_NONCOPYABLE(BufferImpl);
     TEPHRA_MAKE_NONMOVABLE(BufferImpl);
@@ -105,6 +110,7 @@ private:
     Lifeguard<VmaAllocationHandle> memoryAllocationHandle;
     Lifeguard<VkBufferHandle> bufferHandle;
     BufferSetup bufferSetup;
+    DeviceAddress deviceAddress = 0;
 
     TexelViewHandleMap texelViewHandleMap;
     // For internal synchronization of memory mapping. In most cases the memory is coherent and the mutex won't be used

@@ -117,8 +117,12 @@ std::pair<Lifeguard<VkBufferHandle>, Lifeguard<VmaAllocationHandle>> MemoryAlloc
     if (setup.usage.contains(BufferUsage::IndirectBuffer)) {
         createInfo.usage |= VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT;
     }
-    if (setup.usage.contains(BufferUsage::DeviceAddress)) {
+    if (setup.usage.containsAny(BufferUsage::DeviceAddress | BufferUsage::AccelerationStructureInputKHR)) {
+        // We need device address for acceleration structure inputs
         createInfo.usage |= VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
+    }
+    if (setup.usage.contains(BufferUsage::AccelerationStructureInputKHR)) {
+        createInfo.usage |= VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR;
     }
 
     VkBufferHandle vkBufferHandle = deviceImpl->getLogicalDevice()->createBuffer(createInfo);

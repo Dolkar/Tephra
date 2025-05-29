@@ -2,6 +2,7 @@
 
 #include <tephra/buffer.hpp>
 #include <tephra/image.hpp>
+#include <tephra/acceleration_structure.hpp>
 #include <tephra/sampler.hpp>
 #include <tephra/common.hpp>
 
@@ -35,37 +36,40 @@ enum class ReadAccess : uint64_t {
     TessellationControlShaderStorage = 1 << 9,
     /// Tessellation control shader read access through sampled descriptors.
     TessellationControlShaderSampled = 1 << 10,
-    /// Tessellation control shader read access through uniform buffer descriptors.
+    /// Tessellation control shader read access through uniform descriptors.
     TessellationControlShaderUniform = 1 << 11,
 
     /// Tessellation evaluation shader read access through storage descriptors.
     TessellationEvaluationShaderStorage = 1 << 12,
     /// Tessellation evaluation shader read access through sampled descriptors.
     TessellationEvaluationShaderSampled = 1 << 13,
-    /// Tessellation evaluation shader read access through uniform buffer descriptors.
+    /// Tessellation evaluation shader read access through uniform descriptors.
     TessellationEvaluationShaderUniform = 1 << 14,
 
     /// Geometry shader read access through storage descriptors.
     GeometryShaderStorage = 1 << 15,
     /// Geometry shader read access through sampled descriptors.
     GeometryShaderSampled = 1 << 16,
-    /// Geometry shader read access through uniform buffer descriptors.
+    /// Geometry shader read access through uniform descriptors.
     GeometryShaderUniform = 1 << 17,
 
     /// Fragment shader read access through storage descriptors.
     FragmentShaderStorage = 1 << 18,
     /// Fragment shader read access through sampled descriptors.
     FragmentShaderSampled = 1 << 19,
-    /// Fragment shader read access through uniform buffer descriptors.
+    /// Fragment shader read access through uniform descriptors.
     FragmentShaderUniform = 1 << 20,
 
     /// Compute shader read access through storage descriptors.
     ComputeShaderStorage = 1 << 21,
     /// Compute shader read access through sampled descriptors.
     ComputeShaderSampled = 1 << 22,
-    /// Compute shader read access through uniform buffer descriptors.
+    /// Compute shader read access through uniform descriptors.
     ComputeShaderUniform = 1 << 23,
 
+    /// Acceleration structure read access to the bottom-level acceleration structures referenced in instance buffers
+    /// of tp::Job::cmdBuildAccelerationStructuresKHR or cmdBuildAccelerationStructuresIndirectKHR.
+    AccelerationStructureBuildKHR = 1ull << 61,
     /// Image present operation access through tp::Device::submitPresentImagesKHR.
     ImagePresentKHR = 1ull << 62,
 
@@ -107,6 +111,8 @@ public:
     Descriptor(const ImageView& imageView, const Sampler& sampler);
     /// Creates a sampler descriptor binding to tp::DescriptorType::Sampler.
     Descriptor(const Sampler& sampler);
+    /// Creates an acceleration structure descriptor.
+    Descriptor(const AccelerationStructureView& accelerationStructureView);
 
     /// Returns `true` if the descriptor is null and does not refer to any resource.
     bool isNull() const;
@@ -114,6 +120,7 @@ public:
     const VkDescriptorImageInfo* vkResolveDescriptorImageInfo() const;
     const VkDescriptorBufferInfo* vkResolveDescriptorBufferInfo() const;
     const VkBufferView* vkResolveDescriptorBufferViewHandle() const;
+    const VkAccelerationStructureKHR* vkResolveAccelerationStructureHandle() const;
     void debugValidateAgainstBinding(
         const DescriptorBinding& binding,
         std::size_t descriptorIndex,
@@ -127,12 +134,15 @@ private:
         mutable VkDescriptorImageInfo vkDescriptorImageInfo;
         VkDescriptorBufferInfo vkDescriptorBufferInfo;
         VkBufferViewHandle vkDescriptorBufferViewHandle;
+        VkAccelerationStructureHandleKHR vkDescriptorAccelerationStructureHandle;
     };
 
     ResourceType resourceType;
 };
 
+/// Equality operator for tp::Descriptor.
 bool operator==(const Descriptor& lhs, const Descriptor& rhs);
+/// Inequality operator for tp::Descriptor.
 inline bool operator!=(const Descriptor& lhs, const Descriptor& rhs) {
     return !(lhs == rhs);
 }
@@ -162,6 +172,8 @@ public:
     FutureDescriptor(ImageView imageView, const Sampler* sampler);
     /// Creates a sampler descriptor binding to tp::DescriptorType::Sampler.
     FutureDescriptor(const Sampler* sampler);
+    /// Creates an acceleration structure descriptor.
+    FutureDescriptor(AccelerationStructureView accelerationStructureView);
 
     /// Resolves the descriptor. The resource referenced by this descriptor must be ready. For job-local resources
     /// it means this can only be called after the tp::Job has been enqueued.
@@ -177,6 +189,7 @@ private:
     union {
         BufferView descriptorBufferView;
         ImageView descriptorImageView;
+        AccelerationStructureView descriptorAccelerationStructureView;
     };
 
     const Sampler* descriptorSampler = nullptr;
@@ -303,8 +316,8 @@ public:
     DescriptorSetLayout() {}
 
     DescriptorSetLayout(
-        Lifeguard<VkDescriptorSetLayoutHandle>&& descriptorSetLayoutHandle,
-        Lifeguard<VkDescriptorUpdateTemplateHandle>&& descriptorUpdateTemplateHandle,
+        Lifeguard<VkDescriptorSetLayoutHandle> descriptorSetLayoutHandle,
+        Lifeguard<VkDescriptorUpdateTemplateHandle> descriptorUpdateTemplateHandle,
         ArrayParameter<const DescriptorBinding> descriptorBindings);
 
     /// Returns `true` if the descriptor set layout is null and not valid for use.
@@ -349,7 +362,7 @@ private:
     void fillVkPoolSizes();
 };
 
-/// Represents the non-owning view of a tp::DescriptorSet.
+/// Represents a non-owning view of a tp::DescriptorSet.
 /// @see tp::DescriptorSet::getView
 /// @see tp::Job::allocateLocalDescriptorSet
 class DescriptorSetView {
@@ -383,7 +396,10 @@ private:
     VkDescriptorSetHandle* vkJobLocalDescriptorSetPtr;
 };
 
+/// Equality operator for tp::DescriptorSetView.
 bool operator==(const DescriptorSetView& lhs, const DescriptorSetView& rhs);
+
+/// Inequality operator for tp::DescriptorSetView.
 inline bool operator!=(const DescriptorSetView& lhs, const DescriptorSetView& rhs) {
     return !(lhs == rhs);
 }
@@ -395,6 +411,7 @@ struct DescriptorPoolEntry;
 /// @see @vksymbol{VkDescriptorSet}
 class DescriptorSet {
 public:
+    /// Creates a null descriptor set.
     DescriptorSet();
 
     DescriptorSet(VkDescriptorSetHandle vkDescriptorSetHandle, DescriptorPoolEntry* parentDescriptorPoolEntry);

@@ -17,61 +17,77 @@ public:
 
     void addExport(JobRecordStorage::ExportBufferData& exportData) {
         auto [vkBufferHandle, range] = resolveBufferAccess(exportData.buffer);
-        ResourceAccess access;
-        convertReadAccessToVkAccess(exportData.readAccessMask, &access.stageMask, &access.accessMask);
 
         if (exportData.dstQueueFamilyIndex != VK_QUEUE_FAMILY_IGNORED &&
             exportData.dstQueueFamilyIndex != currentQueueFamilyIndex) {
             qfotBufferExports.emplace_back(
-                NewBufferAccess(vkBufferHandle, range, access), exportData.dstQueueFamilyIndex);
+                NewBufferAccess(vkBufferHandle, range, exportData.access), exportData.dstQueueFamilyIndex);
         } else {
-            queuedBufferExports.emplace_back(vkBufferHandle, range, access);
+            queuedBufferExports.emplace_back(vkBufferHandle, range, exportData.access);
         }
     }
 
     void addExport(JobRecordStorage::ExportImageData& exportData) {
         ImageAccessRange range = exportData.range;
         VkImageHandle vkImageHandle = resolveImageAccess(exportData.image, &range);
-        ResourceAccess access;
-        convertReadAccessToVkAccess(exportData.readAccessMask, &access.stageMask, &access.accessMask);
-        VkImageLayout layout = vkGetImageLayoutFromReadAccess(exportData.readAccessMask);
 
         if (exportData.dstQueueFamilyIndex != VK_QUEUE_FAMILY_IGNORED &&
             exportData.dstQueueFamilyIndex != currentQueueFamilyIndex) {
             qfotImageExports.emplace_back(
-                NewImageAccess(vkImageHandle, range, access, layout), exportData.dstQueueFamilyIndex);
+                NewImageAccess(vkImageHandle, range, exportData.access, exportData.vkImageLayout),
+                exportData.dstQueueFamilyIndex);
         } else {
-            queuedImageExports.emplace_back(vkImageHandle, range, access, layout);
+            queuedImageExports.emplace_back(vkImageHandle, range, exportData.access, exportData.vkImageLayout);
         }
     }
 
     // Synchronize exports before a command that might use the exported resources
-    void flushExports(uint32_t cmdIndex) {
-        // Treat each export like a special access
-        for (NewBufferAccess& newAccess : queuedBufferExports) {
-            VkBufferHandle handle = newAccess.vkResourceHandle;
+    void flushExports(uint32_t cmdIndex, VkPipelineStageFlags stageMask) {
+        auto flushBufferExport = [this, cmdIndex, stageMask](NewBufferAccess& access) {
+            // Ignore accesses that aren't part of the requested stages
+            if ((stageMask & access.stageMask) == 0) {
+                return false;
+            }
+
+            VkBufferHandle handle = access.vkResourceHandle;
             auto mapHit = queueSyncState->bufferResourceMap.find(handle);
             if (mapHit == queueSyncState->bufferResourceMap.end())
                 mapHit = queueSyncState->bufferResourceMap.emplace(handle, BufferAccessMap(handle)).first;
-            mapHit->second.synchronizeNewAccess(newAccess, cmdIndex, *barriers);
-            mapHit->second.insertNewAccess(newAccess, barriers->getBarrierCount(), false, true);
-        }
-        queuedBufferExports.clear();
 
-        for (const NewImageAccess& newAccess : queuedImageExports) {
-            VkImageHandle handle = newAccess.vkResourceHandle;
+            // The exports are treated like a special access
+            mapHit->second.synchronizeNewAccess(access, cmdIndex, *barriers);
+            mapHit->second.insertNewAccess(access, barriers->getBarrierCount(), false, true);
+            return true;
+        };
+
+        auto flushImageExport = [this, cmdIndex, stageMask](NewImageAccess& access) {
+            // Ignore accesses that aren't part of the requested stages
+            if ((stageMask & access.stageMask) == 0) {
+                return false;
+            }
+
+            VkImageHandle handle = access.vkResourceHandle;
             auto mapHit = queueSyncState->imageResourceMap.find(handle);
             if (mapHit == queueSyncState->imageResourceMap.end())
                 mapHit = queueSyncState->imageResourceMap.emplace(handle, ImageAccessMap(handle)).first;
-            mapHit->second.synchronizeNewAccess(newAccess, cmdIndex, *barriers);
-            mapHit->second.insertNewAccess(newAccess, barriers->getBarrierCount(), false, true);
-        }
-        queuedImageExports.clear();
+
+            // The exports are treated like a special access
+            mapHit->second.synchronizeNewAccess(access, cmdIndex, *barriers);
+            mapHit->second.insertNewAccess(access, barriers->getBarrierCount(), false, true);
+            return true;
+        };
+
+        auto removeItBuffer = std::remove_if(queuedBufferExports.begin(), queuedBufferExports.end(), flushBufferExport);
+        queuedBufferExports.erase(removeItBuffer, queuedBufferExports.end());
+
+        auto removeItImage = std::remove_if(queuedImageExports.begin(), queuedImageExports.end(), flushImageExport);
+        queuedImageExports.erase(removeItImage, queuedImageExports.end());
     }
 
     void finishSubmit() {
         ResourceAccess bottomOfPipeAccess = { VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, 0 };
-        flushExports(~0);
+        // Flush all remaining exports
+        flushExports(~0, ~0);
 
         // Split the cross-queue exports into two barriers. The first transitions the resources to a known state, while
         // the second only does the queue family ownership transfer. This is a bit wasteful as sometimes we could have
@@ -299,8 +315,8 @@ void prepareBarriers(
             break;
         }
         case JobCommandTypes::ExecuteComputePass: {
-            // Flush export operations so the resources can be used in the compute pass
-            resourceExportHandler.flushExports(cmdIndex);
+            // Flush export operations for resources that can be used in the compute pass
+            resourceExportHandler.flushExports(cmdIndex, getComputePipelineStageMask());
 
             identifyCommandResourceAccesses(cmd, newBufferAccesses, newImageAccesses);
             processAccesses(cmdIndex, view(newBufferAccesses), view(newImageAccesses), barriers, queueSyncState);
@@ -308,13 +324,23 @@ void prepareBarriers(
             break;
         }
         case JobCommandTypes::ExecuteRenderPass: {
-            // Flush export operations so the resources can be used in the render pass
-            resourceExportHandler.flushExports(cmdIndex);
+            // Flush export operations for resources that can be used in the render pass
+            resourceExportHandler.flushExports(cmdIndex, getGraphicsPipelineStageMask());
 
             // Process regular accesses
             identifyCommandResourceAccesses(cmd, newBufferAccesses, newImageAccesses);
             processAccesses(cmdIndex, view(newBufferAccesses), view(newImageAccesses), barriers, queueSyncState);
             barriers.markExportedResourceUsage();
+            break;
+        }
+        case JobCommandTypes::BuildAccelerationStructures:
+        case JobCommandTypes::BuildAccelerationStructuresIndirect: {
+            // Flush export operations for resources that can be used for acceleration structure build
+            resourceExportHandler.flushExports(cmdIndex, VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR);
+
+            // Process regular accesses
+            identifyCommandResourceAccesses(cmd, newBufferAccesses, newImageAccesses);
+            processAccesses(cmdIndex, view(newBufferAccesses), view(newImageAccesses), barriers, queueSyncState);
             break;
         }
         default: {

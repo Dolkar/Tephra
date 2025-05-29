@@ -13,6 +13,9 @@ namespace tp {
 /// Collection of device extensions that are either specific to Tephra, or are Vulkan device
 /// extensions with built-in support in Tephra. Vulkan extensions outside of the ones defined here
 /// may be used, but their support may be limited.
+/// @remarks
+///     Most Vulkan extensions also have their associated feature struct with features that also need to be enabled
+///     to use their functionality. For extensions defined here, this is done for you.
 /// @see tp::DeviceSetup
 namespace DeviceExtension {
     /// Allows the creation and use of tp::Swapchain to display images onto a @vksymbol{VkSurface} object.
@@ -23,6 +26,14 @@ namespace DeviceExtension {
     /// object whose images can be viewed with different formats than what they were created as.
     /// @see @vksymbol{VK_KHR_swapchain_mutable_format}
     const char* const KHR_SwapchainMutableFormat = VK_KHR_SWAPCHAIN_MUTABLE_FORMAT_EXTENSION_NAME;
+    /// Allows the creation and building of tp::AccelerationStructure objects used for ray tracing.
+    /// @see @vksymbol{VK_KHR_acceleration_structure}
+    const char* const KHR_AccelerationStructure = VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME;
+    /// Adds support for the `SPV_KHR_ray_query` SPIR-V extension, allowing the use of `rayQuery` calls from within
+    /// various shader stages.
+    /// Requires the tp::DeviceExtension::KHR_AccelerationStructure extension to be present and enabled.
+    /// @see @vksymbol{VK_KHR_ray_query}
+    const char* const KHR_RayQuery = VK_KHR_RAY_QUERY_EXTENSION_NAME;
     /// Adds support for querying the actual amount of memory used by the process as well as the estimated budget of
     /// how much total memory the current process can use at any given time.
     /// @see tp::MemoryHeapStatistics.

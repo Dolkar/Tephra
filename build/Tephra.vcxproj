@@ -11,6 +11,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\src\tephra\acceleration_structure_dispatch.cpp" />
+    <ClCompile Include="..\src\tephra\acceleration_structure_impl.cpp" />
     <ClCompile Include="..\src\tephra\application\application_dispatch.cpp" />
     <ClCompile Include="..\src\tephra\application\instance.cpp" />
     <ClCompile Include="..\src\tephra\application\vulkan_globals.cpp" />
@@ -40,6 +42,8 @@
     <ClCompile Include="..\src\tephra\job\compute_pass.cpp" />
     <ClCompile Include="..\src\tephra\job\job.cpp" />
     <ClCompile Include="..\src\tephra\job\job_data.cpp" />
+    <ClCompile Include="..\src\tephra\job\local_acceleration_structures.cpp" />
+    <ClCompile Include="..\src\tephra\job\local_acceleration_structure_allocator.cpp" />
     <ClCompile Include="..\src\tephra\job\local_buffers.cpp" />
     <ClCompile Include="..\src\tephra\job\local_buffer_allocator.cpp" />
     <ClCompile Include="..\src\tephra\job\local_descriptor_sets.cpp" />
@@ -66,6 +70,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\debug-trap.h" />
+    <ClInclude Include="..\include\tephra\acceleration_structure.hpp" />
     <ClInclude Include="..\include\tephra\command_list.hpp" />
     <ClInclude Include="..\include\tephra\query.hpp" />
     <ClInclude Include="..\include\tephra\semaphore.hpp" />
@@ -75,6 +80,7 @@
     <ClInclude Include="..\include\tephra\utils\mutable_descriptor_set.hpp" />
     <ClInclude Include="..\include\tephra\utils\growable_ring_buffer.hpp" />
     <ClInclude Include="..\include\tephra\utils\standard_report_handler.hpp" />
+    <ClInclude Include="..\src\tephra\acceleration_structure_impl.hpp" />
     <ClInclude Include="..\src\tephra\application\application_container.hpp" />
     <ClInclude Include="..\src\tephra\application\instance.hpp" />
     <ClInclude Include="..\src\tephra\application\vulkan_globals.hpp" />
@@ -99,6 +105,8 @@
     <ClInclude Include="..\src\tephra\job\barriers.hpp" />
     <ClInclude Include="..\src\tephra\job\command_recording.hpp" />
     <ClInclude Include="..\src\tephra\job\compute_pass.hpp" />
+    <ClInclude Include="..\src\tephra\job\local_acceleration_structures.hpp" />
+    <ClInclude Include="..\src\tephra\job\local_acceleration_structure_allocator.hpp" />
     <ClInclude Include="..\src\tephra\job\local_buffers.hpp" />
     <ClInclude Include="..\src\tephra\job\local_buffer_allocator.hpp" />
     <ClInclude Include="..\src\tephra\job\local_descriptor_sets.hpp" />

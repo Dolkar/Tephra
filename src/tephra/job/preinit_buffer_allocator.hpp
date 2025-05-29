@@ -70,7 +70,6 @@ private:
         BackingBufferGroup& backingGroup,
         uint64_t jobId,
         const BufferSetup& bufferSetup,
-        const char* debugName,
         bool dontSuballocate);
 };
 

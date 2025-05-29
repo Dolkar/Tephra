@@ -4,6 +4,7 @@
 #include <tephra/job.hpp>
 #include <tephra/pipeline.hpp>
 #include <tephra/descriptor.hpp>
+#include <tephra/acceleration_structure.hpp>
 #include <tephra/buffer.hpp>
 #include <tephra/image.hpp>
 #include <tephra/render.hpp>
@@ -245,7 +246,7 @@ public:
     /// @param debugName
     ///     The debug name identifier for the object.
     /// @remarks
-    ///     The use of this function requires the tp::DeviceExtension::KHR_Swapchain extension to be enabled.
+    ///     Use of this function requires the tp::DeviceExtension::KHR_Swapchain extension to be enabled.
     OwningPtr<Swapchain> createSwapchainKHR(
         const SwapchainSetup& setup,
         Swapchain* oldSwapchain = nullptr,
@@ -285,6 +286,33 @@ public:
     /// @param debugName
     ///     The debug name identifier for the object.
     OwningPtr<Image> allocateImage(const ImageSetup& setup, const char* debugName = nullptr);
+
+    /// Creates a tp::AccelerationStructure object according to the given setup structure and allocates memory for it.
+    /// @param setup
+    ///     The setup structure describing the object.
+    /// @param debugName
+    ///     The debug name identifier for the object.
+    /// @remarks
+    ///     Use of this function requires the tp::DeviceExtension::KHR_AccelerationStructure extension to be enabled.
+    OwningPtr<AccelerationStructure> allocateAccelerationStructureKHR(
+        const AccelerationStructureSetup& setup,
+        const char* debugName = nullptr);
+
+    /// Creates a tp::AccelerationStructure object capable of holding the compacted data of the given source
+    /// acceleration structure and allocates memory for it.
+    /// @param srcAccelerationStructure
+    ///     The source acceleration structure whose compacted size is to be queried.
+    /// @param debugName
+    ///     The debug name identifier for the object. If empty, the name will be inherited from the source.
+    /// @remarks
+    ///     The source acceleration structure must have been created with the
+    ///     tp::AccelerationStructureFlag::AllowCompaction flag and its last build operation must have completed
+    ///     execution on the device.
+    /// @remarks
+    ///     Use of this function requires the tp::DeviceExtension::KHR_AccelerationStructure extension to be enabled.
+    OwningPtr<AccelerationStructure> allocateCompactedAccelerationStructureKHR(
+        const AccelerationStructureView& srcAccelerationStructure,
+        const char* debugName = nullptr);
 
     /// Enqueues the given tp::Job to the specified queue, creating and initializing its local resources.
     ///
@@ -432,17 +460,16 @@ public:
     /// @param debugName
     ///     The debug name identifier for the object.
     /// @remarks
-    ///     `bufferHandle` must have been created from the same Vulkan device as returned by
-    ///     tp::Device::vkGetDeviceHandle.
-    ///     `memoryAllocationHandle` must have
+    ///     `bufferHandle` and `memoryAllocationHandle` must have been created from the same Vulkan device as returned
+    ///     by tp::Device::vkGetDeviceHandle.
     /// @remarks
     ///     The lifeguard handles can be either owning or non-owning, which determines whether the handles will be
     ///     properly disposed of when the buffer is destroyed. See tp::Device::vkMakeHandleLifeguard or
     ///     tp::Lifeguard::NonOwning.
     OwningPtr<Buffer> vkCreateExternalBuffer(
         const BufferSetup& setup,
-        Lifeguard<VkBufferHandle>&& bufferHandle,
-        Lifeguard<VmaAllocationHandle>&& memoryAllocationHandle,
+        Lifeguard<VkBufferHandle> bufferHandle,
+        Lifeguard<VmaAllocationHandle> memoryAllocationHandle,
         const char* debugName = nullptr);
 
     /// Creates a tp::Image object out of a raw Vulkan image handle and an optional VMA memory allocation handle.
@@ -458,13 +485,16 @@ public:
     /// @param debugName
     ///     The debug name identifier for the object.
     /// @remarks
+    ///     `imageHandle` and `memoryAllocationHandle` must have been created from the same Vulkan device as returned
+    ///     by tp::Device::vkGetDeviceHandle.
+    /// @remarks
     ///     The lifeguard handles can be either owning or non-owning, which determines whether the handles will be
     ///     properly disposed of when the image is destroyed. See tp::Device::vkMakeHandleLifeguard or
     ///     tp::Lifeguard::NonOwning.
     OwningPtr<Image> vkCreateExternalImage(
         const ImageSetup& setup,
-        Lifeguard<VkImageHandle>&& imageHandle,
-        Lifeguard<VmaAllocationHandle>&& memoryAllocationHandle,
+        Lifeguard<VkImageHandle> imageHandle,
+        Lifeguard<VmaAllocationHandle> memoryAllocationHandle,
         const char* debugName = nullptr);
 
     /// Wraps the given Vulkan handle object in an owning tp::Lifeguard, ensuring its safe deletion after the lifeguard

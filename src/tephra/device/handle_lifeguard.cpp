@@ -15,6 +15,7 @@ template class Lifeguard<VkObjectHandle<VkBuffer, VK_OBJECT_TYPE_BUFFER>>;
 template class Lifeguard<VkObjectHandle<VkBufferView, VK_OBJECT_TYPE_BUFFER_VIEW>>;
 template class Lifeguard<VkObjectHandle<VkImage, VK_OBJECT_TYPE_IMAGE>>;
 template class Lifeguard<VkObjectHandle<VkImageView, VK_OBJECT_TYPE_IMAGE_VIEW>>;
+template class Lifeguard<VkObjectHandle<VkAccelerationStructureKHR, VK_OBJECT_TYPE_ACCELERATION_STRUCTURE_KHR>>;
 template class Lifeguard<VkObjectHandle<VkSampler, VK_OBJECT_TYPE_SAMPLER>>;
 template class Lifeguard<VkObjectHandle<VkDescriptorPool, VK_OBJECT_TYPE_DESCRIPTOR_POOL>>;
 template class Lifeguard<VkObjectHandle<VkPipeline, VK_OBJECT_TYPE_PIPELINE>>;

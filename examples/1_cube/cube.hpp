@@ -11,7 +11,9 @@ class CubeExample : public Example {
 public:
     CubeExample(std::ostream& debugStream, bool debugMode);
 
-    virtual const tp::Application* getApplication() const override;
+    virtual const tp::Application* getApplication() const override {
+        return application.get();
+    }
 
     virtual void update() override;
 
@@ -22,6 +24,8 @@ public:
     virtual void releaseSurface() override;
 
 private:
+    static constexpr tp::Format swapchainFormat = tp::Format::COL32_B8G8R8A8_UNORM;
+
     tp::utils::StandardReportHandler debugHandler;
     tp::DeviceQueue mainQueue;
 
@@ -30,9 +34,6 @@ private:
     const tp::PhysicalDevice* physicalDevice;
     tp::OwningPtr<tp::Device> device;
     tp::OwningPtr<tp::JobResourcePool> jobResourcePool;
-
-    VkSurfaceKHR surface;
-    tp::OwningPtr<tp::Swapchain> swapchain;
 
     tp::OwningPtr<tp::Image> cubeTexture;
     tp::Sampler sampler;
@@ -43,14 +44,10 @@ private:
 
     std::deque<tp::JobSemaphore> frameSemaphores;
 
-    uint32_t width;
-    uint32_t height;
-
     float cubeRotation;
 
     void prepareTexture();
     void preparePipeline();
-    void prepareSwapchain();
 
     void fillUniformBufferData(vktexcube_vs_uniform* data);
 };

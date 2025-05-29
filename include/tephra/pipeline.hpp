@@ -103,11 +103,13 @@ struct BlendState {
     }
 };
 
+/// Equality operator for tp::BlendState.
 inline bool operator==(const BlendState& lhs, const BlendState& rhs) {
     return lhs.srcBlendFactor == rhs.srcBlendFactor && lhs.dstBlendFactor == rhs.dstBlendFactor &&
         lhs.blendOp == rhs.blendOp;
 }
 
+/// Inequality operator for tp::BlendState.
 inline bool operator!=(const BlendState& lhs, const BlendState& rhs) {
     return !(lhs == rhs);
 }
@@ -141,10 +143,12 @@ struct AttachmentBlendState {
     }
 };
 
+/// Equality operator for tp::AttachmentBlendState.
 inline bool operator==(const AttachmentBlendState& lhs, const AttachmentBlendState& rhs) {
     return lhs.colorBlend == rhs.colorBlend && lhs.alphaBlend == rhs.alphaBlend && lhs.writeMask == rhs.writeMask;
 }
 
+/// Inequality operator for tp::AttachmentBlendState.
 inline bool operator!=(const AttachmentBlendState& lhs, const AttachmentBlendState& rhs) {
     return !(lhs == rhs);
 }
@@ -157,7 +161,7 @@ class ShaderModule {
 public:
     ShaderModule() = default;
 
-    ShaderModule(Lifeguard<VkShaderModuleHandle>&& shaderModuleHandle)
+    ShaderModule(Lifeguard<VkShaderModuleHandle> shaderModuleHandle)
         : shaderModuleHandle(std::move(shaderModuleHandle)) {}
 
     /// Returns `true` if the shader module is null and not valid for use.
@@ -181,7 +185,7 @@ class PipelineLayout {
 public:
     PipelineLayout() {}
 
-    PipelineLayout(Lifeguard<VkPipelineLayoutHandle>&& pipelineLayoutHandle)
+    PipelineLayout(Lifeguard<VkPipelineLayoutHandle> pipelineLayoutHandle)
         : pipelineLayoutHandle(std::move(pipelineLayoutHandle)) {}
 
     /// Returns `true` if the pipeline layout is null and not valid for use.
@@ -209,7 +213,7 @@ class PipelineCache {
 public:
     PipelineCache() {}
 
-    PipelineCache(const Device* device, Lifeguard<VkPipelineCacheHandle>&& pipelineCacheHandle)
+    PipelineCache(const Device* device, Lifeguard<VkPipelineCacheHandle> pipelineCacheHandle)
         : device(device), pipelineCacheHandle(std::move(pipelineCacheHandle)) {}
 
     /// Returns `true` if the pipeline cache is null and not valid for use.
@@ -245,7 +249,7 @@ class Pipeline {
 public:
     Pipeline() {}
 
-    Pipeline(Lifeguard<VkPipelineHandle>&& pipelineHandle) : pipelineHandle(std::move(pipelineHandle)) {}
+    Pipeline(Lifeguard<VkPipelineHandle> pipelineHandle) : pipelineHandle(std::move(pipelineHandle)) {}
 
     /// Returns `true` if the pipeline is null and not valid for use.
     bool isNull() const {
@@ -370,9 +374,7 @@ public:
     ///     The primitive topology.
     /// @param primitiveRestartEnable
     ///     When enabled, a special vertex index value (~0) in the index buffer restarts the primitive assembly.
-    GraphicsPipelineSetup& setTopology(
-        PrimitiveTopology topology,
-        bool primitiveRestartEnable = false);
+    GraphicsPipelineSetup& setTopology(PrimitiveTopology topology, bool primitiveRestartEnable = false);
     /// Sets the format of the depth stencil attachment that will be bound along with this pipeline.
     /// @param depthStencilAttachmentFormat
     ///     The format of the depth stencil attachment.
@@ -458,10 +460,7 @@ public:
     ///     The comparison operator to use for depth testing.
     /// @param enableWrite
     ///     If `true` and depth testing is enabled, also enables depth writes.
-    GraphicsPipelineSetup& setDepthTest(
-        bool enable,
-        CompareOp compareOp = CompareOp::Always,
-        bool enableWrite = false);
+    GraphicsPipelineSetup& setDepthTest(bool enable, CompareOp compareOp = CompareOp::Always, bool enableWrite = false);
     /// Sets the depth bounds testing functionality.
     /// @param enable
     ///     Enables depth bounds testing if `true`, discarding samples if the existing depth value in the depth
@@ -474,10 +473,7 @@ public:
     ///     The values must be between 0.0 and 1.0 inclusive.
     /// @remarks
     ///     The @vksymbol{VkPhysicalDeviceFeatures}::`depthBounds` feature must be enabled.
-    GraphicsPipelineSetup& setDepthBoundsTest(
-        bool enable,
-        float minDepthBounds = 0.0f,
-        float maxDepthBounds = 1.0f);
+    GraphicsPipelineSetup& setDepthBoundsTest(bool enable, float minDepthBounds = 0.0f, float maxDepthBounds = 1.0f);
     /// Sets the depth clamp funcionality.
     /// @param enable
     ///     Enables depth clamp if `true`, clamping the output sample depth to the minimum and maximum depth values as
