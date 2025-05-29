@@ -31,10 +31,8 @@ _Tephra is being used and partially developed by [Bohemia Interactive Simulation
 
 <br/>
 <br/>
-<figure>
-    <div align="center"><img height="600" width="600" src="https://github.com/user-attachments/assets/402a48eb-9830-4fa0-a990-57e061845cf5"/></div>
-    <div align="center"><figcaption>Tephra path tracing example</figcaption></div>
-</figure>
+<div align="center"><img height="600" width="600" src="https://github.com/user-attachments/assets/402a48eb-9830-4fa0-a990-57e061845cf5"/></div>
+<div align="center">Tephra path tracing example</div>
 <br/>
 
 ### Comparison to OpenGL / DirectX 11

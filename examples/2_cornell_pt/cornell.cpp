@@ -2,6 +2,8 @@
 #include "cornell_data.hpp"
 
 #include <cassert>
+#include <cstring>
+#include <cmath>
 #include <iostream>
 #include <fstream>
 
@@ -320,7 +322,7 @@ void CornellExample::preparePlaneBuffer() {
         Vector v01 = { plane.p1.x - plane.p0.x, plane.p1.y - plane.p0.y, plane.p1.z - plane.p0.z };
         Vector v02 = { plane.p2.x - plane.p0.x, plane.p2.y - plane.p0.y, plane.p2.z - plane.p0.z };
         Vector cross = { v01.y * v02.z - v01.z * v02.y, v01.z * v02.x - v01.x * v02.z, v01.x * v02.y - v01.y * v02.x };
-        float d = sqrt(cross.x * cross.x + cross.y * cross.y + cross.z * cross.z);
+        float d = std::sqrt(cross.x * cross.x + cross.y * cross.y + cross.z * cross.z);
         Vector n = { cross.x / d, cross.y / d, cross.z / d };
 
         PlaneMaterialData planeData = { n, plane.reflectance, plane.emission };
