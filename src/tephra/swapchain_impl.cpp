@@ -52,22 +52,24 @@ SwapchainImpl::SwapchainImpl(
       swapchainHandle(std::move(swapchainHandle)),
       status(SwapchainStatus::Optimal) {
     setupSwapchainImages(setup, vkSwapchainImageHandles);
-    setupSyncPrimitives(vkSwapchainImageHandles.size());
+    setupAcquireSemaphores(vkSwapchainImageHandles.size());
 }
 
 std::optional<AcquiredImageInfo> SwapchainImpl::acquireNextImage_(Timeout timeout) {
-    // Reuse the earliest presented sync primitives
-    TEPHRA_ASSERT(!presentedImageSync.empty());
-    SwapchainImageSync& imageSync = presentedImageSync.front();
+    // Round-robin acquire semaphores
+    VkSemaphoreHandle acquireSemaphore = acquireSemaphores[nextFreeAcquireSemaphoreIndex++].vkGetHandle();
+    if (nextFreeAcquireSemaphoreIndex == acquireSemaphores.size())
+        nextFreeAcquireSemaphoreIndex = 0;
 
     VkResult result;
+    uint32_t imageIndex;
     try {
         // On some platforms the acquire can return with VK_NOT_READY even when timeout is nonzero.
         // When the user specifies indefinite timeout, make sure we only return when the acquire is
         // actually successful or an error is thrown.
         do {
             result = deviceImpl->getLogicalDevice()->acquireNextImageKHR(
-                swapchainHandle.vkGetHandle(), timeout, imageSync.acquireSemaphore.vkGetHandle(), &imageSync.imageIndex);
+                swapchainHandle.vkGetHandle(), timeout, acquireSemaphore, &imageIndex);
         } while (timeout.isIndefinite() && (result == VK_NOT_READY || result == VK_TIMEOUT));
     } catch (const OutOfDateError&) {
         status = SwapchainStatus::OutOfDate;
@@ -83,15 +85,14 @@ std::optional<AcquiredImageInfo> SwapchainImpl::acquireNextImage_(Timeout timeou
         status = SwapchainStatus::Suboptimal;
     }
 
-    AcquiredImageInfo acquireInfo;
-    acquireInfo.image = &swapchainImageViews[imageSync.imageIndex];
-    acquireInfo.imageIndex = imageSync.imageIndex;
-    // The two semaphores are binary semaphores, so second argument is 0
-    acquireInfo.acquireSemaphore = { imageSync.acquireSemaphore.vkGetHandle(), 0 };
-    acquireInfo.presentSemaphore = { imageSync.presentSemaphore.vkGetHandle(), 0 };
+    SwapchainImage& acquiredImage = images[imageIndex];
 
-    acquiredImageSync.push_back(std::move(presentedImageSync.front()));
-    presentedImageSync.pop_front();
+    AcquiredImageInfo acquireInfo;
+    acquireInfo.image = &acquiredImage.imageView;
+    acquireInfo.imageIndex = imageIndex;
+    // The two semaphores are binary semaphores, so second argument is 0
+    acquireInfo.acquireSemaphore = { acquireSemaphore, 0 };
+    acquireInfo.presentSemaphore = { acquiredImage.presentSemaphore.vkGetHandle(), 0 };
 
     return acquireInfo;
 }
@@ -113,33 +114,10 @@ void SwapchainImpl::submitPresentImages(
     for (std::size_t i = 0; i < swapchains.size(); i++) {
         SwapchainImpl* swapchainImpl = static_cast<SwapchainImpl*>(swapchains[i]);
         uint32_t presentImageIndex = imageIndices[i];
-        VkSemaphoreHandle presentSemaphore = {};
-
-        auto imageSyncIt = swapchainImpl->acquiredImageSync.begin();
-        for (; imageSyncIt != swapchainImpl->acquiredImageSync.end(); ++imageSyncIt) {
-            if (imageSyncIt->imageIndex == presentImageIndex) {
-                presentSemaphore = imageSyncIt->presentSemaphore.vkGetHandle();
-                break;
-            }
-        }
-
-        if constexpr (TephraValidationEnabled) {
-            if (presentSemaphore.isNull()) {
-                reportDebugMessage(
-                    DebugMessageSeverity::Error,
-                    DebugMessageType::Validation,
-                    "At least one of the images requested to be presented is in an invalid state - "
-                    "it has either not been aquired yet or has already been presented.");
-            }
-        }
-
-        SwapchainImageSync imageSync = std::move(*imageSyncIt);
-        swapchainImpl->acquiredImageSync.erase(imageSyncIt);
+        SwapchainImage& imageToPresent = swapchainImpl->images[imageIndices[i]];
 
         vkSwapchainHandles.push_back(swapchainImpl->swapchainHandle.vkGetHandle());
-        vkWaitSemaphoreHandles.push_back(imageSync.presentSemaphore.vkGetHandle());
-
-        swapchainImpl->presentedImageSync.push_back(std::move(imageSync));
+        vkWaitSemaphoreHandles.push_back(imageToPresent.presentSemaphore.vkGetHandle());
     }
 
     ScratchVector<VkResult> vkResults(swapchains.size());
@@ -193,37 +171,37 @@ void SwapchainImpl::setupSwapchainImages(
             MultisampleLevel::x1,
             setup.imageCompatibleFormatsKHR);
 
+        SwapchainImage image;
         std::string imageName = formSwapchainResourceName(debugTarget.getObjectName(), "image", i);
         auto imageDebugTarget = DebugTarget(&debugTarget, "Image", imageName.c_str());
-        swapchainImages.push_back(std::make_unique<ImageImpl>(
+        image.imageOwner = std::make_unique<ImageImpl>(
             deviceImpl,
             imageSetup,
             std::move(imageHandleLifeguard),
             Lifeguard<VmaAllocationHandle>(),
-            std::move(imageDebugTarget)));
-
+            std::move(imageDebugTarget));
         deviceImpl->getLogicalDevice()->setObjectDebugName(vkSwapchainImageHandles[i], imageName.c_str());
-        swapchainImageViews.push_back(swapchainImages.back()->getDefaultView());
+        image.imageView = image.imageOwner->getDefaultView();
+
+        image.presentSemaphore = deviceImpl->vkMakeHandleLifeguard(
+            deviceImpl->getLogicalDevice()->createSemaphore(false));
+
+        std::string semaphoreName = formSwapchainResourceName(debugTarget.getObjectName(), "present semaphore", i);
+        deviceImpl->getLogicalDevice()->setObjectDebugName(image.presentSemaphore.vkGetHandle(), semaphoreName.c_str());
+        images.push_back(std::move(image));
     }
 }
 
-void SwapchainImpl::setupSyncPrimitives(uint64_t imagesCount) {
-    // Use one more sync primitive than images to prevent unnecessary waiting
+void SwapchainImpl::setupAcquireSemaphores(uint64_t imagesCount) {
+    // Use one more acquire semaphore than images to prevent unnecessary waiting
     uint64_t syncCount = imagesCount + 1;
     for (uint64_t i = 0; i < syncCount; i++) {
-        SwapchainImageSync imageSync;
-        imageSync.imageIndex = ~0;
-        imageSync.acquireSemaphore = deviceImpl->vkMakeHandleLifeguard(
-            deviceImpl->getLogicalDevice()->createSemaphore(false));
-        imageSync.presentSemaphore = deviceImpl->vkMakeHandleLifeguard(
+        Lifeguard<VkSemaphoreHandle> acquireSemaphore = deviceImpl->vkMakeHandleLifeguard(
             deviceImpl->getLogicalDevice()->createSemaphore(false));
 
-        std::string name = formSwapchainResourceName(debugTarget.getObjectName(), "acquire semaphore", i);
-        deviceImpl->getLogicalDevice()->setObjectDebugName(imageSync.acquireSemaphore.vkGetHandle(), name.c_str());
-        name = formSwapchainResourceName(debugTarget.getObjectName(), "present semaphore", i);
-        deviceImpl->getLogicalDevice()->setObjectDebugName(imageSync.presentSemaphore.vkGetHandle(), name.c_str());
-
-        presentedImageSync.push_back(std::move(imageSync));
+        std::string semaphoreName = formSwapchainResourceName(debugTarget.getObjectName(), "acquire semaphore", i);
+        deviceImpl->getLogicalDevice()->setObjectDebugName(acquireSemaphore.vkGetHandle(), semaphoreName.c_str());
+        acquireSemaphores.push_back(std::move(acquireSemaphore));
     }
 }
 

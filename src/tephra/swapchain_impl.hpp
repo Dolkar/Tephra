@@ -46,9 +46,10 @@ public:
         ArrayParameter<const uint32_t> imageIndices);
 
 private:
-    struct SwapchainImageSync {
-        uint32_t imageIndex;
-        Lifeguard<VkSemaphoreHandle> acquireSemaphore;
+    struct SwapchainImage {
+        std::unique_ptr<Image> imageOwner;
+        ImageView imageView;
+        // Present semaphores must be tied to each image since we do not know the order of acquired images
         Lifeguard<VkSemaphoreHandle> presentSemaphore;
     };
 
@@ -56,16 +57,14 @@ private:
     DeviceContainer* deviceImpl;
 
     Lifeguard<VkSwapchainHandleKHR> swapchainHandle;
-    std::vector<std::unique_ptr<Image>> swapchainImages;
-    std::vector<ImageView> swapchainImageViews;
+    std::vector<SwapchainImage> images;
+    std::vector<Lifeguard<VkSemaphoreHandle>> acquireSemaphores;
+    uint32_t nextFreeAcquireSemaphoreIndex = 0;
     SwapchainStatus status;
-
-    std::deque<SwapchainImageSync> acquiredImageSync;
-    std::deque<SwapchainImageSync> presentedImageSync;
 
     void setupSwapchainImages(const SwapchainSetup& setup, ArrayParameter<const VkImageHandle> vkSwapchainImageHandles);
 
-    void setupSyncPrimitives(uint64_t imagesCount);
+    void setupAcquireSemaphores(uint64_t imagesCount);
 };
 
 }
