@@ -237,8 +237,12 @@ struct JobRecordStorage {
         };
 
         ArrayView<SingleBuild> builds;
+        bool hasTopLevelBuilds;
 
-        BuildAccelerationStructuresData(ArrayView<SingleBuild> builds) : builds(builds) {}
+        BuildAccelerationStructuresData(ArrayView<SingleBuild> builds) : builds(builds), hasTopLevelBuilds(false) {
+            for (const SingleBuild& build : builds)
+                hasTopLevelBuilds |= build.builder->getType() == AccelerationStructureType::TopLevel;
+        }
     };
 
     struct CopyAccelerationStructureData {

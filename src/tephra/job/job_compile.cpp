@@ -335,8 +335,11 @@ void prepareBarriers(
         }
         case JobCommandTypes::BuildAccelerationStructures:
         case JobCommandTypes::BuildAccelerationStructuresIndirect: {
-            // Flush export operations for resources that can be used for acceleration structure build
-            resourceExportHandler.flushExports(cmdIndex, VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR);
+            auto* data = getCommandData<JobRecordStorage::BuildAccelerationStructuresData>(cmd);
+            if (data->hasTopLevelBuilds) {
+                // Flush export operations for any bottom-level acceleration structures that can be used in the build
+                resourceExportHandler.flushExports(cmdIndex, VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR);
+            }
 
             // Process regular accesses
             identifyCommandResourceAccesses(cmd, newBufferAccesses, newImageAccesses);
