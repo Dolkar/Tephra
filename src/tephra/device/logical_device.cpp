@@ -47,7 +47,7 @@ inline FunctionalityMask processExtensions(
 
 LogicalDevice::LogicalDevice(Instance* instance, QueueMap* queueMap, const DeviceSetup& setup)
     : instance(instance), physicalDevice(setup.physicalDevice), queueMap(queueMap) {
-    // Make a copy of feature map and extensiosn so we can make changes to them
+    // Make a copy of feature map and extensions so we can make changes to them
     VkFeatureMap vkFeatureMap;
     if (setup.vkFeatureMap != nullptr)
         vkFeatureMap = *setup.vkFeatureMap;
@@ -630,15 +630,14 @@ void LogicalDevice::queueSubmit(uint32_t queueIndex, const SubmitBatch& submitBa
             submitBatch.vkSignalSemaphores.data() + entry.signalSemaphoreOffset);
     }
 
-    // Lock Vulkan queue, if shared with other Tephra queues
-    TEPHRA_ASSERT(queueIndex != ~0);
-    const QueueInfo& queueInfo = queueMap->getQueueInfos()[queueIndex];
-    std::unique_lock<Mutex> lock;
-    if (queueInfo.queueHandleMutex != nullptr)
-        lock = std::unique_lock<Mutex>(*queueInfo.queueHandleMutex);
+    {
+        TEPHRA_ASSERT(queueIndex != ~0);
+        const QueueInfo& queueInfo = queueMap->getQueueInfos()[queueIndex];
+        std::lock_guard<Mutex> lock(*queueInfo.queueHandleMutex);
 
-    throwRetcodeErrors(vkiDevice.queueSubmit(
-        queueInfo.vkQueueHandle, static_cast<uint32_t>(vkSubmitInfos.size()), vkSubmitInfos.data(), VK_NULL_HANDLE));
+        throwRetcodeErrors(vkiDevice.queueSubmit(
+            queueInfo.vkQueueHandle, static_cast<uint32_t>(vkSubmitInfos.size()), vkSubmitInfos.data(), VK_NULL_HANDLE));
+    }
 }
 
 VkQueryPoolHandle LogicalDevice::createQueryPool(
@@ -769,6 +768,9 @@ VkSwapchainHandleKHR LogicalDevice::createSwapchainKHR(
 }
 
 void LogicalDevice::waitForDeviceIdle() const {
+    // We need to lock all queue mutexes here because by spec this call needs to be externally synchronized wrt all
+    // Vulkan queues
+    ScratchVector<std::unique_lock<Mutex>> queueLocks = queueMap->lockPhysicalQueues();
     throwRetcodeErrors(vkiDevice.deviceWaitIdle(vkDeviceHandle));
 }
 
@@ -804,14 +806,13 @@ void LogicalDevice::queuePresentKHR(
     presentInfo.pImageIndices = swapchainImageIndices.data();
     presentInfo.pResults = vkResults.data();
 
-    // Lock Vulkan queue, if shared with other Tephra queues
-    TEPHRA_ASSERT(queueIndex != ~0);
-    const QueueInfo& queueInfo = queueMap->getQueueInfos()[queueIndex];
-    std::unique_lock<Mutex> lock;
-    if (queueInfo.queueHandleMutex != nullptr)
-        lock = std::unique_lock<Mutex>(*queueInfo.queueHandleMutex);
+    {
+        TEPHRA_ASSERT(queueIndex != ~0);
+        const QueueInfo& queueInfo = queueMap->getQueueInfos()[queueIndex];
+        std::lock_guard<Mutex> lock(*queueInfo.queueHandleMutex);
 
-    throwRetcodeErrors(vkiDevice.queuePresentKHR(queueInfo.vkQueueHandle, &presentInfo));
+        throwRetcodeErrors(vkiDevice.queuePresentKHR(queueInfo.vkQueueHandle, &presentInfo));
+    }
 }
 
 VkAccelerationStructureHandleKHR LogicalDevice::createAccelerationStructureKHR(

@@ -112,37 +112,53 @@ void QueueMap::assignVkQueueHandles(const LogicalDevice* logicalDevice, ArrayVie
     });
 
     // Add mutexes and name the Vulkan queues according to what logical queues map to them
-    VkQueueHandle prevHandle = queueInfos[indices.front()].vkQueueHandle;
-    uint32_t streakStart = 0;
-    for (uint32_t streakEnd = 1; streakEnd < indices.size(); streakEnd++) {
-        if (queueInfos[indices[streakEnd]].vkQueueHandle == prevHandle)
-            continue;
+    auto processSharedQueues = [this, logicalDevice, &indices](uint32_t start, uint32_t end) {
+        TEPHRA_ASSERT(start != end);
 
         // Handle unique Vulkan queue handle
-        QueueInfo& baseInfo = queueInfos[indices[streakStart]];
-        std::string queueName = std::string(getDeviceQueueTypeName(baseInfo.identifier.type)) + "[";
+        QueueInfo& firstQueueInfo = queueInfos[indices[start]];
+        std::string queueName = std::string(getDeviceQueueTypeName(firstQueueInfo.identifier.type)) + "[";
 
-        if (streakEnd - streakStart > 1) {
-            // Handle Vulkan queue sharing
-            physicalQueueMutexes.emplace_back();
-            Mutex* mutex = &physicalQueueMutexes.back();
+        // Assign one shared mutex per Vulkan queue and list mapping in debug name
+        physicalQueueMutexes.emplace_back();
+        Mutex* mutex = &physicalQueueMutexes.back();
 
-            for (uint32_t i = streakStart; i < streakEnd; i++) {
-                QueueInfo& streakInfo = queueInfos[indices[i]];
-                streakInfo.queueHandleMutex = mutex;
+        for (uint32_t i = start; i < end; i++) {
+            QueueInfo& logicalQueueInfo = queueInfos[indices[i]];
+            TEPHRA_ASSERT(firstQueueInfo.vkQueueHandle == logicalQueueInfo.vkQueueHandle);
+            logicalQueueInfo.queueHandleMutex = mutex;
 
-                queueName += std::to_string(streakInfo.identifier.index);
-                if (i + 1 != streakEnd)
-                    queueName += ",";
-            }
-        } else {
-            // No need for a mutex when there's only one logical queue for this handle
-            queueName += std::to_string(baseInfo.identifier.index);
+            queueName += std::to_string(logicalQueueInfo.identifier.index);
+            if (i + 1 != end)
+                queueName += ",";
         }
         queueName += "] queue";
 
-        logicalDevice->setObjectDebugName(baseInfo.vkQueueHandle, queueName.c_str());
-        streakStart = streakEnd;
+        logicalDevice->setObjectDebugName(firstQueueInfo.vkQueueHandle, queueName.c_str());
+    };
+
+    VkQueueHandle prevHandle = queueInfos[indices.front()].vkQueueHandle;
+    uint32_t streakStart = 0;
+    for (uint32_t streakEnd = 1; streakEnd < indices.size(); streakEnd++) {
+        if (queueInfos[indices[streakEnd]].vkQueueHandle != prevHandle) {
+            processSharedQueues(streakStart, streakEnd);
+            streakStart = streakEnd;
+        }
     }
+    processSharedQueues(streakStart, indices.size());
 }
+
+ScratchVector<std::unique_lock<Mutex>> QueueMap::lockPhysicalQueues() {
+    // We don't need to worry about deadlocking, because queue mutexes only get locked one at a time (like on submit)
+    // or here, where we always lock them all in the same order (for deviceWaitIdle)
+    ScratchVector<std::unique_lock<Mutex>> queueLocks;
+    queueLocks.reserve(physicalQueueMutexes.size());
+
+    for (Mutex& mutex : physicalQueueMutexes) {
+        queueLocks.emplace_back(mutex);
+    }
+
+    return queueLocks;
+}
+
 }

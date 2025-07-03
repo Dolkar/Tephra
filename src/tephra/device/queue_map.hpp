@@ -16,7 +16,7 @@ struct QueueInfo {
     uint32_t queueFamilyIndex;
     uint32_t queueIndexInFamily;
     VkQueueHandle vkQueueHandle;
-    // Sometimes multiple logical queues may map to the same Vulkan queue. Then we need a mutex.
+    // Mutex shared with all Tephra queues that map to the same Vulkan queue
     Mutex* queueHandleMutex;
     std::string name;
 };
@@ -59,6 +59,8 @@ public:
     ArrayView<const uint32_t> getQueueFamilyCounts() const {
         return view(queueFamilyCounts);
     }
+
+    ScratchVector<std::unique_lock<Mutex>> lockPhysicalQueues();
 
 private:
     // Number of queues created for each Vulkan queue family

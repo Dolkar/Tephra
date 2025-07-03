@@ -234,7 +234,7 @@ private:
     VulkanDeviceInterface vkiDevice;
     const Instance* instance;
     const PhysicalDevice* physicalDevice;
-    const QueueMap* queueMap;
+    QueueMap* queueMap;
     FunctionalityMask functionalityMask;
 };
 
