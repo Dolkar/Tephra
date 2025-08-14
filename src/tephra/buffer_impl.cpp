@@ -33,7 +33,7 @@ MemoryLocation BufferImpl::getMemoryLocation_() const {
     return deviceImpl->getMemoryAllocator()->getAllocationLocation(memoryAllocationHandle.vkGetHandle());
 }
 
-void* BufferImpl::beginHostAccess(uint64_t offset, uint64_t size, MemoryAccess accessType) {
+void* BufferImpl::beginHostAccess(uint64_t offset, uint64_t size, bool hasReadAccess) {
     if (coherentlyMappedMemoryPtr != nullptr)
         return static_cast<void*>(static_cast<std::byte*>(coherentlyMappedMemoryPtr) + offset);
 
@@ -41,7 +41,7 @@ void* BufferImpl::beginHostAccess(uint64_t offset, uint64_t size, MemoryAccess a
     std::lock_guard<Mutex> mutexLock(memoryMappingMutex);
     void* mappedMemoryPtr = deviceImpl->getMemoryAllocator()->mapMemory(memoryAllocationHandle.vkGetHandle());
 
-    if (accessType == MemoryAccess::ReadOnly || accessType == MemoryAccess::ReadWrite) {
+    if (hasReadAccess) {
         deviceImpl->getMemoryAllocator()->invalidateAllocationMemory(
             memoryAllocationHandle.vkGetHandle(), offset, size);
     }
@@ -49,12 +49,12 @@ void* BufferImpl::beginHostAccess(uint64_t offset, uint64_t size, MemoryAccess a
     return static_cast<void*>(static_cast<std::byte*>(mappedMemoryPtr) + offset);
 }
 
-void BufferImpl::endHostAccess(uint64_t offset, uint64_t size, MemoryAccess accessType) {
+void BufferImpl::endHostAccess(uint64_t offset, uint64_t size, bool hasWriteAccess) {
     if (coherentlyMappedMemoryPtr == nullptr) {
         std::lock_guard<Mutex> mutexLock(memoryMappingMutex);
         deviceImpl->getMemoryAllocator()->unmapMemory(memoryAllocationHandle.vkGetHandle());
 
-        if (accessType == MemoryAccess::WriteOnly || accessType == MemoryAccess::ReadWrite) {
+        if (hasWriteAccess) {
             deviceImpl->getMemoryAllocator()->flushAllocationMemory(memoryAllocationHandle.vkGetHandle(), offset, size);
         }
     }
@@ -99,10 +99,6 @@ VkBufferViewHandle BufferImpl::vkGetBufferViewHandle(const BufferView& bufferVie
     VkBufferViewHandle vkBufferViewHandle = getBufferImpl(bufferView).texelViewHandleMap[setup];
     TEPHRA_ASSERTD(!vkBufferViewHandle.isNull(), "BufferView with format should have a Vulkan handle created");
     return vkBufferViewHandle;
-}
-
-HostMappedMemory BufferImpl::mapViewForHostAccess(const BufferView& bufferView, MemoryAccess accessType) {
-    return HostMappedMemory(&getBufferImpl(bufferView), bufferView.offset, bufferView.size, accessType);
 }
 
 BufferImpl& BufferImpl::getBufferImpl(const BufferView& bufferView) {

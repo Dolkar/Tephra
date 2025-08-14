@@ -71,48 +71,33 @@ MemoryLocation BufferView::getMemoryLocation() const {
     }
 }
 
-HostMappedMemory BufferView::mapForHostAccess(MemoryAccess accessType) const {
-    TEPHRA_DEBUG_SET_CONTEXT_TEMP(getDebugTarget(), BufferViewTypeName, "mapForHostAccess", nullptr);
-    if constexpr (TephraValidationEnabled) {
-        if (viewsJobLocalBuffer()) {
-            reportDebugMessage(
-                DebugMessageSeverity::Error,
-                DebugMessageType::Validation,
-                "Attempt to map a job-local buffer for host access.");
-        } else if (isNull()) {
-            reportDebugMessage(
-                DebugMessageSeverity::Error,
-                DebugMessageType::Validation,
-                "Attempt to map a null buffer for host access.");
-        } else {
-            if (!std::get<BufferImpl*>(buffer)->bufferSetup.usage.contains(BufferUsage::HostMapped)) {
-                reportDebugMessage(
-                    DebugMessageSeverity::Error,
-                    DebugMessageType::Validation,
-                    "Buffer wasn't created with BufferUsage::HostMapped.");
-            }
-            MemoryLocation location = std::get<BufferImpl*>(buffer)->getMemoryLocation_();
-            if (location == MemoryLocation::DeviceLocal || location == MemoryLocation::Undefined) {
-                reportDebugMessage(
-                    DebugMessageSeverity::Error,
-                    DebugMessageType::Validation,
-                    "Buffer doesn't reside in host-visible memory.");
-            } else if (
-                (accessType == MemoryAccess::ReadOnly || accessType == MemoryAccess::ReadWrite) &&
-                location != MemoryLocation::HostCached && location != MemoryLocation::DeviceLocalHostCached) {
-                // TODO: Store and check the used progression rather than the resulting location
-                reportDebugMessage(
-                    DebugMessageSeverity::Warning,
-                    DebugMessageType::Performance,
-                    "Read access of buffers allocated from non-cached memory locations can be very slow.");
-            }
-        }
-    }
-
+HostReadableMemory BufferView::mapForHostRead() const {
+    TEPHRA_DEBUG_SET_CONTEXT_TEMP(getDebugTarget(), BufferViewTypeName, "mapForHostRead", nullptr);
+    validateMapForHostAccess(true, false);
     if (isNull() || viewsJobLocalBuffer()) {
-        return HostMappedMemory();
+        return {};
     } else {
-        return BufferImpl::mapViewForHostAccess(*this, accessType);
+        return HostReadableMemory(std::get<BufferImpl*>(buffer), offset, size);
+    }
+}
+
+HostWritableMemory BufferView::mapForHostWrite() const {
+    TEPHRA_DEBUG_SET_CONTEXT_TEMP(getDebugTarget(), BufferViewTypeName, "mapForHostWrite", nullptr);
+    validateMapForHostAccess(true, false);
+    if (isNull() || viewsJobLocalBuffer()) {
+        return {};
+    } else {
+        return HostWritableMemory(std::get<BufferImpl*>(buffer), offset, size);
+    }
+}
+
+HostAccessibleMemory BufferView::mapForHostAccess(bool readAccess, bool writeAccess) const {
+    TEPHRA_DEBUG_SET_CONTEXT_TEMP(getDebugTarget(), BufferViewTypeName, "mapForHostAccess", nullptr);
+    validateMapForHostAccess(readAccess, writeAccess);
+    if (isNull() || viewsJobLocalBuffer()) {
+        return {};
+    } else {
+        return HostAccessibleMemory(std::get<BufferImpl*>(buffer), offset, size, readAccess, writeAccess);
     }
 }
 
@@ -196,6 +181,44 @@ const DebugTarget* BufferView::getDebugTarget() const {
         return nullptr;
 }
 
+void BufferView::validateMapForHostAccess(bool readAccess, bool writeAccess) const {
+    if constexpr (TephraValidationEnabled) {
+        if (viewsJobLocalBuffer()) {
+            reportDebugMessage(
+                DebugMessageSeverity::Error,
+                DebugMessageType::Validation,
+                "Attempt to map a job-local buffer for host access.");
+        } else if (isNull()) {
+            reportDebugMessage(
+                DebugMessageSeverity::Error,
+                DebugMessageType::Validation,
+                "Attempt to map a null buffer for host access.");
+        } else {
+            if (!std::get<BufferImpl*>(buffer)->bufferSetup.usage.contains(BufferUsage::HostMapped)) {
+                reportDebugMessage(
+                    DebugMessageSeverity::Error,
+                    DebugMessageType::Validation,
+                    "Buffer wasn't created with BufferUsage::HostMapped.");
+            }
+            MemoryLocation location = std::get<BufferImpl*>(buffer)->getMemoryLocation_();
+            if (location == MemoryLocation::DeviceLocal || location == MemoryLocation::Undefined) {
+                reportDebugMessage(
+                    DebugMessageSeverity::Error,
+                    DebugMessageType::Validation,
+                    "Buffer doesn't reside in host-visible memory.");
+            } else if (
+                readAccess && location != MemoryLocation::HostCached &&
+                location != MemoryLocation::DeviceLocalHostCached) {
+                // TODO: Store and check the used progression rather than the resulting location
+                reportDebugMessage(
+                    DebugMessageSeverity::Warning,
+                    DebugMessageType::Performance,
+                    "Host read access to buffers allocated from non-cached memory locations can be very slow.");
+            }
+        }
+    }
+}
+
 bool operator==(const BufferView& lhs, const BufferView& rhs) {
     if (lhs.size != rhs.size || lhs.offset != rhs.offset || lhs.format != rhs.format) {
         return false;
@@ -227,8 +250,16 @@ uint64_t Buffer::getRequiredViewAlignment() const {
     return bufferImpl->getRequiredViewAlignment_();
 }
 
-HostMappedMemory Buffer::mapForHostAccess(MemoryAccess accessType) const {
-    return getDefaultView().mapForHostAccess(accessType);
+HostReadableMemory Buffer::mapForHostRead() const {
+    return getDefaultView().mapForHostRead();
+}
+
+HostWritableMemory Buffer::mapForHostWrite() const {
+    return getDefaultView().mapForHostWrite();
+}
+
+HostAccessibleMemory Buffer::mapForHostAccess(bool readAccess, bool writeAccess) const {
+    return getDefaultView().mapForHostAccess(readAccess, writeAccess);
 }
 
 BufferView Buffer::createTexelView(uint64_t offset, uint64_t size, Format format) {

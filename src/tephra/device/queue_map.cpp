@@ -145,7 +145,7 @@ void QueueMap::assignVkQueueHandles(const LogicalDevice* logicalDevice, ArrayVie
             streakStart = streakEnd;
         }
     }
-    processSharedQueues(streakStart, indices.size());
+    processSharedQueues(streakStart, static_cast<uint32_t>(indices.size()));
 }
 
 ScratchVector<std::unique_lock<Mutex>> QueueMap::lockPhysicalQueues() {

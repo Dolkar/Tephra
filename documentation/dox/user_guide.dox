@@ -553,16 +553,23 @@ tp::Buffer::getMemoryLocation. There are a couple of predefined preferences, whi
   to be read by the host with low latency.
 
 Buffers that were allocated from a location that is visible by the host - so all of them besides
-tp::MemoryLocation::DeviceLocal - can be mapped for host access with tp::Buffer::mapForHostAccess. It returns a
-tp::HostMappedMemory object that provides this access during its lifetime. tp::HostMappedMemory::getPtr can be used to
-finally retrieve an ordinary pointer of the given type and at the given byte offset. The object should be destroyed
-soon after the access is complete.
+tp::MemoryLocation::DeviceLocal - can be mapped for host (CPU) access. For uploading data, aka write accesses, prefer
+tp::Buffer::mapForHostWrite that returns a tp::HostWritableMemory object, through which data can be written to the
+buffer's underlying memory. For readback, use tp::Buffer::mapForHostRead that returns a tp::HostReadableMemory object.
+This object provides constant pointers to the memory that are valid during its lifetime. There is also a generic
+tp::Buffer::mapForHostAccess method that allows for both reads and writes through mutable pointers.
+
+Beware that buffers allocated from uncached memory locations may be very slow to read from. This can easily happen
+by accident, such as through unexpected compiler optimizations. For that reason it is recommended for uploading data
+to potentially uncached memory to be done through tp::HostWritableMemory objects.
+
+In either case, the host memory objects should be destroyed soon after the access is complete.
 
 @code{.cpp}
 template <typename T>
 void copyDataToBuffer(tp::BufferView& buffer, const std::vector<T>& data) {
-    tp::HostMappedMemory memory = buffer.mapForHostAccess(tp::MemoryAccess::WriteOnly);
-    std::copy(data.begin(), data.end(), memory.getPtr<T>());
+    tp::HostWritableMemory memory = buffer.mapForHostWrite();
+    memory.write<T>(0, tp::view(data));
 }
 @endcode
 
@@ -1150,8 +1157,8 @@ void uploadTex(tp::Job& job, const tp::ImageView& image, const std::vector<std::
     {
         // Copy the data to the staging buffer. Can also be done later, at any point until the job
         // gets submitted.
-        tp::HostMappedMemory memory = stagingBuffer.mapForHostAccess(tp::MemoryAccess::WriteOnly);
-        memcpy(memory.getPtr<std::byte>(), data.data(), data.size());
+        tp::HostWritableMemory memory = stagingBuffer.mapForHostWrite();
+        memory.write<std::byte>(0, tp::view(data));
     }
 
     // Record a command to copy the data to the first mip level of the image.

@@ -20,7 +20,7 @@ enum class ReadAccess : uint64_t {
     DrawVertex = 1 << 2,
     /// Read transfer access of a resource through a transfer command.
     Transfer = 1 << 3,
-    /// Read host access of a buffer through HostMappedMemory.
+    /// Read host access of a buffer through tp::HostReadableMemory or tp::HostAccessibleMemory.
     Host = 1 << 4,
     /// Read access of an image as a depth stencil attachment of a render pass.
     DepthStencilAttachment = 1 << 5,
@@ -68,7 +68,7 @@ enum class ReadAccess : uint64_t {
     ComputeShaderUniform = 1 << 23,
 
     /// Acceleration structure read access to the bottom-level acceleration structures referenced in instance buffers
-    /// of tp::Job::cmdBuildAccelerationStructuresKHR or cmdBuildAccelerationStructuresIndirectKHR.
+    /// of tp::Job::cmdBuildAccelerationStructuresKHR or tp::Job::cmdBuildAccelerationStructuresIndirectKHR.
     AccelerationStructureBuildKHR = 1ull << 61,
     /// Image present operation access through tp::Device::submitPresentImagesKHR.
     ImagePresentKHR = 1ull << 62,

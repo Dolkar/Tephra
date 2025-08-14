@@ -3,7 +3,7 @@
 
 **License**: [MIT](https://github.com/Dolkar/Tephra/blob/main/LICENSE)
 
-**Current version**: [v0.6.0](https://dolkar.github.io/Tephra/changelog.html)
+**Current version**: [v0.7.0](https://dolkar.github.io/Tephra/changelog.html)
 
 **Links**: [User guide](https://dolkar.github.io/Tephra/user-guide.html) | [API Documentation](https://dolkar.github.io/Tephra/annotated.html) |
            [Discussions](https://github.com/Dolkar/Tephra/discussions)

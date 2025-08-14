@@ -348,8 +348,8 @@ void CornellExample::preparePlaneBuffer() {
 
     // Upload data to it
     {
-        tp::HostMappedMemory memory = stagingBuffer.mapForHostAccess(tp::MemoryAccess::WriteOnly);
-        memcpy(memory.getPtr(), planesData.data(), bufferSetup.size);
+        tp::HostWritableMemory memory = stagingBuffer.mapForHostWrite();
+        memory.write<PlaneMaterialData>(0, tp::view(planesData));
     }
 
     // Record the copy and export

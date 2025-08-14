@@ -17,13 +17,16 @@ namespace DistanceTransformTestUtils {
         return v % cellCount;
     }
 
-    void prepareInputData(tp::ArrayView<DistanceValueType> inputBuffer, uint32_t seed) {
+    void prepareInputData(tp::HostWritableMemory& inputBuffer, uint64_t cellCount, uint32_t seed) {
         // The input buffer data consists of 0s as "empty cells" and 1s as "marked cells" that we measure distances to.
         // For testing, make it mostly empty cells except for a few randomly distributed marked cells.
-        memset(inputBuffer.data(), 0, inputBuffer.size() * sizeof(DistanceValueType));
+        inputBuffer.write(0, 0u, inputBuffer.getSize());
 
         for (uint32_t i = 0; i < MarkedCellCount; i++) {
-            inputBuffer[getMarkedCellIndex(inputBuffer.size(), seed, i)] = 1;
+            uint64_t cellOffset = static_cast<uint64_t>(getMarkedCellIndex(cellCount, seed, i)) *
+                sizeof(DistanceValueType);
+            DistanceValueType cellValue = 1;
+            inputBuffer.write<DistanceValueType>(cellOffset, tp::viewOne(cellValue));
         }
     }
 
@@ -116,7 +119,7 @@ public:
 
             // We can now read and validate the output buffer
             if (validateOutput) {
-                tp::HostMappedMemory readAccess = result.outputBuffer.mapForHostAccess(tp::MemoryAccess::ReadOnly);
+                tp::HostReadableMemory readAccess = result.outputBuffer.mapForHostRead();
                 auto dataView = readAccess.getArrayView<const DistanceValueType>();
                 DistanceTransformTestUtils::validateOutputData(dataView, result.seed);
             }
@@ -187,8 +190,8 @@ private:
 
         // Write our test data to it
         {
-            tp::HostMappedMemory writeAccess = inputBuffer.mapForHostAccess(tp::MemoryAccess::WriteOnly);
-            DistanceTransformTestUtils::prepareInputData(writeAccess.getArrayView<DistanceValueType>(), seed);
+            tp::HostWritableMemory writeAccess = inputBuffer.mapForHostWrite();
+            DistanceTransformTestUtils::prepareInputData(writeAccess, elementCount, seed);
         }
 
         // We will also need in the general case two device-local buffers to ping-pong between. It's not too

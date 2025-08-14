@@ -65,9 +65,9 @@ public:
         return getRequiredViewAlignment_(deviceImpl, bufferSetup.usage, bufferSetup.additionalAlignment);
     }
 
-    void* beginHostAccess(uint64_t offset, uint64_t size, MemoryAccess accessType);
+    void* beginHostAccess(uint64_t offset, uint64_t size, bool hasReadAccess);
 
-    void endHostAccess(uint64_t offset, uint64_t size, MemoryAccess accessType);
+    void endHostAccess(uint64_t offset, uint64_t size, bool hasWriteAccess);
 
     BufferView createTexelView_(uint64_t offset, uint64_t size, Format format);
 
@@ -86,8 +86,6 @@ public:
     void destroyHandles(bool immediately);
 
     static VkBufferViewHandle vkGetBufferViewHandle(const BufferView& bufferView);
-
-    static HostMappedMemory mapViewForHostAccess(const BufferView& bufferView, MemoryAccess accessType);
 
     static BufferImpl& getBufferImpl(const BufferView& bufferView);
 

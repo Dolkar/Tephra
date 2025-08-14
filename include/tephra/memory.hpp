@@ -22,16 +22,6 @@ enum class MemoryLocation : uint8_t {
 };
 TEPHRA_MAKE_CONTIGUOUS_ENUM_VIEW(MemoryLocationEnumView, MemoryLocation, HostCached);
 
-/// Specifies the type of memory access.
-enum class MemoryAccess {
-    /// The access is read only.
-    ReadOnly,
-    /// The access is write only.
-    WriteOnly,
-    /// The access is both read and write.
-    ReadWrite,
-};
-
 /// Represents the progression of tp::MemoryLocation that the device will attempt to allocate resources from,
 /// in the given order of preference.
 struct MemoryPreference {
@@ -77,32 +67,134 @@ struct MemoryPreference {
 };
 static_assert(sizeof(MemoryPreference) == sizeof(uint64_t), "Size of MemoryPreference is not suitable for hashing.");
 
-class Buffer;
+class BufferImpl;
 
-/// Represents tp::Buffer memory mapped for host access by the application. Automatically handles cache
-/// management for incoherent memory types and unmaps the memory when destroyed, if the memory is not mapped
-/// persistently.
-/// @see tp::BufferView::mapForHostAccess
-class HostMappedMemory {
+/// Shared base implementation of mapped tp::Buffer memory accessor.
+class HostMappedMemoryBase {
 public:
-    HostMappedMemory();
+    HostMappedMemoryBase();
+    HostMappedMemoryBase(
+        BufferImpl* mappedBuffer,
+        uint64_t mappingOffset,
+        uint64_t mappingSize,
+        bool hasReadAccess,
+        bool hasWriteAccess);
 
-    /// Maps a range of tp::Buffer memory. See tp::BufferView::mapForHostAccess for more convenient mapping of
-    /// tp::BufferView objects.
-    /// @param mappedBuffer
-    ///     The tp::Buffer to map.
-    /// @param mappingOffset
-    ///     The base offset to the memory range to be mapped.
-    /// @param mappingSize
-    ///     The size of the memory range to be mapped.
-    /// @param accessType
-    ///     The type of access.
-    HostMappedMemory(Buffer* mappedBuffer, uint64_t mappingOffset, uint64_t mappingSize, MemoryAccess accessType);
+    /// Returns `true` if no memory is mapped.
+    bool isNull() const {
+        return dataPtr == nullptr;
+    }
 
     /// Returns the size of the mapped memory in bytes
     uint64_t getSize() const {
         return mappingSize;
     }
+
+    TEPHRA_MAKE_NONCOPYABLE(HostMappedMemoryBase);
+    TEPHRA_MAKE_MOVABLE_DEFAULT(HostMappedMemoryBase);
+
+    ~HostMappedMemoryBase();
+
+protected:
+    void* dataPtr;
+
+private:
+    BufferImpl* mappedBuffer;
+    uint64_t mappingOffset;
+    uint64_t mappingSize;
+    bool hasReadAccess;
+    bool hasWriteAccess;
+};
+
+/// Represents tp::Buffer memory mapped for host read-only operations. Pointers are valid for the duration of the
+/// lifetime of this object and that of the mapped buffer.
+/// @see tp::BufferView::mapForHostRead
+class HostReadableMemory : public HostMappedMemoryBase {
+public:
+    /// Constructs a null tp::HostReadableMemory
+    HostReadableMemory() : HostMappedMemoryBase() {}
+
+    HostReadableMemory(BufferImpl* mappedBuffer, uint64_t mappingOffset, uint64_t mappingSize)
+        : HostMappedMemoryBase(mappedBuffer, mappingOffset, mappingSize, true, false) {}
+
+    /// Returns a pointer to the mapped memory interpreted as the given type.
+    template <typename T = void>
+    const T* getPtr() const {
+        return static_cast<const T*>(dataPtr);
+    }
+
+    /// Returns a pointer to the mapped memory with a byte offset interpreted as the given type.
+    template <typename T = void>
+    const T* getPtr(uint64_t byteOffset) const {
+        return static_cast<const T*>(static_cast<const void*>(static_cast<const std::byte*>(dataPtr) + byteOffset));
+    }
+
+    /// Returns an array view of the mapped memory interpreted as the given type.
+    template <typename T>
+    ArrayView<const T> getArrayView() const {
+        return ArrayView<const T>(getPtr<T>(), getSize() / sizeof(T));
+    }
+
+    /// Returns an array view of the mapped memory with a byte offset interpreted as `count` elements of the given type.
+    template <typename T>
+    ArrayView<const T> getArrayView(uint64_t byteOffset, uint64_t count) const;
+};
+
+/// Represents tp::Buffer memory mapped for host write-only operations. Intended for uploading data to the device.
+/// @see tp::BufferView::mapForHostWrite
+class HostWritableMemory : public HostMappedMemoryBase {
+public:
+    /// Constructs a null tp::HostWritableMemory
+    HostWritableMemory() : HostMappedMemoryBase() {}
+
+    HostWritableMemory(BufferImpl* mappedBuffer, uint64_t mappingOffset, uint64_t mappingSize)
+        : HostMappedMemoryBase(mappedBuffer, mappingOffset, mappingSize, false, true) {}
+
+    /// Returns a pointer to the mapped memory interpreted as the given type.
+    /// @remarks
+    ///     Reads from this pointer, even unintended or caused by compiler optimizations, may return undefined values or
+    ///     cause performance degradation when accessing uncached memory.
+    /// @remarks
+    ///     The pointer is valid for the duration of the lifetime of this object and that of the mapped buffer.
+    template <typename T = void>
+    T* getPtrUnsafe() {
+        return static_cast<T*>(dataPtr);
+    }
+
+    /// Writes a number of bytes with the given value into the mapped memory at the given byte offset.
+    void write(uint64_t byteOffset, uint8_t value, uint64_t byteCount);
+
+    /// Copies the given data range into the mapped memory at the given byte offset.
+    template <typename T = std::byte>
+    void write(uint64_t byteOffset, const T* srcPtr, uint64_t count) {
+        writeTypeless(byteOffset, static_cast<const void*>(srcPtr), count * sizeof(T));
+    }
+
+    /// Copies the given data view into the mapped memory at the given byte offset.
+    template <typename T>
+    void write(uint64_t byteOffset, ArrayParameter<const T> srcView) {
+        writeTypeless(byteOffset, static_cast<const void*>(srcView.data()), srcView.size() * sizeof(T));
+    }
+
+private:
+    void writeTypeless(uint64_t byteOffset, const void* srcPtr, uint64_t srcSize);
+};
+
+/// Represents tp::Buffer memory mapped for generic host access. Pointers are valid for the duration of the
+/// lifetime of this object and that of the mapped buffer.
+/// @see tp::BufferView::mapForHostAccess
+class HostAccessibleMemory : public HostMappedMemoryBase {
+public:
+    /// Constructs a null tp::HostAccessibleMemory
+    HostAccessibleMemory() : HostMappedMemoryBase() {}
+
+    HostAccessibleMemory(
+        BufferImpl* mappedBuffer,
+        uint64_t mappingOffset,
+        uint64_t mappingSize,
+        bool hasReadAccess = true,
+        bool hasWriteAccess = true)
+        : HostMappedMemoryBase(mappedBuffer, mappingOffset, mappingSize, hasReadAccess, hasWriteAccess) {}
 
     /// Returns a pointer to the mapped memory interpreted as the given type.
     template <typename T = void>
@@ -147,23 +239,6 @@ public:
     /// Returns an array view of the mapped memory with a byte offset interpreted as `count` elements of the given type.
     template <typename T>
     ArrayView<const T> getArrayView(uint64_t byteOffset, uint64_t count) const;
-
-    /// Returns `true` if no memory is mapped.
-    bool isNull() const {
-        return dataPtr == nullptr;
-    }
-
-    TEPHRA_MAKE_NONCOPYABLE(HostMappedMemory);
-    TEPHRA_MAKE_MOVABLE_DEFAULT(HostMappedMemory);
-
-    ~HostMappedMemory();
-
-private:
-    void* dataPtr;
-    Buffer* mappedBuffer;
-    uint64_t mappingOffset;
-    uint64_t mappingSize;
-    MemoryAccess accessType;
 };
 
 }

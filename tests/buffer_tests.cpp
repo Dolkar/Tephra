@@ -48,16 +48,15 @@ public:
         tp::OwningPtr<tp::Buffer> buffer = ctx.device->allocateBuffer(setup, tp::MemoryPreference::Host, "TestBuffer");
 
         {
-            tp::HostMappedMemory writeAccess = buffer->mapForHostAccess(tp::MemoryAccess::WriteOnly);
+            tp::HostWritableMemory writeAccess = buffer->mapForHostWrite();
             Assert::IsFalse(writeAccess.isNull());
-            uint8_t* byteWritePtr = writeAccess.getPtr<uint8_t>();
-            memset(byteWritePtr, 0x33, buffer->getSize());
+            writeAccess.write(0, 0x33, buffer->getSize());
         }
 
         {
-            tp::HostMappedMemory readAccess = buffer->mapForHostAccess(tp::MemoryAccess::ReadOnly);
+            tp::HostReadableMemory readAccess = buffer->mapForHostRead();
             Assert::IsFalse(readAccess.isNull());
-            
+
             uint64_t sum = 0;
             for (uint8_t byte : readAccess.getArrayView<uint8_t>()) {
                 sum += byte;
@@ -93,8 +92,7 @@ public:
         }
 
         // Then recreate it through Tephra buffer views
-
-        tp::HostMappedMemory bufferMemory = buffer->mapForHostAccess(tp::MemoryAccess::ReadWrite);
+        tp::HostAccessibleMemory bufferMemory = buffer->mapForHostAccess();
         uint8_t* byteBufferPtr = bufferMemory.getPtr<uint8_t>();
         memset(byteBufferPtr, 0x00, buffer->getSize());
 
@@ -107,9 +105,8 @@ public:
             tp::BufferView bufView = buffer->getView(viewOffset, viewSize);
             Assert::AreEqual(viewSize, bufView.getSize());
 
-            tp::HostMappedMemory writeAccess = bufView.mapForHostAccess(tp::MemoryAccess::WriteOnly);
-            uint8_t* byteWritePtr = writeAccess.getPtr<uint8_t>();
-            memset(byteWritePtr, writeValue, bufView.getSize());
+            tp::HostWritableMemory writeAccess = bufView.mapForHostWrite();
+            writeAccess.write(0, writeValue, bufView.getSize());
         }
 
         // Check equivalence
@@ -224,7 +221,7 @@ public:
             job.cmdFillBuffer(buffer, 123456);
 
             waitSemaphore = ctx.device->enqueueJob(ctx.noOverallocateCtx.queue, std::move(job));
-            Assert::IsFalse(buffer.mapForHostAccess(tp::MemoryAccess::ReadOnly).isNull());
+            Assert::IsFalse(buffer.mapForHostRead().isNull());
             ctx.device->submitQueuedJobs(ctx.noOverallocateCtx.queue);
 
             usedLocation = buffer.getMemoryLocation();
@@ -242,7 +239,7 @@ public:
             job.cmdFillBuffer(buffer, 123456);
 
             waitSemaphore = ctx.device->enqueueJob(ctx.noOverallocateCtx.queue, std::move(job));
-            Assert::IsFalse(buffer.mapForHostAccess(tp::MemoryAccess::ReadOnly).isNull());
+            Assert::IsFalse(buffer.mapForHostRead().isNull());
             ctx.device->submitQueuedJobs(ctx.noOverallocateCtx.queue);
         }
 
@@ -287,8 +284,8 @@ public:
 
         ctx.device->submitQueuedJobs(ctx.noOverallocateCtx.queue);
 
-        tp::HostMappedMemory memA = bufferA.mapForHostAccess(tp::MemoryAccess::ReadOnly);
-        tp::HostMappedMemory memB = bufferB.mapForHostAccess(tp::MemoryAccess::ReadOnly);
+        tp::HostReadableMemory memA = bufferA.mapForHostRead();
+        tp::HostReadableMemory memB = bufferB.mapForHostRead();
 
         Assert::IsFalse(memA.isNull());
         Assert::IsFalse(memB.isNull());

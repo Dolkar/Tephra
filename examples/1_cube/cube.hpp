@@ -49,5 +49,5 @@ private:
     void prepareTexture();
     void preparePipeline();
 
-    void fillUniformBufferData(vktexcube_vs_uniform* data);
+    vktexcube_vs_uniform makeUniformBufferData();
 };

@@ -148,23 +148,22 @@ public:
         tp::JobSemaphore semaphore = ctx.device->enqueueJob(ctx.graphicsQueueCtx.queue, std::move(job));
 
         // Write data to the staging buffer
-        tp::HostMappedMemory stagingMemory = stagingBuffer.mapForHostAccess(tp::MemoryAccess::WriteOnly);
-        uint8_t* byteBufferPtr = stagingMemory.getPtr<uint8_t>();
+        tp::HostWritableMemory stagingMemory = stagingBuffer.mapForHostWrite();
 
         ctx.rand32.seed(seed);
         for (int i = 0; i < randomIters; i++) {
             uint32_t viewOffset = ctx.rand32() % (arrayCount - viewArrayCount);
             uint8_t writeValue = ctx.rand32() & 0xff;
 
-            memset(byteBufferPtr + i * viewArrayCount * arrayLevelSize, writeValue, viewArrayCount * arrayLevelSize);
+            stagingMemory.write(i * viewArrayCount * arrayLevelSize, writeValue, viewArrayCount * arrayLevelSize);
         }
 
         ctx.device->submitQueuedJobs(ctx.graphicsQueueCtx.queue);
         ctx.device->waitForJobSemaphores({ semaphore });
 
         // Check equivalence
-        tp::HostMappedMemory readbackMemory = readbackBuffer->mapForHostAccess(tp::MemoryAccess::ReadOnly);
-        byteBufferPtr = readbackMemory.getPtr<uint8_t>();
+        tp::HostReadableMemory readbackMemory = readbackBuffer->mapForHostRead();
+        const uint8_t* byteBufferPtr = readbackMemory.getPtr<uint8_t>();
 
         bool isEqual = std::equal(
             refPtr, refPtr + arrayCount * arrayLevelSize, byteBufferPtr, byteBufferPtr + arrayCount * arrayLevelSize);
@@ -427,15 +426,15 @@ public:
         // Create and upload the first mip data
         std::vector<uint8_t> imageData = generateExampleImageData(imageSize);
 
-        tp::HostMappedMemory uploadMemory = uploadBuffer.mapForHostAccess(tp::MemoryAccess::WriteOnly);
-        std::copy(imageData.begin(), imageData.end(), uploadMemory.getPtr<uint8_t>());
+        tp::HostWritableMemory uploadMemory = uploadBuffer.mapForHostWrite();
+        uploadMemory.write<uint8_t>(0, tp::view(imageData));
 
         ctx.device->submitQueuedJobs(ctx.graphicsQueueCtx.queue);
 
         // Wait, read back the last mip and compare to the expected result
         ctx.device->waitForIdle();
 
-        tp::HostMappedMemory readbackMemory = readbackBuffer->mapForHostAccess(tp::MemoryAccess::ReadOnly);
+        tp::HostReadableMemory readbackMemory = readbackBuffer->mapForHostRead();
         const uint8_t* readbackData = readbackMemory.getPtr<uint8_t>();
 
         // The average can be 127 or 128, permitting rounding errors

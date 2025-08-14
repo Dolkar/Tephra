@@ -91,7 +91,7 @@ public:
     ///     unless such a use happens before the job gets submitted.
     /// @remarks
     ///     The intended use of preinitialized buffers is for uploading data to the device through
-    ///     tp::HostMappedMemory. Unlike job-local buffers, they are created immediately.
+    ///     tp::HostWritableMemory. Unlike job-local buffers, they are created immediately.
     BufferView allocatePreinitializedBuffer(
         const BufferSetup& setup,
         const MemoryPreference& memoryPreference,
@@ -247,7 +247,7 @@ public:
     ///     The data to update. The length of the array defines the size of the range to be updated.
     /// @remarks
     ///     The size of the data array must be less or equal to 65536 bytes. For larger updates, use
-    ///     tp::HostMappedMemory. A copy of the data is made upon this call, which is later copied again to a Vulkan
+    ///     tp::HostWritableMemory. A copy of the data is made upon this call, which is later copied again to a Vulkan
     ///     command buffer. It should therefore only be used for very small amounts of data.
     /// @remarks
     ///     The size of the `data` array must be a multiple of 4 and smaller or equal to the size of `dstBuffer`.

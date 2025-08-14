@@ -6,6 +6,26 @@ version increments.
 
 @tableofcontents
 
+@section v0-7-0 In-dev version 0.7.0
+Released 2025-08-14
+- Reworked host memory mapping to use separate types for reads and writes. This should prevent accidental reads from
+  uncached memory locations.
+- Acceleration structure build optimization: BLAS builds now don't sync against previous BLAS exports.
+- Fixed swapchain validation issue caused by presentation binary semaphores not being tied to swapchain images.
+- Properly synchronized against all device queues on vkDeviceWaitIdle.
+
+@subsection v0-7-0-breaking Breaking changes
+@m_class{m-note m-warning}
+
+@parblock
+- Replaced tp::HostMappedMemory with tp::HostReadableMemory, tp::HostWritableMemory and tp::HostAccessibleMemory.
+- Added tp::Buffer::mapForHostRead, tp::Buffer::mapForHostWrite, tp::BufferView::mapForHostRead and
+  tp::BufferView::mapForHostWrite.
+- tp::Buffer::mapForHostAccess and tp::BufferView::mapForHostAccess have been reworked and their use is discouraged
+  over the dedicated read-only and write-only methods.
+- Removed tp::MemoryAccess enum.
+@endparblock
+
 @section v0-6-0 In-dev version 0.6.0
 Released 2025-05-29
 - Added ray tracing functionality

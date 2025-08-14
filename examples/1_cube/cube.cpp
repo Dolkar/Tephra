@@ -164,8 +164,8 @@ void CubeExample::drawFrame() {
 
     // We can fill the uniform buffer now
     {
-        tp::HostMappedMemory memory = uniformBuffer.mapForHostAccess(tp::MemoryAccess::WriteOnly);
-        fillUniformBufferData(memory.getPtr<vktexcube_vs_uniform>());
+        tp::HostWritableMemory memory = uniformBuffer.mapForHostWrite();
+        memory.write<vktexcube_vs_uniform>(0, { makeUniformBufferData() });
     }
 
     // Submit the queued jobs. At this point the commands in the job get compiled and the RenderList
@@ -229,10 +229,12 @@ void CubeExample::prepareTexture() {
 
     // Upload data to it
     {
-        tp::HostMappedMemory memory = stagingBuffer.mapForHostAccess(tp::MemoryAccess::WriteOnly);
-        if (!loadLunarGTexture(memory.getPtr<uint8_t>(), rowPitch, &extent.width, &extent.height)) {
+        std::vector<uint8_t> imageData = std::vector<uint8_t>(rowPitch * extent.height);
+        if (!loadLunarGTexture(imageData.data(), rowPitch, &extent.width, &extent.height)) {
             showErrorAndExit("Demo initialization failed", "Failed to load LunarG texture.");
         }
+        tp::HostWritableMemory memory = stagingBuffer.mapForHostWrite();
+        memory.write<uint8_t>(0, tp::view(imageData));
     }
 
     // Record the copy command
@@ -288,7 +290,7 @@ void CubeExample::preparePipeline() {
     device->compileGraphicsPipelines({ &pipelineSetup }, nullptr, { &pipeline });
 }
 
-void CubeExample::fillUniformBufferData(vktexcube_vs_uniform* data) {
+vktexcube_vs_uniform CubeExample::makeUniformBufferData() {
     // Set up matrices
     vec3 eye = { 0.0f, 3.0f, 5.0f };
     vec3 origin = { 0, 0, 0 };
@@ -310,19 +312,18 @@ void CubeExample::fillUniformBufferData(vktexcube_vs_uniform* data) {
     mat4x4 VP;
     mat4x4_mul(VP, projectionMatrix, viewMatrix);
 
-    mat4x4 MVP;
-    mat4x4_mul(MVP, VP, modelMatrix);
-
-    memcpy(data->mvp, MVP, sizeof(MVP));
+    vktexcube_vs_uniform data;
+    mat4x4_mul(data.mvp, VP, modelMatrix);
 
     for (int32_t i = 0; i < 12 * 3; i++) {
-        data->position[i][0] = g_vertex_buffer_data[i * 3];
-        data->position[i][1] = g_vertex_buffer_data[i * 3 + 1];
-        data->position[i][2] = g_vertex_buffer_data[i * 3 + 2];
-        data->position[i][3] = 1.0f;
-        data->attr[i][0] = g_uv_buffer_data[2 * i];
-        data->attr[i][1] = g_uv_buffer_data[2 * i + 1];
-        data->attr[i][2] = 0;
-        data->attr[i][3] = 0;
+        data.position[i][0] = g_vertex_buffer_data[i * 3];
+        data.position[i][1] = g_vertex_buffer_data[i * 3 + 1];
+        data.position[i][2] = g_vertex_buffer_data[i * 3 + 2];
+        data.position[i][3] = 1.0f;
+        data.attr[i][0] = g_uv_buffer_data[2 * i];
+        data.attr[i][1] = g_uv_buffer_data[2 * i + 1];
+        data.attr[i][2] = 0;
+        data.attr[i][3] = 0;
     }
+    return data;
 }

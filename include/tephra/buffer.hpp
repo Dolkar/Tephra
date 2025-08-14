@@ -71,16 +71,32 @@ public:
         return std::holds_alternative<JobLocalBufferImpl*>(buffer);
     }
 
-    /// Maps the viewed range of the buffer to visible memory, allowing it to be written
-    /// or read out by the application.
-    /// @param accessType
-    ///     Specifies the allowed types of access.
-    /// @returns
-    ///     Returns tp::HostMappedMemory object that can be used to access the memory range.
+    /// Maps the viewed range of the buffer's memory for direct read operations by the application.
     /// @remarks
-    ///     The viewed buffer must be either a persistent buffer or a job preinitialized buffer
-    ///     allocated from a tp::Job. The viewed buffer must be allocated from host-visible memory.
-    HostMappedMemory mapForHostAccess(MemoryAccess accessType) const;
+    ///     The viewed buffer must be either a persistent buffer or a job preinitialized buffer allocated from
+    ///     a tp::Job. The viewed buffer must be allocated from host-visible memory.
+    /// @remarks
+    ///     Reads from uncached memory locations may be slow.
+    HostReadableMemory mapForHostRead() const;
+
+    /// Maps the viewed range of the buffer's memory for direct write operations by the application.
+    /// @remarks
+    ///     The viewed buffer must be either a persistent buffer or a job preinitialized buffer allocated from
+    ///     a tp::Job. The viewed buffer must be allocated from host-visible memory.
+    HostWritableMemory mapForHostWrite() const;
+
+    /// Maps the viewed range of the buffer's memory for direct read or write operations by the application.
+    /// tp::BufferView::mapForHostRead or tp::BufferView::mapForHostWrite should be preferred over this generic access.
+    /// @param readAccess
+    ///     If `true`, specifies that the application intends to read from the memory.
+    /// @param writeAccess
+    ///     If `true`, specifies that the application intends to write to the memory.
+    /// @remarks
+    ///     The viewed buffer must be either a persistent buffer or a job preinitialized buffer allocated from
+    ///     a tp::Job. The viewed buffer must be allocated from host-visible memory.
+    /// @remarks
+    ///     Reads from uncached memory locations may be slow.
+    HostAccessibleMemory mapForHostAccess(bool readAccess = true, bool writeAccess = true) const;
 
     /// Creates a texel buffer view of the viewed buffer relative to this view.
     /// @param offset
@@ -131,10 +147,10 @@ private:
     friend bool operator==(const BufferView&, const BufferView&);
 
     BufferView(BufferImpl* persistentBuffer, uint64_t offset, uint64_t size, Format format);
-
     BufferView(JobLocalBufferImpl* jobLocalBuffer, uint64_t offset, uint64_t size, Format format);
 
     const DebugTarget* getDebugTarget() const;
+    void validateMapForHostAccess(bool readAccess, bool writeAccess) const;
 
     std::variant<std::monostate, BufferImpl*, JobLocalBufferImpl*> buffer;
     uint64_t offset;
@@ -158,7 +174,7 @@ inline bool operator!=(const BufferView& lhs, const BufferView& rhs) {
 enum class BufferUsage : uint32_t {
     /// Allows the buffer to be used as the source or destination buffer of copy commands that copy to or from an image.
     ImageTransfer = 1 << 0,
-    /// Allows the buffer to have its memory mapped for host access using tp::Buffer::mapForHostAccess.
+    /// Allows the buffer to have its memory mapped for host access using tp::Buffer::mapForHostAccess and similar.
     HostMapped = 1 << 1,
     /// Allows the buffer to be used in a tp::DescriptorType::TexelBuffer or a tp::DescriptorType::StorageTexelBuffer
     /// descriptor.
@@ -255,14 +271,29 @@ public:
     /// not larger than 256 bytes.
     uint64_t getRequiredViewAlignment() const;
 
-    /// Maps the buffer to visible memory, allowing it to be written or read out by the application.
-    /// @param accessType
-    ///     Specifies the allowed types of access.
-    /// @returns
-    ///     Returns tp::HostMappedMemory object that can be used to access the memory.
+    /// Maps the buffer's memory for direct read operations by the application.
     /// @remarks
     ///     The buffer must be allocated from host-visible memory.
-    HostMappedMemory mapForHostAccess(MemoryAccess accessType) const;
+    /// @remarks
+    ///     Reads from uncached memory locations may be slow.
+    HostReadableMemory mapForHostRead() const;
+
+    /// Maps the buffer's memory for direct write operations by the application.
+    /// @remarks
+    ///     The buffer must be allocated from host-visible memory.
+    HostWritableMemory mapForHostWrite() const;
+
+    /// Maps the buffer's memory for direct read or write operations by the application. tp::Buffer::mapForHostRead
+    /// or tp::Buffer::mapForHostWrite should be preferred over this generic access.
+    /// @param readAccess
+    ///     If `true`, specifies that the application intends to read from the memory.
+    /// @param writeAccess
+    ///     If `true`, specifies that the application intends to write to the memory.
+    /// @remarks
+    ///     The buffer must be allocated from host-visible memory.
+    /// @remarks
+    ///     Reads from uncached memory locations may be slow.
+    HostAccessibleMemory mapForHostAccess(bool readAccess = true, bool writeAccess = true) const;
 
     /// Creates a texel buffer view of the buffer data.
     /// @param offset

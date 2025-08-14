@@ -42,12 +42,15 @@ public:
         tp::BufferView hostBufferView = hostBuffer->createTexelView(0, bufferSize, tp::Format::COL32_R32_UINT);
 
         {
-            tp::HostMappedMemory writeAccess = hostBufferView.mapForHostAccess(tp::MemoryAccess::WriteOnly);
-            Assert::IsFalse(writeAccess.isNull());
-            uint32_t* writePtr = writeAccess.getPtr<uint32_t>();
-            for (std::size_t i = 0; i < bufferSize / sizeof(uint32_t); i++) {
-                *(writePtr + i) = static_cast<uint32_t>(i);
+            std::vector<uint32_t> data;
+            data.resize(bufferSize / sizeof(uint32_t));
+            for (std::size_t i = 0; i < data.size(); i++) {
+                data[i] = static_cast<uint32_t>(i);
             }
+
+            tp::HostWritableMemory writeAccess = hostBufferView.mapForHostWrite();
+            Assert::IsFalse(writeAccess.isNull());
+            writeAccess.write<uint32_t>(0, tp::view(data));
         }
 
         tp::Job job = ctx.graphicsQueueCtx.jobResourcePool->createJob();
@@ -97,7 +100,7 @@ public:
 
         ctx.device->waitForJobSemaphores({ semaphore });
         {
-            tp::HostMappedMemory readAccess = hostBufferView.mapForHostAccess(tp::MemoryAccess::ReadOnly);
+            tp::HostReadableMemory readAccess = hostBufferView.mapForHostRead();
             Assert::IsFalse(readAccess.isNull());
             const uint32_t* readPtr = readAccess.getPtr<uint32_t>();
 
@@ -142,12 +145,15 @@ public:
         tp::BufferView hostBufferView = hostBuffer->createTexelView(0, bufferSize, tp::Format::COL32_R32_UINT);
 
         {
-            tp::HostMappedMemory writeAccess = hostBufferView.mapForHostAccess(tp::MemoryAccess::WriteOnly);
-            Assert::IsFalse(writeAccess.isNull());
-            uint32_t* writePtr = writeAccess.getPtr<uint32_t>();
-            for (std::size_t i = 0; i < bufferSize / sizeof(uint32_t); i++) {
-                *(writePtr + i) = static_cast<uint32_t>(i);
+            std::vector<uint32_t> data;
+            data.resize(bufferSize / sizeof(uint32_t));
+            for (std::size_t i = 0; i < data.size(); i++) {
+                data[i] = static_cast<uint32_t>(i);
             }
+
+            tp::HostWritableMemory writeAccess = hostBufferView.mapForHostWrite();
+            Assert::IsFalse(writeAccess.isNull());
+            writeAccess.write<uint32_t>(0, tp::view(data));
         }
 
         tp::Job job = ctx.graphicsQueueCtx.jobResourcePool->createJob();
@@ -211,7 +217,7 @@ public:
 
         ctx.device->waitForJobSemaphores({ semaphore });
         {
-            tp::HostMappedMemory readAccess = hostBufferView.mapForHostAccess(tp::MemoryAccess::ReadOnly);
+            tp::HostReadableMemory readAccess = hostBufferView.mapForHostRead();
             Assert::IsFalse(readAccess.isNull());
             const uint32_t* readPtr = readAccess.getPtr<uint32_t>();
 
