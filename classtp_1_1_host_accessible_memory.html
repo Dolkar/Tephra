@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>tp::HostMappedMemory class | Tephra Documentation</title>
+  <title>tp::HostAccessibleMemory class | Tephra Documentation</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark-tephra.css" />
   <link rel="stylesheet" href="m-documentation.css" />
@@ -54,123 +54,87 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="namespacetp.html">tp</a>::<wbr/></span>HostMappedMemory <span class="m-thin">class</span>
+          <span class="m-breadcrumb"><a href="namespacetp.html">tp</a>::<wbr/></span>HostAccessibleMemory <span class="m-thin">class</span>
         </h1>
-        <p>Represents <a href="classtp_1_1_buffer.html" class="m-doc">tp::<wbr />Buffer</a> memory mapped for host access by the application. Automatically handles cache management for incoherent memory types and unmaps the memory when destroyed, if the memory is not mapped persistently.</p>
+        <p>Represents <a href="classtp_1_1_buffer.html" class="m-doc">tp::<wbr />Buffer</a> memory mapped for generic host access. Pointers are valid for the duration of the lifetime of this object and that of the mapped buffer.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
+                <li><a href="#base-classes">Base classes</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="classtp_1_1_buffer_view.html#ab3ca382175ff0aaa4b359c837cf124b3" class="m-doc">tp::<wbr />BufferView::<wbr />mapForHostAccess</a></p></aside>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="classtp_1_1_buffer_view.html#a0b591001a1c223dd362b3644aca1a062" class="m-doc">tp::<wbr />BufferView::<wbr />mapForHostAccess</a></p></aside>
+        <section id="base-classes">
+          <h2><a href="#base-classes">Base classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              class <a href="classtp_1_1_host_mapped_memory_base.html" class="m-doc">HostMappedMemoryBase</a>
+            </dt>
+            <dd>Shared base implementation of mapped <a href="classtp_1_1_buffer.html" class="m-doc">tp::<wbr />Buffer</a> memory accessor.</dd>
+          </dl>
+        </section>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt>
-              <span class="m-doc-wrap-bumper"><a href="#aef5b3f193b0be501a7fc9c538ed7c52a" class="m-doc">HostMappedMemory</a>(</span><span class="m-doc-wrap"><a href="classtp_1_1_buffer.html" class="m-doc">Buffer</a>* mappedBuffer,
-              uint64_t mappingOffset,
-              uint64_t mappingSize,
-              <a href="namespacetp.html#a9bd7d8270f938631e796ff2c0966667c" class="m-doc">MemoryAccess</a> accessType)</span>
+            <dt id="a3b4f2014929660dee196efd32f1c356f">
+              <span class="m-doc-wrap-bumper"><a href="#a3b4f2014929660dee196efd32f1c356f" class="m-doc-self">HostAccessibleMemory</a>(</span><span class="m-doc-wrap">)</span>
             </dt>
-            <dd>Maps a range of <a href="classtp_1_1_buffer.html" class="m-doc">tp::<wbr />Buffer</a> memory. See <a href="classtp_1_1_buffer_view.html#ab3ca382175ff0aaa4b359c837cf124b3" class="m-doc">tp::<wbr />BufferView::<wbr />mapForHostAccess</a> for more convenient mapping of <a href="classtp_1_1_buffer_view.html" class="m-doc">tp::<wbr />BufferView</a> objects.</dd>
+            <dd>Constructs a null <a href="classtp_1_1_host_accessible_memory.html" class="m-doc">tp::<wbr />HostAccessibleMemory</a>.</dd>
           </dl>
         </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="a92b6ce27f4946bd1acbbf60f514d0454">
+            <dt id="acaa02f3c09c4cda08a87b8b6d4f2498d">
               <div class="m-doc-template">template&lt;typename T&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a92b6ce27f4946bd1acbbf60f514d0454" class="m-doc-self">getArrayView</a>(</span><span class="m-doc-wrap">) -&gt; <a href="classtp_1_1_array_view.html" class="m-doc">ArrayView</a>&lt;T&gt;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#acaa02f3c09c4cda08a87b8b6d4f2498d" class="m-doc-self">getArrayView</a>(</span><span class="m-doc-wrap">) -&gt; <a href="classtp_1_1_array_view.html" class="m-doc">ArrayView</a>&lt;T&gt;</span>
             </dt>
             <dd>Returns an array view of the mapped memory interpreted as the given type.</dd>
-            <dt id="a36fd4d035d5b3fab6c4734c763461a42">
+            <dt id="a35964b1a3fc79d00f76a33ca66f8c373">
               <div class="m-doc-template">template&lt;typename T&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a36fd4d035d5b3fab6c4734c763461a42" class="m-doc-self">getArrayView</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="classtp_1_1_array_view.html" class="m-doc">ArrayView</a>&lt;const T&gt;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a35964b1a3fc79d00f76a33ca66f8c373" class="m-doc-self">getArrayView</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="classtp_1_1_array_view.html" class="m-doc">ArrayView</a>&lt;const T&gt;</span>
             </dt>
             <dd>Returns an array view of the mapped memory interpreted as the given type.</dd>
-            <dt id="a1a158fbeeeb58451a475841fa5d114f3">
+            <dt id="aad65b3e65470c00d97e835200744ddbf">
               <div class="m-doc-template">template&lt;typename T&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a1a158fbeeeb58451a475841fa5d114f3" class="m-doc-self">getArrayView</a>(</span><span class="m-doc-wrap">uint64_t byteOffset,
+              <span class="m-doc-wrap-bumper">auto <a href="#aad65b3e65470c00d97e835200744ddbf" class="m-doc-self">getArrayView</a>(</span><span class="m-doc-wrap">uint64_t byteOffset,
               uint64_t count) -&gt; <a href="classtp_1_1_array_view.html" class="m-doc">ArrayView</a>&lt;T&gt;</span>
             </dt>
             <dd>Returns an array view of the mapped memory with a byte offset interpreted as <code>count</code> elements of the given type.</dd>
-            <dt id="a8a87b95931f2f070ca3a8831ad0cf221">
+            <dt id="adc21f6bac483fae79910076c425d134a">
               <div class="m-doc-template">template&lt;typename T&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a8a87b95931f2f070ca3a8831ad0cf221" class="m-doc-self">getArrayView</a>(</span><span class="m-doc-wrap">uint64_t byteOffset,
+              <span class="m-doc-wrap-bumper">auto <a href="#adc21f6bac483fae79910076c425d134a" class="m-doc-self">getArrayView</a>(</span><span class="m-doc-wrap">uint64_t byteOffset,
               uint64_t count) const -&gt; <a href="classtp_1_1_array_view.html" class="m-doc">ArrayView</a>&lt;const T&gt;</span>
             </dt>
             <dd>Returns an array view of the mapped memory with a byte offset interpreted as <code>count</code> elements of the given type.</dd>
-            <dt id="a7b22375362eac61d672106c461d3745e">
+            <dt id="a3da04e47293ff3b08884bb50830892c4">
               <div class="m-doc-template">template&lt;typename T = void&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a7b22375362eac61d672106c461d3745e" class="m-doc-self">getPtr</a>(</span><span class="m-doc-wrap">) -&gt; T*</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3da04e47293ff3b08884bb50830892c4" class="m-doc-self">getPtr</a>(</span><span class="m-doc-wrap">) -&gt; T*</span>
             </dt>
             <dd>Returns a pointer to the mapped memory interpreted as the given type.</dd>
-            <dt id="a0d7f64369753675c4e89130c9c280f5c">
+            <dt id="a577445399c5a077c0c19720171ef36be">
               <div class="m-doc-template">template&lt;typename T = void&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a0d7f64369753675c4e89130c9c280f5c" class="m-doc-self">getPtr</a>(</span><span class="m-doc-wrap">) const -&gt; const T*</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a577445399c5a077c0c19720171ef36be" class="m-doc-self">getPtr</a>(</span><span class="m-doc-wrap">) const -&gt; const T*</span>
             </dt>
             <dd>Returns a pointer to the mapped memory interpreted as the given type.</dd>
-            <dt id="a07e51035952645d393ecf8fc5843931f">
+            <dt id="a5405d2623328351ccd8b1990c2393c19">
               <div class="m-doc-template">template&lt;typename T = void&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a07e51035952645d393ecf8fc5843931f" class="m-doc-self">getPtr</a>(</span><span class="m-doc-wrap">uint64_t byteOffset) -&gt; T*</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5405d2623328351ccd8b1990c2393c19" class="m-doc-self">getPtr</a>(</span><span class="m-doc-wrap">uint64_t byteOffset) -&gt; T*</span>
             </dt>
             <dd>Returns a pointer to the mapped memory with a byte offset interpreted as the given type.</dd>
-            <dt id="a4ba2b509774b0211a279a6101d733915">
+            <dt id="a2d6dee159db522262c5c5045a0332704">
               <div class="m-doc-template">template&lt;typename T = void&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a4ba2b509774b0211a279a6101d733915" class="m-doc-self">getPtr</a>(</span><span class="m-doc-wrap">uint64_t byteOffset) const -&gt; const T*</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2d6dee159db522262c5c5045a0332704" class="m-doc-self">getPtr</a>(</span><span class="m-doc-wrap">uint64_t byteOffset) const -&gt; const T*</span>
             </dt>
             <dd>Returns a pointer to the mapped memory with a byte offset interpreted as the given type.</dd>
-            <dt id="a1560421aafaf2351a0e84590d9eca565">
-              <span class="m-doc-wrap-bumper">auto <a href="#a1560421aafaf2351a0e84590d9eca565" class="m-doc-self">getSize</a>(</span><span class="m-doc-wrap">) const -&gt; uint64_t</span>
-            </dt>
-            <dd>Returns the size of the mapped memory in bytes.</dd>
-            <dt id="a8e2da34c154c87cd311b04e45d998702">
-              <span class="m-doc-wrap-bumper">auto <a href="#a8e2da34c154c87cd311b04e45d998702" class="m-doc-self">isNull</a>(</span><span class="m-doc-wrap">) const -&gt; bool</span>
-            </dt>
-            <dd>Returns <code>true</code> if no memory is mapped.</dd>
           </dl>
-        </section>
-        <section>
-          <h2>Function documentation</h2>
-          <section class="m-doc-details" id="aef5b3f193b0be501a7fc9c538ed7c52a"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper"> tp::<wbr />HostMappedMemory::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aef5b3f193b0be501a7fc9c538ed7c52a" class="m-doc-self">HostMappedMemory</a>(</span><span class="m-doc-wrap"><a href="classtp_1_1_buffer.html" class="m-doc">Buffer</a>* mappedBuffer,
-              uint64_t mappingOffset,
-              uint64_t mappingSize,
-              <a href="namespacetp.html#a9bd7d8270f938631e796ff2c0966667c" class="m-doc">MemoryAccess</a> accessType)</span></span>
-            </h3>
-            <p>Maps a range of <a href="classtp_1_1_buffer.html" class="m-doc">tp::<wbr />Buffer</a> memory. See <a href="classtp_1_1_buffer_view.html#ab3ca382175ff0aaa4b359c837cf124b3" class="m-doc">tp::<wbr />BufferView::<wbr />mapForHostAccess</a> for more convenient mapping of <a href="classtp_1_1_buffer_view.html" class="m-doc">tp::<wbr />BufferView</a> objects.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">mappedBuffer</td>
-                  <td>The <a href="classtp_1_1_buffer.html" class="m-doc">tp::<wbr />Buffer</a> to map.</td>
-                </tr>
-                <tr>
-                  <td>mappingOffset</td>
-                  <td>The base offset to the memory range to be mapped.</td>
-                </tr>
-                <tr>
-                  <td>mappingSize</td>
-                  <td>The size of the memory range to be mapped.</td>
-                </tr>
-                <tr>
-                  <td>accessType</td>
-                  <td>The type of access.</td>
-                </tr>
-              </tbody>
-            </table>
-          </div></section>
         </section>
       </div>
     </div>

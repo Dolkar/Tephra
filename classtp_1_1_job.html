@@ -389,7 +389,7 @@
                 </tr>
               </tbody>
             </table>
-<aside class="m-note m-default"><h4>Remark</h4><p>The buffer may only be used for commands within this job or in command lists that execute within it, unless such a use happens before the job gets submitted.</p><p>The intended use of preinitialized buffers is for uploading data to the device through <a href="classtp_1_1_host_mapped_memory.html" class="m-doc">tp::<wbr />HostMappedMemory</a>. Unlike job-local buffers, they are created immediately.</p></aside>
+<aside class="m-note m-default"><h4>Remark</h4><p>The buffer may only be used for commands within this job or in command lists that execute within it, unless such a use happens before the job gets submitted.</p><p>The intended use of preinitialized buffers is for uploading data to the device through <a href="classtp_1_1_host_writable_memory.html" class="m-doc">tp::<wbr />HostWritableMemory</a>. Unlike job-local buffers, they are created immediately.</p></aside>
           </div></section>
           <section class="m-doc-details" id="a91aa92a3dfc3938149a6c07302aa9348"><div>
             <h3>
@@ -992,7 +992,7 @@
                 </tr>
               </tbody>
             </table>
-<aside class="m-note m-default"><h4>Remark</h4><p>The size of the data array must be less or equal to 65536 bytes. For larger updates, use <a href="classtp_1_1_host_mapped_memory.html" class="m-doc">tp::<wbr />HostMappedMemory</a>. A copy of the data is made upon this call, which is later copied again to a Vulkan command buffer. It should therefore only be used for very small amounts of data.</p><p>The size of the <code>data</code> array must be a multiple of 4 and smaller or equal to the size of <code>dstBuffer</code>.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/vkCmdUpdateBuffer.html" class="m-doc-external">vkCmdUpdateBuffer</a></p></aside>
+<aside class="m-note m-default"><h4>Remark</h4><p>The size of the data array must be less or equal to 65536 bytes. For larger updates, use <a href="classtp_1_1_host_writable_memory.html" class="m-doc">tp::<wbr />HostWritableMemory</a>. A copy of the data is made upon this call, which is later copied again to a Vulkan command buffer. It should therefore only be used for very small amounts of data.</p><p>The size of the <code>data</code> array must be a multiple of 4 and smaller or equal to the size of <code>dstBuffer</code>.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/vkCmdUpdateBuffer.html" class="m-doc-external">vkCmdUpdateBuffer</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="aa1c20d89515267679ef144db73a580ae"><div>
             <h3>

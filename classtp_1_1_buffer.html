@@ -135,9 +135,18 @@
             </dt>
             <dd>Returns a view of a specified contiguous range of the buffer data.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a2922fe5d7595ba0dfe93d202f54d6747" class="m-doc">mapForHostAccess</a>(</span><span class="m-doc-wrap"><a href="namespacetp.html#a9bd7d8270f938631e796ff2c0966667c" class="m-doc">MemoryAccess</a> accessType) const -&gt; <a href="classtp_1_1_host_mapped_memory.html" class="m-doc">HostMappedMemory</a></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#afc1c666aac5fe8f7ddfdcd01e47ab744" class="m-doc">mapForHostAccess</a>(</span><span class="m-doc-wrap">bool readAccess = true,
+              bool writeAccess = true) const -&gt; <a href="classtp_1_1_host_accessible_memory.html" class="m-doc">HostAccessibleMemory</a></span>
             </dt>
-            <dd>Maps the buffer to visible memory, allowing it to be written or read out by the application.</dd>
+            <dd>Maps the buffer&#x27;s memory for direct read or write operations by the application. <a href="classtp_1_1_buffer.html#aaab725a2374d8e4fb667c010c7221446" class="m-doc">tp::<wbr />Buffer::<wbr />mapForHostRead</a> or <a href="classtp_1_1_buffer.html#a2bb1577c62aff56ca36041bf68497363" class="m-doc">tp::<wbr />Buffer::<wbr />mapForHostWrite</a> should be preferred over this generic access.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aaab725a2374d8e4fb667c010c7221446" class="m-doc">mapForHostRead</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="classtp_1_1_host_readable_memory.html" class="m-doc">HostReadableMemory</a></span>
+            </dt>
+            <dd>Maps the buffer&#x27;s memory for direct read operations by the application.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2bb1577c62aff56ca36041bf68497363" class="m-doc">mapForHostWrite</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="classtp_1_1_host_writable_memory.html" class="m-doc">HostWritableMemory</a></span>
+            </dt>
+            <dd>Maps the buffer&#x27;s memory for direct write operations by the application.</dd>
             <dt id="ad58fb03e3c9885a84fafef0041b2e977">
               <span class="m-doc-wrap-bumper">auto <a href="#ad58fb03e3c9885a84fafef0041b2e977" class="m-doc-self">vkGetBufferHandle</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="structtp_1_1_vk_object_handle.html" class="m-doc">VkBufferHandle</a></span>
             </dt>
@@ -237,28 +246,41 @@
             </table>
 <aside class="m-note m-default"><h4>Remark</h4><p>The range of the new view must be fully contained inside the buffer, meaning the <code>offset + size</code> must be less or equal the size of the buffer.</p></aside>
           </div></section>
-          <section class="m-doc-details" id="a2922fe5d7595ba0dfe93d202f54d6747"><div>
+          <section class="m-doc-details" id="afc1c666aac5fe8f7ddfdcd01e47ab744"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="classtp_1_1_host_mapped_memory.html" class="m-doc">HostMappedMemory</a> tp::<wbr />Buffer::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2922fe5d7595ba0dfe93d202f54d6747" class="m-doc-self">mapForHostAccess</a>(</span><span class="m-doc-wrap"><a href="namespacetp.html#a9bd7d8270f938631e796ff2c0966667c" class="m-doc">MemoryAccess</a> accessType) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="classtp_1_1_host_accessible_memory.html" class="m-doc">HostAccessibleMemory</a> tp::<wbr />Buffer::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afc1c666aac5fe8f7ddfdcd01e47ab744" class="m-doc-self">mapForHostAccess</a>(</span><span class="m-doc-wrap">bool readAccess = true,
+              bool writeAccess = true) const</span></span>
             </h3>
-            <p>Maps the buffer to visible memory, allowing it to be written or read out by the application.</p>
+            <p>Maps the buffer&#x27;s memory for direct read or write operations by the application. <a href="classtp_1_1_buffer.html#aaab725a2374d8e4fb667c010c7221446" class="m-doc">tp::<wbr />Buffer::<wbr />mapForHostRead</a> or <a href="classtp_1_1_buffer.html#a2bb1577c62aff56ca36041bf68497363" class="m-doc">tp::<wbr />Buffer::<wbr />mapForHostWrite</a> should be preferred over this generic access.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
               </thead>
               <tbody>
                 <tr>
-                  <td style="width: 1%">accessType</td>
-                  <td>Specifies the allowed types of access.</td>
+                  <td style="width: 1%">readAccess</td>
+                  <td>If <code>true</code>, specifies that the application intends to read from the memory.</td>
+                </tr>
+                <tr>
+                  <td>writeAccess</td>
+                  <td>If <code>true</code>, specifies that the application intends to write to the memory.</td>
                 </tr>
               </tbody>
-              <tfoot>
-                <tr>
-                  <th>Returns</th>
-                  <td>Returns <a href="classtp_1_1_host_mapped_memory.html" class="m-doc">tp::<wbr />HostMappedMemory</a> object that can be used to access the memory.</td>
-                </tr>
-              </tfoot>
             </table>
+<aside class="m-note m-default"><h4>Remark</h4><p>The buffer must be allocated from host-visible memory.</p><p>Reads from uncached memory locations may be slow.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="aaab725a2374d8e4fb667c010c7221446"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="classtp_1_1_host_readable_memory.html" class="m-doc">HostReadableMemory</a> tp::<wbr />Buffer::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aaab725a2374d8e4fb667c010c7221446" class="m-doc-self">mapForHostRead</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Maps the buffer&#x27;s memory for direct read operations by the application.</p>
+<aside class="m-note m-default"><h4>Remark</h4><p>The buffer must be allocated from host-visible memory.</p><p>Reads from uncached memory locations may be slow.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a2bb1577c62aff56ca36041bf68497363"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="classtp_1_1_host_writable_memory.html" class="m-doc">HostWritableMemory</a> tp::<wbr />Buffer::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2bb1577c62aff56ca36041bf68497363" class="m-doc-self">mapForHostWrite</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Maps the buffer&#x27;s memory for direct write operations by the application.</p>
 <aside class="m-note m-default"><h4>Remark</h4><p>The buffer must be allocated from host-visible memory.</p></aside>
           </div></section>
         </section>
