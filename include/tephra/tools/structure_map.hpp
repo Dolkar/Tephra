@@ -118,6 +118,8 @@ public:
     /// Removes all elements from the map.
     void clear() {
         map.clear();
+        frontPtr = nullptr;
+        backPtr = nullptr;
     }
 
     VkStructureMap(const VkStructureMap& other) noexcept : map(other.map) {
