@@ -992,19 +992,17 @@ generally more efficiently than separate commands like tp::Job::cmdClearImage an
 The tp::DepthStencilAttachment and tp::ColorAttachment structures describe a depth / stencil attachment and a color
 attachment for use in a render pass, respectively. Besides the actual image view that will be used as the attachment,
 they also have you specify the load and store operations for the image that will take place at the start and end of the
-render pass. The tp::AttachmentLoadOp determines whether the contents of the image view should cleared to some color, be
-loaded to preserve its previous contents, or discarded with `DontCare`. Discarding or clearing are likely going to be the
-fastest options, but should only be used if you know you won't need the existing contents. Similarly, the
-tp::AttachmentStoreOp specifies whether the contents need to be accessible after the render pass ends, or if they should
-also be discarded with `DontCare`, which can be useful, for example, for a depth buffer that is used just for the depth
-tests and its contents aren't needed afterwards. If you selected the tp::AttachmentLoadOp::Clear load operation, you also
-need to provide a valid clear value.
+render pass. The tp::AttachmentLoadOp determines whether the previous contents of the image view should loaded for use
+within the render pass or cleared to some color, or assumed to be undefined with `None`. Similarly, the
+tp::AttachmentStoreOp specifies whether any writes to it within the render pass should be visible after the render pass
+ends. In both cases, `None` should be the preferred option unless others are needed. If you selected the
+tp::AttachmentLoadOp::Clear load operation, you also need to provide a valid clear value.
 
 tp::DepthStencilAttachment has some additional configuration options compared to color attachments. You can promise that
-the depth / stencil attachment will be used as read-only. That can be useful not just as an optimization, but it can also
-allow you to safely read that image as a texture at the same time. Since such images may encompass both depth and stencil
-aspects, the setup structure optionally lets you define load ops, store ops and read-only flags for the depth and stencil
-separately.
+the depth / stencil attachment will be used as read-only within the render pass itself. That can be useful not just as an
+optimization, but it can also allow you to safely read that image as a texture at the same time. Since such images may
+encompass both depth and stencil aspects, the setup structure optionally lets you define load ops, store ops and read-only
+flags for the depth and stencil separately.
 
 The attachment setup structures are also the place to request multisampled attachments to be resolved. The `resolveImage`
 parameter can be set to another image with identical parameters, just without multisampling, to resolve the multisampled
@@ -1069,10 +1067,10 @@ public:
 
         // We clear the depth and color images, but we don't need the data after the render pass
         auto depthAttachment = tp::DepthStencilAttachment(depthImage, false,
-            tp::AttachmentLoadOp::Clear, tp::AttachmentStoreOp::DontCare, clearDepth);
+            tp::AttachmentLoadOp::Clear, tp::AttachmentStoreOp::None, clearDepth);
         // We resolve the color attachment
         auto colorAttachment = tp::ColorAttachment(colorImage,
-            tp::AttachmentLoadOp::Clear, tp::AttachmentStoreOp::DontCare, clearColor,
+            tp::AttachmentLoadOp::Clear, tp::AttachmentStoreOp::None, clearColor,
             resolvedImage, tp::ResolveMode::Average);
 
         // Record the render pass, no additional non-attachment accesses to declare

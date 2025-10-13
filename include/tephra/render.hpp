@@ -77,6 +77,28 @@ enum class RenderAccess : uint64_t {
 };
 TEPHRA_MAKE_ENUM_BIT_MASK(RenderAccessMask, RenderAccess);
 
+/// The load operation applied to the contents of an attachment at the start of a render pass.
+/// @see @vksymbol{VkAttachmentLoadOp}
+enum class AttachmentLoadOp {
+    /// The previous contents of the attachment will not be loaded and will be left undefined at the start of the
+    /// render pass.
+    None,
+    /// Loads the previous contents of the attachment for use within the render pass.
+    Load,
+    /// Clears the contents of the attachment to a specified value.
+    Clear,
+};
+
+/// The store operation applied to the contents of an attachment at the end of a render pass.
+/// @see @vksymbol{VkAttachmentStoreOp}
+enum class AttachmentStoreOp {
+    /// The contents of the attachment will be not be changed, unless the render pass writes to the attachment, in
+    /// which case the contents will be undefined after the end of the render pass.
+    None,
+    /// Any changes to the contents of the attachment will be applied after the end of the render pass.
+    Store,
+};
+
 class CommandPool;
 class VulkanCommandInterface;
 
@@ -369,7 +391,7 @@ struct ColorAttachment {
     ResolveMode resolveMode;
 
     /// Describes an empty attachment
-    ColorAttachment() : ColorAttachment({}, AttachmentLoadOp::DontCare, AttachmentStoreOp::DontCare) {}
+    ColorAttachment() : ColorAttachment({}, AttachmentLoadOp::None, AttachmentStoreOp::None) {}
 
     /// @param image
     ///     The image view used as an attachment.
@@ -414,8 +436,7 @@ struct DepthStencilAttachment {
     ResolveMode resolveMode;
 
     /// Describes an empty attachment
-    DepthStencilAttachment()
-        : DepthStencilAttachment({}, false, AttachmentLoadOp::DontCare, AttachmentStoreOp::DontCare) {}
+    DepthStencilAttachment() : DepthStencilAttachment({}, false, AttachmentLoadOp::None, AttachmentStoreOp::None) {}
 
     /// @param image
     ///     The image view used as an attachment.

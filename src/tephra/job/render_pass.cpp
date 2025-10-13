@@ -6,6 +6,33 @@
 
 namespace tp {
 
+VkAttachmentLoadOp vkConvertAttachmentLoadOp(AttachmentLoadOp op) {
+    switch (op) {
+    case tp::AttachmentLoadOp::None:
+        // TODO: Swap for LOAD_OP_NONE after Vulkan 1.4 is required. DONT_CARE counts as write access
+        return VK_ATTACHMENT_LOAD_OP_LOAD;
+    case tp::AttachmentLoadOp::Load:
+        return VK_ATTACHMENT_LOAD_OP_LOAD;
+    case tp::AttachmentLoadOp::Clear:
+        return VK_ATTACHMENT_LOAD_OP_CLEAR;
+    default:
+        TEPHRA_ASSERTD(false, "Unexpected load op");
+        return VK_ATTACHMENT_LOAD_OP_LOAD;
+    }
+}
+
+VkAttachmentStoreOp vkConvertAttachmentStoreOp(AttachmentStoreOp op) {
+    switch (op) {
+    case tp::AttachmentStoreOp::None:
+        return VK_ATTACHMENT_STORE_OP_NONE;
+    case tp::AttachmentStoreOp::Store:
+        return VK_ATTACHMENT_STORE_OP_STORE;
+    default:
+        TEPHRA_ASSERTD(false, "Unexpected store op");
+        return VK_ATTACHMENT_STORE_OP_NONE;
+    }
+}
+
 void AttachmentAccess::convertToVkAccess(
     ImageAccessRange* rangePtr,
     ResourceAccess* accessPtr,
@@ -187,8 +214,8 @@ void RenderPass::prepareRendering(const RenderPassSetup& setup, bool useSecondar
 
         { // Depth attachment
             VkRenderingAttachmentInfo vkDepthAttachment = vkAttachmentCommon;
-            vkDepthAttachment.loadOp = vkCastConvertibleEnum(attachment.depthLoadOp);
-            vkDepthAttachment.storeOp = vkCastConvertibleEnum(attachment.depthStoreOp);
+            vkDepthAttachment.loadOp = vkConvertAttachmentLoadOp(attachment.depthLoadOp);
+            vkDepthAttachment.storeOp = vkConvertAttachmentStoreOp(attachment.depthStoreOp);
 
             if (attachment.depthReadOnly)
                 vkDepthAttachment.imageLayout = VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL;
@@ -208,8 +235,8 @@ void RenderPass::prepareRendering(const RenderPassSetup& setup, bool useSecondar
 
         { // Stencil attachment
             VkRenderingAttachmentInfo vkStencilAttachment = vkAttachmentCommon;
-            vkStencilAttachment.loadOp = vkCastConvertibleEnum(attachment.stencilLoadOp);
-            vkStencilAttachment.storeOp = vkCastConvertibleEnum(attachment.stencilStoreOp);
+            vkStencilAttachment.loadOp = vkConvertAttachmentLoadOp(attachment.stencilLoadOp);
+            vkStencilAttachment.storeOp = vkConvertAttachmentStoreOp(attachment.stencilStoreOp);
 
             if (attachment.stencilReadOnly)
                 vkStencilAttachment.imageLayout = VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL;
@@ -243,8 +270,8 @@ void RenderPass::prepareRendering(const RenderPassSetup& setup, bool useSecondar
             attachment.resolveImage, vkAttachment.resolveImageLayout, ImageAspect::Color);
 
         vkAttachment.clearValue = attachment.clearValue.vkValue;
-        vkAttachment.loadOp = vkCastConvertibleEnum(attachment.loadOp);
-        vkAttachment.storeOp = vkCastConvertibleEnum(attachment.storeOp);
+        vkAttachment.loadOp = vkConvertAttachmentLoadOp(attachment.loadOp);
+        vkAttachment.storeOp = vkConvertAttachmentStoreOp(attachment.storeOp);
     }
 
     // Assign pointers now that vkRenderingAttachments is final

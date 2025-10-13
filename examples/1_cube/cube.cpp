@@ -111,7 +111,7 @@ void CubeExample::drawFrame() {
     auto clearColor = tp::ClearValue::ColorFloat(0.3f, 0.075f, 0.075f, 0.0f);
     auto clearDepth = tp::ClearValue::DepthStencil(1.0f, 0);
     auto depthAttachment = tp::DepthStencilAttachment(
-        depthImage, /*readOnly*/ false, tp::AttachmentLoadOp::Clear, tp::AttachmentStoreOp::DontCare, clearDepth);
+        depthImage, /*readOnly*/ false, tp::AttachmentLoadOp::Clear, tp::AttachmentStoreOp::None, clearDepth);
     auto colorAttachment = tp::ColorAttachment(
         *acquiredImage.image, tp::AttachmentLoadOp::Clear, tp::AttachmentStoreOp::Store, clearColor);
 

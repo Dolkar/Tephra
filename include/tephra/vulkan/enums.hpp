@@ -442,28 +442,6 @@ enum class ImageAspect : uint32_t {
 TEPHRA_VULKAN_COMPATIBLE_ENUM(ImageAspect, VkImageAspectFlagBits);
 TEPHRA_MAKE_ENUM_BIT_MASK(ImageAspectMask, ImageAspect);
 
-/// The load operation applied to the contents of an attachment at the start of a render pass.
-/// @see @vksymbol{VkAttachmentLoadOp}
-enum class AttachmentLoadOp : uint32_t {
-    /// Specifies that the attachment will load the contents of the assigned image view.
-    Load = VK_ATTACHMENT_LOAD_OP_LOAD,
-    /// Specifies that the attachment will be cleared to a specified value.
-    Clear = VK_ATTACHMENT_LOAD_OP_CLEAR,
-    /// Specifies that the contents of the attachment may be undefined.
-    DontCare = VK_ATTACHMENT_LOAD_OP_DONT_CARE
-};
-TEPHRA_VULKAN_COMPATIBLE_ENUM(AttachmentLoadOp, VkAttachmentLoadOp);
-
-/// The store operation applied to the contents of an attachment.
-/// @see @vksymbol{VkAttachmentStoreOp}
-enum class AttachmentStoreOp : uint32_t {
-    /// Specifies that the contents of the attachment will be stored into the assigned image view.
-    Store = VK_ATTACHMENT_STORE_OP_STORE,
-    /// Specifies that the contents of the image view may be left undefined.
-    DontCare = VK_ATTACHMENT_STORE_OP_DONT_CARE
-};
-TEPHRA_VULKAN_COMPATIBLE_ENUM(AttachmentStoreOp, VkAttachmentStoreOp);
-
 /// The type of values of an index buffer.
 /// @see @vksymbol{VkIndexType}
 enum class IndexType : uint32_t {
