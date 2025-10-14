@@ -161,6 +161,17 @@ public:
         return static_cast<T*>(dataPtr);
     }
 
+    /// Returns a pointer to the mapped memory with a byte offset interpreted as the given type.
+    /// @remarks
+    ///     Reads from this pointer, even unintended or caused by compiler optimizations, may return undefined values or
+    ///     cause performance degradation when accessing uncached memory.
+    /// @remarks
+    ///     The pointer is valid for the duration of the lifetime of this object and that of the mapped buffer.
+    template <typename T = void>
+    T* getPtrUnsafe(uint64_t byteOffset) {
+        return static_cast<T*>(static_cast<void*>(static_cast<std::byte*>(dataPtr) + byteOffset));
+    }
+
     /// Writes a number of bytes with the given value into the mapped memory at the given byte offset.
     void write(uint64_t byteOffset, uint8_t value, uint64_t byteCount);
 

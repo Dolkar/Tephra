@@ -20,6 +20,7 @@ Released 2025-10-14
     - Configuring the validation layers can now be done by providing a list of @vksymbol{VkLayerSettingEXT} to
       tp::ApplicationSetup. See https://vulkan.lunarg.com/doc/sdk/1.4.328.1/windows/khronos_validation_layer.html
     - Added it as a built-in extension as tp::ApplicationExtension::EXT_LayerSettings
+- Added tp::HostWritableMemory::getPtrUnsafe variant that accepts an additional byte offset.
 
 @subsection v0-8-0-breaking Breaking changes
 @m_class{m-note m-warning}
