@@ -6,6 +6,34 @@ version increments.
 
 @tableofcontents
 
+@section v0-8-0 In-dev version 0.8.0
+Released 2025-10-14
+- Fixed tp::VkStructureMap::clear not properly resetting internal pointers.
+- Render pass attachment load and store operations were reworked to move away from `OP_DONT_CARE` load and store ops in
+  favor of `OP_NONE` to prevent undesired write accesses.
+    - Using `VK_ATTACHMENT_LOAD_OP_NONE` would require Vulkan 1.4 or the @vksymbol{VK_KHR_load_store_op_none} extension.
+      Instead of increasing the minspec, `VK_ATTACHMENT_LOAD_OP_LOAD` gets used instead to retain read-only access.
+- Changed how validation layers are enabled and configured to move away from the deprecated
+  @vksymbol{VK_EXT_validation_features} extension in favor of @vksymbol{VK_EXT_layer_settings}.
+    - Enabling Vulkan validation programmatically can now be done by adding `VK_LAYER_KHRONOS_validation` to the layer
+      list of tp::ApplicationSetup.
+    - Configuring the validation layers can now be done by providing a list of @vksymbol{VkLayerSettingEXT} to
+      tp::ApplicationSetup. See https://vulkan.lunarg.com/doc/sdk/1.4.328.1/windows/khronos_validation_layer.html
+    - Added it as a built-in extension as tp::ApplicationExtension::EXT_LayerSettings
+
+@subsection v0-8-0-breaking Breaking changes
+@m_class{m-note m-warning}
+
+@parblock
+- Replaced tp::AttachmentLoadOp::DontCare and tp::AttachmentStoreOp::DontCare with tp::AttachmentLoadOp::None and
+  tp::AttachmentStoreOp::None respectively. They have less surprising semantics compared to the previous options.
+- tp::AttachmentLoadOp and tp::AttachmentStoreOp are no longer directly convertible to or from their associated
+  Vulkan enums.
+- Removed tp::ValidationFeatureEnable, tp::ValidationFeatureDisable and tp::VulkanValidationSetup.
+- Removed the `vulkanValidation` field from tp::ApplicationSetup, renamed the `instanceLayers` field to `layers` and
+  added the `layerSettingsEXT` field.
+@endparblock
+
 @section v0-7-0 In-dev version 0.7.0
 Released 2025-08-14
 - Reworked host memory mapping to use separate types for reads and writes. This should prevent accidental reads from
