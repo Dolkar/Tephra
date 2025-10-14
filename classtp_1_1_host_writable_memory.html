@@ -97,6 +97,11 @@
               <span class="m-doc-wrap-bumper">auto <a href="#a2f32267530fd57deaa4cf2924469c9b5" class="m-doc">getPtrUnsafe</a>(</span><span class="m-doc-wrap">) -&gt; T*</span>
             </dt>
             <dd>Returns a pointer to the mapped memory interpreted as the given type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename T = void&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a0e01375d24e8c9a2f1f064884c786a0b" class="m-doc">getPtrUnsafe</a>(</span><span class="m-doc-wrap">uint64_t byteOffset) -&gt; T*</span>
+            </dt>
+            <dd>Returns a pointer to the mapped memory with a byte offset interpreted as the given type.</dd>
             <dt id="a35c83c1a38479db655dc656c21d1282a">
               <div class="m-doc-template">template&lt;typename T&gt;</div>
               <span class="m-doc-wrap-bumper">void <a href="#a35c83c1a38479db655dc656c21d1282a" class="m-doc-self">write</a>(</span><span class="m-doc-wrap">uint64_t byteOffset,
@@ -128,6 +133,16 @@
               <span class="m-doc-wrap-bumper">T* tp::<wbr />HostWritableMemory::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2f32267530fd57deaa4cf2924469c9b5" class="m-doc-self">getPtrUnsafe</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
             <p>Returns a pointer to the mapped memory interpreted as the given type.</p>
+<aside class="m-note m-default"><h4>Remark</h4><p>Reads from this pointer, even unintended or caused by compiler optimizations, may return undefined values or cause performance degradation when accessing uncached memory.</p><p>The pointer is valid for the duration of the lifetime of this object and that of the mapped buffer.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a0e01375d24e8c9a2f1f064884c786a0b"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T = void&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">T* tp::<wbr />HostWritableMemory::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0e01375d24e8c9a2f1f064884c786a0b" class="m-doc-self">getPtrUnsafe</a>(</span><span class="m-doc-wrap">uint64_t byteOffset)</span></span>
+            </h3>
+            <p>Returns a pointer to the mapped memory with a byte offset interpreted as the given type.</p>
 <aside class="m-note m-default"><h4>Remark</h4><p>Reads from this pointer, even unintended or caused by compiler optimizations, may return undefined values or cause performance degradation when accessing uncached memory.</p><p>The pointer is valid for the duration of the lifetime of this object and that of the mapped buffer.</p></aside>
           </div></section>
         </section>
