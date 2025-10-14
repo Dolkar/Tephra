@@ -86,25 +86,30 @@ struct TephraContext {
     };
 
     void initialize(bool requirePresentCapabilities) {
-        // Create application
-        std::vector<const char*> appExtensions = { tp::ApplicationExtension::EXT_DebugUtils };
+        std::vector<const char*> appExtensions = { tp::ApplicationExtension::EXT_DebugUtils,
+                                                   VK_EXT_LAYER_SETTINGS_EXTENSION_NAME };
         if (requirePresentCapabilities) {
             appExtensions.push_back(tp::ApplicationExtension::KHR_Surface);
         }
 
-        // TODO: Disabled sync validation because it leads to false positives.
-        // See https://github.com/KhronosGroup/Vulkan-ValidationLayers/issues/7457
-        // Re-enable after the timeline semas get implemented or VK_EXT_layer_settings becomes available.
-        auto validationSetup = tp::VulkanValidationSetup(
-            true,
-            tp::ValidationFeatureEnable::BestPractices | /*tp::ValidationFeatureEnable::Synchronization |*/
-                tp::ValidationFeatureEnable::GPUAssisted | tp::ValidationFeatureEnable::GPUAssistedReserveBindingSlot);
+        // Enable and configure validation
+        std::vector<const char*> appLayers = { vkLayerVulkanValidationName };
 
+        uint32_t vkTrue = VK_TRUE;
+        std::vector<VkLayerSettingEXT> validationSettings = {
+            { vkLayerVulkanValidationName, "validate_sync", VK_LAYER_SETTING_TYPE_BOOL32_EXT, 1, &vkTrue },
+            { vkLayerVulkanValidationName, "gpuav_enable", VK_LAYER_SETTING_TYPE_BOOL32_EXT, 1, &vkTrue },
+            { vkLayerVulkanValidationName, "validate_best_practices", VK_LAYER_SETTING_TYPE_BOOL32_EXT, 1, &vkTrue },
+        };
+
+        // Create application
         auto appSetup = tp::ApplicationSetup(
             { "TephraIntegrationTests", tp::Version(0, 1, 0) },
-            validationSetup,
             &testReportHandler,
-            tp::view(appExtensions));
+            tp::view(appExtensions),
+            tp::view(appLayers),
+            tp::Version::getMaxUsedVulkanAPIVersion(),
+            tp::view(validationSettings));
         application = tp::Application::createApplication(appSetup);
 
         // Pick the first physical device that supports what we need
@@ -168,6 +173,8 @@ struct TephraContext {
     uint64_t getLastStatistic(tp::StatisticEventType eventType) {
         return testReportHandler.getLastStatistic(eventType);
     }
+
+    static constexpr const char* vkLayerVulkanValidationName = "VK_LAYER_KHRONOS_validation";
 
     TestReportHandler testReportHandler;
     tp::OwningPtr<tp::Application> application;

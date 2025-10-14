@@ -139,14 +139,16 @@ a mask is expected with strong typing. All bit enums in Tephra also have their m
 
 Drivers implementing the Vulkan API aren't required to check that it is being used correctly by the user. Incorrect
 behavior is more often than not unspecified and can lead to anything from driver crashes to working perfectly fine on
-your machine, the latter being more insidious. As such, validation layers are shipped as part of the Vulkan SDK, which
-can be then enabled during development. They are then able to validate correct usage without impacting performance when
-they are not needed.
+your machine, the latter being more insidious. As such, validation layers are an optional part of Vulkan included with
+the SDK that can be toggled as needed without impacting performance of shipped applications.
 
-Tephra validation works similarly. The library by default doesn't check for correct usage, only when built with the
-#TEPHRA_ENABLE_DEBUG preprocessor define. Doing so has a performance impact and so is only recommended for debug builds.
-Vulkan validation can be toggled without needing to rebuild through tp::VulkanValidationSetup or simply by using the
-Vulkan Configurator that comes with the SDK.
+Vulkan validation layers can be enabled and configured through the Vulkan Configurator tool installed to your system as
+part of the SDK. Alternatively, it is possible to enable them programmatically by adding `VK_LAYER_KHRONOS_validation`
+to tp::ApplicationSetup::`layers` when creating a Tephra application. Additional configuration can be done by enabling
+tp::ApplicationExtension::EXT_LayerSettings and providing a list of layer-specific settings to tp::ApplicationSetup.
+
+Tephra also has optional validation, toggled separately from Vulkan validation by building with the #TEPHRA_ENABLE_DEBUG
+preprocessor define. Doing so has a performance impact and so is only recommended for debug build configurations.
 
 Tephra validation is far from complete. User errors or bugs in the library may silently manifest as incorrect usage of
 the Vulkan API, so it is recommended to also enable Vulkan validation during development. To allow Tephra to consume the
@@ -320,27 +322,28 @@ The first is tp::ApplicationIdentifier, which lets you provide the name and vers
 Vulkan driver. In case your application becomes popular enough, the driver may use this information to identify and
 optimize for your app. A tall order for now, but I think it's cute to define it anyway.
 
-Two essential debugging parameters follow. tp::VulkanValidationSetup lets you enable Vulkan validation. It should be
-enabled when debugging, along with the #TEPHRA_ENABLE_DEBUG define, which enables Tephra's own validation. Both will
-warn about various mistakes when using the library. See the @ref ug-general-concepts-debugging-and-validation section
-for more details. These messages will be reported to a debug handler that can be provided as the third parameter.
-
-The debug handler is an interface that will be used by the library when a validation message or an error occurs. For
-simplicity, there is a standard implementation of it in Tephra's utilities that outputs to a C++ stream, filtered by
-the chosen message severities and types. See @ref ug-utilities-standard-report-handler.
+The second parameter is the debug report handler, which is essential for debugging. It allows for debug messages to be
+reported in a user-specified way, whether they originate from Vulkan layers or Tephra itself. For simplicity, there is
+a standard implementation of the handler in Tephra's utilities that outputs to a C++ stream, filtered by the chosen
+message severities and types. See @ref ug-utilities-standard-report-handler. See also
+@ref ug-general-concepts-debugging-and-validation section for more details.
 If all validation and messaging is disabled, the debug handler is unused.
 
 Next, we can define any requested extensions. These can be either one of the predefined tp::ApplicationExtension
 extensions, or any other Vulkan instance extensions. They add additional optional functionality to what the base API
 offers. One of the most useful ones being tp::ApplicationExtension::KHR_Surface, which will later enable us to present
 rendered images to the screen. Whenever you see a Tephra function or class name with the KHR, EXT or other suffix, it
-is likely a part of either a device or instance extension. The next parameter allows you to specify any additional
-Vulkan layers, used for letting tools hook into your API calls.
+is likely a part of either a device or instance extension.
+
+The following parameter allows you to specify Vulkan layers to programmatically enable. This will most commonly be
+the Vulkan validation layers that can report invalid API usage to your debug report handler. To request them, add
+`VK_LAYER_KHRONOS_validation` to the array. Equivalently, it can also be controlled manually through the Vulkan
+Configurator tool.
 
 To finally create the application object, call the static method tp::Application::createApplication. On success, it will
 return an owning pointer to the object. If the method fails, likely because something was not supported, a
 tp::RuntimeError exception will be thrown. It is also possible to check for support ahead of time with the other static
-methods, like tp::Application::isExtensionAvailable.
+methods, like tp::Application::isExtensionAvailable and tp::Application::isLayerAvailable.    
 
 @code{.cpp}
 #include <tephra/tephra.hpp>
@@ -357,11 +360,17 @@ int main() {
         tp::ApplicationExtension::KHR_Surface
     };
 
+    // Enable Vulkan validation layers if present and in debug mode
+    std::vector<const char*> appLayers;
+    if (debugMode && tp::Application::isLayerAvailable("VK_LAYER_KHRONOS_validation")) {
+        appLayers.push_back("VK_LAYER_KHRONOS_validation");
+    }
+
     auto appSetup = tp::ApplicationSetup(
         tp::ApplicationIdentifier("Tephra user guide"),
-        tp::VulkanValidationSetup(debugMode),
         &debugHandler,
-        tp::view(appExtensions));
+        tp::view(appExtensions),
+        tp::view(appLayers));
 
     std::unique_ptr<tp::Application> app;
     try {
@@ -1823,7 +1832,7 @@ they can be converted to nanoseconds by multiplying them with @vksymbol{VkPhysic
 Timestamp queries can be created through tp::Device::createTimestampQueries and then either recorded into a job
 with tp::Job::cmdWriteTimestamp, tp::ComputeList::cmdWriteTimestamp or tp::RenderList::cmdWriteTimestamp. In any case,
 you need to also provide a tp::PipelineStage value, which further specifies at what point in the pipeline should the
-timestamp be written. For example, writing a timestamp with the `tp::PipelineStage::FragmentShader` pipeline stage value
+timestamp be written. For example, writing a timestamp with the tp::PipelineStage::FragmentShader pipeline stage value
 should capture the timestamp at the point when all the previously submitted commands have finished executing all of
 their fragment shader invocations. The support for accurate timestamps of all pipeline stages is not universal, however.
 

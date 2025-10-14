@@ -37,7 +37,7 @@ private:
     VulkanGlobalInterface vkiGlobal;
     Version instanceApiVersion;
     std::vector<VkExtensionProperties> instanceExtensions;
-    std::vector<VkLayerProperties> instanceLayers;
+    std::vector<VkLayerProperties> layers;
 
     VulkanGlobals();
     ~VulkanGlobals() {}

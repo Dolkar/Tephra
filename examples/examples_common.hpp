@@ -37,7 +37,8 @@ public:
     virtual ~Example() {};
 
 protected:
-    static constexpr const char* vkLayerLunargMonitorName = "VK_LAYER_LUNARG_monitor";
+    static constexpr const char* vkLayerVulkanValidationName = "VK_LAYER_KHRONOS_validation";
+    static constexpr const char* vkLayerLunarGMonitorName = "VK_LAYER_LUNARG_monitor";
     static const tp::DebugMessageSeverityMask debugSeverity;
 
     VkSurfaceKHR surface = nullptr;

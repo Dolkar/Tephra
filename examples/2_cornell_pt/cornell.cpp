@@ -37,16 +37,19 @@ CornellExample::CornellExample(std::ostream& debugStream, RenderingMethod method
         appExtensions.push_back(tp::ApplicationExtension::EXT_DebugUtils);
     }
 
-    // Also enable monitor layer if present. Validation layers are enabled through validation setup.
-    std::vector<const char*> appLayers = {};
-    if (tp::Application::isLayerAvailable(vkLayerLunargMonitorName)) {
-        appLayers.push_back(vkLayerLunargMonitorName);
+    std::vector<const char*> appLayers;
+    // Enable Vulkan validation layers if present and in debug mode
+    if (debugMode && tp::Application::isLayerAvailable(vkLayerVulkanValidationName)) {
+        appLayers.push_back(vkLayerVulkanValidationName);
+    }
+    // Enable FPS monitoring layer if present
+    if (tp::Application::isLayerAvailable(vkLayerLunarGMonitorName)) {
+        appLayers.push_back(vkLayerLunarGMonitorName);
     }
 
     // Create the application
     auto appSetup = tp::ApplicationSetup(
         tp::ApplicationIdentifier("Cornell Path Tracing Demo"),
-        tp::VulkanValidationSetup(debugMode),
         &debugHandler,
         tp::view(appExtensions),
         tp::view(appLayers));

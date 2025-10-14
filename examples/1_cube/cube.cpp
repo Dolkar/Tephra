@@ -14,19 +14,18 @@ CubeExample::CubeExample(std::ostream& debugStream, bool debugMode)
         appExtensions.push_back(tp::ApplicationExtension::EXT_DebugUtils);
     }
 
-    // Also enable monitor layer if present. Validation layers are enabled through validation setup.
+    // Also enable additional layers if present
     std::vector<const char*> appLayers = {};
-    if (tp::Application::isLayerAvailable(vkLayerLunargMonitorName)) {
-        appLayers.push_back(vkLayerLunargMonitorName);
+    if (debugMode && tp::Application::isLayerAvailable(vkLayerVulkanValidationName)) {
+        appLayers.push_back(vkLayerVulkanValidationName);
+    }
+    if (tp::Application::isLayerAvailable(vkLayerLunarGMonitorName)) {
+        appLayers.push_back(vkLayerLunarGMonitorName);
     }
 
     // Create the application
     auto appSetup = tp::ApplicationSetup(
-        tp::ApplicationIdentifier("Cube Demo"),
-        tp::VulkanValidationSetup(debugMode),
-        &debugHandler,
-        tp::view(appExtensions),
-        tp::view(appLayers));
+        tp::ApplicationIdentifier("Cube Demo"), &debugHandler, tp::view(appExtensions), tp::view(appLayers));
 
     application = tp::Application::createApplication(appSetup);
 

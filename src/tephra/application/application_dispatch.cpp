@@ -8,12 +8,6 @@ namespace tp {
 
 constexpr const char* ApplicationTypeName = "Application";
 
-VulkanValidationSetup::VulkanValidationSetup(
-    bool enable,
-    ValidationFeatureEnableMask enabledFeatures,
-    ValidationFeatureDisableMask disabledFeatures)
-    : enable(enable), enabledFeatures(enabledFeatures), disabledFeatures(disabledFeatures) {}
-
 ApplicationIdentifier::ApplicationIdentifier(
     const char* applicationName,
     Version applicationVersion,
@@ -26,18 +20,18 @@ ApplicationIdentifier::ApplicationIdentifier(
 
 ApplicationSetup::ApplicationSetup(
     ApplicationIdentifier applicationIdentifier,
-    VulkanValidationSetup vulkanValidation,
     DebugReportHandler* debugReportHandler,
     ArrayView<const char* const> extensions,
-    ArrayView<const char* const> instanceLayers,
+    ArrayView<const char* const> layers,
     Version apiVersion,
+    ArrayView<VkLayerSettingEXT> layerSettingsEXT,
     void* vkCreateInfoExtPtr)
     : applicationIdentifier(std::move(applicationIdentifier)),
-      vulkanValidation(std::move(vulkanValidation)),
       debugReportHandler(debugReportHandler),
       extensions(extensions),
-      instanceLayers(instanceLayers),
+      layers(layers),
       apiVersion(apiVersion),
+      layerSettingsEXT(layerSettingsEXT),
       vkCreateInfoExtPtr(vkCreateInfoExtPtr) {}
 
 bool Application::isExtensionAvailable(const char* extension) {

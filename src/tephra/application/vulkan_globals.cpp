@@ -26,9 +26,9 @@ VulkanGlobals::VulkanGlobals() {
     instanceExtensions.resize(count);
 
     throwRetcodeErrors(vkiGlobal.enumerateInstanceLayerProperties(&count, nullptr));
-    instanceLayers.resize(count);
-    throwRetcodeErrors(vkiGlobal.enumerateInstanceLayerProperties(&count, instanceLayers.data()));
-    instanceLayers.resize(count);
+    layers.resize(count);
+    throwRetcodeErrors(vkiGlobal.enumerateInstanceLayerProperties(&count, layers.data()));
+    layers.resize(count);
 }
 
 bool VulkanGlobals::isInstanceExtensionAvailable(const char* extName) const {
@@ -41,7 +41,7 @@ bool VulkanGlobals::isInstanceExtensionAvailable(const char* extName) const {
 }
 
 bool VulkanGlobals::isInstanceLayerAvailable(const char* layerName) const {
-    for (const VkLayerProperties& layerInfo : instanceLayers) {
+    for (const VkLayerProperties& layerInfo : layers) {
         if (strcmp(layerName, layerInfo.layerName) == 0) {
             return true;
         }

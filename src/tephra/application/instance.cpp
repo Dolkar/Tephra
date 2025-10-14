@@ -5,8 +5,6 @@
 
 namespace tp {
 
-constexpr const char* StandardValidationLayerName = "VK_LAYER_KHRONOS_validation";
-
 std::vector<const char*> initPrepareExtensions(const ApplicationSetup& appSetup, const VulkanGlobals* vulkanGlobals) {
     // At least one of the platform specific extensions needs to be available for surface support
     static const char* platformExtensionNames[] = {
@@ -33,61 +31,16 @@ std::vector<const char*> initPrepareExtensions(const ApplicationSetup& appSetup,
         }
     }
 
+    if (!appSetup.layerSettingsEXT.empty() &&
+        !containsString(appSetup.extensions, VK_EXT_LAYER_SETTINGS_EXTENSION_NAME)) {
+        reportDebugMessage(
+            DebugMessageSeverity::Warning,
+            DebugMessageType::General,
+            "Instance layer settings were requested, but the VK_EXT_layer_settings instance extension was not "
+            "enabled.");
+    }
+
     return enabledExtensions;
-}
-
-std::vector<const char*> initPrepareLayers(const ApplicationSetup& appSetup, const VulkanGlobals* vulkanGlobals) {
-    std::vector<const char*> enabledLayers{ appSetup.instanceLayers.begin(), appSetup.instanceLayers.end() };
-
-    if (appSetup.vulkanValidation.enable && !containsString(appSetup.instanceLayers, StandardValidationLayerName)) {
-        if (vulkanGlobals->isInstanceLayerAvailable(StandardValidationLayerName)) {
-            enabledLayers.push_back(StandardValidationLayerName);
-        } else {
-            reportDebugMessage(
-                DebugMessageSeverity::Warning,
-                DebugMessageType::General,
-                "Vulkan validation was requested, but the standard Khronos validation layer isn't present.");
-        }
-    }
-
-    return enabledLayers;
-}
-
-struct ValidationFeaturesSetup {
-    VkValidationFeaturesEXT vkValidationFeatures;
-    std::vector<VkValidationFeatureEnableEXT> enableSet;
-    std::vector<VkValidationFeatureDisableEXT> disableSet;
-};
-
-void initPrepareValidationFeatures(const VulkanValidationSetup& vulkanValidation, ValidationFeaturesSetup* setup) {
-    // Convert Tephra bitmasks to an array of features. They aren't directly convertible, but (for now) the indices of
-    // the bits used are convertible (see definition of ValidationFeatureEnable)
-    uint32_t mask = static_cast<uint32_t>(vulkanValidation.enabledFeatures);
-    uint32_t bitIndex = 0;
-    while (mask) {
-        if ((mask & 1) == 1) {
-            setup->enableSet.push_back(static_cast<VkValidationFeatureEnableEXT>(bitIndex));
-        }
-        mask >>= 1;
-        bitIndex++;
-    }
-
-    mask = static_cast<uint32_t>(vulkanValidation.disabledFeatures);
-    bitIndex = 0;
-    while (mask) {
-        if ((mask & 1) == 1) {
-            setup->disableSet.push_back(static_cast<VkValidationFeatureDisableEXT>(bitIndex));
-        }
-        mask >>= 1;
-        bitIndex++;
-    }
-
-    setup->vkValidationFeatures.sType = VK_STRUCTURE_TYPE_VALIDATION_FEATURES_EXT;
-    setup->vkValidationFeatures.pNext = nullptr;
-    setup->vkValidationFeatures.enabledValidationFeatureCount = static_cast<uint32_t>(setup->enableSet.size());
-    setup->vkValidationFeatures.pEnabledValidationFeatures = setup->enableSet.data();
-    setup->vkValidationFeatures.disabledValidationFeatureCount = static_cast<uint32_t>(setup->disableSet.size());
-    setup->vkValidationFeatures.pDisabledValidationFeatures = setup->disableSet.data();
 }
 
 VkInstanceHandle initCreateVulkanInstance(const VulkanGlobals* vulkanGlobals, const ApplicationSetup& appSetup) {
@@ -100,32 +53,19 @@ VkInstanceHandle initCreateVulkanInstance(const VulkanGlobals* vulkanGlobals, co
     appInfo.engineVersion = appSetup.applicationIdentifier.engineVersion.pack();
     appInfo.apiVersion = tp::max(appSetup.apiVersion.pack(), Version::getMaxUsedVulkanAPIVersion().pack());
     std::vector<const char*> extensions = initPrepareExtensions(appSetup, vulkanGlobals);
-    std::vector<const char*> layers = initPrepareLayers(appSetup, vulkanGlobals);
 
     void* vkCreateInfoExtPtr = appSetup.vkCreateInfoExtPtr;
 
-    ValidationFeaturesSetup validationFeaturesSetup;
-    if (appSetup.vulkanValidation.enable &&
-        (appSetup.vulkanValidation.enabledFeatures != ValidationFeatureEnableMask::None() ||
-         appSetup.vulkanValidation.disabledFeatures != ValidationFeatureDisableMask::None())) {
-        // Need to enable the validation feature extension and set it up through the extension pointer
-        if (vulkanGlobals->queryLayerExtension(
-                StandardValidationLayerName, VK_EXT_VALIDATION_FEATURES_EXTENSION_NAME)) {
-            extensions.push_back(VK_EXT_VALIDATION_FEATURES_EXTENSION_NAME);
-
-            initPrepareValidationFeatures(appSetup.vulkanValidation, &validationFeaturesSetup);
-            validationFeaturesSetup.vkValidationFeatures.pNext = appSetup.vkCreateInfoExtPtr;
-            vkCreateInfoExtPtr = &validationFeaturesSetup.vkValidationFeatures;
-        } else {
-            reportDebugMessage(
-                DebugMessageSeverity::Warning,
-                DebugMessageType::General,
-                "Specific validation features were requested, but Vulkan instance does not support "
-                "the " VK_EXT_VALIDATION_FEATURES_EXTENSION_NAME " extension.");
-        }
+    VkLayerSettingsCreateInfoEXT layerSettingsCreateInfo;
+    if (!appSetup.layerSettingsEXT.empty()) {
+        layerSettingsCreateInfo.sType = VK_STRUCTURE_TYPE_LAYER_SETTINGS_CREATE_INFO_EXT;
+        layerSettingsCreateInfo.pNext = vkCreateInfoExtPtr;
+        layerSettingsCreateInfo.settingCount = static_cast<uint32_t>(appSetup.layerSettingsEXT.size());
+        layerSettingsCreateInfo.pSettings = appSetup.layerSettingsEXT.data();
+        vkCreateInfoExtPtr = &layerSettingsCreateInfo;
     }
 
-    return vulkanGlobals->createVulkanInstance(appInfo, view(extensions), view(layers), vkCreateInfoExtPtr);
+    return vulkanGlobals->createVulkanInstance(appInfo, view(extensions), view(appSetup.layers), vkCreateInfoExtPtr);
 }
 
 Instance::Instance(const ApplicationSetup& appSetup)
