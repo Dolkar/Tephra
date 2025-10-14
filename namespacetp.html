@@ -619,10 +619,6 @@
               class <a href="classtp_1_1_vk_structure_map.html" class="m-doc">VkStructureMap</a>
             </dt>
             <dd>A heterogenous container of unique Vulkan structure types. The structures get zero initialized with <code>sType</code> filled out appropriately and <code>pNext</code> used to chain them in the order they were added.</dd>
-            <dt>
-              struct <a href="structtp_1_1_vulkan_validation_setup.html" class="m-doc">VulkanValidationSetup</a>
-            </dt>
-            <dd>Describes whether Vulkan validation should be enabled, optionally with control over its specific features.</dd>
           </dl>
         </section>
         <section id="enum-members">
@@ -652,16 +648,16 @@
             </dt>
             <dd>Type of ray tracing acceleration structure. Top level contains references to bottom level acceleration structures, which then contain the actual geometry.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">enum class <a href="#aa57e260754413ae9a64d57adb264c384" class="m-doc">AttachmentLoadOp</a>: uint32_t { </span><span class="m-doc-wrap"><a href="#aa57e260754413ae9a64d57adb264c384af19dbf2edb3a0bd74b0524d960ff21eb" class="m-doc">Load</a> = VK_ATTACHMENT_LOAD_OP_LOAD,
-              <a href="#aa57e260754413ae9a64d57adb264c384adc30bc0c7914db5918da4263fce93ad2" class="m-doc">Clear</a> = VK_ATTACHMENT_LOAD_OP_CLEAR,
-              <a href="#aa57e260754413ae9a64d57adb264c384a60a3629ef6a8f991f45d7a85f2458544" class="m-doc">DontCare</a> = VK_ATTACHMENT_LOAD_OP_DONT_CARE }</span>
+              <span class="m-doc-wrap-bumper">enum class <a href="#a439f1ddb0d323e46e9aac742a603e47f" class="m-doc">AttachmentLoadOp</a> { </span><span class="m-doc-wrap"><a href="#a439f1ddb0d323e46e9aac742a603e47fa6adf97f83acf6453d4a6a4b1070f3754" class="m-doc">None</a>,
+              <a href="#a439f1ddb0d323e46e9aac742a603e47faf19dbf2edb3a0bd74b0524d960ff21eb" class="m-doc">Load</a>,
+              <a href="#a439f1ddb0d323e46e9aac742a603e47fadc30bc0c7914db5918da4263fce93ad2" class="m-doc">Clear</a> }</span>
             </dt>
             <dd>The load operation applied to the contents of an attachment at the start of a render pass.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">enum class <a href="#ae8ae216230f07b1ccb769eac93fa9c3d" class="m-doc">AttachmentStoreOp</a>: uint32_t { </span><span class="m-doc-wrap"><a href="#ae8ae216230f07b1ccb769eac93fa9c3dafdb0c388de01d545017cdf9ccf00eb72" class="m-doc">Store</a> = VK_ATTACHMENT_STORE_OP_STORE,
-              <a href="#ae8ae216230f07b1ccb769eac93fa9c3da60a3629ef6a8f991f45d7a85f2458544" class="m-doc">DontCare</a> = VK_ATTACHMENT_STORE_OP_DONT_CARE }</span>
+              <span class="m-doc-wrap-bumper">enum class <a href="#a9ff9a92ad2f56f3a8faee51dfb74a0b7" class="m-doc">AttachmentStoreOp</a> { </span><span class="m-doc-wrap"><a href="#a9ff9a92ad2f56f3a8faee51dfb74a0b7a6adf97f83acf6453d4a6a4b1070f3754" class="m-doc">None</a>,
+              <a href="#a9ff9a92ad2f56f3a8faee51dfb74a0b7afdb0c388de01d545017cdf9ccf00eb72" class="m-doc">Store</a> }</span>
             </dt>
-            <dd>The store operation applied to the contents of an attachment.</dd>
+            <dd>The store operation applied to the contents of an attachment at the end of a render pass.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">enum class <a href="#a61ff7a7fc09d75005d831407a545073c" class="m-doc">BlendFactor</a>: uint32_t { </span><span class="m-doc-wrap"><a href="#a61ff7a7fc09d75005d831407a545073cad7ed4ee1df437474d005188535f74875" class="m-doc">Zero</a> = VK_BLEND_FACTOR_ZERO,
               <a href="#a61ff7a7fc09d75005d831407a545073ca06c2cea18679d64399783748fa367bdd" class="m-doc">One</a> = VK_BLEND_FACTOR_ONE,
@@ -1406,23 +1402,6 @@
             </dt>
             <dd>Describes the status of a <a href="classtp_1_1_swapchain.html" class="m-doc">tp::<wbr />Swapchain</a> object and/or the reason why the last operation may have failed.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">enum class <a href="#a2d4d2e583e723731d859127347e0df8e" class="m-doc">ValidationFeatureDisable</a>: uint32_t { </span><span class="m-doc-wrap"><a href="#a2d4d2e583e723731d859127347e0df8eaecee0a84af1bbe31d8aec4ce303fad9d" class="m-doc">Shaders</a> = 1 &lt;&lt; VK_VALIDATION_FEATURE_DISABLE_SHADERS_EXT,
-              <a href="#a2d4d2e583e723731d859127347e0df8eadda0567e8d32fbafa2300423be8d8c75" class="m-doc">ThreadSafety</a> = 1 &lt;&lt; VK_VALIDATION_FEATURE_DISABLE_THREAD_SAFETY_EXT,
-              <a href="#a2d4d2e583e723731d859127347e0df8ea69dc83d7d66a34b3747aa9166775e0a3" class="m-doc">APIParameters</a> = 1 &lt;&lt; VK_VALIDATION_FEATURE_DISABLE_API_PARAMETERS_EXT,
-              <a href="#a2d4d2e583e723731d859127347e0df8eae17b4aec83b22af03456d6be3d373cc1" class="m-doc">ObjectLifetimes</a> = 1 &lt;&lt; VK_VALIDATION_FEATURE_DISABLE_OBJECT_LIFETIMES_EXT,
-              <a href="#a2d4d2e583e723731d859127347e0df8ea50ab12be6211dd44ad943970a369e93c" class="m-doc">CoreChecks</a> = 1 &lt;&lt; VK_VALIDATION_FEATURE_DISABLE_CORE_CHECKS_EXT,
-              <a href="#a2d4d2e583e723731d859127347e0df8ea9917f5a1f87b1a93c073aea87aa332af" class="m-doc">UniqueHandles</a> = 1 &lt;&lt; VK_VALIDATION_FEATURE_DISABLE_UNIQUE_HANDLES_EXT }</span>
-            </dt>
-            <dd>Validation features part of the standard set that may be optionally disabled.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">enum class <a href="#a42931d68ca39e625158d56faa51800ae" class="m-doc">ValidationFeatureEnable</a>: uint32_t { </span><span class="m-doc-wrap"><a href="#a42931d68ca39e625158d56faa51800aea12880fea6557146edbf0ad5d7918f051" class="m-doc">GPUAssisted</a> = 1 &lt;&lt; VK_VALIDATION_FEATURE_ENABLE_GPU_ASSISTED_EXT,
-              <a href="#a42931d68ca39e625158d56faa51800aea94cdcc0a57484ae331e91b239452c95e" class="m-doc">GPUAssistedReserveBindingSlot</a> = 1 &lt;&lt; VK_VALIDATION_FEATURE_ENABLE_GPU_ASSISTED_RESERVE_BINDING_SLOT_EXT,
-              <a href="#a42931d68ca39e625158d56faa51800aea4345b3c92639681f1accdbd513b5835e" class="m-doc">BestPractices</a> = 1 &lt;&lt; VK_VALIDATION_FEATURE_ENABLE_BEST_PRACTICES_EXT,
-              <a href="#a42931d68ca39e625158d56faa51800aeabae92496837665b85fa53ff9f26ad18f" class="m-doc">DebugPrintf</a> = 1 &lt;&lt; VK_VALIDATION_FEATURE_ENABLE_DEBUG_PRINTF_EXT,
-              <a href="#a42931d68ca39e625158d56faa51800aea454c65346b592d2a6ddcf6e6cd91d9b3" class="m-doc">Synchronization</a> = 1 &lt;&lt; VK_VALIDATION_FEATURE_ENABLE_SYNCHRONIZATION_VALIDATION_EXT }</span>
-            </dt>
-            <dd>Optional validation features that may additionally be enabled.</dd>
-            <dt>
               <span class="m-doc-wrap-bumper">enum class <a href="#a67caa79015ff900edfff5470eccb6830" class="m-doc">VertexInputRate</a>: uint32_t { </span><span class="m-doc-wrap"><a href="#a67caa79015ff900edfff5470eccb6830ab22b929ba52471a02d18bb3a4e4472e6" class="m-doc">Vertex</a> = VK_VERTEX_INPUT_RATE_VERTEX,
               <a href="#a67caa79015ff900edfff5470eccb6830ad9a17c1c9e8ef6866e4dbeef41c741b2" class="m-doc">Instance</a> = VK_VERTEX_INPUT_RATE_INSTANCE }</span>
             </dt>
@@ -1555,14 +1534,6 @@
             <dd></dd>
             <dt>
               using <a href="#aa30595b7d2b5b260981eb588779df6ea" class="m-doc">SwapchainFlagMask</a> = <a href="classtp_1_1_enum_bit_mask.html" class="m-doc">EnumBitMask</a>&lt;<a href="namespacetp.html#ae1e4540d7cbc0c0a864a76044620b42f" class="m-doc">SwapchainFlag</a>&gt;
-            </dt>
-            <dd></dd>
-            <dt>
-              using <a href="#a56181a3dc2a51f18a580e379d7ef9fba" class="m-doc">ValidationFeatureDisableMask</a> = <a href="classtp_1_1_enum_bit_mask.html" class="m-doc">EnumBitMask</a>&lt;<a href="namespacetp.html#a2d4d2e583e723731d859127347e0df8e" class="m-doc">ValidationFeatureDisable</a>&gt;
-            </dt>
-            <dd></dd>
-            <dt>
-              using <a href="#ac5ede96f9caf8937beba88274d523a24" class="m-doc">ValidationFeatureEnableMask</a> = <a href="classtp_1_1_enum_bit_mask.html" class="m-doc">EnumBitMask</a>&lt;<a href="namespacetp.html#a42931d68ca39e625158d56faa51800ae" class="m-doc">ValidationFeatureEnable</a>&gt;
             </dt>
             <dd></dd>
             <dt id="ab6d2edf195b1f62b81c67845e61c243c">
@@ -1927,9 +1898,9 @@
               </tbody>
             </table>
           </div></section>
-          <section class="m-doc-details" id="aa57e260754413ae9a64d57adb264c384"><div>
+          <section class="m-doc-details" id="a439f1ddb0d323e46e9aac742a603e47f"><div>
             <h3>
-              enum class tp::<wbr /><a href="#aa57e260754413ae9a64d57adb264c384" class="m-doc-self">AttachmentLoadOp</a>: uint32_t
+              enum class tp::<wbr /><a href="#a439f1ddb0d323e46e9aac742a603e47f" class="m-doc-self">AttachmentLoadOp</a>
             </h3>
             <p>The load operation applied to the contents of an attachment at the start of a render pass.</p>
 <aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkAttachmentLoadOp.html" class="m-doc-external">VkAttachmentLoadOp</a></p></aside>
@@ -1937,45 +1908,45 @@
               <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
               <tbody>
                 <tr>
-                  <td><a href="#aa57e260754413ae9a64d57adb264c384af19dbf2edb3a0bd74b0524d960ff21eb" class="m-doc-self" id="aa57e260754413ae9a64d57adb264c384af19dbf2edb3a0bd74b0524d960ff21eb">Load</a></td>
+                  <td><a href="#a439f1ddb0d323e46e9aac742a603e47fa6adf97f83acf6453d4a6a4b1070f3754" class="m-doc-self" id="a439f1ddb0d323e46e9aac742a603e47fa6adf97f83acf6453d4a6a4b1070f3754">None</a></td>
                   <td>
-                  <p>Specifies that the attachment will load the contents of the assigned image view.</p>
+                  <p>The previous contents of the attachment will not be loaded and will be left undefined at the start of the render pass.</p>
                   </td>
                 </tr>
                 <tr>
-                  <td><a href="#aa57e260754413ae9a64d57adb264c384adc30bc0c7914db5918da4263fce93ad2" class="m-doc-self" id="aa57e260754413ae9a64d57adb264c384adc30bc0c7914db5918da4263fce93ad2">Clear</a></td>
+                  <td><a href="#a439f1ddb0d323e46e9aac742a603e47faf19dbf2edb3a0bd74b0524d960ff21eb" class="m-doc-self" id="a439f1ddb0d323e46e9aac742a603e47faf19dbf2edb3a0bd74b0524d960ff21eb">Load</a></td>
                   <td>
-                  <p>Specifies that the attachment will be cleared to a specified value.</p>
+                  <p>Loads the previous contents of the attachment for use within the render pass.</p>
                   </td>
                 </tr>
                 <tr>
-                  <td><a href="#aa57e260754413ae9a64d57adb264c384a60a3629ef6a8f991f45d7a85f2458544" class="m-doc-self" id="aa57e260754413ae9a64d57adb264c384a60a3629ef6a8f991f45d7a85f2458544">DontCare</a></td>
+                  <td><a href="#a439f1ddb0d323e46e9aac742a603e47fadc30bc0c7914db5918da4263fce93ad2" class="m-doc-self" id="a439f1ddb0d323e46e9aac742a603e47fadc30bc0c7914db5918da4263fce93ad2">Clear</a></td>
                   <td>
-                  <p>Specifies that the contents of the attachment may be undefined.</p>
+                  <p>Clears the contents of the attachment to a specified value.</p>
                   </td>
                 </tr>
               </tbody>
             </table>
           </div></section>
-          <section class="m-doc-details" id="ae8ae216230f07b1ccb769eac93fa9c3d"><div>
+          <section class="m-doc-details" id="a9ff9a92ad2f56f3a8faee51dfb74a0b7"><div>
             <h3>
-              enum class tp::<wbr /><a href="#ae8ae216230f07b1ccb769eac93fa9c3d" class="m-doc-self">AttachmentStoreOp</a>: uint32_t
+              enum class tp::<wbr /><a href="#a9ff9a92ad2f56f3a8faee51dfb74a0b7" class="m-doc-self">AttachmentStoreOp</a>
             </h3>
-            <p>The store operation applied to the contents of an attachment.</p>
+            <p>The store operation applied to the contents of an attachment at the end of a render pass.</p>
 <aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkAttachmentStoreOp.html" class="m-doc-external">VkAttachmentStoreOp</a></p></aside>
             <table class="m-table m-fullwidth m-flat m-doc">
               <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
               <tbody>
                 <tr>
-                  <td><a href="#ae8ae216230f07b1ccb769eac93fa9c3dafdb0c388de01d545017cdf9ccf00eb72" class="m-doc-self" id="ae8ae216230f07b1ccb769eac93fa9c3dafdb0c388de01d545017cdf9ccf00eb72">Store</a></td>
+                  <td><a href="#a9ff9a92ad2f56f3a8faee51dfb74a0b7a6adf97f83acf6453d4a6a4b1070f3754" class="m-doc-self" id="a9ff9a92ad2f56f3a8faee51dfb74a0b7a6adf97f83acf6453d4a6a4b1070f3754">None</a></td>
                   <td>
-                  <p>Specifies that the contents of the attachment will be stored into the assigned image view.</p>
+                  <p>The contents of the attachment will be not be changed, unless the render pass writes to the attachment, in which case the contents will be undefined after the end of the render pass.</p>
                   </td>
                 </tr>
                 <tr>
-                  <td><a href="#ae8ae216230f07b1ccb769eac93fa9c3da60a3629ef6a8f991f45d7a85f2458544" class="m-doc-self" id="ae8ae216230f07b1ccb769eac93fa9c3da60a3629ef6a8f991f45d7a85f2458544">DontCare</a></td>
+                  <td><a href="#a9ff9a92ad2f56f3a8faee51dfb74a0b7afdb0c388de01d545017cdf9ccf00eb72" class="m-doc-self" id="a9ff9a92ad2f56f3a8faee51dfb74a0b7afdb0c388de01d545017cdf9ccf00eb72">Store</a></td>
                   <td>
-                  <p>Specifies that the contents of the image view may be left undefined.</p>
+                  <p>Any changes to the contents of the attachment will be applied after the end of the render pass.</p>
                   </td>
                 </tr>
               </tbody>
@@ -3834,20 +3805,6 @@
               </tbody>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a2d4d2e583e723731d859127347e0df8e"><div>
-            <h3>
-              enum class tp::<wbr /><a href="#a2d4d2e583e723731d859127347e0df8e" class="m-doc-self">ValidationFeatureDisable</a>: uint32_t
-            </h3>
-            <p>Validation features part of the standard set that may be optionally disabled.</p>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="structtp_1_1_vulkan_validation_setup.html" class="m-doc">tp::<wbr />VulkanValidationSetup</a></p><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkValidationFeatureDisableEXT.html" class="m-doc-external">VkValidationFeatureDisableEXT</a></p></aside>
-          </div></section>
-          <section class="m-doc-details" id="a42931d68ca39e625158d56faa51800ae"><div>
-            <h3>
-              enum class tp::<wbr /><a href="#a42931d68ca39e625158d56faa51800ae" class="m-doc-self">ValidationFeatureEnable</a>: uint32_t
-            </h3>
-            <p>Optional validation features that may additionally be enabled.</p>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="structtp_1_1_vulkan_validation_setup.html" class="m-doc">tp::<wbr />VulkanValidationSetup</a></p><p><a href="https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkValidationFeatureEnableEXT.html" class="m-doc-external">VkValidationFeatureEnableEXT</a></p></aside>
-          </div></section>
           <section class="m-doc-details" id="a67caa79015ff900edfff5470eccb6830"><div>
             <h3>
               enum class tp::<wbr /><a href="#a67caa79015ff900edfff5470eccb6830" class="m-doc-self">VertexInputRate</a>: uint32_t
@@ -4051,18 +4008,6 @@
               using tp::<wbr /><a href="#aa30595b7d2b5b260981eb588779df6ea" class="m-doc-self">SwapchainFlagMask</a> = <a href="classtp_1_1_enum_bit_mask.html" class="m-doc">EnumBitMask</a>&lt;<a href="namespacetp.html#ae1e4540d7cbc0c0a864a76044620b42f" class="m-doc">SwapchainFlag</a>&gt;
             </h3>
 <p>A bitmask of <a href="namespacetp.html#ae1e4540d7cbc0c0a864a76044620b42f" class="m-doc">tp::<wbr />SwapchainFlag</a> values.</p>
-          </div></section>
-          <section class="m-doc-details" id="a56181a3dc2a51f18a580e379d7ef9fba"><div>
-            <h3>
-              using tp::<wbr /><a href="#a56181a3dc2a51f18a580e379d7ef9fba" class="m-doc-self">ValidationFeatureDisableMask</a> = <a href="classtp_1_1_enum_bit_mask.html" class="m-doc">EnumBitMask</a>&lt;<a href="namespacetp.html#a2d4d2e583e723731d859127347e0df8e" class="m-doc">ValidationFeatureDisable</a>&gt;
-            </h3>
-<p>A bitmask of <a href="namespacetp.html#a2d4d2e583e723731d859127347e0df8e" class="m-doc">tp::<wbr />ValidationFeatureDisable</a> values.</p>
-          </div></section>
-          <section class="m-doc-details" id="ac5ede96f9caf8937beba88274d523a24"><div>
-            <h3>
-              using tp::<wbr /><a href="#ac5ede96f9caf8937beba88274d523a24" class="m-doc-self">ValidationFeatureEnableMask</a> = <a href="classtp_1_1_enum_bit_mask.html" class="m-doc">EnumBitMask</a>&lt;<a href="namespacetp.html#a42931d68ca39e625158d56faa51800ae" class="m-doc">ValidationFeatureEnable</a>&gt;
-            </h3>
-<p>A bitmask of <a href="namespacetp.html#a42931d68ca39e625158d56faa51800ae" class="m-doc">tp::<wbr />ValidationFeatureEnable</a> values.</p>
           </div></section>
         </section>
       </div>

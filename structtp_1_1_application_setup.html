@@ -73,12 +73,12 @@
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#ab55b4575af47d8ff0a63347b9e176dea" class="m-doc">ApplicationSetup</a>(</span><span class="m-doc-wrap"><a href="structtp_1_1_application_identifier.html" class="m-doc">ApplicationIdentifier</a> applicationIdentifier = {},
-              <a href="structtp_1_1_vulkan_validation_setup.html" class="m-doc">VulkanValidationSetup</a> vulkanValidation = {},
+              <span class="m-doc-wrap-bumper"><a href="#adfef7b2d51c17c0fecbbad958c4f30d0" class="m-doc">ApplicationSetup</a>(</span><span class="m-doc-wrap"><a href="structtp_1_1_application_identifier.html" class="m-doc">ApplicationIdentifier</a> applicationIdentifier = {},
               <a href="classtp_1_1_debug_report_handler.html" class="m-doc">DebugReportHandler</a>* debugReportHandler = nullptr,
               <a href="classtp_1_1_array_view.html" class="m-doc">ArrayView</a>&lt;const char*const&gt; extensions = {},
-              <a href="classtp_1_1_array_view.html" class="m-doc">ArrayView</a>&lt;const char*const&gt; instanceLayers = {},
+              <a href="classtp_1_1_array_view.html" class="m-doc">ArrayView</a>&lt;const char*const&gt; layers = {},
               <a href="structtp_1_1_version.html" class="m-doc">Version</a> apiVersion = <a href="structtp_1_1_version.html#a92905c9ddb6550d533a8c81848429546" class="m-doc">Version::<wbr />getMaxUsedVulkanAPIVersion</a>(),
+              <a href="classtp_1_1_array_view.html" class="m-doc">ArrayView</a>&lt;VkLayerSettingEXT&gt; layerSettingsEXT = {},
               void* vkCreateInfoExtPtr = nullptr)</span>
             </dt>
             <dd></dd>
@@ -86,14 +86,14 @@
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="ab55b4575af47d8ff0a63347b9e176dea"><div>
+          <section class="m-doc-details" id="adfef7b2d51c17c0fecbbad958c4f30d0"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> tp::<wbr />ApplicationSetup::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab55b4575af47d8ff0a63347b9e176dea" class="m-doc-self">ApplicationSetup</a>(</span><span class="m-doc-wrap"><a href="structtp_1_1_application_identifier.html" class="m-doc">ApplicationIdentifier</a> applicationIdentifier = {},
-              <a href="structtp_1_1_vulkan_validation_setup.html" class="m-doc">VulkanValidationSetup</a> vulkanValidation = {},
+              <span class="m-doc-wrap-bumper"> tp::<wbr />ApplicationSetup::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adfef7b2d51c17c0fecbbad958c4f30d0" class="m-doc-self">ApplicationSetup</a>(</span><span class="m-doc-wrap"><a href="structtp_1_1_application_identifier.html" class="m-doc">ApplicationIdentifier</a> applicationIdentifier = {},
               <a href="classtp_1_1_debug_report_handler.html" class="m-doc">DebugReportHandler</a>* debugReportHandler = nullptr,
               <a href="classtp_1_1_array_view.html" class="m-doc">ArrayView</a>&lt;const char*const&gt; extensions = {},
-              <a href="classtp_1_1_array_view.html" class="m-doc">ArrayView</a>&lt;const char*const&gt; instanceLayers = {},
+              <a href="classtp_1_1_array_view.html" class="m-doc">ArrayView</a>&lt;const char*const&gt; layers = {},
               <a href="structtp_1_1_version.html" class="m-doc">Version</a> apiVersion = <a href="structtp_1_1_version.html#a92905c9ddb6550d533a8c81848429546" class="m-doc">Version::<wbr />getMaxUsedVulkanAPIVersion</a>(),
+              <a href="classtp_1_1_array_view.html" class="m-doc">ArrayView</a>&lt;VkLayerSettingEXT&gt; layerSettingsEXT = {},
               void* vkCreateInfoExtPtr = nullptr)</span></span>
             </h3>
             <table class="m-table m-fullwidth m-flat">
@@ -106,10 +106,6 @@
                   <td>The optional identification of your application.</td>
                 </tr>
                 <tr>
-                  <td>vulkanValidation</td>
-                  <td>Allows enabling of Vulkan validation layers and provides control over its features.</td>
-                </tr>
-                <tr>
                   <td>debugReportHandler</td>
                   <td>If not <code>nullptr</code>, points to the object responsible for reporting debug and validation information. If <code>nullptr</code>, reporting of debug information will be disabled.</td>
                 </tr>
@@ -118,12 +114,16 @@
                   <td>The set of application extensions or Vulkan instance extensions to enable. The extensions must be available, as can be checked with <a href="classtp_1_1_application.html#ae2d290a69e9cae196c02af8dfb0d1968" class="m-doc">tp::<wbr />Application::<wbr />isExtensionAvailable</a>. See <a href="namespacetp_1_1_application_extension.html" class="m-doc">tp::<wbr />ApplicationExtension</a>.</td>
                 </tr>
                 <tr>
-                  <td>instanceLayers</td>
+                  <td>layers</td>
                   <td>The set of additional Vulkan instance layers to enable. The layers must be available, as can be checked with <a href="classtp_1_1_application.html#a1783409558f98659338029c9098e1e9d" class="m-doc">tp::<wbr />Application::<wbr />isLayerAvailable</a>.</td>
                 </tr>
                 <tr>
                   <td>apiVersion</td>
                   <td>The highest Vulkan API version that this application will use. Only the major and minor versions are considered. Should be equal or higher than <a href="structtp_1_1_version.html#a92905c9ddb6550d533a8c81848429546" class="m-doc">tp::<wbr />Version::<wbr />getMaxUsedVulkanAPIVersion</a>.</td>
+                </tr>
+                <tr>
+                  <td>layerSettingsEXT</td>
+                  <td>Layer-specific settings that can be used to configure enabled layers. Requires the <a href="namespacetp_1_1_application_extension.html#ade75e9f372d018fedc1fdd79f251cbfd" class="m-doc">tp::<wbr />ApplicationExtension::<wbr />EXT_LayerSettings</a> extension to be enabled.</td>
                 </tr>
                 <tr>
                   <td>vkCreateInfoExtPtr</td>
