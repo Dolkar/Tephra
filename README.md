@@ -132,8 +132,6 @@ The following features are planned and will likely be available in the future:
 The following features are out of scope for the library and won't be included:
 - Platform-dependent window management - use GLFW or a similar library instead
 - Shader compilation and reflection - use the existing Vulkan ecosystem
-- Sparse buffers and images
-- Linear images
 - CPU-side acceleration structure building and serialization
 - Rendering algorithms - this is not a renderer or a game engine
 
