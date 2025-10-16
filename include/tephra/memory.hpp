@@ -93,7 +93,7 @@ public:
     TEPHRA_MAKE_NONCOPYABLE(HostMappedMemoryBase);
     TEPHRA_MAKE_MOVABLE_DEFAULT(HostMappedMemoryBase);
 
-    ~HostMappedMemoryBase();
+    virtual ~HostMappedMemoryBase();
 
 protected:
     void* dataPtr;

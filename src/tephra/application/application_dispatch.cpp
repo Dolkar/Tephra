@@ -34,9 +34,13 @@ ApplicationSetup::ApplicationSetup(
       layerSettingsEXT(layerSettingsEXT),
       vkCreateInfoExtPtr(vkCreateInfoExtPtr) {}
 
-bool Application::isExtensionAvailable(const char* extension) {
+bool Application::isExtensionAvailable(const char* extension, const char* sourceLayer) {
     const VulkanGlobals* vulkanGlobals = VulkanGlobals::get();
-    return vulkanGlobals->isInstanceExtensionAvailable(extension);
+
+    if (sourceLayer == nullptr)
+        return vulkanGlobals->isInstanceExtensionAvailable(extension);
+    else
+        return vulkanGlobals->queryLayerExtension(sourceLayer, extension);
 }
 
 bool Application::isLayerAvailable(const char* layer) {

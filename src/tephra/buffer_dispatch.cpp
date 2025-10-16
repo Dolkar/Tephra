@@ -83,7 +83,7 @@ HostReadableMemory BufferView::mapForHostRead() const {
 
 HostWritableMemory BufferView::mapForHostWrite() const {
     TEPHRA_DEBUG_SET_CONTEXT_TEMP(getDebugTarget(), BufferViewTypeName, "mapForHostWrite", nullptr);
-    validateMapForHostAccess(true, false);
+    validateMapForHostAccess(false, true);
     if (isNull() || viewsJobLocalBuffer()) {
         return {};
     } else {
