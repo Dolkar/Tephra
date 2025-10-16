@@ -96,8 +96,9 @@
               <span class="m-doc-wrap-bumper">static auto <a href="#ab821d315d700773bf6763daaebbdc548" class="m-doc-self">getApiVersion</a>(</span><span class="m-doc-wrap">) -&gt; <a href="structtp_1_1_version.html" class="m-doc">Version</a></span>
             </dt>
             <dd>Returns the API version of the Vulkan runtime library (loader).</dd>
-            <dt id="ae2d290a69e9cae196c02af8dfb0d1968">
-              <span class="m-doc-wrap-bumper">static auto <a href="#ae2d290a69e9cae196c02af8dfb0d1968" class="m-doc-self">isExtensionAvailable</a>(</span><span class="m-doc-wrap">const char* extension) -&gt; bool</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">static auto <a href="#adf83b295e2714d1eceec7f70642ba5e0" class="m-doc">isExtensionAvailable</a>(</span><span class="m-doc-wrap">const char* extension,
+              const char* sourceLayer = nullptr) -&gt; bool</span>
             </dt>
             <dd>Returns <code>true</code> when the provided <a href="namespacetp_1_1_application_extension.html" class="m-doc">tp::<wbr />ApplicationExtension</a> or Vulkan instance extension is available.</dd>
             <dt id="a1783409558f98659338029c9098e1e9d">
@@ -169,6 +170,28 @@
               </tbody>
             </table>
 <aside class="m-note m-default"><h4>Remark</h4><p>The ownership of the instance handle remains with the user and it must not be destroyed during the lifetime of the application.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="adf83b295e2714d1eceec7f70642ba5e0"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">static bool tp::<wbr />Application::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adf83b295e2714d1eceec7f70642ba5e0" class="m-doc-self">isExtensionAvailable</a>(</span><span class="m-doc-wrap">const char* extension,
+              const char* sourceLayer = nullptr)</span></span>
+            </h3>
+            <p>Returns <code>true</code> when the provided <a href="namespacetp_1_1_application_extension.html" class="m-doc">tp::<wbr />ApplicationExtension</a> or Vulkan instance extension is available.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">extension</td>
+                  <td>The name of the extension, see <a href="namespacetp_1_1_application_extension.html" class="m-doc">tp::<wbr />ApplicationExtension</a> or list of Vulkan instance extensions</td>
+                </tr>
+                <tr>
+                  <td>sourceLayer</td>
+                  <td>If <code>nullptr</code>, checks if the extension is provided by the base Vulkan implementation or any implicitly enabled layers. Otherwise, checks if the extensions is provided by the specified layer.</td>
+                </tr>
+              </tbody>
+            </table>
           </div></section>
           <section class="m-doc-details" id="a415c0b6fcd2e3500caa020f2d96e90d9"><div>
             <h3>
