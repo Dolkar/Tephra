@@ -201,11 +201,10 @@ struct JobRecordStorage {
     };
 
     struct DebugLabelData {
-        std::string name;
+        const char* name;
         float color[4];
 
-        DebugLabelData(const char* labelName, ArrayParameter<const float> labelColor = {})
-            : name(labelName ? labelName : std::string()) {
+        DebugLabelData(const char* labelName, ArrayParameter<const float> labelColor = {}) : name(labelName) {
             if (labelColor.size() >= 4)
                 memcpy(color, labelColor.data(), sizeof(float) * 4);
             else
@@ -283,6 +282,7 @@ struct JobRecordStorage {
     std::deque<ComputePass> computePassStorage;
     std::size_t renderPassCount = 0;
     std::deque<RenderPass> renderPassStorage;
+    std::deque<std::string> debugStringStorage;
 };
 
 struct JobSemaphoreStorage {

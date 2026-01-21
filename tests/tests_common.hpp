@@ -87,7 +87,7 @@ struct TephraContext {
 
     void initialize(bool requirePresentCapabilities) {
         std::vector<const char*> appExtensions = { tp::ApplicationExtension::EXT_DebugUtils,
-                                                   VK_EXT_LAYER_SETTINGS_EXTENSION_NAME };
+                                                   tp::ApplicationExtension::EXT_LayerSettings };
         if (requirePresentCapabilities) {
             appExtensions.push_back(tp::ApplicationExtension::KHR_Surface);
         }

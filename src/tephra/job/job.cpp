@@ -476,16 +476,23 @@ void Job::cmdBeginDebugLabel(const char* name, ArrayParameter<const float> color
     TEPHRA_DEBUG_SET_CONTEXT(debugTarget.get(), "cmdBeginDebugLabel", name);
     const DeviceContainer* deviceImpl = jobData->resourcePoolImpl->getParentDeviceImpl();
     if (deviceImpl->getLogicalDevice()->isFunctionalityAvailable(Functionality::DebugUtilsEXT)) {
-        recordCommand<JobRecordStorage::DebugLabelData>(jobData->record, JobCommandTypes::BeginDebugLabel, name, color);
+        jobData->record.debugStringStorage.push_back(name);
+        recordCommand<JobRecordStorage::DebugLabelData>(
+            jobData->record, JobCommandTypes::BeginDebugLabel, jobData->record.debugStringStorage.back().c_str(), color);
     }
 }
 
 void Job::cmdInsertDebugLabel(const char* name, ArrayParameter<const float> color) {
     TEPHRA_DEBUG_SET_CONTEXT(debugTarget.get(), "cmdInsertDebugLabel", name);
     const DeviceContainer* deviceImpl = jobData->resourcePoolImpl->getParentDeviceImpl();
-    if (deviceImpl->getLogicalDevice()->isFunctionalityAvailable(Functionality::DebugUtilsEXT))
+    if (deviceImpl->getLogicalDevice()->isFunctionalityAvailable(Functionality::DebugUtilsEXT)) {
+        jobData->record.debugStringStorage.push_back(name);
         recordCommand<JobRecordStorage::DebugLabelData>(
-            jobData->record, JobCommandTypes::InsertDebugLabel, name, color);
+            jobData->record,
+            JobCommandTypes::InsertDebugLabel,
+            jobData->record.debugStringStorage.back().c_str(),
+            color);
+    }
 }
 
 void Job::cmdEndDebugLabel() {

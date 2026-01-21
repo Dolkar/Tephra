@@ -50,6 +50,7 @@ void JobRecordStorage::clear() {
     lastCommandPtr = nullptr;
     firstDelayedCommandPtr = nullptr;
     lastDelayedCommandPtr = nullptr;
+    debugStringStorage.clear();
 
     computePassCount = 0;
     renderPassCount = 0;

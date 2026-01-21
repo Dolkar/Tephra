@@ -45,7 +45,7 @@ VkDebugUtilsLabelEXT makeDebugLabel(const JobRecordStorage::DebugLabelData& data
     VkDebugUtilsLabelEXT label;
     label.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT;
     label.pNext = nullptr;
-    label.pLabelName = data.name.c_str();
+    label.pLabelName = data.name;
     memcpy(label.color, data.color, sizeof(float) * 4);
     return label;
 }
