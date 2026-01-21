@@ -27,7 +27,7 @@ and relevance. To that end, Tephra provides:
   for getting started with using the library without prior knowledge of Vulkan
 - Debugging features, usage validation and testing suite (WIP)
 
-_Tephra is being used and partially developed by [Bohemia Interactive Simulations](https://bisimulations.com/)._
+_Tephra is being used and partially developed by [BAE Systems OneArc](https://onearc.com/) (formerly Bohemia Interactive Simulations)._
 
 <br/>
 <br/>
