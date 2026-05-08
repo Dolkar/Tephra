@@ -612,15 +612,17 @@ inline AccelerationStructureBuildData prepareASBuild(
     }
 
     // Allocate scratch buffer for the build
+    BufferView scratchBuffer;
     uint64_t scratchBufferSize = builder.getScratchBufferSize(buildInfo.mode);
+    if (scratchBufferSize > 0u) {
+        auto scratchBufferSetup = BufferSetup(
+            scratchBufferSize, BufferUsage::StorageBuffer | BufferUsage::DeviceAddress, 0, 0, 256);
+        scratchBuffer = jobData->resources.localBuffers.acquireNewBuffer(
+            scratchBufferSetup, DebugTarget::makeSilent());
 
-    auto scratchBufferSetup = BufferSetup(
-        scratchBufferSize, BufferUsage::StorageBuffer | BufferUsage::DeviceAddress, 0, 0, 256);
-    BufferView scratchBuffer = jobData->resources.localBuffers.acquireNewBuffer(
-        scratchBufferSetup, DebugTarget::makeSilent());
-
-    // Immediately mark the scratch buffer as used
-    markResourceUsage(jobData, scratchBuffer);
+        // Immediately mark the scratch buffer as used
+        markResourceUsage(jobData, scratchBuffer);
+    }
 
     // Copy the data as stored resources
     auto accessedViewsData = jobData->record.cmdBuffer.allocate<StoredAccelerationStructureView>(

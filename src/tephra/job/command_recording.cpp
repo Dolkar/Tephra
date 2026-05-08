@@ -332,9 +332,11 @@ void identifyCommandResourceAccesses(
             if (!indirectBuffer.isNull())
                 addBufferAccess(bufferAccesses, indirectBuffer, { asBuildStage, VK_ACCESS_INDIRECT_COMMAND_READ_BIT });
 
-            const auto scratchAccess = VK_ACCESS_ACCELERATION_STRUCTURE_READ_BIT_KHR |
-                VK_ACCESS_ACCELERATION_STRUCTURE_WRITE_BIT_KHR;
-            addBufferAccess(bufferAccesses, buildData.scratchBuffer, { asBuildStage, scratchAccess });
+            if (!buildData.scratchBuffer.isNull()) {
+                const auto scratchAccess = VK_ACCESS_ACCELERATION_STRUCTURE_READ_BIT_KHR |
+                    VK_ACCESS_ACCELERATION_STRUCTURE_WRITE_BIT_KHR;
+                addBufferAccess(bufferAccesses, buildData.scratchBuffer, { asBuildStage, scratchAccess });
+            }
         }
         break;
     }

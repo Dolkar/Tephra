@@ -180,7 +180,8 @@ VkAccelerationStructureBuildGeometryInfoKHR AccelerationStructureBuilder::prepar
     if (!buildInfo.srcView.isNull())
         vkBuildInfo.srcAccelerationStructure = buildInfo.srcView.vkGetAccelerationStructureHandle();
     vkBuildInfo.dstAccelerationStructure = buildInfo.dstView.vkGetAccelerationStructureHandle();
-    vkBuildInfo.scratchData = { getCheckedDeviceAddress(scratchBuffer) };
+    // Can be null when required scratch buffer size is 0
+    vkBuildInfo.scratchData = { scratchBuffer.getDeviceAddress() };
 
     if (type == AccelerationStructureType::TopLevel) {
         // Instance geometry
