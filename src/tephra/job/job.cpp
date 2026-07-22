@@ -574,7 +574,9 @@ using AccelerationStructureBuildData = JobRecordStorage::BuildAccelerationStruct
 inline AccelerationStructureBuildData prepareASBuild(
     tp::JobData* jobData,
     const AccelerationStructureBuildInfo& buildInfo,
-    const AccelerationStructureBuildIndirectInfo& indirectInfo) {
+    const AccelerationStructureBuildIndirectInfo& indirectInfo,
+    uint32_t scratchBufferAlignment,
+    uint64_t& totalScratchBufferSize) {
     // Mark input buffers as used
     markResourceUsage(jobData, buildInfo.dstView.getBackingBufferView());
 
@@ -611,18 +613,10 @@ inline AccelerationStructureBuildData prepareASBuild(
         jobData->resources.usedASBuilders.push_back(asImpl.getBuilder());
     }
 
-    // Allocate scratch buffer for the build
-    BufferView scratchBuffer;
-    uint64_t scratchBufferSize = builder.getScratchBufferSize(buildInfo.mode);
-    if (scratchBufferSize > 0u) {
-        auto scratchBufferSetup = BufferSetup(
-            scratchBufferSize, BufferUsage::StorageBuffer | BufferUsage::DeviceAddress, 0, 0, 256);
-        scratchBuffer = jobData->resources.localBuffers.acquireNewBuffer(
-            scratchBufferSetup, DebugTarget::makeSilent());
-
-        // Immediately mark the scratch buffer as used
-        markResourceUsage(jobData, scratchBuffer);
-    }
+    // Allocate scratch buffer space for the build - use one buffer all builds
+    uint64_t scratchBufferOffset = roundUpToMultiple(
+        totalScratchBufferSize, static_cast<uint64_t>(scratchBufferAlignment));
+    totalScratchBufferSize = scratchBufferOffset + builder.getScratchBufferSize(buildInfo.mode);
 
     // Copy the data as stored resources
     auto accessedViewsData = jobData->record.cmdBuffer.allocate<StoredAccelerationStructureView>(
@@ -635,7 +629,7 @@ inline AccelerationStructureBuildData prepareASBuild(
         &builder,
         StoredAccelerationStructureBuildInfo(buildInfo, accessedViewsData, triangleGeometriesData, aabbGeometriesData),
         StoredAccelerationStructureBuildIndirectInfo(indirectInfo),
-        scratchBuffer);
+        scratchBufferOffset);
 }
 
 void Job::cmdBuildAccelerationStructuresKHR(ArrayParameter<const AccelerationStructureBuildInfo> buildInfos) {
@@ -648,14 +642,33 @@ void Job::cmdBuildAccelerationStructuresKHR(ArrayParameter<const AccelerationStr
         }
     }
 
+    // Prepare each build and accumulate total required scratch space
+    const DeviceContainer* deviceImpl = jobData->resourcePoolImpl->getParentDeviceImpl();
+    uint32_t scratchBufferAlignment = deviceImpl->getPhysicalDevice()
+                                          ->vkQueryProperties<VkPhysicalDeviceAccelerationStructurePropertiesKHR>()
+                                          .minAccelerationStructureScratchOffsetAlignment;
+    uint64_t scratchBufferSize = 0u;
+
     auto buildsData = jobData->record.cmdBuffer.allocate<AccelerationStructureBuildData>(buildInfos.size());
     auto unusedIndirectInfo = AccelerationStructureBuildIndirectInfo({});
     for (std::size_t i = 0; i < buildInfos.size(); i++) {
-        buildsData[i] = prepareASBuild(jobData, buildInfos[i], unusedIndirectInfo);
+        buildsData[i] = prepareASBuild(
+            jobData, buildInfos[i], unusedIndirectInfo, scratchBufferAlignment, scratchBufferSize);
+    }
+
+    // Allocate a scratch buffer, if needed
+    BufferView scratchBuffer;
+    if (scratchBufferSize > 0u) {
+        auto scratchBufferSetup = BufferSetup(
+            scratchBufferSize, BufferUsage::StorageBuffer | BufferUsage::DeviceAddress, 0, 0, scratchBufferAlignment);
+        scratchBuffer = jobData->resources.localBuffers.acquireNewBuffer(scratchBufferSetup, DebugTarget::makeSilent());
+
+        // Immediately mark the scratch buffer as used
+        markResourceUsage(jobData, scratchBuffer);
     }
 
     recordCommand<JobRecordStorage::BuildAccelerationStructuresData>(
-        jobData->record, JobCommandTypes::BuildAccelerationStructures, buildsData);
+        jobData->record, JobCommandTypes::BuildAccelerationStructures, scratchBuffer, buildsData);
 
     // We also want to query the compacted size for acceleration structures that support it after building
     // Leaving it for the end of the job will help avoid needless barriers
@@ -693,13 +706,32 @@ void Job::cmdBuildAccelerationStructuresIndirectKHR(
         }
     }
 
+    // Prepare each build and accumulate total required scratch space
+    const DeviceContainer* deviceImpl = jobData->resourcePoolImpl->getParentDeviceImpl();
+    uint32_t scratchBufferAlignment = deviceImpl->getPhysicalDevice()
+                                          ->vkQueryProperties<VkPhysicalDeviceAccelerationStructurePropertiesKHR>()
+                                          .minAccelerationStructureScratchOffsetAlignment;
+    uint64_t scratchBufferSize = 0u;
+
     auto buildsData = jobData->record.cmdBuffer.allocate<AccelerationStructureBuildData>(buildInfos.size());
     for (std::size_t i = 0; i < buildInfos.size(); i++) {
-        buildsData[i] = prepareASBuild(jobData, buildInfos[i], indirectInfos[i]);
+        buildsData[i] = prepareASBuild(
+            jobData, buildInfos[i], indirectInfos[i], scratchBufferAlignment, scratchBufferSize);
+    }
+
+    // Allocate a scratch buffer, if needed
+    BufferView scratchBuffer;
+    if (scratchBufferSize > 0u) {
+        auto scratchBufferSetup = BufferSetup(
+            scratchBufferSize, BufferUsage::StorageBuffer | BufferUsage::DeviceAddress, 0, 0, scratchBufferAlignment);
+        scratchBuffer = jobData->resources.localBuffers.acquireNewBuffer(scratchBufferSetup, DebugTarget::makeSilent());
+
+        // Immediately mark the scratch buffer as used
+        markResourceUsage(jobData, scratchBuffer);
     }
 
     recordCommand<JobRecordStorage::BuildAccelerationStructuresData>(
-        jobData->record, JobCommandTypes::BuildAccelerationStructuresIndirect, buildsData);
+        jobData->record, JobCommandTypes::BuildAccelerationStructuresIndirect, scratchBuffer, buildsData);
 
     // We also want to query the compacted size for acceleration structures that support it after building
     // Leaving it for the end of the job will help avoid needless barriers

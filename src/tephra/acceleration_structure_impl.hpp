@@ -57,13 +57,13 @@ public:
     // Prepares Vulkan structure for the build command, filling out the passed build ranges
     VkAccelerationStructureBuildGeometryInfoKHR prepareBuild(
         StoredAccelerationStructureBuildInfo& buildInfo,
-        StoredBufferView& scratchBuffer,
+        DeviceAddress scratchBuffer,
         ArrayView<VkAccelerationStructureBuildRangeInfoKHR> vkBuildRanges);
 
     // Prepares Vulkan structure for the indirect build command
     VkAccelerationStructureBuildGeometryInfoKHR prepareBuildIndirect(
         StoredAccelerationStructureBuildInfo& buildInfo,
-        StoredBufferView& scratchBuffer);
+        DeviceAddress scratchBuffer);
 
     void validateBuildInfo(const AccelerationStructureBuildInfo& buildInfo, std::size_t buildIndex) const;
 
@@ -80,7 +80,7 @@ private:
     // Creates a build info structure for the final build command
     VkAccelerationStructureBuildGeometryInfoKHR prepareBuildInfo(
         StoredAccelerationStructureBuildInfo& buildInfo,
-        StoredBufferView& scratchBuffer);
+        DeviceAddress scratchBuffer);
     // Makes the Vulkan build info structure with null resources from setup structure
     VkAccelerationStructureBuildGeometryInfoKHR initVkBuildInfo(
         AccelerationStructureBuildMode buildMode = AccelerationStructureBuildMode::Build) const;

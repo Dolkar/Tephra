@@ -331,12 +331,12 @@ void identifyCommandResourceAccesses(
             StoredBufferView& indirectBuffer = buildData.indirectInfo.buildRangeBuffer;
             if (!indirectBuffer.isNull())
                 addBufferAccess(bufferAccesses, indirectBuffer, { asBuildStage, VK_ACCESS_INDIRECT_COMMAND_READ_BIT });
+        }
 
-            if (!buildData.scratchBuffer.isNull()) {
-                const auto scratchAccess = VK_ACCESS_ACCELERATION_STRUCTURE_READ_BIT_KHR |
-                    VK_ACCESS_ACCELERATION_STRUCTURE_WRITE_BIT_KHR;
-                addBufferAccess(bufferAccesses, buildData.scratchBuffer, { asBuildStage, scratchAccess });
-            }
+        if (!data->scratchBuffer.isNull()) {
+            const auto scratchAccess = VK_ACCESS_ACCELERATION_STRUCTURE_READ_BIT_KHR |
+                VK_ACCESS_ACCELERATION_STRUCTURE_WRITE_BIT_KHR;
+            addBufferAccess(bufferAccesses, data->scratchBuffer, { asBuildStage, scratchAccess });
         }
         break;
     }
@@ -639,8 +639,11 @@ void recordCommand(const JobData* job, PrimaryBufferRecorder& recorder, JobRecor
             auto vkRangeInfoView = viewRange(vkRangeInfos, vkRangeInfoOffset, geometryCount);
             vkRangeInfoOffset += geometryCount;
 
+            TEPHRA_ASSERT(!data->scratchBuffer.isNull() || buildData.scratchBufferOffset == 0ull);
+            DeviceAddress scratchBufferAddress = data->scratchBuffer.getDeviceAddress() + buildData.scratchBufferOffset;
+
             vkBuildInfos.push_back(
-                buildData.builder->prepareBuild(buildData.buildInfo, buildData.scratchBuffer, vkRangeInfoView));
+                buildData.builder->prepareBuild(buildData.buildInfo, scratchBufferAddress, vkRangeInfoView));
             vkRangeInfosPtrs.push_back(vkRangeInfoView.data());
         }
 
@@ -675,8 +678,11 @@ void recordCommand(const JobData* job, PrimaryBufferRecorder& recorder, JobRecor
 
         for (std::size_t i = 0; i < data->builds.size(); i++) {
             auto& buildData = data->builds[i];
-            vkBuildInfos.push_back(
-                buildData.builder->prepareBuildIndirect(buildData.buildInfo, buildData.scratchBuffer));
+
+            TEPHRA_ASSERT(!data->scratchBuffer.isNull() || buildData.scratchBufferOffset == 0ull);
+            DeviceAddress scratchBufferAddress = data->scratchBuffer.getDeviceAddress() + buildData.scratchBufferOffset;
+
+            vkBuildInfos.push_back(buildData.builder->prepareBuildIndirect(buildData.buildInfo, scratchBufferAddress));
 
             vkIndirectDeviceAddresses.push_back(buildData.indirectInfo.buildRangeBuffer.getDeviceAddress());
             vkIndirectStrides.push_back(buildData.indirectInfo.buildRangeStride);

@@ -14,7 +14,7 @@ AccelerationStructureBuilder::AccelerationStructureBuilder(
 
 VkAccelerationStructureBuildGeometryInfoKHR AccelerationStructureBuilder::prepareBuild(
     StoredAccelerationStructureBuildInfo& buildInfo,
-    StoredBufferView& scratchBuffer,
+    DeviceAddress scratchBuffer,
     ArrayView<VkAccelerationStructureBuildRangeInfoKHR> vkBuildRanges) {
     TEPHRA_ASSERT(vkBuildRanges.size() == vkGeometries.size());
 
@@ -74,7 +74,7 @@ VkAccelerationStructureBuildGeometryInfoKHR AccelerationStructureBuilder::prepar
 
 VkAccelerationStructureBuildGeometryInfoKHR AccelerationStructureBuilder::prepareBuildIndirect(
     StoredAccelerationStructureBuildInfo& buildInfo,
-    StoredBufferView& scratchBuffer) {
+    DeviceAddress scratchBuffer) {
     // Filling out build ranges indirectly is the app's responsibility
     return prepareBuildInfo(buildInfo, scratchBuffer);
 }
@@ -168,7 +168,7 @@ AccelerationStructureBuilder& AccelerationStructureBuilder::getBuilderFromView(c
 
 VkAccelerationStructureBuildGeometryInfoKHR AccelerationStructureBuilder::prepareBuildInfo(
     StoredAccelerationStructureBuildInfo& buildInfo,
-    StoredBufferView& scratchBuffer) {
+    DeviceAddress scratchBuffer) {
     auto getCheckedDeviceAddress = [](StoredBufferView& buffer) {
         DeviceAddress address = { buffer.getDeviceAddress() };
         TEPHRA_ASSERT(address != 0 || buffer.isNull());
@@ -180,8 +180,7 @@ VkAccelerationStructureBuildGeometryInfoKHR AccelerationStructureBuilder::prepar
     if (!buildInfo.srcView.isNull())
         vkBuildInfo.srcAccelerationStructure = buildInfo.srcView.vkGetAccelerationStructureHandle();
     vkBuildInfo.dstAccelerationStructure = buildInfo.dstView.vkGetAccelerationStructureHandle();
-    // Can be null when required scratch buffer size is 0
-    vkBuildInfo.scratchData = { scratchBuffer.getDeviceAddress() };
+    vkBuildInfo.scratchData = { scratchBuffer };
 
     if (type == AccelerationStructureType::TopLevel) {
         // Instance geometry

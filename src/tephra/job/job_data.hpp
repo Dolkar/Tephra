@@ -225,20 +225,25 @@ struct JobRecordStorage {
             AccelerationStructureBuilder* builder;
             StoredAccelerationStructureBuildInfo buildInfo;
             StoredAccelerationStructureBuildIndirectInfo indirectInfo;
-            StoredBufferView scratchBuffer;
+            uint64_t scratchBufferOffset;
 
             SingleBuild(
                 AccelerationStructureBuilder* builder,
                 StoredAccelerationStructureBuildInfo buildInfo,
                 StoredAccelerationStructureBuildIndirectInfo indirectInfo,
-                StoredBufferView scratchBuffer)
-                : builder(builder), buildInfo(buildInfo), indirectInfo(indirectInfo), scratchBuffer(scratchBuffer) {}
+                uint64_t scratchBufferOffset)
+                : builder(builder),
+                  buildInfo(buildInfo),
+                  indirectInfo(indirectInfo),
+                  scratchBufferOffset(scratchBufferOffset) {}
         };
 
+        StoredBufferView scratchBuffer;
         ArrayView<SingleBuild> builds;
         bool hasTopLevelBuilds;
 
-        BuildAccelerationStructuresData(ArrayView<SingleBuild> builds) : builds(builds), hasTopLevelBuilds(false) {
+        BuildAccelerationStructuresData(StoredBufferView scratchBuffer, ArrayView<SingleBuild> builds)
+            : scratchBuffer(scratchBuffer), builds(builds), hasTopLevelBuilds(false) {
             for (const SingleBuild& build : builds)
                 hasTopLevelBuilds |= build.builder->getType() == AccelerationStructureType::TopLevel;
         }
