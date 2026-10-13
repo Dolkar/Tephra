@@ -52,11 +52,10 @@ void* BufferImpl::beginHostAccess(uint64_t offset, uint64_t size, bool hasReadAc
 void BufferImpl::endHostAccess(uint64_t offset, uint64_t size, bool hasWriteAccess) {
     if (coherentlyMappedMemoryPtr == nullptr) {
         std::lock_guard<Mutex> mutexLock(memoryMappingMutex);
-        deviceImpl->getMemoryAllocator()->unmapMemory(memoryAllocationHandle.vkGetHandle());
-
         if (hasWriteAccess) {
             deviceImpl->getMemoryAllocator()->flushAllocationMemory(memoryAllocationHandle.vkGetHandle(), offset, size);
         }
+        deviceImpl->getMemoryAllocator()->unmapMemory(memoryAllocationHandle.vkGetHandle());
     }
 }
 
