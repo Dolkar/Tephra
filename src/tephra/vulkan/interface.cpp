@@ -177,6 +177,8 @@ VulkanDeviceMemoryInterface::VulkanDeviceMemoryInterface(
     getImageMemoryRequirements2 = LOAD_DEVICE_PROCEDURE(vkGetImageMemoryRequirements2);
     bindBufferMemory2 = LOAD_DEVICE_PROCEDURE(vkBindBufferMemory2);
     bindImageMemory2 = LOAD_DEVICE_PROCEDURE(vkBindImageMemory2);
+    getDeviceBufferMemoryRequirements = LOAD_DEVICE_PROCEDURE(vkGetDeviceBufferMemoryRequirements);
+    getDeviceImageMemoryRequirements = LOAD_DEVICE_PROCEDURE(vkGetDeviceImageMemoryRequirements);
 
     createBuffer = LOAD_DEVICE_PROCEDURE(vkCreateBuffer);
     destroyBuffer = LOAD_DEVICE_PROCEDURE(vkDestroyBuffer);

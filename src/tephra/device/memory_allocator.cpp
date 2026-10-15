@@ -37,6 +37,8 @@ MemoryAllocator::MemoryAllocator(DeviceContainer* deviceImpl, Instance* instance
     vkiMemory = device->loadDeviceInterface<VulkanDeviceMemoryInterface>();
     auto& vkiPhysicalDevice = deviceImpl->getParentAppImpl()->getInstance()->getPhysicalDeviceInterface();
     VmaVulkanFunctions functions;
+    functions.vkGetInstanceProcAddr = nullptr;
+    functions.vkGetDeviceProcAddr = nullptr;
     functions.vkGetPhysicalDeviceProperties = vkiPhysicalDevice.getPhysicalDeviceProperties;
     functions.vkGetPhysicalDeviceMemoryProperties = vkiPhysicalDevice.getPhysicalDeviceMemoryProperties;
     functions.vkAllocateMemory = vkiMemory.allocateMemory;
@@ -59,6 +61,10 @@ MemoryAllocator::MemoryAllocator(DeviceContainer* deviceImpl, Instance* instance
     functions.vkBindBufferMemory2KHR = vkiMemory.bindBufferMemory2;
     functions.vkBindImageMemory2KHR = vkiMemory.bindImageMemory2;
     functions.vkGetPhysicalDeviceMemoryProperties2KHR = vkiPhysicalDevice.getPhysicalDeviceMemoryProperties2;
+    functions.vkGetDeviceBufferMemoryRequirements = vkiMemory.getDeviceBufferMemoryRequirements;
+    functions.vkGetDeviceImageMemoryRequirements = vkiMemory.getDeviceImageMemoryRequirements;
+    functions.vkGetMemoryWin32HandleKHR = nullptr;
+    functions.vkGetPhysicalDeviceProperties2KHR = vkiPhysicalDevice.getPhysicalDeviceProperties2;
 
     allocInfo.pVulkanFunctions = &functions;
 
@@ -138,6 +144,7 @@ std::pair<Lifeguard<VkBufferHandle>, Lifeguard<VmaAllocationHandle>> MemoryAlloc
     allocInfo.preferredFlags = VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
     allocInfo.pool = VK_NULL_HANDLE;
     allocInfo.pUserData = nullptr;
+    allocInfo.minAlignment = setup.additionalAlignment;
 
     VmaAllocationHandle allocation;
     for (auto memoryLocation : memoryPreference.locationProgression) {
@@ -341,6 +348,7 @@ std::pair<Lifeguard<VkImageHandle>, Lifeguard<VmaAllocationHandle>> MemoryAlloca
         allocInfo.memoryTypeBits = UINT32_MAX;
         allocInfo.pool = VK_NULL_HANDLE;
         allocInfo.pUserData = nullptr;
+        allocInfo.minAlignment = 0;
 
         while (true) {
             VkResult retcode = vmaCreateImage(

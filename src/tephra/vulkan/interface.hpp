@@ -166,6 +166,8 @@ public:
     PFN_vkGetImageMemoryRequirements2 getImageMemoryRequirements2 = nullptr;
     PFN_vkBindBufferMemory2 bindBufferMemory2 = nullptr;
     PFN_vkBindImageMemory2 bindImageMemory2 = nullptr;
+    PFN_vkGetDeviceBufferMemoryRequirements getDeviceBufferMemoryRequirements = nullptr;
+    PFN_vkGetDeviceImageMemoryRequirements getDeviceImageMemoryRequirements = nullptr;
 
     // Additional functions defined elsewhere, but used by vma
     PFN_vkCreateBuffer createBuffer = nullptr;
