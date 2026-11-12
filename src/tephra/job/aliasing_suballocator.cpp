@@ -1,4 +1,5 @@
 #include "aliasing_suballocator.hpp"
+#include <algorithm>
 
 namespace tp {
 
@@ -37,11 +38,11 @@ std::pair<uint32_t, uint64_t> AliasingSuballocator::allocate(
     uint32_t allocIndex = 0; // Index of the backing allocation used
     uint64_t allocOffset = 0; // Offset of the backing allocation used
     uint64_t offset = 0; // The virtual offset across the space of all backing allocations
-    int sortedIndex = 0; // The index where the allocation should be inserted wrt its virtual offset
 
     // Walk over already assigned allocations for ones with overlapping usage in the order they are assigned
     // in memory and find an empty space for this one.
-    for (int i = 0; i < allocations.size(); i++) {
+    int i = 0;
+    for (; i < allocations.size(); i++) {
         const Allocation& otherAllocation = allocations[i];
 
         if (!usageRange.isOverlapping(otherAllocation)) {
@@ -59,17 +60,22 @@ std::pair<uint32_t, uint64_t> AliasingSuballocator::allocate(
                 // We have crossed to another backing allocation
                 allocIndex++;
                 allocOffset = otherAllocation.offset;
+                offset = allocOffset;
+            } else {
+                uint64_t unalignedOffset = otherAllocation.offset + otherAllocation.size;
+                uint64_t alignedOffset = allocOffset +
+                    roundUpToPoTMultiple(unalignedOffset - allocOffset, requiredAlignment);
+                offset = tp::max(offset, alignedOffset);
             }
-
-            uint64_t unalignedOffset = otherAllocation.offset + otherAllocation.size;
-            offset = allocOffset + roundUpToPoTMultiple(unalignedOffset - allocOffset, requiredAlignment);
-            // This new allocation would go right after this one
-            sortedIndex = i + 1;
         }
     }
 
-    // Insert the new allocation to consider it for the next one
-    allocations.emplace(allocations.begin() + sortedIndex, usageRange, offset, requiredSize);
+    // Insert the new allocation in offset-sorted order to consider it for the next one
+    auto insertIt = std::upper_bound(
+        allocations.begin(), allocations.begin() + i, offset, [](uint64_t offset, const Allocation& other) {
+            return offset < other.offset;
+        });
+    allocations.emplace(insertIt, usageRange, offset, requiredSize);
     usedSize = tp::max(usedSize, offset + requiredSize);
 
     // Convert virtual offset to actual offset
