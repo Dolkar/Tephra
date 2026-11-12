@@ -6,6 +6,7 @@
 #include "barriers.hpp"
 #include <unordered_map>
 #include <deque>
+#include <algorithm>
 
 namespace tp {
 
